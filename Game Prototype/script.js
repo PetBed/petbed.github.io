@@ -116,12 +116,17 @@ function buyMaxItem(id)
 {
     var obj = findObjectWithID(id)
 
-    var maxBuyAmount = Math.floor((Math.log((cash * (obj.ratePrice - 1)) / (obj.basePrice * Math.pow(obj.ratePrice, obj.ownedItemBaseAmount))) + 1) / (log(obj.ratePrice)))
-
-    for (i = 0; i < maxBuyAmount; i++)
-    {
-        buyItem(id);
-    }
+    var maxBuyAmount = Math.floor((Math.log((cash * (obj.ratePrice - 1)) / (obj.basePrice * Math.pow(obj.ratePrice, obj.ownedItemBaseAmount)) + 1)) / (Math.log(obj.ratePrice)))
+    console.log(maxBuyAmount);
+    
+    buyAmount = maxBuyAmount
+    obj.nextPrice = calculateItemPrice(obj.basePrice, obj.ratePrice, obj.ownedItemBaseAmount);
+    buyItem(id);
+    buyAmount = 1;
+    // for (i = 0; i < maxBuyAmount; i++)
+    // {
+        // buyItem(id);
+    // }
 }
 
 setInterval(gameLoop, 1000);

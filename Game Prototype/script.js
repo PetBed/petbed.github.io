@@ -5,7 +5,7 @@ const roundValue = (value, decimalPoints) => Math.floor(value * Math.pow(10, dec
 var cash = 0, buyAmount = 1;
 var itemList = [];
 
-createNewItem(1, 1, "Item 1", 1, 10, 1.05);
+createNewItem(1, 24, "Item 1", 1, 10, 1.05);
 createNewItem(2, 0, "Item 2", 2, 250, 1.20);
 createNewItem(3, 0, "Item 3", 3, 5000, 1.45);
 
@@ -22,7 +22,7 @@ function createNewItem(itemID, value, buttonText, priority, basePrice, ratePrice
     obj.ownedItemBaseAmount = value
     obj.nextPrice = calculateItemPrice(obj.basePrice, obj.ratePrice, obj.ownedItemBaseAmount);
     obj.ownedItemAmount = 0;
-    obj.multipliers = 0;
+    obj.multipliers = 1;
     obj.baseProduction = 1; 
     obj.priority = priority;
     
@@ -38,6 +38,13 @@ function createNewItem(itemID, value, buttonText, priority, basePrice, ratePrice
     button.onclick = function() {buyItem(itemID)};
     const buttonDiv = document.getElementById("buttons");
     buttonDiv.appendChild(button);
+
+    const buyMaxButton = document.createElement("button");
+    buyMaxButton.setAttribute("id", "buymax" + obj.buttonID);
+    buyMaxButton.onclick = function() {buyMaxItem(itemID)};
+    buyMaxButton.innerHTML = "Buy Max"
+    const buyMaxButtonDiv = document.getElementById("buyMaxButtons");
+    buyMaxButtonDiv.appendChild(buyMaxButton);
 }
 
 function gameLoop()
@@ -52,7 +59,7 @@ function updateUI()
     for(i = 0; i < itemList.length; i++)
     {
         item = itemList[i];
-        document.getElementById(item.valueID).innerHTML = item.ownedItemAmount + item.ownedItemBaseAmount;
+        document.getElementById(item.valueID).innerHTML = `${item.ownedItemAmount + item.ownedItemBaseAmount} (${item.ownedItemBaseAmount}) <i>x${item.multipliers}</i>`;
         document.getElementById(item.buttonID).innerHTML = `<i>${item.text}</i> <b>+${buyAmount}</b> </br> ${item.nextPrice}`;
     }
 
@@ -68,10 +75,10 @@ function updateValues()
         if(obj.priority > 1)
         {
             var previousObj = findObjectWithID(curPriorityValue - 1)
-            previousObj.ownedItemAmount += roundValue((obj.baseProduction * (obj.ownedItemAmount + obj.ownedItemBaseAmount)) * (obj.multipliers + 1), 2);
+            previousObj.ownedItemAmount += roundValue((obj.baseProduction * (obj.ownedItemAmount + obj.ownedItemBaseAmount)) * obj.multipliers, 2);
         } else if (obj.priority = 1)
         {
-            cash += Math.max(roundValue((obj.baseProduction * (obj.ownedItemAmount + obj.ownedItemBaseAmount)) * (obj.multipliers + 1) - (obj.baseProduction/2), 2), 0);
+            cash += Math.max(roundValue((obj.baseProduction * (obj.ownedItemAmount + obj.ownedItemBaseAmount)) * obj.multipliers - (obj.baseProduction/2), 2), 0);
         } else {
             console.warn(`Object id:${obj.id} has a priority of ${obj.priority}`);
         }
@@ -95,8 +102,26 @@ function buyItem(id)
         obj.nextPrice = calculateItemPrice(obj.basePrice, obj.ratePrice, obj.ownedItemBaseAmount);
     }
     console.log("buttonClicked!", id, obj.ownedItemBaseAmount)
+
+    obj.multipliers = 1;
+    console.log(Math.floor(obj.ownedItemBaseAmount / 25))
+    for (i = 0; i < Math.floor(obj.ownedItemBaseAmount / 25); i++)
+    {
+        obj.multipliers = obj.multipliers * 2;
+    }
     updateUI();
 }
 
+function buyMaxItem(id)
+{
+    var obj = findObjectWithID(id)
+
+    var maxBuyAmount = Math.floor((Math.log((cash * (obj.ratePrice - 1)) / (obj.basePrice * Math.pow(obj.ratePrice, obj.ownedItemBaseAmount))) + 1) / (log(obj.ratePrice)))
+
+    for (i = 0; i < maxBuyAmount; i++)
+    {
+        buyItem(id);
+    }
+}
 
 setInterval(gameLoop, 1000);

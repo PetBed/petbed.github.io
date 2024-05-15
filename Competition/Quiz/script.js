@@ -1,67 +1,67 @@
     const questions = [
     {
-        question: "How many types of road signs are there in Malayasia?",
+        question: "How to help when you witness a road accident?",
         answers: [
-            { text: "4", correct: false }, 
-            { text: "5", correct: true}, 
-            { text: "2", correct: false}, 
-            { text: "3", correct: false}
+            { text: "Ignore and walk away", correct: false }, 
+            { text: "Dial 999", correct: true}, 
+            { text: "Take a picture", correct: false}, 
+            { text: "Act like you didn't see it", correct: false}
         ]
     },
     {
-        question: "Which is a special day in Malaysia based on road traffic?",
+        question: "What are the effects of drunk driving?",
         answers: [
-            { text: "Car Free Day", correct: true }, 
-            { text: "Fun Friday", correct: false }, 
-            { text: "Birthday Party", correct: false }, 
-            { text: "Hari Kemerdekaan", correct: false }
+            { text: "Slows reaction time", correct: true }, 
+            { text: "Helps with night vision", correct: false }, 
+            { text: "Better steering", correct: false }, 
+            { text: "Improved reaction time", correct: false }
         ]  
     },
     {
-        question: "When is Road Safety Week?",
+        question: "Which is a type of road accident?",
         answers: [
-            { text: "19th of October", correct: false }, 
-            { text: "23rd of Sepetember", correct: false }, 
-            { text: "1st of January", correct: false }, 
-            { text: "19th Of November", correct: true }
+            { text: "Falling down the stair", correct: false }, 
+            { text: "Meeting an old friend", correct: false }, 
+            { text: "Greeting another driver", correct: false }, 
+            { text: "Head-on collisions", correct: true }
         ]
     },
     {
-        question: "What special day is on the 3rd of June?",
+        question: "When does a road accident occur?",
         answers: [
-            { text: "Road Safety Week", correct: false }, 
-            { text: "World Bicycle Day", correct: true }, 
-            { text: "Car Free Day", correct: false }, 
-            { text: "World Day of Remembrence for Road Traffic Victims", correct: false }
+            { text: "When you open a door", correct: false }, 
+            { text: "When a vehicle hits an object, person or another vehicle", correct: true }, 
+            { text: "When you fall off a chair", correct: false }, 
+            { text: "When you drop your phone in the toilet", correct: false }
         ]
     },
     {
-        question: "Which is a type of road sign in Malaysia?",
+        question: "What is an effect of road accidents?",
         answers: [
-            { text: "Hand Signs", correct: false }, 
-            { text: "Signature", correct: false }, 
-            { text: "Speed limit signs", correct: true }, 
-            { text: "Signalman", correct: false }
+            { text: "Causes injury, fatality or damage", correct: false }, 
+            { text: "Causes paper cuts", correct: false }, 
+            { text: "Increased air-con maintenance fee", correct: true }, 
+            { text: "Your cat will be starved", correct: false }
+        ]
+    },
+{
+        question: "Why should you have a dashcam in your vehicle?",
+        answers: [
+            { text: "Spy on other people", correct: false }, 
+            { text: "Provide evidence in accident cases", correct: true }, 
+            { text: "Post the footage on Youtube", correct: false }, 
+            { text: "Make edits for TikTok", correct: false }
         ]
     },
-    {
-        question: "When the traffic light turns orange in color what should you do?",
+{
+        question: "When does a road accident occur?",
         answers: [
-            { text: "Slow down", correct: true }, 
-            { text: "Speed up", correct: false }, 
-            { text: "Stop instatly", correct: false }, 
-            { text: "Ignore it", correct: false }
+            { text: "When you open a door", correct: false }, 
+            { text: "When a vehicle hits an object, person or another vehicle", correct: true }, 
+            { text: "When you fall off a chair", correct: false }, 
+            { text: "When you drop your phone in the toilet", correct: false }
         ]
-    },
-    {
-        question: "When you are crossing the street you should...",
-        answers: [
-            { text: "Just run across the street", correct: false }, 
-            { text: "Stick your hand out and walk across", correct: false }, 
-            { text: "Look left and right first", correct: true }, 
-            { text: "Play your phone", correct: false }
-        ]
-    },
+    }
     
 ];
 
@@ -98,7 +98,7 @@ function showQuestion() {
 }
 
 function resetState() {
-    nextButton.style.display = "none";
+    nextButton.style.opacity = "0";
     while(answerButtons.firstChild) {
         answerButtons.removeChild(answerButtons.firstChild);
     }
@@ -119,14 +119,14 @@ function selectAnswer(e) {
         }
         button.disabled = true;
     });
-    nextButton.style.display = "block";
+    nextButton.style.opacity = "1";
 }
 
 function showScore() {
     resetState();
     questionElement.innerHTML = `You scored ${score} out of ${questions.length}!`;
     nextButton.innerHTML = "Play Again";
-    nextButton.style.display = "block";
+    nextButton.style.opacity = "1";
 }
 
 function handleNextButton() {

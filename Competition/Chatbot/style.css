@@ -1,10 +1,17 @@
+:root {
+    --header-height: 10vh;
+    --selections-height: 13vh;
+}
+
 body {
     margin: 0;
 }
 header {
-    display: block;
-    background-color: cadetblue;
-    padding: 2em;
+    display: flex;
+    background-color: grey;
+    padding: 0 1.5em;
+    height: var(--header-height);
+    align-items: center;
     top: 0;
 }
 header h1 {
@@ -14,20 +21,106 @@ header h1 {
     position: absolute;
     bottom: 0;
     left: 0;
-    /* display: block; */
-    background-color: chartreuse;
+    background-color: grey;
     width: 100vw;
     display: flex;
     justify-content: space-around;
+    align-items: center;
+    height: var(--selections-height);
 }
 .selections a {
-    font-size: 2em;
+    font-size: 1.5em;
+    padding: .6% 2%;
+    height: 40%;
+    background-color: whitesmoke;
+    border-radius: 100em;
+    transition: ease-in 150ms;
+    display: flex;
+    align-items: center;
+}
+.selections a:hover {
+    cursor: pointer;
+    background-color: lightgray;
+}
+.selection-disabled{
+    background-color: rgb(117, 117, 117) !important;
+    cursor: default !important;
 }
 
-.text-box, #loading-bubble {
+#texts {
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - var(--header-height) - var(--selections-height));
+    overflow-x: hidden;
+    overflow-y: scroll;
+    align-items: flex-start;
+}
+.text-box  {
     animation: fade-in ease-in 200ms;
+    display: flex;
+    margin: 15px 0;
 }
 @keyframes fade-in {
     from {opacity: 0;}
     to {opacity: 1;}
+}
+.text-box p{
+    font-size: 1.5em;
+    max-width: 60vw;
+    width: fit-content;
+    padding: .4em .5em;
+    margin: 0;
+    margin-top: 2px;
+    position: relative;
+    border-radius: 10px;
+}
+.text-box p::after {
+    content: "";
+    width: 0;
+    height: 0;
+    display: block;
+    position: absolute;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    rotate: 90deg;
+    top: -2.5px;
+}
+.user-text p::after {
+    border-left: 15px solid lightskyblue;
+    right: -7px;
+}
+.ai-text p::after {
+    border-left: 15px solid lightgreen;
+    left: -7px;
+}
+
+.user-text {
+    align-self: flex-end;
+    text-align: right;
+    flex-direction: row-reverse;
+    margin-right: 15px;
+}
+.user-text p {
+    background-color: lightskyblue;
+}
+.ai-text {
+    align-self: flex-start;
+    margin-left: 15px;
+}
+.ai-text p {
+    background-color: lightgreen;
+}
+
+.user-profile, .ai-profile {
+    width: 2.5em;
+    height: 2.5em;
+    border-radius: 100%;
+    background-color: lightgrey;
+}
+.user-profile {
+    margin-left: 15px;
+}
+.ai-profile {
+    margin-right: 15px;
 }

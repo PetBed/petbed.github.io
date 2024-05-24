@@ -38,9 +38,9 @@
     {
         question: "What is an effect of road accidents?",
         answers: [
-            { text: "Causes injury, fatality or damage", correct: false }, 
+            { text: "Causes injury, fatality or damage", correct: true }, 
             { text: "Causes paper cuts", correct: false }, 
-            { text: "Increased air-con maintenance fee", correct: true }, 
+            { text: "Increased air-con maintenance fee", correct: false }, 
             { text: "Your cat will be starved", correct: false }
         ]
     },

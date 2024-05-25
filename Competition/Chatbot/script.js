@@ -142,7 +142,7 @@ async function sendQuery() {
         await fetch(fetchLink).then(r => r.json()).then(data => {queryData = data; return queryData;})
         answerText = queryData.items[0].htmlSnippet;
         answerText += "<br>";
-        answerText += `<span>Source: <a href="${queryData.items[0].link}">${queryData.items[0].displayLink}</a></span>`;
+        answerText += `<span>Source: <a href="${queryData.items[0].link}" target="_blank">${queryData.items[0].displayLink}</a></span>`;
         await sleep(300);
         createLoadingBubble();
         scrollDown();
@@ -152,7 +152,7 @@ async function sendQuery() {
         scrollDown();
         answerText = queryData.items[1].htmlSnippet;
         answerText += "<br>";
-        answerText += `<span>Source: <a href="${queryData.items[1].link}">${queryData.items[1].displayLink}</a></span>`;
+        answerText += `<span>Source: <a href="${queryData.items[1].link} target="_blank">${queryData.items[1].displayLink}</a></span>`;
         await sleep(300);
         createLoadingBubble();
         scrollDown();

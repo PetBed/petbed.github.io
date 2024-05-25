@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatbot</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-T9KQVBSWDL"></script>
 <script>
@@ -25,10 +26,18 @@
         </div>
     </div>
     <div class="selections">
-        <a id="selection-1" onclick="sendMessage(1)" class="selection">Selection 1?</a>
-        <a id="selection-2" onclick="sendMessage(2)" class="selection">Selection 2!</a>
-        <a id="selection-3" onclick="sendMessage(3)" class="selection">Selection 3...</a>
-        <a id="selection-4" onclick="sendMessage(4)" class="selection">Selection 4?</a>
+        <div>
+            <div class="selection-more-input">
+                <input type="text" class="selection-more-input" id="selection-more-input">
+                <button onclick="sendQuery()" class="selection-more-input"><i class="fa fa-send"></i></button>
+            </div>
+            <a id="selection-1" onclick="sendMessage(1)" class="selection">Selection 1?</a>
+            <a id="selection-2" onclick="sendMessage(2)" class="selection">Selection 2!</a>
+            <a id="selection-3" onclick="sendMessage(3)" class="selection">Selection 3...</a>
+            <a id="selection-4" onclick="sendMessage(4)" class="selection">Selection 4?</a>
+            <span></span>
+        </div>
+        <a id="selection-more" onclick="openMore()" class="">Others</a>
     </div>
     <script src="script.js"></script>
 </body>

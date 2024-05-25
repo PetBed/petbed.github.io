@@ -1,4 +1,5 @@
-const textDiv = document.getElementById("texts")
+const textDiv = document.getElementById("texts");
+const sendInput = document.getElementById("selection-more-input");
 const response = 
 [
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam egestas convallis orci. Morbi posuere ultrices libero vel dictum. Duis vitae rhoncus orci. In sit amet turpis nec arcu venenatis luctus. Mauris auctor lacinia ante sit amet scelerisque. In quam mauris, aliquam sed dapibus sed, efficitur vel nulla. Donec nec ligula nec magna varius pulvinar eu dictum dolor. Donec mattis laoreet eros eget pulvinar. Ut at mi sodales, ornare massa eget, scelerisque mi. In magna libero, porttitor sed odio eget, ultricies fermentum risus. Cras in mollis libero. Aenean sed eros tempor, vestibulum urna semper, rutrum ante. Ut posuere aliquam elit eget placerat. Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -20,7 +21,7 @@ const sendMessage = async (elementNum) => {
         await sleep(300);
         createLoadingBubble();
         scrollDown();
-        await sleep(800);
+        await sleep(500);
         deleteLoadingBubble();
         createNewText("ai-text", response[elementNum - 1]);
         scrollDown();
@@ -28,7 +29,7 @@ const sendMessage = async (elementNum) => {
     }
 }
 
-
+//Message sending
 function createNewText(senderClass, text) {
     const newChildDiv = document.createElement("div")
     if (senderClass == "user-text") {
@@ -85,3 +86,79 @@ function scrollDown() {
     scrollDownDiv.scrollIntoView();
     scrollDownDiv.remove();
 }
+
+//More functions
+var moreSelections = false;
+function openMore() {
+    if (!moreSelections) {
+        moreSelections = true;
+        hideClass(".selection");
+        showClass(".selection-more-input")
+    } else {
+        moreSelections = false;
+        showClass(".selection");
+        hideClass(".selection-more-input")
+    }
+}
+
+function hideClass(className) {
+    var elementsToHide = document.getElementsByClassName(className.split(".")[1]);
+    for(var i = 0; i < elementsToHide.length; i++){
+        elementsToHide[i].style.display = "none"; // depending on what you're doing
+    }
+}
+
+function showClass(className) {
+    var elementsToHide = document.getElementsByClassName(className.split(".")[1]);
+    for(var i = 0; i < elementsToHide.length; i++){
+        elementsToHide[i].style.display = "flex"; // depending on what you're doing
+    }
+}
+
+async function sendQuery() {
+    if (sendInput.value != "" && !sendingMessage) {
+        sendingMessage = true;
+        var fetchLink = "https://www.googleapis.com/customsearch/v1?key=AIzaSyCzCnB_E-ZDAaoEQ5s7ucHTazlMYr1g56E&cx=d1f9b0939f4e34e35&format=js&q=what%20is%20";
+        var queryData, answerText;
+        fetchLink += sendInput.value.replace(" ", "%20");
+        createNewText("user-text", sendInput.value);
+        scrollDown();
+        sendInput.value = "";
+        await sleep(300);
+        createLoadingBubble();
+        scrollDown();
+        await sleep(300);
+        deleteLoadingBubble();
+        createNewText("ai-text", "Here's what I found:");
+        scrollDown();
+        await fetch(fetchLink).then(r => r.json()).then(data => {queryData = data; return queryData;})
+        answerText = queryData.items[0].htmlSnippet;
+        answerText += "<br>";
+        answerText += `<span>Source: <a href="${queryData.items[0].link}">${queryData.items[0].displayLink}</a></span>`;
+        await sleep(300);
+        createLoadingBubble();
+        scrollDown();
+        await sleep(1000);
+        deleteLoadingBubble();
+        createNewText("ai-text", answerText);
+        scrollDown();
+        answerText = queryData.items[1].htmlSnippet;
+        answerText += "<br>";
+        answerText += `<span>Source: <a href="${queryData.items[1].link}">${queryData.items[1].displayLink}</a></span>`;
+        await sleep(300);
+        createLoadingBubble();
+        scrollDown();
+        await sleep(700);
+        deleteLoadingBubble();
+        createNewText("ai-text", answerText);
+        scrollDown();
+        sendingMessage = false;
+    }
+}
+
+sendInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        sendQuery();
+    }
+})
+

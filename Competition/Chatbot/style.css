@@ -1,6 +1,6 @@
 :root {
     --header-height: 10vh;
-    --selections-height: 13vh;
+    --selections-height: 11vh;
 }
 
 body {
@@ -22,16 +22,31 @@ header h1 {
     bottom: 0;
     left: 0;
     background-color: grey;
-    width: 100vw;
+    width: 94vw;
+    height: calc(var(--selections-height) - 6vh);
+    padding: 3vh 3vw;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
-    height: var(--selections-height);
+}
+.selections > div {
+    flex-grow: 2;
+    flex-direction: row;
+    display: flex;
+    justify-content: space-between;
+    height: 100%;
+}
+.selections > a {
+    display: flex;
+    font: inherit;
+    justify-content: center;
+    height: 100%;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
 }
 .selections a {
     font-size: 1.5em;
-    padding: .6% 2%;
-    height: 40%;
+    padding: .3em .7em;
     background-color: whitesmoke;
     border-radius: 100em;
     transition: ease-in 150ms;
@@ -111,7 +126,10 @@ header h1 {
 .ai-text p {
     background-color: lightgreen;
 }
-
+.ai-text p span {
+    color: gray;
+    font-size: .8em;
+}
 .user-profile, .ai-profile {
     width: 2.5em;
     height: 2.5em;
@@ -123,4 +141,24 @@ header h1 {
 }
 .ai-profile {
     margin-right: 15px;
+}
+
+.selection-more-input {
+    display: none;
+    width: 95%;
+    font-size: 1.1em;
+}
+#selection-more-input + button {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 2em;
+    font-size: 1.2rem;
+    background-color: rgba(255, 255, 255, 0);
+    border: none;
+    color: white;
+}
+#selection-more-input + button:hover {
+    cursor: pointer;
 }

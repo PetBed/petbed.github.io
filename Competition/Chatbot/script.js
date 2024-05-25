@@ -1,5 +1,6 @@
 const textDiv = document.getElementById("texts");
 const sendInput = document.getElementById("selection-more-input");
+const selectionMore = document.getElementById("selection-more");
 const response = 
 [
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam egestas convallis orci. Morbi posuere ultrices libero vel dictum. Duis vitae rhoncus orci. In sit amet turpis nec arcu venenatis luctus. Mauris auctor lacinia ante sit amet scelerisque. In quam mauris, aliquam sed dapibus sed, efficitur vel nulla. Donec nec ligula nec magna varius pulvinar eu dictum dolor. Donec mattis laoreet eros eget pulvinar. Ut at mi sodales, ornare massa eget, scelerisque mi. In magna libero, porttitor sed odio eget, ultricies fermentum risus. Cras in mollis libero. Aenean sed eros tempor, vestibulum urna semper, rutrum ante. Ut posuere aliquam elit eget placerat. Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -89,29 +90,36 @@ function scrollDown() {
 
 //More functions
 var moreSelections = false;
-function openMore() {
+async function openMore() {
     if (!moreSelections) {
         moreSelections = true;
+        selectionMore.innerHTML = "Back";
         hideClass(".selection");
-        showClass(".selection-more-input")
+        showClass(".selection-more-input");
+        createNewText("user-text", "Others");
+        scrollDown();
+        await sleep(300);
+        createNewText("ai-text", "What else would you like to know?");
+        scrollDown();
     } else {
         moreSelections = false;
+        selectionMore.innerHTML = "Others";
         showClass(".selection");
-        hideClass(".selection-more-input")
+        hideClass(".selection-more-input");
     }
 }
 
 function hideClass(className) {
     var elementsToHide = document.getElementsByClassName(className.split(".")[1]);
     for(var i = 0; i < elementsToHide.length; i++){
-        elementsToHide[i].style.display = "none"; // depending on what you're doing
+        elementsToHide[i].style.display = "none";
     }
 }
 
 function showClass(className) {
     var elementsToHide = document.getElementsByClassName(className.split(".")[1]);
     for(var i = 0; i < elementsToHide.length; i++){
-        elementsToHide[i].style.display = "flex"; // depending on what you're doing
+        elementsToHide[i].style.display = "flex";
     }
 }
 

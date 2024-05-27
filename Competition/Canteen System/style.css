@@ -1,0 +1,22 @@
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 2rem;
+}
+td, th {
+    border: solid black 2px;
+}
+tr:nth-child(odd):not(:has(th)) {
+    background-color: lightgray;
+    vertical-align: text-top;
+}
+td {
+    padding: 5px;
+}
+tr th:nth-child(1) {
+    width: 0;
+    white-space: nowrap;
+}
+tr td:nth-child(1) {
+    font-weight: bold;
+}

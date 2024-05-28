@@ -10,29 +10,22 @@
     <header>
         <h1>Orders</h1>
         <select id="sort-options" name="sort-options" onchange=sortChanged()>
-            <option value="time" selected>Time</option>
+            <option value="order" selected>Order</option>
             <option value="name">Name</option>
             <option value="class">Class</option>
-            <option value="order">Order</option>
+            <option value="time">Time</option>
             <option value="price">Price</option>
         </select>
         <input type="checkbox" id="reverse" onclick=reverseChanged()>
     </header>
     <div class="table">
         <table>
-            <thead>
-                <tr>
-                    <th>No.</th>
-                    <th>Order</th>
-                    <th>Name</th>
-                    <th>Class</th>
-                    <th>Cost</th>
-                    <th>Time</th>
-                </tr>
-            </thead>
+            <thead class="table-head"></thead>
             <tbody class="table-data"></tbody>
         </table>
     </div>
     <script src="script.js"></script>
+    <script type="module" src="nameList.js"></script>
+    <script type="module" src="generateRandom.js"></script>
 </body>
 </html>

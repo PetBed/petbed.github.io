@@ -20,7 +20,15 @@ init();
 setInterval(async () => {
     await fetch('./data.json')
         .then((response) => response.json())
-        .then(json => {newOrderListJSON = json; return newOrderListJSON;});
+        .then(json => {
+            json = JSON.stringify(json);
+            json = json.replaceAll("\\", "");
+            json = json.replace('ords\":\"', "ords\":");
+            json = json.replace('}]\"}', "}]}");
+            newOrderListJSON = JSON.parse(json);
+            // orderListJSON
+            return newOrderListJSON;
+        });
 
     loop();
 }, 1000);
@@ -39,7 +47,16 @@ async function loop() {
 async function getOrders() {
     await fetch('./data.json')
         .then((response) => response.json())
-        .then(json => {orderListJSON = json; return orderListJSON;});
+        .then(json => {
+            json = JSON.stringify(json);
+            json = json.replaceAll("\\", "");
+            json = json.replace('ords\":\"', "ords\":");
+            json = json.replace('}]\"}', "}]}");
+            orderListJSON = JSON.parse(json);
+            // orderListJSON
+            console.log(orderListJSON); 
+            return orderListJSON;
+        });
 
     orderList = orderListJSON.ords
 }
@@ -63,6 +80,7 @@ function createTable(sortType) {
         time = "";
         cost = 0;
         //set order
+        console.log(orderList[sortedOrderList[i]])
         for (let j = 0; j < orderList[sortedOrderList[i]].o.length; j++) {
             let menuIndex = orderList[sortedOrderList[i]].o[j][0];
             let itemIndex = orderList[sortedOrderList[i]].o[j][1];
@@ -105,7 +123,9 @@ function createTableRow(order, name, className, cost, time) { //used className i
 
 function sortOrderList(sortType) {
     var tempArray = [];
+    var sortedTempArray = [];
     sortedOrderList = [];
+
     if (sortType == "time") {
         for (let i = 0; i < orderList.length; i++) {
             tempArray.push(orderList[i].t)
@@ -126,6 +146,8 @@ function sortOrderList(sortType) {
     } else if (sortType == "class") {
         var teacher = [];
         var pa = [];
+        var tempObjectNumArray = [];
+        var tempSortedArray = [];
 
         for (let i = 0; i < orderList.length; i++) {
             if (orderList[i].c == "PA") {
@@ -133,18 +155,49 @@ function sortOrderList(sortType) {
             } else if (orderList[i].c == "Teacher") {
                 teacher.push(orderList[i].c);
             } else {
-                tempArray.push(orderList[i].c);
+                tempSortedArray.push(orderList[i].c)
+            }
+            tempArray.push(orderList[i].c);
+        }
+        // console.log(tempArray);
+
+        for (let i = 0; i < tempSortedArray.length; i++) {
+            var object = {"num": tempSortedArray[i].charAt(0), "letter": tempSortedArray[i].charAt(1)};
+            tempObjectNumArray.push(object);
+        }
+        tempObjectNumArray.sort((firstItem, secondItem) => firstItem.num - secondItem.num)
+        tempSortedArray = [];
+        // console.log(tempObjectNumArray)
+
+        for (let i = 1; i <= 5; i++) {
+            var tempObjectArray = [];
+            for (let j = 0; j < tempObjectNumArray.length; j++) {
+                if (tempObjectNumArray[j].num == i.toString()) {
+                    tempObjectArray.push(tempObjectNumArray[j]);
+                }
+            }
+
+            tempObjectArray.sort(function(a, b) {
+                var textA = a.letter.toUpperCase();
+                var textB = b.letter.toUpperCase();
+                return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+            });
+
+            for (let i = 0; i < tempObjectArray.length; i++) {
+                tempSortedArray.push(tempObjectArray[i].num + tempObjectArray[i].letter);
             }
         }
-
+        
+        
         for (let i = 0; i < pa.length; i++) {
-            tempArray.push("PA");
+            tempSortedArray.push("PA");
         }
         for (let i = 0; i < teacher.length; i++) {
-            tempArray.push("Teacher");
+            tempSortedArray.push("Teacher");
         }
-
-        console.log(tempArray);
+        
+        sortedTempArray = tempSortedArray;
+        // console.log(tempSortedArray);
     }
     else {
         for (let i = 0; i < orderList.length; i++) {
@@ -152,37 +205,45 @@ function sortOrderList(sortType) {
         }
         return;
     }
+    
+    if (sortType != "class") {
+        sortedTempArray = tempArray.toSorted();
+    }
 
-    var sortedTempArray = tempArray.toSorted();
     if (reverseSort) {
         sortedTempArray.reverse();
     }
 
-    var matches = [];
     var matchValue, dupeCount;
+
     for (let i = 0; i < tempArray.length; i++) {
-        console.log(sortedTempArray[i]);
         matchValue = sortedTempArray[i];
-        matches = [];
         dupeCount = 0;
+        // console.log(tempArray)
         if (sortedTempArray[i] == sortedTempArray[i + 1]) {
             for (let j = 0; j < tempArray.length - i; j++) {
+                console.log(sortedTempArray);
                 if (sortedTempArray[i].toString() == sortedTempArray[i + j]) {
                     dupeCount++;
                 } else {
                     break;
                 }
             }
-            console.log(`Duped item: ${sortedTempArray[i]}; Count: ${dupeCount}`);
+            // console.log(`Duped item: ${sortedTempArray[i]}; Count: ${dupeCount}`);
             for (let j = 0; j < tempArray.length; j++) {
                 if (tempArray[j].toString() == matchValue.toString()) {
                     sortedOrderList.push(j);
+                    console.log("Duped")
                 }
             }
             i += dupeCount - 1;
         } else {
             sortedOrderList.push(tempArray.indexOf(sortedTempArray[i]));
+            // console.log(tempArray.indexOf(sortedTempArray[i]))
+            // console.log(sortedTempArray[i], tempArray, tempArray.indexOf(sortedTempArray[i]))
         }
+
+        // console.log(sortedOrderList);
     }
 }
 

@@ -1,5 +1,7 @@
 const textDiv = document.getElementById("texts");
+const selections = document.getElementById("selections");
 const sendInput = document.getElementById("selection-more-input");
+const header = document.getElementById("header");
 const selectionMore = document.getElementById("selection-more");
 const response = 
 [
@@ -170,3 +172,11 @@ sendInput.addEventListener("keydown", (event) => {
     }
 })
 
+setInterval(() => {
+    // console.log(document.getElementsByClassName("selections")[0])
+    console.log(document.getElementById("texts").style.height)
+    // document.getElementById("texts").style.height = "20px";
+    console.log(window.innerHeight - document.getElementsByClassName("selections")[0].offsetHeight - document.getElementById("header").offsetHeight)
+    // console.log(Math.max(document.documentElement.clientHeight, window.innerHeight || 0))
+    document.getElementById("texts").style.height = (window.innerHeight - document.getElementsByClassName("selections")[0].offsetHeight - document.getElementById("header").offsetHeight) + "px";
+}, 20);

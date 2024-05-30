@@ -23,11 +23,12 @@ header h1 {
     left: 0;
     background-color: grey;
     width: 94vw;
-    height: calc(var(--selections-height) - 6vh);
+    height: 7vh;
     padding: 3vh 3vw;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
 }
 .selections > div {
     flex-grow: 2;
@@ -45,7 +46,7 @@ header h1 {
     padding-bottom: 0 !important;
 }
 .selections a {
-    font-size: 1.5em;
+    font-size: 3vw;
     padding: .3em .7em;
     background-color: whitesmoke;
     border-radius: 100em;
@@ -70,6 +71,7 @@ header h1 {
     overflow-x: hidden;
     overflow-y: scroll;
     align-items: flex-start;
+    background-color: white;
 }
 .text-box  {
     animation: fade-in ease-in 200ms;

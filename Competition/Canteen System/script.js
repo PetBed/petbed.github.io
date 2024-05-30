@@ -181,60 +181,9 @@ function sortOrderList(sortType) {
             tempArray.push(orderList[i].n)
         }
     } else if (sortType == "class") {
-        var teacher = [];
-        var pa = [];
-        var tempObjectNumArray = [];
-        var tempSortedArray = [];
-
         for (let i = 0; i < orderList.length; i++) {
-            if (orderList[i].c == "PA") {
-                pa.push(orderList[i].c);
-            } else if (orderList[i].c == "Teacher") {
-                teacher.push(orderList[i].c);
-            } else {
-                tempSortedArray.push(orderList[i].c)
-            }
             tempArray.push(orderList[i].c);
         }
-        // console.log(tempArray);
-
-        for (let i = 0; i < tempSortedArray.length; i++) {
-            var object = {"num": tempSortedArray[i].charAt(0), "letter": tempSortedArray[i].charAt(1)};
-            tempObjectNumArray.push(object);
-        }
-        tempObjectNumArray.sort((firstItem, secondItem) => firstItem.num - secondItem.num)
-        tempSortedArray = [];
-        // console.log(tempObjectNumArray)
-
-        for (let i = 1; i <= 5; i++) {
-            var tempObjectArray = [];
-            for (let j = 0; j < tempObjectNumArray.length; j++) {
-                if (tempObjectNumArray[j].num == i.toString()) {
-                    tempObjectArray.push(tempObjectNumArray[j]);
-                }
-            }
-
-            tempObjectArray.sort(function(a, b) {
-                var textA = a.letter.toUpperCase();
-                var textB = b.letter.toUpperCase();
-                return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
-            });
-
-            for (let i = 0; i < tempObjectArray.length; i++) {
-                tempSortedArray.push(tempObjectArray[i].num + tempObjectArray[i].letter);
-            }
-        }
-        
-        
-        for (let i = 0; i < pa.length; i++) {
-            tempSortedArray.push("PA");
-        }
-        for (let i = 0; i < teacher.length; i++) {
-            tempSortedArray.push("Teacher");
-        }
-        
-        sortedTempArray = tempSortedArray;
-        // console.log(tempSortedArray);
     }
     else {
         for (let i = 0; i < orderList.length; i++) {
@@ -243,11 +192,7 @@ function sortOrderList(sortType) {
         return;
     }
     
-    if (sortType != "class") {
-        sortedTempArray = tempArray.toSorted();
-        console.log(tempArray)
-        console.log(sortedTempArray)
-    }
+    sortedTempArray = tempArray.toSorted();
 
     if (reverseSort) {
         sortedTempArray.reverse();

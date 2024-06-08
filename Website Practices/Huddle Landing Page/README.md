@@ -20,7 +20,7 @@ This is a solution to the [Huddle landing page with curved sections challenge on
 
 Users should be able to:
 
-- View the optimal layout for the site depending on their device's screen size
+- View the optimal layout for the site depending on their device's screen size (*Not fully solved, check the [github status for it](https://github.com/PetBed/petbed.github.io/issues/2)*)
 - See hover states for all interactive elements on the page
 
 ### Screenshot
@@ -53,6 +53,7 @@ Didn't learn much, but this was a good practice. This was a chance for me to use
 ### Continued development
 
 Use of flexbox - Not entirely familiar of align-content, justify-contents, align-items etc
+
 Dynamic Website - Still unable to make this website respond to smaller screens. Will update it in the future. Here's the [github status for it](https://github.com/PetBed/petbed.github.io/issues/2)
 
 

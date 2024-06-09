@@ -1,5 +1,4 @@
-#open-help-button,
-#close-help-button {
+#open-help-button, #close-help-button {
 	display: none;
 }
 label.fa-question {
@@ -44,6 +43,6 @@ label.fa-question > div label {
 #open-help-button:checked + label.fa-question > div {
 	display: block;
 	opacity: 1;
-	width: 30vw;
-	height: 65vh;
+	width: 40vw;
+	height: 75vh;
 }

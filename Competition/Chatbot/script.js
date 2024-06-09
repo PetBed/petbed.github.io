@@ -12,9 +12,11 @@ const response = [
 
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
 var sendingMessage = false;
+var moreSelectionsJustClicked = false;
 
 const sendMessage = async (elementNum) => {
 	if (!sendingMessage) {
+    moreSelectionsJustClicked = false;
 		disableSelections();
 		var selectionId = "selection-";
 		selectionId += elementNum;
@@ -97,11 +99,15 @@ async function openMore() {
 		selectionMore.innerHTML = "Back";
 		hideClass(".selection");
 		showClass(".selection-more-input");
-		createNewText("user-text", "Others");
-		scrollDown();
-		await sleep(300);
-		createNewText("ai-text", "What else would you like to know?");
-		scrollDown();
+    console.log(moreSelectionsJustClicked)
+    if (!moreSelectionsJustClicked) {
+      createNewText("user-text", "Others");
+      scrollDown();
+      await sleep(300);
+      createNewText("ai-text", "What else would you like to know?");
+      scrollDown();
+      moreSelectionsJustClicked = true;
+    }
 	} else {
 		moreSelections = false;
 		selectionMore.innerHTML = "Others";
@@ -178,9 +184,9 @@ sendInput.addEventListener("keydown", (event) => {
 
 setInterval(() => {
 	// console.log(document.getElementsByClassName("selections")[0])
-	console.log(document.getElementById("texts").style.height);
+	// console.log(document.getElementById("texts").style.height);
 	// document.getElementById("texts").style.height = "20px";
-	console.log(window.innerHeight - document.getElementsByClassName("selections")[0].offsetHeight - document.getElementById("header").offsetHeight);
+	// console.log(window.innerHeight - document.getElementsByClassName("selections")[0].offsetHeight - document.getElementById("header").offsetHeight);
 	// console.log(Math.max(document.documentElement.clientHeight, window.innerHeight || 0))
 	document.getElementById("texts").style.height = window.innerHeight - document.getElementsByClassName("selections")[0].offsetHeight - document.getElementById("header").offsetHeight + "px";
 }, 20);

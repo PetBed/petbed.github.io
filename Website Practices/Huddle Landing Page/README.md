@@ -62,5 +62,3 @@ Dynamic Website - Still unable to make this website respond to smaller screens. 
 - [Text Gradient with Font Awesome](https://stackoverflow.com/questions/12732663/text-gradient-with-font-awesome) - Great solution to add text gradient to font awesome icons (Instagram). But background: didn't work, instead background-image: worked for me.
 - [Check if Email is Valid](https://developer.mozilla.org/en-US/docs/Web/CSS/:valid) - Help me with email validation
 - [Check if Input is Empty](https://stackoverflow.com/questions/16952526/detect-if-an-input-has-text-in-it-using-css-on-a-page-i-am-visiting-and-do-no) - Helped me with the email part
-
-**Note: Delete this note and replace the list above with resources that helped you during the challenge. These could come in handy for anyone viewing your solution or for yourself when you look back on this project in the future.**

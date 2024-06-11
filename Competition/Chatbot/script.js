@@ -4,17 +4,19 @@ const sendInput = document.getElementById("selection-more-input");
 const header = document.getElementById("header");
 const selectionMore = document.getElementById("selection-more");
 const response = [
-	"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam egestas convallis orci. Morbi posuere ultrices libero vel dictum. Duis vitae rhoncus orci. In sit amet turpis nec arcu venenatis luctus. Mauris auctor lacinia ante sit amet scelerisque. In quam mauris, aliquam sed dapibus sed, efficitur vel nulla. Donec nec ligula nec magna varius pulvinar eu dictum dolor. Donec mattis laoreet eros eget pulvinar. Ut at mi sodales, ornare massa eget, scelerisque mi. In magna libero, porttitor sed odio eget, ultricies fermentum risus. Cras in mollis libero. Aenean sed eros tempor, vestibulum urna semper, rutrum ante. Ut posuere aliquam elit eget placerat. Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-	"Answer 2",
-	"Answer 3",
-	"Answer 4",
+	"Road accidents commonly occur due to several factors. Distracted driving, such as texting or using a phone, diverts attention from the road and increases the chance of collisions. Speeding reduces the time to react to unexpected situations and makes crashes more severe. Impaired driving, whether due to alcohol or drugs, decreases a driver’s ability to make safe decisions. Poor weather conditions like rain, snow, or fog can lead to reduced visibility and slippery roads. Bad road conditions, such as potholes or missing signs, also contribute to accidents. Additionally, driver fatigue and aggressive driving behaviors significantly raise the risk of accidents.",
+	"Road accidents generally occur on weekends, particularly Friday and Saturday nights. Data shows a higher number of accidents due to increased social activities and higher instances of impaired driving. During the week, rush hours between 7-9AM and 4-6PM are peak times for accidents, as there is a higher volume of traffic and more hurried driving behavior. Additionally, holidays and long weekends often see a spike in accidents due to increased travel and celebrations that may involve alcohol consumption. Weather conditions and daylight hours also play a role, with accidents more common during poor weather and at times of reduced visibility, such as dawn and dusk.",
+	"Unfavorable weather conditions create wet or icy roads that decreases tyre grip and makes it more difficult to maneuver safely. Fog, heavy rain, and snowstorms reduce visibility, making it harder for drivers to see other vehicles, road signs, and obstacles, which can lead to collisions. Severe weather conditions often cause drivers to overestimate their abilities or underestimate the dangers, leading to more reckless driving behaviors. Additionally, poor weather can lead to an increase in multi-vehicle pile-ups due to the reduced ability to stop in time, thus increasing the severity of accidents.",
+	"Distracted driving can be caused by a variety of activities and elements that divert attention from the road: <br><br> 1. Mobile phones – Texting, calling, or using apps can take a driver's eyes off the road and hands off the wheel. <br><br> 2. In-Car Technology – GPS devices, infotainment systems, and other electronic controls can divert a driver's attention away from the road <br><br> 3. Eating and drinking while driving – Requires physical and cognitive attention that should be focused on the road <br><br> 4. External factors – E.g. billboards, roadside accidents, or other activities can catch a driver's eye, leading to dangerous lapses in attention",
 ];
 
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
 var sendingMessage = false;
+var moreSelectionsJustClicked = false;
 
 const sendMessage = async (elementNum) => {
 	if (!sendingMessage) {
+    moreSelectionsJustClicked = false;
 		disableSelections();
 		var selectionId = "selection-";
 		selectionId += elementNum;
@@ -97,11 +99,15 @@ async function openMore() {
 		selectionMore.innerHTML = "Back";
 		hideClass(".selection");
 		showClass(".selection-more-input");
-		createNewText("user-text", "Others");
-		scrollDown();
-		await sleep(300);
-		createNewText("ai-text", "What else would you like to know?");
-		scrollDown();
+    console.log(moreSelectionsJustClicked)
+    if (!moreSelectionsJustClicked) {
+      createNewText("user-text", "Others");
+      scrollDown();
+      await sleep(300);
+      createNewText("ai-text", "What else would you like to know?");
+      scrollDown();
+      moreSelectionsJustClicked = true;
+    }
 	} else {
 		moreSelections = false;
 		selectionMore.innerHTML = "Others";
@@ -178,9 +184,9 @@ sendInput.addEventListener("keydown", (event) => {
 
 setInterval(() => {
 	// console.log(document.getElementsByClassName("selections")[0])
-	console.log(document.getElementById("texts").style.height);
+	// console.log(document.getElementById("texts").style.height);
 	// document.getElementById("texts").style.height = "20px";
-	console.log(window.innerHeight - document.getElementsByClassName("selections")[0].offsetHeight - document.getElementById("header").offsetHeight);
+	// console.log(window.innerHeight - document.getElementsByClassName("selections")[0].offsetHeight - document.getElementById("header").offsetHeight);
 	// console.log(Math.max(document.documentElement.clientHeight, window.innerHeight || 0))
 	document.getElementById("texts").style.height = window.innerHeight - document.getElementsByClassName("selections")[0].offsetHeight - document.getElementById("header").offsetHeight + "px";
 }, 20);

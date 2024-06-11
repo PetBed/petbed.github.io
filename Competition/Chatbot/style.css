@@ -3,6 +3,13 @@
 	--selections-height: 11vh;
 }
 
+::-webkit-scrollbar-thumb {
+  background: #888; 
+  border-radius: 100vw;
+}
+::-webkit-scrollbar {
+  width: 10px;
+}
 body {
 	margin: 0;
 }
@@ -23,12 +30,12 @@ header h1 {
 	left: 0;
 	background-color: grey;
 	width: 94vw;
-	height: 7vh;
+	height: fit-content;
 	padding: 3vh 3vw;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	flex-wrap: wrap;
+	flex-wrap: nowrap;
 }
 .selections > div {
 	flex-grow: 2;
@@ -46,8 +53,9 @@ header h1 {
 	padding-bottom: 0 !important;
 }
 .selections a {
-	font-size: 3vw;
-	padding: 0.3em 0.7em;
+	font-size: 2.1vw;
+  font-weight: 600;
+	padding: 0.3em 1em;
 	background-color: whitesmoke;
 	border-radius: 100em;
 	transition: ease-in 150ms;
@@ -72,6 +80,11 @@ header h1 {
 	overflow-y: scroll;
 	align-items: flex-start;
 	background-color: white;
+}
+#texts > p {
+  color: #808080;
+  align-self: center;
+  font-size: medium;
 }
 .text-box {
 	animation: fade-in ease-in 200ms;
@@ -118,7 +131,7 @@ header h1 {
 
 .user-text {
 	align-self: flex-end;
-	text-align: right;
+	text-align: left;
 	flex-direction: row-reverse;
 	margin-right: 15px;
 }
@@ -145,9 +158,15 @@ header h1 {
 }
 .user-profile {
 	margin-left: 15px;
+  background-image: url("user-icon.png");
+  background-size: 2.4em;
+  background-position: center;
 }
 .ai-profile {
 	margin-right: 15px;
+  background-image: url("bot-icon.png");
+  background-size: 2.5em;
+  background-position: center;
 }
 
 .selection-more-input {

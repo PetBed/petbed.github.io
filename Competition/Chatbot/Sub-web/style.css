@@ -1,5 +1,4 @@
-#open-help-button,
-#close-help-button {
+#open-help-button, #close-help-button {
 	display: none;
 }
 label.fa-question {
@@ -34,16 +33,17 @@ label.fa-question > div {
 label.fa-question > div embed {
 	height: 100%;
 	width: 100%;
-	border: 1px black solid;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+  border-radius: 10px;
 }
 label.fa-question > div label {
 	position: absolute;
-	right: 0;
-	top: 0;
+	right: 10px;
+	top: 1vh;
 }
 #open-help-button:checked + label.fa-question > div {
 	display: block;
 	opacity: 1;
 	width: 30vw;
-	height: 65vh;
+	height: 75vh;
 }

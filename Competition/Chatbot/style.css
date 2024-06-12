@@ -15,20 +15,26 @@ body {
 }
 header {
 	display: flex;
-	background-color: grey;
+	background-color: rgb(255, 255, 255);
 	padding: 0 1.5em;
 	height: var(--header-height);
 	align-items: center;
 	top: 0;
+  box-shadow: 0px 5px 11px -6px rgba(0,0,0,0.75);
+  z-index: 1;
+  position: relative;
 }
 header h1 {
 	margin: 0;
 }
 .selections {
+  box-shadow: 0px -5px 11px -6px rgba(0,0,0,0.75);
+  z-index: 1;
+  position: relative;
 	position: absolute;
 	bottom: 0;
 	left: 0;
-	background-color: grey;
+	background-color: white;
 	width: 94vw;
 	height: fit-content;
 	padding: 3vh 3vw;
@@ -53,10 +59,11 @@ header h1 {
 	padding-bottom: 0 !important;
 }
 .selections a {
-	font-size: 2.1vw;
+	font-size: 2.2vw;
   font-weight: 600;
 	padding: 0.3em 1em;
-	background-color: whitesmoke;
+	background-color: rgb(122, 122, 122);
+  color: white;
 	border-radius: 100em;
 	transition: ease-in 150ms;
 	display: flex;
@@ -67,7 +74,7 @@ header h1 {
 	background-color: lightgray;
 }
 .selection-disabled {
-	background-color: rgb(117, 117, 117) !important;
+	background-color: lightgray !important;
 	cursor: default !important;
 }
 

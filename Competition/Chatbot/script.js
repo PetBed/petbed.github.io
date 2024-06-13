@@ -3,7 +3,12 @@ const selections = document.getElementById("selections");
 const sendInput = document.getElementById("selection-more-input");
 const header = document.getElementById("header");
 const selectionMore = document.getElementById("selection-more");
-const response = ["Generating energy that produces no greenhouse gas emissions from fossil fuels and reduces some types of air pollution. Diversifying energy supply and reducing dependence on imported fuels. Creating economic development and jobs in manufacturing, installation, and more.", "", "", ""];
+const response = [
+	"Generating energy that produces no greenhouse gas emissions from fossil fuels and reduces some types of air pollution. Diversifying energy supply and reducing dependence on imported fuels. Creating economic development and jobs in manufacturing, installation, and more.",
+	"Renewable energy sources like wind, solar, and hydropower generate electricity without emitting greenhouse gases, unlike fossil fuels such as coal and natural gas. This helps mitigate climate change by reducing carbon dioxide and other harmful emissions.",
+	"Malaysia leverages its abundant natural resources to harness various renewable energy sources, primarily solar, biomass, biogas, and hydropower. The country benefits from high solar radiation, leading to widespread adoption of solar photovoltaic systems and large-scale solar projects. Biomass energy is generated from agricultural and forestry residues, especially from the palm oil industry, while biogas is produced from palm oil mill effluent and livestock waste, capturing methane for energy use. Hydropower, especially from large plants in Sarawak, also plays a crucial role. These renewable sources are part of Malaysia's strategy to reduce reliance on fossil fuels and promote sustainable energy development.",
+	"Renewable energy is derived from natural processes that are continually replenished, making it a sustainable and environmentally friendly alternative to fossil fuels. The primary sources of renewable energy include sunlight (solar energy), wind, rain (hydropower), tides, waves, and geothermal heat. Unlike fossil fuels, which are finite and produce harmful emissions, renewable energy sources produce little to no pollution and have a minimal impact on the environment. They play a crucial role in reducing greenhouse gas emissions, combating climate change, enhancing energy security, and providing economic and social benefits by creating jobs and supporting rural development.",
+];
 
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
 var sendingMessage = false;

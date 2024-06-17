@@ -1,0 +1,123 @@
+@font-face {
+	font-family: 'MainFont';
+	src: url('Resources/VT323-Regular.ttf');
+}
+:root {
+  --window-header-height: 8%;
+}
+
+
+* {
+  font-family: MainFont;
+  margin: 0;
+  box-sizing: border-box;
+}
+body {
+  background-color: #2CBCC4;
+  margin: 0;
+}
+.app {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+.folder:hover {
+  outline: dotted 1px #238f95;
+}
+.folder img {
+  width: 60%;
+}
+
+.selected {
+  background-color: #46dfe7;
+}
+.folders {
+  display: flex;
+  flex-direction: column;
+}
+
+.folder {
+  position: relative;
+  display: inline-flex;
+  margin: 5px;
+  width: 110px;
+  height: 110px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 5px;
+}
+.folder p {
+  position: absolute;
+  bottom: 0;
+}
+
+#folder-window {
+  position: fixed;
+  display: none;
+  width: 80vw;
+  height: 80vh;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.window-title {
+  height: var(--window-header-height);
+  background-color: #808080;
+  display: block;
+  position: relative;
+}
+#folder-path {
+  font-size: 1.7em;
+  display: inline-block;
+  position: relative;
+  padding: 3px 10px;
+  top: 50%;
+  transform: translate(0, -50%);
+}
+.close-btn {
+  font-size: 1.7em;
+  padding: 3px 10px;
+  position: absolute;
+  right: 0;
+  border-color: #808080;
+  text-align: center;
+  margin: 5px;
+  background-color: #C0C0C0;
+}
+#window-body {
+  background-color: white;
+  height: calc(100% - var(--window-header-height));
+  display: flex;
+}
+#window-body .folder:last-child {
+  order: -1;
+}
+#window-body img {
+  overflow: scroll;
+  max-width: 100%;
+  width: auto;
+}
+
+.nav-bottom {
+  position: absolute;
+  bottom: 0;
+  background-color: #c3c3c3;
+  height: 40px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+#time {
+  font-size: 1.4em;
+  position: absolute;
+  right: 0;
+  margin: 4px;
+  padding: 3px 5px;
+  border-top: 1px solid #08080E;
+  border-left: 1px solid #08080E;
+  border-right: 1px solid #FCFCFC;
+  border-bottom: 1px solid #FCFCFC;
+}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homepage</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <div class="folders"> 
+      <div class="folder folder-Competition" onclick="selectFile('Competition')">
+        <img src="Resources/folder.png" alt="">
+        <p>Competition</p>
+      </div>
+      <div class="folder folder-Games" onclick="selectFile('Games')">
+        <img src="Resources/folder.png" alt="">
+        <p>Games</p>
+      </div>
+      <div class="folder folder-Website Practices" onclick="selectFile('Website Practices')">
+        <img src="Resources/folder.png" alt="">
+        <p>Website Practices</p>
+      </div>
+      <div class="folder folder-Credits" onclick="selectFile('Credits')">
+        <img src="Resources/paper.png" alt="">
+        <p>Credits</p>
+      </div>
+    </div>
+    <div id="folder-window">
+      <div class="window-title"><button class="close-btn" onclick="closeWindow()">X</button><p id="folder-path">Games</p></div>
+      <div id="window-body"></div>
+    </div>
+    <footer class="nav-bottom">
+      <p id="time"></p>
+    </footer>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

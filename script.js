@@ -32,7 +32,11 @@ const paths = {
 				},
 			},
 			"In Development": {
-				contents: {},
+				contents: {
+					"Paper Legacy": {
+						url: "https://petbed.github.io/Games/Paper%20Legacy",
+					},
+				},
 			},
 		},
 	},

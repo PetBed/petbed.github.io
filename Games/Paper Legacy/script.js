@@ -3,6 +3,7 @@ var data = {
     credit: {
       max: 10,
       contents: [],
+      paperRange: 10,
       cooldownDraw: 1000,
       cooldownRefill: 5000,
     }
@@ -30,7 +31,8 @@ function refillBox(boxType) {
   data.boxes[boxType].contents.length = 0;
   
   shuffledNumbers = [ ...unshuffledNumbers ]
-  
+  shuffledNumbers.splice(data.boxes[boxType].paperRange, shuffledNumbers.length);
+
   for (let i = shuffledNumbers.length - 1; i > 0; i--) {
     const u = Math.floor(Math.random() * (i + 1));
 		[shuffledNumbers[i], shuffledNumbers[u]] = [shuffledNumbers[u], shuffledNumbers[i]];
@@ -52,7 +54,12 @@ document.getElementById("draw-paper-credit").addEventListener("click", () => {
     boxStatus["credit"].cooldownDraw = data.boxes["credit"].cooldownDraw;
     if (data.boxes["credit"].contents.length <= 0) boxStatus["credit"].cooldownRefill = data.boxes["credit"].cooldownRefill;
   }
-})
+});
+
+document.getElementById("upgrade-range-credit").addEventListener("click", () => {
+	
+});
+
 
 function updateCooldowns() {
   if (boxStatus["credit"].cooldownDraw > 0) boxStatus["credit"].cooldownDraw -= refreshRate;
@@ -86,3 +93,5 @@ if (savegame !== null) {
 } else {
   console.log("No Game File Found")
 }
+
+localStorage.clear();

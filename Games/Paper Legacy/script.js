@@ -7,18 +7,23 @@ var data = {
       cooldownDraw: 30,
 
       cooldownRefillUpgrades: 0,
-      cooldownRefillBase: 10000,
+      cooldownRefillBase: 1000,
       refillSpeedDecay: 0.04,
       refillCostBase: 100,
       refillCostGrowth: 1.09,
 
       sizeCostBase: 100,
       sizeCostGrowth: 1.07,
+
       rangeCostGrowth: 50,
+
+      minRangeCostGrowth: 1.15,
+      minRangeCostBase: 1000,
+      minRangeCostUpgrades: 0
     }
   },
   currencies: {
-    credit: 10000
+    credit: 100000000000000000000
   }
 }
 var boxStatus = {
@@ -43,7 +48,7 @@ function refillBox(boxType) {
   numberRange = [ ...unshuffledNumbers ]
   numberRange.splice(data.boxes[boxType].paperRange, numberRange.length);
 
-  for (i = 0; i < Math.ceil(data.boxes["credit"].size / data.boxes["credit"].paperRange); i++) {
+  for (let i = 0; i < Math.ceil(data.boxes["credit"].size / data.boxes["credit"].paperRange); i++) {
     shuffledNumbers.push( ...numberRange );
   }
 
@@ -52,8 +57,14 @@ function refillBox(boxType) {
 		[shuffledNumbers[i], shuffledNumbers[u]] = [shuffledNumbers[u], shuffledNumbers[i]];
 	}
 
+  for (let i = 0; i < shuffledNumbers.length; i++) {
+    if(shuffledNumbers[i] < data.boxes["credit"].minRangeCostUpgrades + 1) {
+      shuffledNumbers[i] = data.boxes["credit"].minRangeCostUpgrades + 1;
+    }
+  }
+
   data.boxes[boxType].contents = [ ...shuffledNumbers.slice(0, data.boxes[boxType].size) ];
-  // console.log(data.boxes["credit"].contents)
+  console.log(data.boxes["credit"].contents)
 }
 refillBox("credit");
 
@@ -93,6 +104,13 @@ document.getElementById("upgrade-refill-credit").addEventListener("click", () =>
   }
 })
 
+document.getElementById("upgrade-min-credit").addEventListener("click", () => {
+	if (exponentialNextCost(data.boxes["credit"].minRangeCostBase, data.boxes["credit"].minRangeCostGrowth, data.boxes["credit"].minRangeCostUpgrades)) {
+		data.currencies.credit -= exponentialNextCost(data.boxes["credit"].minRangeCostBase, data.boxes["credit"].minRangeCostGrowth, data.boxes["credit"].minRangeCostUpgrades);
+		data.boxes["credit"].minRangeCostUpgrades += 1;
+	}
+});
+
 function updateCooldowns() {
   if (boxStatus["credit"].cooldownDraw > 0) boxStatus["credit"].cooldownDraw -= refreshRate;
   if (boxStatus["credit"].cooldownRefill > 0) {
@@ -108,11 +126,12 @@ function draw() {
   document.getElementById("cooldown-time-credit").innerHTML = `Refill Cooldown: ${(boxStatus["credit"].cooldownRefill / 1000).toFixed(2)}s`;
   document.getElementById("base-cooldown-time-credit").innerHTML = `Base Refill Cooldown: ${((data.boxes["credit"].cooldownRefillBase - exponentialDecay(data.boxes["credit"].cooldownRefillBase, data.boxes["credit"].refillSpeedDecay, data.boxes["credit"].cooldownRefillUpgrades)) / 1000).toFixed(2)}s`;
   document.getElementById("box-size-credit").innerHTML = `Box Size: ${data.boxes["credit"].size}`;
-  document.getElementById("paper-range-credit").innerHTML = `Paper Range: 1 - ${(data.boxes["credit"].paperRange)}`;
+  document.getElementById("paper-range-credit").innerHTML = `Paper Range: ${data.boxes["credit"].minRangeCostUpgrades + 1} - ${(data.boxes["credit"].paperRange)}`;
 
   document.getElementById("upgrade-range-credit").innerHTML = `Upgrade Paper Range (${(data.boxes["credit"].paperRange - 9) * data.boxes["credit"].rangeCostGrowth} Credits)`;
   document.getElementById("upgrade-size-credit").innerHTML = `Upgrade Box Size (${exponentialNextCost(data.boxes["credit"].sizeCostBase, data.boxes["credit"].sizeCostGrowth, data.boxes["credit"].size - 10)} Credits)`;
   document.getElementById("upgrade-refill-credit").innerHTML = `Upgrade Refill Speed (${exponentialNextCost(data.boxes["credit"].refillCostBase, data.boxes["credit"].refillCostGrowth, data.boxes["credit"].cooldownRefillUpgrades)} Credits)`;
+  document.getElementById("upgrade-min-credit").innerHTML = `Upgrade Min Paper (${exponentialNextCost(data.boxes["credit"].minRangeCostBase, data.boxes["credit"].minRangeCostGrowth, data.boxes["credit"].minRangeCostUpgrades)} Credits)`;
 }
 
 function exponentialNextCost(base, growth, owned) {

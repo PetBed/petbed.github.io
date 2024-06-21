@@ -5,15 +5,16 @@ var data = {
       contents: [],
       paperRange: 10,
       cooldownDraw: 30,
-      cooldownRefillUpgrades: 1,
-      cooldownRefill: 500,
+
+      cooldownRefillUpgrades: 0,
+      cooldownRefillBase: 10000,
+      refillSpeedDecay: 0.04,
+      refillCostBase: 100,
+      refillCostGrowth: 1.09,
 
       sizeCostBase: 100,
       sizeCostGrowth: 1.07,
       rangeCostGrowth: 50,
-      refillSpeedDecay: 0.125,
-      refillCostBase: 100,
-      refillCostGrowth: 1.09
     }
   },
   currencies: {
@@ -59,14 +60,15 @@ refillBox("credit");
 document.getElementById("draw-paper-credit").addEventListener("click", () => {
   if (boxStatus["credit"].cooldownDraw <= 0 && boxStatus["credit"].cooldownRefill <= 0) {
     if (data.boxes["credit"].contents.length <= 0) {
-      boxStatus["credit"].cooldownRefill = data.boxes["credit"].cooldownRefill;
+      boxStatus["credit"].cooldownRefill = Number(document.getElementById("base-cooldown-time-credit").innerHTML.slice(0, -1).replace("Base Refill Cooldown: ", "")) * 1000;
       return;
     }
     data.currencies["credit"] += data.boxes["credit"].contents[0];
     boxStatus["credit"].lastPaperDrawn = data.boxes["credit"].contents[0];
     data.boxes["credit"].contents.shift();
     boxStatus["credit"].cooldownDraw = data.boxes["credit"].cooldownDraw;
-    if (data.boxes["credit"].contents.length <= 0) boxStatus["credit"].cooldownRefill = data.boxes["credit"].cooldownRefill;
+    if (data.boxes["credit"].contents.length <= 0) boxStatus["credit"].cooldownRefill = Number(document.getElementById("base-cooldown-time-credit").innerHTML.slice(0, -1).replace("Base Refill Cooldown: ", "")) * 1000;
+    // console.log(Number(document.getElementById("base-cooldown-time-credit").innerHTML.slice(0, -1).replace("Base Refill Cooldown: ", "")) * 1000);
   }
 });
 
@@ -104,13 +106,21 @@ function draw() {
   document.getElementById("paper-left-credit").innerHTML = `Papers Left: ${data.boxes["credit"].contents.length}`;
   document.getElementById("last-paper-drawn-credit").innerHTML = `Paper Drawn: ${boxStatus["credit"].lastPaperDrawn}`;
   document.getElementById("cooldown-time-credit").innerHTML = `Refill Cooldown: ${(boxStatus["credit"].cooldownRefill / 1000).toFixed(2)}s`;
-  document.getElementById("base-cooldown-time-credit").innerHTML = `Base Refill Cooldown: ${data.boxes["credit"].cooldownDraw - (0 * (1 - Math.pow(Math.E, data.boxes["credit"].refillSpeedDecay * data.boxes["credit"].cooldownRefillUpgrades * -1)))}`
+  document.getElementById("base-cooldown-time-credit").innerHTML = `Base Refill Cooldown: ${((data.boxes["credit"].cooldownRefillBase - exponentialDecay(data.boxes["credit"].cooldownRefillBase, data.boxes["credit"].refillSpeedDecay, data.boxes["credit"].cooldownRefillUpgrades)) / 1000).toFixed(2)}s`;
   document.getElementById("box-size-credit").innerHTML = `Box Size: ${data.boxes["credit"].size}`;
   document.getElementById("paper-range-credit").innerHTML = `Paper Range: 1 - ${(data.boxes["credit"].paperRange)}`;
 
   document.getElementById("upgrade-range-credit").innerHTML = `Upgrade Paper Range (${(data.boxes["credit"].paperRange - 9) * data.boxes["credit"].rangeCostGrowth} Credits)`;
-  document.getElementById("upgrade-size-credit").innerHTML = `Upgrade Box Size (${(data.boxes["credit"].sizeCostBase * Math.pow(data.boxes["credit"].sizeCostGrowth, data.boxes["credit"].size - 10)).toFixed(2)} Credits)`;
-  document.getElementById("upgrade-refill-credit").innerHTML = `Upgrade Refill Speed (${(data.boxes["credit"].refillCostBase * Math.pow(data.boxes["credit"].refillCostGrowth, data.boxes["credit"].cooldownRefillUpgrades - 1)).toFixed(2)} Credits)`;
+  document.getElementById("upgrade-size-credit").innerHTML = `Upgrade Box Size (${exponentialNextCost(data.boxes["credit"].sizeCostBase, data.boxes["credit"].sizeCostGrowth, data.boxes["credit"].size - 10)} Credits)`;
+  document.getElementById("upgrade-refill-credit").innerHTML = `Upgrade Refill Speed (${exponentialNextCost(data.boxes["credit"].refillCostBase, data.boxes["credit"].refillCostGrowth, data.boxes["credit"].cooldownRefillUpgrades)} Credits)`;
+}
+
+function exponentialNextCost(base, growth, owned) {
+  return (base * Math.pow(growth, owned)).toFixed(2);
+}
+
+function exponentialDecay(max, decay, owned) {
+  return (max * (1 - Math.pow(Math.E, -1 * decay * owned))).toFixed(3)
 }
 
 var gameLoop = window.setInterval(() => {

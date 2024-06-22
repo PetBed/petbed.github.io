@@ -3,27 +3,26 @@ var data = {
     credit: {
       size: 10,
       contents: [],
-      paperRange: 10,
       cooldownDraw: 30,
+      
+      sizeCostBase: 100,
+      sizeCostGrowth: 1.07,
 
       cooldownRefillUpgrades: 0,
       cooldownRefillBase: 1000,
       refillSpeedDecay: 0.04,
       refillCostBase: 100,
       refillCostGrowth: 1.09,
-
-      sizeCostBase: 100,
-      sizeCostGrowth: 1.07,
-
-      rangeCostGrowth: 50,
-
+      
+      minPaperRange: 3,
       minRangeCostGrowth: 1.15,
-      minRangeCostBase: 1000,
-      minRangeCostUpgrades: 0
+      minRangeCostBase: 869.565,
+      maxPaperRange: 10,
+      maxRangeCostGrowth: 50,
     }
   },
   currencies: {
-    credit: 100000000000000000000
+    credit: 10000000000000000
   }
 }
 var boxStatus = {
@@ -34,34 +33,28 @@ var boxStatus = {
   }
 }
 
-var unshuffledNumbers = shuffledNumbers = numberRange = [];
+var numberRange = [];
 var refreshRate = 30;
-
-for (let i = 0; i < 100 ; i++) {
-  unshuffledNumbers.push(i + 1);
-}
 
 function refillBox(boxType) {
   data.boxes[boxType].contents.length = 0;
-  shuffledNumbers = [];
-  
-  numberRange = [ ...unshuffledNumbers ]
-  numberRange.splice(data.boxes[boxType].paperRange, numberRange.length);
+  var shuffledNumbers = [];
+  var numberRange = [];
 
-  for (let i = 0; i < Math.ceil(data.boxes["credit"].size / data.boxes["credit"].paperRange); i++) {
-    shuffledNumbers.push( ...numberRange );
+  for (let i = data.boxes[boxType].minPaperRange; i <= data.boxes[boxType].maxPaperRange; i++) {
+    numberRange.push(i);
   }
 
+  for (let i = 0; i < Math.ceil(data.boxes[boxType].size / (data.boxes[boxType].maxPaperRange - data.boxes[boxType].minPaperRange + 1)); i++) {
+    shuffledNumbers.push(...numberRange);
+    console.log(...numberRange);
+	}
+  
+  shuffledNumbers = shuffledNumbers.slice(0, data.boxes[boxType].size)
   for (let i = shuffledNumbers.length - 1; i > 0; i--) {
     const u = Math.floor(Math.random() * (i + 1));
 		[shuffledNumbers[i], shuffledNumbers[u]] = [shuffledNumbers[u], shuffledNumbers[i]];
 	}
-
-  for (let i = 0; i < shuffledNumbers.length; i++) {
-    if(shuffledNumbers[i] < data.boxes["credit"].minRangeCostUpgrades + 1) {
-      shuffledNumbers[i] = data.boxes["credit"].minRangeCostUpgrades + 1;
-    }
-  }
 
   data.boxes[boxType].contents = [ ...shuffledNumbers.slice(0, data.boxes[boxType].size) ];
   console.log(data.boxes["credit"].contents)
@@ -84,9 +77,9 @@ document.getElementById("draw-paper-credit").addEventListener("click", () => {
 });
 
 document.getElementById("upgrade-range-credit").addEventListener("click", () => {
-	if (data.currencies.credit >= (data.boxes["credit"].paperRange - 9) * 50) {
-    data.currencies.credit -= (data.boxes["credit"].paperRange - 9) * 50;
-    data.boxes["credit"].paperRange += 1;
+	if (data.currencies.credit >= (data.boxes["credit"].maxPaperRange - 9) * 50) {
+    data.currencies.credit -= (data.boxes["credit"].maxPaperRange - 9) * 50;
+    data.boxes["credit"].maxPaperRange += 1;
   }
 });
 
@@ -105,9 +98,9 @@ document.getElementById("upgrade-refill-credit").addEventListener("click", () =>
 })
 
 document.getElementById("upgrade-min-credit").addEventListener("click", () => {
-	if (exponentialNextCost(data.boxes["credit"].minRangeCostBase, data.boxes["credit"].minRangeCostGrowth, data.boxes["credit"].minRangeCostUpgrades)) {
-		data.currencies.credit -= exponentialNextCost(data.boxes["credit"].minRangeCostBase, data.boxes["credit"].minRangeCostGrowth, data.boxes["credit"].minRangeCostUpgrades);
-		data.boxes["credit"].minRangeCostUpgrades += 1;
+	if (exponentialNextCost(data.boxes["credit"].minRangeCostBase, data.boxes["credit"].minRangeCostGrowth, data.boxes["credit"].minPaperRange)) {
+		data.currencies.credit -= exponentialNextCost(data.boxes["credit"].minRangeCostBase, data.boxes["credit"].minRangeCostGrowth, data.boxes["credit"].minPaperRange);
+		data.boxes["credit"].minPaperRange += 1;
 	}
 });
 
@@ -126,12 +119,12 @@ function draw() {
   document.getElementById("cooldown-time-credit").innerHTML = `Refill Cooldown: ${(boxStatus["credit"].cooldownRefill / 1000).toFixed(2)}s`;
   document.getElementById("base-cooldown-time-credit").innerHTML = `Base Refill Cooldown: ${((data.boxes["credit"].cooldownRefillBase - exponentialDecay(data.boxes["credit"].cooldownRefillBase, data.boxes["credit"].refillSpeedDecay, data.boxes["credit"].cooldownRefillUpgrades)) / 1000).toFixed(2)}s`;
   document.getElementById("box-size-credit").innerHTML = `Box Size: ${data.boxes["credit"].size}`;
-  document.getElementById("paper-range-credit").innerHTML = `Paper Range: ${data.boxes["credit"].minRangeCostUpgrades + 1} - ${(data.boxes["credit"].paperRange)}`;
+  document.getElementById("paper-range-credit").innerHTML = `Paper Range: ${data.boxes["credit"].minPaperRange} - ${(data.boxes["credit"].maxPaperRange)}`;
 
-  document.getElementById("upgrade-range-credit").innerHTML = `Upgrade Paper Range (${(data.boxes["credit"].paperRange - 9) * data.boxes["credit"].rangeCostGrowth} Credits)`;
+  document.getElementById("upgrade-range-credit").innerHTML = `Upgrade Paper Range (${(data.boxes["credit"].maxPaperRange - 9) * data.boxes["credit"].maxRangeCostGrowth} Credits)`;
   document.getElementById("upgrade-size-credit").innerHTML = `Upgrade Box Size (${exponentialNextCost(data.boxes["credit"].sizeCostBase, data.boxes["credit"].sizeCostGrowth, data.boxes["credit"].size - 10)} Credits)`;
   document.getElementById("upgrade-refill-credit").innerHTML = `Upgrade Refill Speed (${exponentialNextCost(data.boxes["credit"].refillCostBase, data.boxes["credit"].refillCostGrowth, data.boxes["credit"].cooldownRefillUpgrades)} Credits)`;
-  document.getElementById("upgrade-min-credit").innerHTML = `Upgrade Min Paper (${exponentialNextCost(data.boxes["credit"].minRangeCostBase, data.boxes["credit"].minRangeCostGrowth, data.boxes["credit"].minRangeCostUpgrades)} Credits)`;
+  document.getElementById("upgrade-min-credit").innerHTML = `Upgrade Min Paper (${exponentialNextCost(data.boxes["credit"].minRangeCostBase, data.boxes["credit"].minRangeCostGrowth, data.boxes["credit"].minPaperRange)} Credits)`;
 }
 
 function exponentialNextCost(base, growth, owned) {

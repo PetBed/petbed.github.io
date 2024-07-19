@@ -17,6 +17,6 @@
   },
 
   "nodemonConfig": {
-    "ignore": ["Public/data.json"]
+    "ignore": ["Database/data.json"]
   }
 }

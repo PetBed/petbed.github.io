@@ -15,9 +15,8 @@ async function login() {
 		if (usernameInput.value == users[i].username && passwordInput.value == users[i].password) {
 			loginResult.style.display = "block";
 			loginResult.innerHTML = "Login Succesful!";
-      document.cookie = "username=" + users[i].username + ";path=" + window.location.origin;
-      console.log("username=" + users[i].username + ";domain=" + window.location.origin)
-			// location.replace("./");
+			document.cookie = "username=" + users[i].username + ";path=/";
+			location.replace("../");
 			return;
 		}
 	}

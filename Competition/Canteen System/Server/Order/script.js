@@ -1,9 +1,22 @@
+var usernameTitle = document.getElementById("username-title")
 function init() {
-  // if (getCookie("username") != "") {
-  console.log(getCookie("username"))
-  // } else {
-  //   window.location.href = "./login";
-  // }
+  if (getCookie("username") == "") {
+    window.location.href = "./login";
+	return;
+  }
+
+  usernameTitle.innerHTML = `Hello, ${getCookie("username")}!`
+}
+
+function logout() {
+	deleteCookie("username", "/");
+	window.location.href = "./login";
+}
+
+function checkCookie(name) {
+	return document.cookie.split(';').some(c => {
+        return c.trim().startsWith(name + '=');
+    });
 }
 
 function getCookie(cname) {
@@ -21,3 +34,12 @@ function getCookie(cname) {
 	}
 	return "";
 }
+
+function deleteCookie( name, path ) {
+	if( checkCookie( name ) ) {
+		document.cookie = name + "=" + ((path) ? ";path="+path:"") + ";expires=Thu, 01 Jan 1970 00:00:01 GMT";
+		return;
+	}
+	console.warn("No cookie found");
+  }
+  

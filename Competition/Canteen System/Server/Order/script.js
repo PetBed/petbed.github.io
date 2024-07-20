@@ -1,5 +1,6 @@
-var usernameTitle = document.getElementById("username-title")
+var usernameTitle = document.getElementById("username-title");
 var itemsDiv = document.getElementById("items");
+var cartDiv = document.getElementById("cart");
 var foodRadio = document.getElementById("selection-food");
 var drinksRadio = document.getElementById("selection-drinks");
 var snacksRadio = document.getElementById("selection-snacks");
@@ -22,10 +23,12 @@ async function init() {
   usernameTitle.innerHTML = `Hello, ${getCookie("username")}!`
   
   changeSection(0);
+  updateCart();
 }
 
 function logout() {
 	deleteCookie("username", "/");
+  deleteCookie("cart", "/");
 	window.location.href = "./login";
 }
 
@@ -47,13 +50,76 @@ function changeSection(index) {
 
 function addItem(index) {
   var newCart = checkCookie("cart") ? JSON.parse(getCookie("cart")) : {cart: []};
-  var newItem = {"index": index, "count": 1}
-  newCart.cart.push(newItem);
-  setCookie("cart", JSON.stringify(newCart), 365);
-  console.log(JSON.parse(getCookie("cart")));
-}
-deleteCookie("cart", "")
+  // Immediately invoked function expression (IIFE)
+  (function() {
+    for (let i = 0; i < newCart.cart.length; i++) {
+      if (newCart.cart[i].index == index) {
+        newCart.cart[i].count += 1;
+        return;
+      }
+    }
+    // If no item found
+    var newItem = {"index": index, "count": 1}
+    newCart.cart.push(newItem);
+  })();
 
+  setCookie("cart", JSON.stringify(newCart), 365);
+  updateCart();
+}
+
+function updateCart() {
+  cartDiv.innerHTML = "";
+  // Check if cookie exists 
+  if (!getCookie("cart")) return;
+  var cart = JSON.parse(getCookie("cart")).cart
+  var totalPrice = 0;
+
+  for (let i = 0; i < cart.length; i++) {
+    var itemIndex = cart[i].index.split(",");
+    const newDiv = document.createElement("div");
+    newDiv.innerHTML = `
+      <p>${subMenu[itemIndex[0]][itemIndex[1]]}</p>
+      <button onclick="changeItemCount('${itemIndex[0]},${itemIndex[1]}', false)">-</button>
+      <p>${cart[i].count}</p>
+      <button onclick="changeItemCount('${itemIndex[0]},${itemIndex[1]}', true)">+</button>
+    `
+
+    cartDiv.appendChild(newDiv);
+    // Count total price
+    for (let j = 0; j < cart[i].count; j++) {
+      totalPrice += subMenuPrice[itemIndex[0]][itemIndex[1]];
+    }
+  }
+
+  cartDiv.innerHTML += `<p>=RM${totalPrice}</p>`
+  cartDiv.innerHTML += "<a onclick='confirmOrder()'>CONFIRM ORDER</a>"
+}
+
+function changeItemCount(index, increase) {
+  var cart = JSON.parse(getCookie("cart")).cart
+  for (let i = 0; i < cart.length; i++) {
+    if (cart[i].index == index) {
+      cart[i].count += increase ? 1 : -1; 
+    }
+
+    if (cart[i].count < 1) {
+      cart.splice(i, 1);
+    }
+
+    // Check if cart is empty...
+    if (!Array.isArray(cart) || !cart.length) {
+      // Delete cookie (To avoid conflicts in addItem function)
+      deleteCookie("cart");
+      updateCart();
+      return;
+    }
+  }
+
+  var newCart = JSON.parse(getCookie("cart"));
+  newCart.cart = cart;
+  setCookie("cart", JSON.stringify(newCart), 365);
+  updateCart();
+}
 //==============================================
 //Event listeners 
 // document.getElementById("section-food").addEventListener("onclick", changeSection());

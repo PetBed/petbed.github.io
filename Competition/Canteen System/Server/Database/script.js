@@ -6,25 +6,26 @@ const filterDone = document.getElementById("filter-done");
 const filterPending = document.getElementById("filter-pending");
 
 
-var menu = ["Food", "Drinks", "Snacks"];
-var subMenu = [
-	["Nasi Ayam", "Nasi Kari", "Kueh Tiaw", "Mi Goreng"],
-	["Milo-S", "Milo-L", "Sirap", "Sprite"],
-	["Ayam", "Nugget", "Sosej", "Keropok"],
-];
-var subMenuPrice = [
-	[5, 4, 3, 3],
-	[2, 3, 2, 2],
-	[2, 2, 2, 3],
-];
+// var menu = ["Food", "Drinks", "Snacks"];
+// var subMenu = [
+// 	["Nasi Ayam", "Nasi Kari", "Kueh Tiaw", "Mi Goreng"],
+// 	["Milo-S", "Milo-L", "Sirap", "Sprite"],
+// 	["Ayam", "Nugget", "Sosej", "Keropok"],
+// ];
+// var subMenuPrice = [
+// 	[5, 4, 3, 3],
+// 	[2, 3, 2, 2],
+// 	[2, 2, 2, 3],
+// ];
+var menu = subMenu = subMenuPrice = [];
+
 var orderListJSON, orderList, newOrderListJSON;
 var sortedOrderList = [];
 var reverseSort = false;
 var orderStatus = [];
 
-init();
 setInterval(async () => {
-	await fetch("./data.json")
+	await fetch("../Data/orders.json")
 		.then((response) => response.json())
 		.then((json) => {
 			newOrderListJSON = json;
@@ -46,7 +47,7 @@ async function loop() {
 }
 
 async function getOrders() {
-	await fetch("./data.json")
+	await fetch("../Data/orders.json")
 		.then((response) => response.json())
 		.then((json) => {
 			orderListJSON = json;
@@ -57,6 +58,14 @@ async function getOrders() {
 }
 
 async function init() {
+  await fetch("../Data/items.json")
+		.then((response) => response.json())
+		.then((json) => {
+        menu = json.menu;
+        subMenu = json.subMenu;
+        subMenuPrice = json.subMenuPrice;
+  });
+
 	await getOrders();
 	await createTable(getCookie("sortType"));
   sortOption.value = getCookie("sortType");

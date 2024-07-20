@@ -17,6 +17,6 @@
   },
 
   "nodemonConfig": {
-    "ignore": ["Database/data.json"]
+    "ignore": ["Data/*"]
   }
 }

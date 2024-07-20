@@ -67,8 +67,8 @@ async function init() {
   });
 
 	await getOrders();
-	await createTable(getCookie("sortType"));
-  sortOption.value = getCookie("sortType");
+	await createTable(checkCookie("sortType") ? getCookie("sortType") : "order");
+  sortOption.value = checkCookie("sortType") ? getCookie("sortType") : "order";
 
   function setSelectedValue(selectObj, valueToSet) {
     for (var i = 0; i < selectObj.options.length; i++) {
@@ -368,4 +368,10 @@ function getCookie(cname) {
 		}
 	}
 	return "";
+}
+
+function checkCookie(name) {
+	return document.cookie.split(';').some(c => {
+        return c.trim().startsWith(name + '=');
+    });
 }

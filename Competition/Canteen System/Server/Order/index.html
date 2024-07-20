@@ -18,6 +18,18 @@
 
   <div id="items"></div>
   <div id="cart"></div>
+  <div id="confirm-overlay">
+    <div id="confirm-div">
+      <div id="confirm-items"></div>
+      <p id="confirm-price">TOTAL = RM</p>
+      <div id="confirm-payment-method">
+        <p>SELECT PAYMENT METHOD</p>
+        <a href="#" onclick="sendOrder()">UPON PICKUP</a>
+        <a href="#">ONLINE TRANSFER</a>
+      </div>
+      <a href="#" id="confirm-close" onclick="confirmOrder()">CANCEL</a>
+    </div>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>

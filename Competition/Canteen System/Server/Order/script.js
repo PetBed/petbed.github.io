@@ -4,6 +4,9 @@ var cartDiv = document.getElementById("cart");
 var foodRadio = document.getElementById("selection-food");
 var drinksRadio = document.getElementById("selection-drinks");
 var snacksRadio = document.getElementById("selection-snacks");
+var confirmOverlay = document.getElementById("confirm-overlay");
+var confirmItems = document.getElementById("confirm-items");
+var confirmPrice = document.getElementById("confirm-price");
 var menu = subMenu = subMenuPrice = [];
 
 async function init() {
@@ -20,8 +23,7 @@ async function init() {
         subMenuPrice = json.subMenuPrice;
   });
 
-  usernameTitle.innerHTML = `Hello, ${getCookie("username")}!`
-  
+  usernameTitle.innerHTML = `Hello, ${getCookie("username")}${checkCookie("class") ? ' (' + getCookie("class") + ')' : ""}!`
   changeSection(0);
   updateCart();
 }
@@ -120,9 +122,65 @@ function changeItemCount(index, increase) {
   setCookie("cart", JSON.stringify(newCart), 365);
   updateCart();
 }
+
+function confirmOrder() {
+  console.log(confirmOverlay)
+  confirmOverlay.style.display = confirmOverlay.style.display != "block" ? "block" : "none";
+  var cart = JSON.parse(getCookie("cart")).cart;
+  var totalPrice = 0;
+  confirmItems.innerHTML = ""
+
+  for (let i = 0; i < cart.length; i++) {
+    let index = cart[i].index.split(",")
+    const newDiv = document.createElement("div");
+    newDiv.classList.add("confirm-item-details")
+    newDiv.innerHTML = `
+      <div class="confirm-item-count"><p>${cart[i].count}</p></div>
+      <p>${subMenu[index[0]][index[1]]}</p>
+    `
+    confirmItems.appendChild(newDiv);
+
+    for (let j = 0; j < cart[i].count; j++) {
+      totalPrice += subMenuPrice[index[0]][index[1]];
+    }
+  }
+  confirmPrice.innerHTML = `TOTAL = RM${totalPrice}`
+}
+
+function sendOrder() {
+  var cart = JSON.parse(getCookie("cart")).cart
+  var order = [];
+  var date = new Date();
+
+  for (let i = 0; i < cart.length; i++) {
+    for (let j = 0; j < cart[i].count; j++) {
+      order.push(cart[i].index)
+    }
+  }
+
+  fetch("./newOrder", {
+    method: "POST",
+    body: JSON.stringify({
+      name: getCookie("username"),
+      class: checkCookie("class") ? getCookie("class") : "Teacher",
+      orders: order.join("/"),
+      time: `${date.getHours() < 10 ? "0" : ""}${date.getHours()}${date.getMinutes()}`
+    }),
+    headers: {
+      "Content-type": "application/json; charset=UTF-8"
+    }
+  })
+    .then((response) => response.json())
+    .then((json) => console.log(json));
+}
 //==============================================
 //Event listeners 
 // document.getElementById("section-food").addEventListener("onclick", changeSection());
+
+// Scroll horizontally without pressing shift (Creds: https://stackoverflow.com/questions/40855884/horizontal-scroll-without-holding-shift)
+confirmItems.addEventListener("wheel", (evt) => {
+      confirmItems.scrollLeft += (evt.deltaY * .5);
+});
 //==============================================
 //Cookie things
 function checkCookie(name) {

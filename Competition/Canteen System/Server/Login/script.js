@@ -16,6 +16,7 @@ async function login() {
 			loginResult.style.display = "block";
 			loginResult.innerHTML = "Login Succesful!";
 			document.cookie = "username=" + users[i].username + ";path=/";
+      document.cookie = `class=${users[i].class};path=/;${!users[i].class ? "expires=Thu, 01 Jan 1970 00:00:01 GMT" : ""}`;
 			location.replace("../");
 			return;
 		}

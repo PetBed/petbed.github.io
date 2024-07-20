@@ -9,6 +9,7 @@ app.use('/', express.static("Order"));
 app.use('/orders', express.static("database"));
 app.use('/login', express.static("Login"));
 app.use('/admin', express.static("Admin"));
+app.use('/data', express.static("Data"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -38,13 +39,13 @@ app.post('/submit', (req, res) => {
 
 app.post('/doneOrder', (req, res) => {
   var index = req.body.orderIndex.split(",");
-  var data = fs.readFileSync('Database/data.json');
+  var data = fs.readFileSync('Data/orders.json');
   data = JSON.parse(data);
 
   data.orders[index[0]].order[index[1]].done = data.orders[index[0]].order[index[1]].done ? false : true;
   console.log(data.orders[index[0]].order[index[1]])
   var newData = JSON.stringify(data);
-  fs.writeFile('Database/data.json', newData, err => {
+  fs.writeFile('Data/orders.json', newData, err => {
     if(err) throw err;
     console.log(`Order: ${req.body.orderIndex} ${data.orders[index[0]].order[index[1]].done ? "Undone" : "Done"}.`);
   });   
@@ -71,11 +72,11 @@ app.post('/newOrder', (req, res) => {
     "time": time
   };
   
-  var data = fs.readFileSync('Database/data.json');
+  var data = fs.readFileSync('Data/orders.json');
   data = JSON.parse(data);
   data.orders.push(newObject);
   var newData = JSON.stringify(data);
-  fs.writeFile('Database/data.json', newData, err => {
+  fs.writeFile('Data/orders.json', newData, err => {
     if(err) throw err;
   });
 })
@@ -84,14 +85,14 @@ app.post('/newUser', (req, res) => {
   var username = req.body.username;
   var password = req.body.password;
   
-  var data = fs.readFileSync('Login/users.json');
+  var data = fs.readFileSync('Data/users.json');
   data = JSON.parse(data);
   data.users.push({
     "username": username,
     "password": password
   });
   var newData = JSON.stringify(data);
-  fs.writeFile('Login/users.json', newData, err => {
+  fs.writeFile('Data/users.json', newData, err => {
     if(err) throw err;
   });
 });

@@ -9,6 +9,14 @@
 <body onload="init()">
   <h1 id="username-title">Hello</h1>
   <a href="#" onclick="logout()">Logout</a>
+  <input type="radio" name="section" id="section-food" class="section-radio" onclick="changeSection(0)" checked>
+  <label for="section-food">Food</label>
+  <input type="radio" name="section" id="section-drinks" class="section-radio" onclick="changeSection(1)">
+  <label for="section-drinks">Drinks</label>
+  <input type="radio" name="section" id="section-snacks" class="section-radio" onclick="changeSection(2)">
+  <label for="section-snacks">Snacks</label>
+
+  <div id="items"></div>
   <script src="script.js"></script>
 </body>
 </html>

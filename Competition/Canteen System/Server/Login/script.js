@@ -4,7 +4,7 @@ var loginResult = document.getElementById("result");
 
 async function login() {
 	var users;
-	await fetch("./users.json")
+	await fetch("../Data/users.json")
 		.then((response) => response.json())
 		.then((json) => {
 			users = json.users;

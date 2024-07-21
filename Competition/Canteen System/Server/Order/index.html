@@ -1,35 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body onload="init()">
-  <h1 id="username-title">Hello</h1>
-  <a href="#" onclick="logout()">Logout</a>
-  <input type="radio" name="section" id="section-food" class="section-radio" onclick="changeSection(0)" checked>
-  <label for="section-food">Food</label>
-  <input type="radio" name="section" id="section-drinks" class="section-radio" onclick="changeSection(1)">
-  <label for="section-drinks">Drinks</label>
-  <input type="radio" name="section" id="section-snacks" class="section-radio" onclick="changeSection(2)">
-  <label for="section-snacks">Snacks</label>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<link rel="stylesheet" href="style.css" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+	</head>
+	<body onload="init()">
+		<h1 id="username-title">Hello</h1>
+		<a href="#" onclick="logout()">Logout</a>
+		<input type="radio" name="section" id="section-food" class="section-radio" onclick="changeSection(0)" checked />
+		<label for="section-food">Food</label>
+		<input type="radio" name="section" id="section-drinks" class="section-radio" onclick="changeSection(1)" />
+		<label for="section-drinks">Drinks</label>
+		<input type="radio" name="section" id="section-snacks" class="section-radio" onclick="changeSection(2)" />
+		<label for="section-snacks">Snacks</label>
 
-  <div id="items"></div>
-  <div id="cart"></div>
-  <div id="confirm-overlay">
-    <div id="confirm-div">
-      <div id="confirm-items"></div>
-      <p id="confirm-price">TOTAL = RM</p>
-      <div id="confirm-payment-method">
-        <p>SELECT PAYMENT METHOD</p>
-        <a href="#" onclick="sendOrder()">UPON PICKUP</a>
-        <a href="#">ONLINE TRANSFER</a>
-      </div>
-      <a href="#" id="confirm-close" onclick="confirmOrder()">CANCEL</a>
-    </div>
-  </div>
-  <script src="script.js"></script>
-</body>
+		<div id="items"></div>
+		<div id="cart"></div>
+		<div id="confirm-overlay">
+			<div id="confirm-div">
+				<div id="confirm-items"></div>
+				<p id="confirm-price">TOTAL = RM</p>
+				<div id="confirm-payment-method">
+					<p>SELECT PAYMENT METHOD</p>
+					<a onclick="sendOrder()">UPON PICKUP</a>
+					<a onclick="onlineTransfer()">ONLINE TRANSFER</a>
+				</div>
+				<a class="close-btn" onclick="confirmOrder()">CANCEL</a>
+			</div>
+			<div id="transfer-div" style="z-index: 10; display: none; box-shadow: none">
+				<p><b>Supported Cards</b></p>
+				<div id="supported-cards">
+					<i id="card-visa" class="fa fa-cc-visa card-type" aria-hidden="true" style="color: #1434cb"></i>
+					<i id="card-mastercard" class="fa fa-cc-mastercard card-type" aria-hidden="true" style="background: #eb001b; background: linear-gradient(to right, #eb001b 0%, #ff5f00 51%, #f79e1b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent"></i>
+					<i id="card-discover" class="fa fa-cc-discover card-type" aria-hidden="true" style="background: #e36c24; background: linear-gradient(to bottom right, #e36c24 0%, #f99e24 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent"></i>
+					<i id="card-amex" class="fa fa-cc-amex card-type" aria-hidden="true" style="color: #006fcf"></i>
+				</div>
+				<p><b>Card number</b></p>
+				<div>
+					<input type="number" name="card-number" id="card-number" />
+				</div>
+				<p id="invalid-number">Invalid credit card number</p>
+				<p><b>Expire date</b></p>
+				<div>
+					<input type="text" name="card-expire" id="card-expire" />
+				</div>
+				<p id="invalid-expire">Invalid expire date</p>
+				<p><b>CVC/CVV</b></p>
+				<div>
+					<input type="number" name="card-verification" id="card-verification" />
+				</div>
+				<p id="invalid-verification">Invalid CVC/CVV</p>
+        <a onclick="sendOrder()" style="opacity: 0;" id="place-order">Place Order</a>
+				<a class="close-btn" onclick="onlineTransfer()">BACK</a>
+			</div>
+		</div>
+		<script src="script.js"></script>
+	</body>
 </html>

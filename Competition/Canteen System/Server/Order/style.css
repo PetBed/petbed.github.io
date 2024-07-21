@@ -10,7 +10,7 @@ body:has(#confirm-overlay[style="display: block;"]) {
   top: 0;
   background-color: rgba(0, 0, 0, 0.5);
 }
-#confirm-div {
+#confirm-div, #transfer-div {
   background-color: whitesmoke;
   box-shadow: 0px 0px 7px 1px rgba(0,0,0,0.75);
   position: fixed;
@@ -27,7 +27,7 @@ body:has(#confirm-overlay[style="display: block;"]) {
   display: flex;
   flex-direction: column;
 }
-#confirm-close {
+.close-btn {
   position: absolute;
   right: 0;
   bottom: 0;
@@ -51,4 +51,17 @@ body:has(#confirm-overlay[style="display: block;"]) {
   align-items: center;
   margin: 5px;
   min-width: 20%;
+}
+#supported-cards {
+  font-size: 2em;
+}
+.card-type {
+  filter: brightness(0%);
+}
+p[id^="invalid"] {
+  color: red;
+  opacity: 0;
+}
+.card-selected {
+  filter: none !important;
 }

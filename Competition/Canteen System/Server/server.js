@@ -84,12 +84,14 @@ app.post('/newOrder', (req, res) => {
 app.post('/newUser', (req, res) => {
   var username = req.body.username;
   var password = req.body.password;
+  var className = req.body.class;
   
   var data = fs.readFileSync('Data/users.json');
   data = JSON.parse(data);
   data.users.push({
     "username": username,
-    "password": password
+    "password": password,
+    "class": className
   });
   var newData = JSON.stringify(data);
   fs.writeFile('Data/users.json', newData, err => {

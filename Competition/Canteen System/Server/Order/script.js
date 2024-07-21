@@ -9,6 +9,7 @@ var confirmItems = document.getElementById("confirm-items");
 var confirmPrice = document.getElementById("confirm-price");
 var transferDiv = document.getElementById("transfer-div");
 var placeOrder = document.getElementById("place-order");
+var editButton = document.getElementById("edit-btn");
 var menu = (subMenu = subMenuPrice = []);
 
 async function init() {
@@ -26,12 +27,16 @@ async function init() {
 		});
 
 	usernameTitle.innerHTML = `Hello, ${getCookie("username")}${checkCookie("class") ? " (" + getCookie("class") + ")" : ""}!`;
+  if (getCookie("class") == "Staff") {
+    document.getElementById("edit-btn").style.display = "block";
+  }
 	changeSection(0);
 	updateCart();
 }
 
 function logout() {
 	deleteCookie("username", "/");
+  deleteCookie("class", "/");
 	deleteCookie("cart", "/");
 	window.location.href = "./login";
 }
@@ -41,7 +46,7 @@ function changeSection(index) {
 
 	for (let i = 0; i < subMenu[index].length; i++) {
 		const newDiv = document.createElement("div");
-		newDiv.id = ""; //might be useless
+		newDiv.id = `item-${i}`;
 		newDiv.innerHTML = `
       <img src="">
       <p>${subMenu[index][i]}</p>
@@ -177,6 +182,22 @@ function sendOrder() {
 
 function onlineTransfer() {
 	transferDiv.style.display = transferDiv.style.display != "block" ? "block" : "none";
+}
+
+function toggleEdit() {
+  if (editButton.innerHTML == "EDIT") {
+    editButton.innerHTML = "BACK"
+    let children = itemsDiv.children;
+    for (let i = 0; i < children.length; i++) {
+      children[i].innerHTML += `<a onclick="editItem(${i})">Edit</a>`;
+    }
+  } else {
+    editButton.innerHTML = "EDIT"
+    let children = itemsDiv.children;
+    for (let i = 0; i < children.length; i++) {
+      children[i].removeChild(children[i].lastChild);
+    }
+  }
 }
 
 //==============================================

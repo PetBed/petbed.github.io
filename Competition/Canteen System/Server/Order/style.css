@@ -1,7 +1,7 @@
-body:has(#confirm-overlay[style="display: block;"]) {
+body:has(div[id$="overlay"][style="display: block;"]) {
   overflow: hidden;
 }
-#confirm-overlay {
+div[id$="overlay"] {
   position: fixed; /* Set in html for js to read it */
   display: none;
   width: 100vw;
@@ -10,7 +10,7 @@ body:has(#confirm-overlay[style="display: block;"]) {
   top: 0;
   background-color: rgba(0, 0, 0, 0.5);
 }
-#confirm-div, #transfer-div {
+div[id$="overlay"] > div[id$="div"] {
   background-color: whitesmoke;
   box-shadow: 0px 0px 7px 1px rgba(0,0,0,0.75);
   position: fixed;

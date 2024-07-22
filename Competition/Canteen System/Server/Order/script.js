@@ -5,12 +5,14 @@ var foodRadio = document.getElementById("selection-food");
 var drinksRadio = document.getElementById("selection-drinks");
 var snacksRadio = document.getElementById("selection-snacks");
 var confirmOverlay = document.getElementById("confirm-overlay");
+var editOverlay = document.getElementById("edit-overlay");
 var confirmItems = document.getElementById("confirm-items");
 var confirmPrice = document.getElementById("confirm-price");
 var transferDiv = document.getElementById("transfer-div");
 var placeOrder = document.getElementById("place-order");
 var editButton = document.getElementById("edit-btn");
-var menu = (subMenu = subMenuPrice = []);
+var menu = subMenu = subMenuPrice = [];
+var curMenu;
 
 async function init() {
 	if (getCookie("username") == "") {
@@ -18,7 +20,7 @@ async function init() {
 		return;
 	}
 
-	await fetch("../Data/items.json")
+  await fetch("../Data/items.json")
 		.then((response) => response.json())
 		.then((json) => {
 			menu = json.menu;
@@ -30,8 +32,10 @@ async function init() {
   if (getCookie("class") == "Staff") {
     document.getElementById("edit-btn").style.display = "block";
   }
+
 	changeSection(0);
 	updateCart();
+  editItem(0);
 }
 
 function logout() {
@@ -41,9 +45,18 @@ function logout() {
 	window.location.href = "./login";
 }
 
-function changeSection(index) {
-	itemsDiv.innerHTML = "";
+async function changeSection(index) {
+  await fetch("../Data/items.json")
+		.then((response) => response.json())
+		.then((json) => {
+			menu = json.menu;
+			subMenu = json.subMenu;
+			subMenuPrice = json.subMenuPrice;
+		});
 
+	itemsDiv.innerHTML = "";
+  curMenu = index;
+  
 	for (let i = 0; i < subMenu[index].length; i++) {
 		const newDiv = document.createElement("div");
 		newDiv.id = `item-${i}`;
@@ -131,7 +144,6 @@ function changeItemCount(index, increase) {
 }
 
 function confirmOrder() {
-	console.log(confirmOverlay);
 	confirmOverlay.style.display = confirmOverlay.style.display != "block" ? "block" : "none";
 	var cart = JSON.parse(getCookie("cart")).cart;
 	var totalPrice = 0;
@@ -198,6 +210,38 @@ function toggleEdit() {
       children[i].removeChild(children[i].lastChild);
     }
   }
+}
+
+async function editItem(index) {
+  if (index == -1) {
+    editOverlay.style.display = "none";
+    return
+  }
+
+  editOverlay.style.display = "block";
+  document.getElementById("save-edit").setAttribute("onclick", `saveItem(${index})`)
+}
+
+async function saveItem(index) {
+  var name = document.getElementById("edit-name");
+  var price = document.getElementById("edit-price");
+  var formData = new FormData(document.getElementById("edit-form"));
+  formData.append("index", `${curMenu},${index}`);
+
+  if (name.value == "" && price.value == "") {
+    return;
+  }
+
+
+  fetch("./editItem", {
+		method: "post",
+		body: formData
+	})
+		.then((response) => response.json())
+		.then((json) => console.log(json));
+
+  console.log("Done!")
+  changeSection(curMenu);
 }
 
 //==============================================

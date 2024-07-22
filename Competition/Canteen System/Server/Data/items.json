@@ -1,13 +1,1 @@
-{
-	"menu": ["Food", "Drinks", "Snacks"],
-	"subMenu": [
-		["Nasi Ayam", "Nasi Kari", "Kueh Tiaw", "Mi Goreng"],
-		["Milo-S", "Milo-L", "Sirap", "Sprite"],
-		["Ayam", "Nugget", "Sosej", "Keropok"]
-	],
-	"subMenuPrice": [
-		[5, 4, 3, 3],
-		[2, 3, 2, 2],
-		[2, 2, 2, 3]
-	]
-}
+{"menu":["Food","Drinks","Snacks"],"subMenu":[["wa","Nasi Kari","Kueh Tiaw","Mi Goreng"],["Milo-S","Milo-L","Sirap","Sprite"],["Ayam","Nugget","Sosej","Keropok"]],"subMenuPrice":[[321,4,3,3],[2,3,2,2],[2,2,2,3]]}

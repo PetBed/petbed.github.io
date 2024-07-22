@@ -58,6 +58,23 @@
 			</div>
 		</div>
 
+    <div id="edit-overlay">
+      <div id="edit-div">
+        <p>Item Details</p>
+        <form id="edit-form">
+          <p>Name</p>
+          <input type="text" id="edit-name" name="name">
+          <p>Price</p>
+          <input type="number" id="edit-price" name="price">
+          <p>Image</p>
+          <input type="file" id="edit-image" name="image" accept=".jepg,.jpg,.png ">
+          <div style="position: absolute; right: 0; bottom: 0;">
+            <a onclick="editItem(-1)">BACK</a>
+            <a onclick="saveItem()" id="save-edit">SAVE</a>
+          </div>
+        </form>
+      </div>
+    </div>
     <a id="edit-btn" onclick="toggleEdit()">EDIT</a>
 		<script src="script.js"></script>
 	</body>

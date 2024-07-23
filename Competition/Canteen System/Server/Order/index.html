@@ -8,17 +8,31 @@
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 	</head>
 	<body onload="init()">
-		<h1 id="username-title">Hello</h1>
-		<a href="#" onclick="logout()">Logout</a>
-		<input type="radio" name="section" id="section-food" class="section-radio" onclick="changeSection(0)" checked />
-		<label for="section-food">Food</label>
-		<input type="radio" name="section" id="section-drinks" class="section-radio" onclick="changeSection(1)" />
-		<label for="section-drinks">Drinks</label>
-		<input type="radio" name="section" id="section-snacks" class="section-radio" onclick="changeSection(2)" />
-		<label for="section-snacks">Snacks</label>
-
-		<div id="items"></div>
-		<div id="cart"></div>
+		<header>
+			<a>Menu</a>
+			<a>Contact</a>
+			<div class="menu-icon">
+				<div></div>
+				<div></div>
+				<div></div>
+			</div>
+			<div class="profile"></div>
+		</header>
+		<div class="main-container">
+			<!-- <h1 id="username-title">Hello</h1> -->
+			<!-- <a href="#" onclick="logout()">Logout</a> -->
+			<div id="cart"></div>
+      <div class="menu">
+        <input type="radio" name="section" id="section-food" class="section-radio" onclick="changeSection(0)" checked />
+        <label for="section-food">Food</label>
+        <input type="radio" name="section" id="section-drinks" class="section-radio" onclick="changeSection(1)" />
+        <label for="section-drinks">Drinks</label>
+        <input type="radio" name="section" id="section-snacks" class="section-radio" onclick="changeSection(2)" />
+        <label for="section-snacks">Snacks</label>
+        
+        <div id="items"></div>
+      </div>
+		</div>
 		<div id="confirm-overlay">
 			<div id="confirm-div">
 				<div id="confirm-items"></div>
@@ -53,29 +67,52 @@
 					<input type="number" name="card-verification" id="card-verification" />
 				</div>
 				<p id="invalid-verification">Invalid CVC/CVV</p>
-        <a onclick="sendOrder()" style="opacity: 0;" id="place-order">Place Order</a>
+				<a onclick="sendOrder()" style="opacity: 0" id="place-order">Place Order</a>
 				<a class="close-btn" onclick="onlineTransfer()">BACK</a>
 			</div>
 		</div>
 
-    <div id="edit-overlay">
-      <div id="edit-div">
-        <p>Item Details</p>
-        <form id="edit-form">
-          <p>Name</p>
-          <input type="text" id="edit-name" name="name">
-          <p>Price</p>
-          <input type="number" id="edit-price" name="price">
-          <p>Image</p>
-          <input type="file" id="edit-image" name="image" accept=".jepg,.jpg,.png ">
-          <div style="position: absolute; right: 0; bottom: 0;">
-            <a onclick="editItem(-1)">BACK</a>
-            <a onclick="saveItem()" id="save-edit">SAVE</a>
-          </div>
-        </form>
-      </div>
-    </div>
-    <a id="edit-btn" onclick="toggleEdit()">EDIT</a>
+		<div id="edit-overlay">
+			<div id="edit-div">
+				<p>Item Details</p>
+				<form id="edit-form">
+					<p>Name</p>
+					<input type="text" id="edit-name" name="name" />
+					<p>Price</p>
+					<input type="number" id="edit-price" name="price" />
+					<p>Image</p>
+					<input type="file" id="edit-image" name="image" accept=".jepg,.jpg,.png " />
+					<div style="position: absolute; right: 0; bottom: 0">
+						<a onclick="editItem(-1)">BACK</a>
+						<a onclick="saveItem()" id="save-edit">SAVE</a>
+					</div>
+				</form>
+				<a onclick="toggleDelete()" id="delete-btn">Delete Item</a>
+			</div>
+			<div id="add-item-div">
+				<p>Add New Item</p>
+				<form id="new-item-form">
+					<p>Name</p>
+					<input type="text" id="new-item-name" name="name" />
+					<p>Price</p>
+					<input type="number" id="new-item-price" name="price" />
+					<p>Image</p>
+					<input type="file" id="edit-image" name="image" accept=".jepg,.jpg,.png " />
+					<div style="position: absolute; right: 0; bottom: 0">
+						<a onclick="editItem(-1)">BACK</a>
+						<a onclick="addNewItem()" id="save-edit">ADD NEW ITEM</a>
+					</div>
+				</form>
+			</div>
+			<div id="delete-div">
+				<p>Delete Item</p>
+				<p><b>Are you sure you want to delete?</b></p>
+				<a id="delete-yes">Yes</a>
+				<a id="delete-no">No</a>
+			</div>
+		</div>
+		<a id="edit-btn" onclick="toggleEdit()">EDIT</a>
+		<a id="add-item-btn" onclick="toggleAddItem()">ADD ITEM</a>
 		<script src="script.js"></script>
 	</body>
 </html>

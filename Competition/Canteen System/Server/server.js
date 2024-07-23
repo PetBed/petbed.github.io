@@ -125,9 +125,53 @@ app.post('/editItem', (req, res) => {
     fs.writeFile('Data/items.json', JSON.stringify(data), err => {
       if(err) throw err;
     });
+
+    res.sendStatus(200);
   }
 })
 
+app.post('/newItem', (req, res) => {
+  var name, price, image, index;
+  var form = new multiparty.Form();
+  form.parse(req, function(err, fields, files) {
+      name = fields.name[0];
+      price = fields.price[0];
+      index = fields.index[0];
+      image = files.image[0];
+
+      saveData();
+  });
+
+  function saveData() {
+    var data = fs.readFileSync('Data/items.json');
+    data = JSON.parse(data);
+    data.subMenu[index].push(name);
+    data.subMenuPrice[index].push(Number(price));
+    
+    fs.rename(image.path, `Data/ItemImage/${index},${data.subMenu[index].length - 1}.png`, function (err) {
+      if (err) throw err;
+    });
+
+    fs.writeFile('Data/items.json', JSON.stringify(data), err => {
+      if(err) throw err;
+    });
+
+    res.sendStatus(200);
+  }
+})
+
+app.post('/deleteItem', (req, res) => {
+  var index = req.body.index.split(",");
+  var data = fs.readFileSync('Data/items.json');
+  data = JSON.parse(data);
+  data.subMenu[index[0]].splice(index[1], 1);
+  data.subMenuPrice[index[0]].splice(index[1], 1);
+
+  fs.writeFile('Data/items.json', JSON.stringify(data), err => {
+    if(err) throw err;
+  });
+  res.sendStatus(200);
+})
 // app.get('/test', (req, res) => {
 //   res.sendFile(__dirname + '/Database/index.html')
 // })

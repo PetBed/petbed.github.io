@@ -5,20 +5,7 @@ const reverseOption = document.getElementById("reverse");
 const filterDone = document.getElementById("filter-done");
 const filterPending = document.getElementById("filter-pending");
 
-
-// var menu = ["Food", "Drinks", "Snacks"];
-// var subMenu = [
-// 	["Nasi Ayam", "Nasi Kari", "Kueh Tiaw", "Mi Goreng"],
-// 	["Milo-S", "Milo-L", "Sirap", "Sprite"],
-// 	["Ayam", "Nugget", "Sosej", "Keropok"],
-// ];
-// var subMenuPrice = [
-// 	[5, 4, 3, 3],
-// 	[2, 3, 2, 2],
-// 	[2, 2, 2, 3],
-// ];
 var menu = subMenu = subMenuPrice = [];
-
 var orderListJSON, orderList, newOrderListJSON;
 var sortedOrderList = [];
 var reverseSort = false;
@@ -67,8 +54,8 @@ async function init() {
   });
 
 	await getOrders();
-	await createTable(getCookie("sortType"));
-  sortOption.value = getCookie("sortType");
+	await createTable(checkCookie("sortType") ? getCookie("sortType") : "order");
+  sortOption.value = checkCookie("sortType") ? getCookie("sortType") : "order";
 
   function setSelectedValue(selectObj, valueToSet) {
     for (var i = 0; i < selectObj.options.length; i++) {
@@ -368,4 +355,10 @@ function getCookie(cname) {
 		}
 	}
 	return "";
+}
+
+function checkCookie(name) {
+	return document.cookie.split(';').some(c => {
+        return c.trim().startsWith(name + '=');
+    });
 }

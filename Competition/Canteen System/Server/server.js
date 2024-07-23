@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require('body-parser');
+var multiparty = require('multiparty');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -84,18 +85,48 @@ app.post('/newOrder', (req, res) => {
 app.post('/newUser', (req, res) => {
   var username = req.body.username;
   var password = req.body.password;
+  var className = req.body.class;
   
   var data = fs.readFileSync('Data/users.json');
   data = JSON.parse(data);
   data.users.push({
     "username": username,
-    "password": password
+    "password": password,
+    "class": className
   });
   var newData = JSON.stringify(data);
   fs.writeFile('Data/users.json', newData, err => {
     if(err) throw err;
   });
 });
+
+app.post('/editItem', (req, res) => {
+  var name, price, image, index;
+  var form = new multiparty.Form();
+  form.parse(req, function(err, fields, files) {
+      name = fields.name[0];
+      price = fields.price[0];
+      index = fields.index[0].split(",");
+      image = files.image[0];
+
+      saveData();
+  });
+
+  function saveData() {
+    var data = fs.readFileSync('Data/items.json');
+    data = JSON.parse(data);
+    data.subMenu[index[0]][index[1]] = name;
+    data.subMenuPrice[index[0]][index[1]] = Number(price);
+    
+    fs.rename(image.path, `Data/ItemImage/${index.join(",")}.png`, function (err) {
+      if (err) throw err;
+    });
+
+    fs.writeFile('Data/items.json', JSON.stringify(data), err => {
+      if(err) throw err;
+    });
+  }
+})
 
 // app.get('/test', (req, res) => {
 //   res.sendFile(__dirname + '/Database/index.html')

@@ -6,13 +6,21 @@
   <title>Document</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body onload="init()">
   <iframe src="" frameborder="0" name="vm" style="display: none;"></iframe>
   <form action="../newUser" method="post" target="vm">
-    <input type="text" name="username" id="username">
-    <input type="text" name="password" id="yes">
+    <input type="text" name="username">
+    <input type="text" name="password">
+    <input type="text" name="class">
     <button type="submit">Add</button>
   </form>
+  <div class="table">
+    <table>
+      <thead class="table-head"></thead>
+      <tbody class="table-data"></tbody>
+    </table>
+  </div>
+  <a onclick="logout()">Logout</a>
   <script src="script.js"></script>
 </body>
 </html>

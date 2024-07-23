@@ -4,7 +4,7 @@
 		<title></title>
 		<link href="styles.css" rel="stylesheet" />
 	</head>
-	<body>
+	<body onload="init()">
 		<div class="main-container" id="login" style="display: block">
 			<div class="container">
 				<div class="form">
@@ -16,6 +16,11 @@
 					<div class="input">
 						<input type="text" id="password" placeholder="Password" />
 					</div>
+
+          <div style="display: flex; width: 260px;">
+            <input type="checkbox" id="remember-me">
+            <label for="remember-me">Remember me</label>
+          </div>
 
 					<p id="result" style="display: none"></p>
 					<a class="login-btn" onclick="login()">LOGIN</a>

@@ -5,25 +5,35 @@
 		<link href="styles.css" rel="stylesheet" />
 	</head>
 	<body onload="init()">
+		<img src="logo_pr_speed-removebg-preview.png">
 		<div class="main-container" id="login" style="display: block">
 			<div class="container">
 				<div class="form">
-					<h1>USER LOGIN</h1>
+					<h1>Sign In</h1>
 					<div class="input">
-						<input type="text" id="username" placeholder="Username" />
+						<p>Username</p>
+						<input type="text" id="username" placeholder="Username"/>
 					</div>
 
 					<div class="input">
-						<input type="text" id="password" placeholder="Password" />
+						<p>Password</p>
+						<input type="text" id="password" placeholder="Password"/>
+						<br>
+							<a href="SHREK.jpg">
+						<p id="forgot">Forgot password?</p>
+							</a>
 					</div>
-
-          <div style="display: flex; width: 260px;">
-            <input type="checkbox" id="remember-me">
-            <label for="remember-me">Remember me</label>
-          </div>
+					
+					
 
 					<p id="result" style="display: none"></p>
-					<a class="login-btn" onclick="login()">LOGIN</a>
+					<a class="login-btn" onclick="login()">Sign In</a>
+					
+					<div style="display: flex; width: 300px; margin-top: 8px;">
+            <input type="checkbox" id="remember-me">
+            <label for="remember-me" style="color:rgb(255, 255, 255); padding-left: 5px; padding-top: 2px; font-size: 10px;">Remember me</label>
+
+          </div>
 				</div>
 			</div>
 		</div>

@@ -11,7 +11,8 @@ var confirmPrice = document.getElementById("confirm-price");
 var transferDiv = document.getElementById("transfer-div");
 var placeOrder = document.getElementById("place-order");
 var editButton = document.getElementById("edit-btn");
-var menu = subMenu = subMenuPrice = [];
+var addItemButton = document.getElementById("add-item-btn");
+var menu = (subMenu = subMenuPrice = []);
 var curMenu;
 
 async function init() {
@@ -20,7 +21,7 @@ async function init() {
 		return;
 	}
 
-  await fetch("../Data/items.json")
+	await fetch("../Data/items.json")
 		.then((response) => response.json())
 		.then((json) => {
 			menu = json.menu;
@@ -28,25 +29,30 @@ async function init() {
 			subMenuPrice = json.subMenuPrice;
 		});
 
-	usernameTitle.innerHTML = `Hello, ${getCookie("username")}${checkCookie("class") ? " (" + getCookie("class") + ")" : ""}!`;
-  if (getCookie("class") == "Staff") {
-    document.getElementById("edit-btn").style.display = "block";
-  }
+	// usernameTitle.innerHTML = `Hello, ${getCookie("username")}${checkCookie("class") ? " (" + getCookie("class") + ")" : ""}!`;
+	if (getCookie("class") == "Staff") {
+		document.getElementById("edit-btn").style.display = "block";
+	}
 
-	changeSection(0);
+	await changeSection(0);
 	updateCart();
-  editItem(0);
+
+	const searchParam = new URLSearchParams(window.location.search).get("edit");
+	// console.log(searchParam);
+	if (searchParam == "true") {
+		toggleEdit();
+	}
 }
 
 function logout() {
 	deleteCookie("username", "/");
-  deleteCookie("class", "/");
+	deleteCookie("class", "/");
 	deleteCookie("cart", "/");
 	window.location.href = "./login";
 }
 
 async function changeSection(index) {
-  await fetch("../Data/items.json")
+	await fetch("../Data/items.json")
 		.then((response) => response.json())
 		.then((json) => {
 			menu = json.menu;
@@ -55,16 +61,18 @@ async function changeSection(index) {
 		});
 
 	itemsDiv.innerHTML = "";
-  curMenu = index;
-  
+	curMenu = index;
+
 	for (let i = 0; i < subMenu[index].length; i++) {
 		const newDiv = document.createElement("div");
 		newDiv.id = `item-${i}`;
 		newDiv.innerHTML = `
-      <img src="">
-      <p>${subMenu[index][i]}</p>
-      <p>RM${subMenuPrice[index][i]}</p>
-      <button onclick="addItem('${index},${i}')">+</button>
+      <img src="./Data/ItemImage/${curMenu},${i}.png" onerror="this.removeAttribute('src')"/>
+      <div>
+        <p>${subMenu[index][i]}</p>
+        <p>RM${subMenuPrice[index][i]}</p>
+        <button onclick="addItem('${index},${i}')">+</button>
+      </div>
     `;
 		itemsDiv.appendChild(newDiv);
 	}
@@ -100,6 +108,7 @@ function updateCart() {
 		var itemIndex = cart[i].index.split(",");
 		const newDiv = document.createElement("div");
 		newDiv.innerHTML = `
+      <img src="./Data/ItemImage/${itemIndex[0]},${itemIndex[1]}.png" onerror="this.style.display='none'"/>
       <p>${subMenu[itemIndex[0]][itemIndex[1]]}</p>
       <button onclick="changeItemCount('${itemIndex[0]},${itemIndex[1]}', false)">-</button>
       <p>${cart[i].count}</p>
@@ -197,51 +206,145 @@ function onlineTransfer() {
 }
 
 function toggleEdit() {
-  if (editButton.innerHTML == "EDIT") {
-    editButton.innerHTML = "BACK"
-    let children = itemsDiv.children;
-    for (let i = 0; i < children.length; i++) {
-      children[i].innerHTML += `<a onclick="editItem(${i})">Edit</a>`;
-    }
-  } else {
-    editButton.innerHTML = "EDIT"
-    let children = itemsDiv.children;
-    for (let i = 0; i < children.length; i++) {
-      children[i].removeChild(children[i].lastChild);
-    }
-  }
+	const url = new URL(window.location);
+	if (editButton.innerHTML == "EDIT") {
+		editButton.innerHTML = "BACK";
+		addItemButton.style.display = "block";
+		let children = itemsDiv.children;
+		for (let i = 0; i < children.length; i++) {
+			children[i].innerHTML += `<a onclick="editItem(${i})">Edit</a>`;
+		}
+		url.searchParams.set("edit", true);
+		history.pushState(null, "", url);
+	} else {
+		editButton.innerHTML = "EDIT";
+		let children = itemsDiv.children;
+		for (let i = 0; i < children.length; i++) {
+			children[i].removeChild(children[i].lastChild);
+		}
+		addItemButton.style.display = "none";
+		history.pushState(null, "", url.href.split("?")[0]);
+	}
 }
 
 async function editItem(index) {
-  if (index == -1) {
-    editOverlay.style.display = "none";
-    return
-  }
+	document.getElementById("add-item-div").style.display = "none";
+	document.getElementById("delete-div").style.display = "none";
+	if (index == -1) {
+		editOverlay.style.display = "none";
+		document.getElementById("edit-div").style.display = "none";
+		return;
+	}
 
-  editOverlay.style.display = "block";
-  document.getElementById("save-edit").setAttribute("onclick", `saveItem(${index})`)
+	editOverlay.style.display = "block";
+	document.getElementById("edit-div").style.display = "block";
+	document.getElementById("delete-btn").setAttribute("onclick", `toggleDelete(${index})`);
+	document.getElementById("save-edit").setAttribute("onclick", `saveItem(${index})`);
+
+	document.getElementById("edit-name").value = subMenu[curMenu][index];
+	document.getElementById("edit-price").value = subMenuPrice[curMenu][index];
+
+  // Change img resource to base 64, then to file object to be pushed into file input 
+  // Creds: https://stackoverflow.com/questions/62179675/how-to-convert-image-source-into-a-javascript-file-object
+  //        https://pqina.nl/blog/set-value-to-file-input/
+	const toDataURL = (url) =>
+		fetch(url)
+			.then((response) => response.blob())
+			.then(
+				(blob) =>
+					new Promise((resolve, reject) => {
+						const reader = new FileReader();
+						reader.onloadend = () => resolve(reader.result);
+						reader.onerror = reject;
+						reader.readAsDataURL(blob);
+					})
+			);
+
+	function dataURLtoFile(dataurl, filename) {
+		var arr = dataurl.split(","),
+			mime = arr[0].match(/:(.*?);/)[1],
+			bstr = atob(arr[1]),
+			n = bstr.length,
+			u8arr = new Uint8Array(n);
+		while (n--) {
+			u8arr[n] = bstr.charCodeAt(n);
+		}
+		return new File([u8arr], filename, {type: mime});
+	}
+
+	toDataURL("./Data/ItemImage/0,0.png").then((dataUrl) => {
+		var fileData = dataURLtoFile(dataUrl, "imageName.jpg");
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(fileData);
+    document.getElementById("edit-image").files = dataTransfer.files;
+		console.log(fileData);
+	});
 }
 
 async function saveItem(index) {
-  var name = document.getElementById("edit-name");
-  var price = document.getElementById("edit-price");
-  var formData = new FormData(document.getElementById("edit-form"));
-  formData.append("index", `${curMenu},${index}`);
+	var name = document.getElementById("edit-name");
+	var price = document.getElementById("edit-price");
+	var formData = new FormData(document.getElementById("edit-form"));
+	formData.append("index", `${curMenu},${index}`);
 
-  if (name.value == "" && price.value == "") {
-    return;
-  }
+	if (name.value == "" && price.value == "") {
+		console.log(document.getElementById("edit-image").value);
+		return;
+	}
 
-
-  fetch("./editItem", {
+	await fetch("./editItem", {
 		method: "post",
-		body: formData
-	})
-		.then((response) => response.json())
-		.then((json) => console.log(json));
+		body: formData,
+	});
+	changeSection(curMenu);
 
-  console.log("Done!")
-  changeSection(curMenu);
+	location.reload();
+}
+
+function toggleAddItem() {
+	editOverlay.style.display = "block";
+	document.getElementById("add-item-div").style.display = "block";
+	document.getElementById("delete-div").style.display = "none";
+}
+
+async function addNewItem() {
+	var name = document.getElementById("new-item-name");
+	var price = document.getElementById("new-item-price");
+	var formData = new FormData(document.getElementById("new-item-form"));
+	formData.append("index", curMenu);
+
+	if (name.value == "" && price.value == "") {
+		return;
+	}
+
+	await fetch("./newItem", {
+		method: "post",
+		body: formData,
+	});
+	changeSection(curMenu);
+
+	location.reload();
+}
+
+function toggleDelete(index) {
+	editOverlay.style.display = "block";
+	document.getElementById("delete-div").style.display = "block";
+	document.getElementById("delete-yes").setAttribute("onclick", `deleteItem(${index})`);
+	document.getElementById("delete-no").setAttribute("onclick", `editItem(${index})`);
+}
+
+async function deleteItem(index) {
+	await fetch("./deleteItem", {
+		method: "POST",
+		body: JSON.stringify({
+			index: `${curMenu},${index}`,
+		}),
+		headers: {
+			"Content-type": "application/json; charset=UTF-8",
+		},
+	});
+
+	location.reload();
 }
 
 //==============================================
@@ -312,14 +415,14 @@ function invalidElement(name) {
 }
 
 function checkIfCardValid() {
-  var checks = ["number", "expire", "verification"];
-  placeOrder.style.opacity = 0;
-  for (let i = 0; i < checks.length; i++) {
-    if (invalidElement(checks[i]).style.opacity == 1 || document.getElementById(`card-${checks[i]}`).value == "") {
-      return
-    }
-  }
-  placeOrder.style.opacity = 1;
+	var checks = ["number", "expire", "verification"];
+	placeOrder.style.opacity = 0;
+	for (let i = 0; i < checks.length; i++) {
+		if (invalidElement(checks[i]).style.opacity == 1 || document.getElementById(`card-${checks[i]}`).value == "") {
+			return;
+		}
+	}
+	placeOrder.style.opacity = 1;
 }
 //==============================================
 //Event listeners
@@ -356,7 +459,7 @@ document.getElementById("card-number").addEventListener("input", (e) => {
 		invalidElement("number").style.opacity = 0;
 	}
 
-  checkIfCardValid();
+	checkIfCardValid();
 });
 
 document.getElementById("card-expire").addEventListener("input", (e) => {
@@ -379,7 +482,7 @@ document.getElementById("card-expire").addEventListener("input", (e) => {
 		invalidElement("expire").style.opacity = 1;
 	}
 
-  checkIfCardValid();
+	checkIfCardValid();
 });
 
 document.getElementById("card-verification").addEventListener("input", (e) => {
@@ -390,7 +493,7 @@ document.getElementById("card-verification").addEventListener("input", (e) => {
 		invalidElement("verification").style.opacity = 0;
 	}
 
-  checkIfCardValid();
+	checkIfCardValid();
 });
 //==============================================
 //Cookie things

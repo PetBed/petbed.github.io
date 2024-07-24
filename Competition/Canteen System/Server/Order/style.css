@@ -1,3 +1,100 @@
+:root {
+  --header-height: 5rem;
+  --cart-width: 17%;
+}
+body {
+  margin: 0;
+}
+
+header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: var(--header-height);
+  box-shadow: 0px 0px 10px 1px rgba(0,0,0,0.75);
+  font-size: 2em;
+}
+header > * {
+  margin: 0 20px;
+}
+.profile {
+  background-color: grey;
+  height: 1.5em;
+  width: 1.5em;
+  border-radius: 100%;
+}
+.menu-icon div {
+  width: 1.2em;
+  height: 5px;
+  background-color: black;
+  margin: 6px 0;
+}
+
+.main-container {
+  display: flex;
+  height: calc(100vh - var(--header-height));
+}
+#cart {
+  display: inline-flex;
+  flex-direction: column;
+  height: 100%;
+  width: var(--cart-width);
+  position: fixed;
+}
+.menu {
+  padding-left: var(--cart-width);
+  width: calc(100% - var(--cart-width));
+}
+.menu input[type="radio"] {
+  display: none;
+}
+#items {
+  border: solid 2px orange;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: max-content;
+  grid-column-gap: 30px;
+  grid-row-gap: 30px;
+  padding: 10px;
+}
+@media only screen and (max-width: 790px) {
+  #items {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  #items > div {
+    height: 23vw !important;
+  }
+}
+#items img {
+  width: 100%;
+  height: 90%;
+  border: solid black 3px;
+}
+#items > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 18vw;
+}
+#items > div > div {
+  position: relative;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+  width: 100%;
+}
+#items > div > div *:first-child {
+  position: absolute;
+  left: 0;
+}
+#items > div > div * {
+  height: fit-content;
+}
+#items > div > div *:last-child {
+  margin-left: 10px;
+}
+
 body:has(div[id$="overlay"][style="display: block;"]) {
   overflow: hidden;
 }
@@ -9,6 +106,7 @@ div[id$="overlay"] {
   left: 0;
   top: 0;
   background-color: rgba(0, 0, 0, 0.5);
+  z-index: 100;
 }
 div[id$="overlay"] > div[id$="div"] {
   background-color: whitesmoke;
@@ -72,3 +170,21 @@ p[id^="invalid"] {
   bottom: 0;
   display: none;
 }
+#add-item-btn {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  display: none;
+}
+
+/* div#items>div[id^="item"] {
+  position: relative;
+  display: inline;
+}
+
+div#items>div[id^="item"]>img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+} */

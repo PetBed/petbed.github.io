@@ -5,10 +5,18 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Document</title>
 		<link rel="stylesheet" href="style.css" />
+		<link rel="stylesheet" href="../Data/Resources/scrollbar.css" />
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet" />
 	</head>
 	<body onload="init()">
 		<header>
+			<div class="logo" style="font-family: 'Oswald', sans-serif; font-size: 1em; height: 90%; flex: 1">
+				<p style="color: #064759; font-size: 1em; text-shadow: 0.04375em 0.03125em 0px #b5b5b5; font-weight: 400">Project</p>
+				<p style="color: #ef7200; font-size: 1.6em; position: absolute; font-weight: bolder; bottom: 0">SPEED</p>
+			</div>
 			<a>Menu</a>
 			<a>Contact</a>
 			<div class="menu-icon">
@@ -16,58 +24,85 @@
 				<div></div>
 				<div></div>
 			</div>
-			<div class="profile"></div>
+			<input type="text" id="profile-select" style="position: fixed; opacity: 0" />
+			<label class="profile" for="profile-select">
+				<div>
+					<p id="username-title"></p>
+          <p id="class-title"></p>
+          <hr>
+          <a>Credits</a>
+          <hr>
+					<a onclick="logout()">Logout</a>
+				</div>
+			</label>
 		</header>
 		<div class="main-container">
-			<!-- <h1 id="username-title">Hello</h1> -->
-			<!-- <a href="#" onclick="logout()">Logout</a> -->
-			<div id="cart"></div>
-      <div class="menu">
-        <input type="radio" name="section" id="section-food" class="section-radio" onclick="changeSection(0)" checked />
-        <label for="section-food">Food</label>
-        <input type="radio" name="section" id="section-drinks" class="section-radio" onclick="changeSection(1)" />
-        <label for="section-drinks">Drinks</label>
-        <input type="radio" name="section" id="section-snacks" class="section-radio" onclick="changeSection(2)" />
-        <label for="section-snacks">Snacks</label>
-        
-        <div id="items"></div>
-      </div>
+			<div class="cart-container">
+				<p>Cart</p>
+				<div id="cart"></div>
+				<div id="cart-details"></div>
+			</div>
+			<div class="menu">
+				<div class="sections">
+					<input type="radio" name="section" id="section-food" class="section-radio" onclick="changeSection(0)" checked />
+					<label for="section-food">Food</label>
+					<input type="radio" name="section" id="section-drinks" class="section-radio" onclick="changeSection(1)" />
+					<label for="section-drinks">Drinks</label>
+					<input type="radio" name="section" id="section-snacks" class="section-radio" onclick="changeSection(2)" />
+					<label for="section-snacks">Snacks</label>
+					<div id="edit-controls">
+						<a id="add-item-btn" onclick="toggleAddItem()"><i class="fa fa-plus" aria-hidden="true"></i></a>
+						<a onclick="toggleEdit()">Save Changes</a>
+					</div>
+				</div>
+				<div id="items"></div>
+			</div>
 		</div>
 		<div id="confirm-overlay">
 			<div id="confirm-div">
 				<div id="confirm-items"></div>
 				<p id="confirm-price">TOTAL = RM</p>
 				<div id="confirm-payment-method">
-					<p>SELECT PAYMENT METHOD</p>
-					<a onclick="sendOrder()">UPON PICKUP</a>
-					<a onclick="onlineTransfer()">ONLINE TRANSFER</a>
+					<p style="font-size: 1.4em">Select Payment Method</p>
+					<div>
+						<a onclick="sendOrder()">UPON PICKUP</a>
+						<a onclick="onlineTransfer()">IN-CARD CREDITS</a>
+						<a onclick="onlineTransfer()">ONLINE TRANSFER</a>
+					</div>
 				</div>
 				<a class="close-btn" onclick="confirmOrder()">CANCEL</a>
 			</div>
 			<div id="transfer-div" style="z-index: 10; display: none; box-shadow: none">
-				<p><b>Supported Cards</b></p>
-				<div id="supported-cards">
-					<i id="card-visa" class="fa fa-cc-visa card-type" aria-hidden="true" style="color: #1434cb"></i>
-					<i id="card-mastercard" class="fa fa-cc-mastercard card-type" aria-hidden="true" style="background: #eb001b; background: linear-gradient(to right, #eb001b 0%, #ff5f00 51%, #f79e1b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent"></i>
-					<i id="card-discover" class="fa fa-cc-discover card-type" aria-hidden="true" style="background: #e36c24; background: linear-gradient(to bottom right, #e36c24 0%, #f99e24 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent"></i>
-					<i id="card-amex" class="fa fa-cc-amex card-type" aria-hidden="true" style="color: #006fcf"></i>
+				<div class="card-details-div">
+					<p>Debit/Credit Card</p>
+					<div id="supported-cards">
+						<p>Supported Cards</p>
+						<div style="background-color: #f4f5f7">
+							<i id="card-visa" class="fa fa-cc-visa card-type" aria-hidden="true" style="color: #1434cb"></i>
+							<i id="card-mastercard" class="fa fa-cc-mastercard card-type" aria-hidden="true" style="background: #eb001b; background: linear-gradient(to right, #eb001b 0%, #ff5f00 51%, #f79e1b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent"></i>
+							<i id="card-discover" class="fa fa-cc-discover card-type" aria-hidden="true" style="background: #e36c24; background: linear-gradient(to bottom right, #e36c24 0%, #f99e24 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent"></i>
+							<i id="card-amex" class="fa fa-cc-amex card-type" aria-hidden="true" style="color: #006fcf"></i>
+						</div>
+					</div>
+					<div id="card-details">
+						<div>
+							<p><b>Card number</b></p>
+							<input type="number" name="card-number" id="card-number" placeholder="0000 0000 0000" />
+							<p id="invalid-number">Invalid credit card number</p>
+						</div>
+						<div>
+							<p><b>Expire date</b></p>
+							<input type="text" name="card-expire" id="card-expire" placeholder="MM/YY" />
+							<p id="invalid-expire">Invalid expire date</p>
+						</div>
+						<div>
+							<p><b>CVC/CVV</b></p>
+							<input type="number" name="card-verification" id="card-verification" placeholder=". . ." />
+							<p id="invalid-verification">Invalid CVC/CVV</p>
+							<a onclick="sendOrder()" id="place-order">Place Order</a>
+						</div>
+					</div>
 				</div>
-				<p><b>Card number</b></p>
-				<div>
-					<input type="number" name="card-number" id="card-number" />
-				</div>
-				<p id="invalid-number">Invalid credit card number</p>
-				<p><b>Expire date</b></p>
-				<div>
-					<input type="text" name="card-expire" id="card-expire" />
-				</div>
-				<p id="invalid-expire">Invalid expire date</p>
-				<p><b>CVC/CVV</b></p>
-				<div>
-					<input type="number" name="card-verification" id="card-verification" />
-				</div>
-				<p id="invalid-verification">Invalid CVC/CVV</p>
-				<a onclick="sendOrder()" style="opacity: 0" id="place-order">Place Order</a>
 				<a class="close-btn" onclick="onlineTransfer()">BACK</a>
 			</div>
 		</div>
@@ -76,43 +111,59 @@
 			<div id="edit-div">
 				<p>Item Details</p>
 				<form id="edit-form">
-					<p>Name</p>
-					<input type="text" id="edit-name" name="name" />
-					<p>Price</p>
-					<input type="number" id="edit-price" name="price" />
-					<p>Image</p>
-					<input type="file" id="edit-image" name="image" accept=".jepg,.jpg,.png " />
-					<div style="position: absolute; right: 0; bottom: 0">
+					<div>
+						<p>Name</p>
+						<input type="text" id="edit-name" name="name" />
+					</div>
+					<div>
+						<p>Price</p>
+						<input type="number" id="edit-price" name="price" />
+					</div>
+					<div>
+						<p>Image</p>
+						<input type="file" id="edit-image" name="image" accept=".jepg,.jpg,.png " />
+					</div>
+					<div>
 						<a onclick="editItem(-1)">BACK</a>
 						<a onclick="saveItem()" id="save-edit">SAVE</a>
 					</div>
 				</form>
-				<a onclick="toggleDelete()" id="delete-btn">Delete Item</a>
+				<a onclick="toggleDelete()" id="delete-btn"><i class="fa fa-trash" aria-hidden="true"></i></a>
 			</div>
 			<div id="add-item-div">
 				<p>Add New Item</p>
 				<form id="new-item-form">
-					<p>Name</p>
-					<input type="text" id="new-item-name" name="name" />
-					<p>Price</p>
-					<input type="number" id="new-item-price" name="price" />
-					<p>Image</p>
-					<input type="file" id="edit-image" name="image" accept=".jepg,.jpg,.png " />
-					<div style="position: absolute; right: 0; bottom: 0">
-						<a onclick="editItem(-1)">BACK</a>
-						<a onclick="addNewItem()" id="save-edit">ADD NEW ITEM</a>
+					<div>
+						<p>Name</p>
+						<input type="text" id="new-item-name" name="name" />
+					</div>
+					<div>
+						<p>Price</p>
+						<input type="number" id="new-item-price" name="price" />
+					</div>
+					<div>
+						<p>Image</p>
+						<input type="file" id="edit-image" name="image" accept=".jepg,.jpg,.png " />
+					</div>
+					<div>
+						<a onclick="editItem(-1)">Back</a>
+						<a onclick="addNewItem()" id="save-edit">Add Item</a>
 					</div>
 				</form>
 			</div>
 			<div id="delete-div">
-				<p>Delete Item</p>
-				<p><b>Are you sure you want to delete?</b></p>
-				<a id="delete-yes">Yes</a>
-				<a id="delete-no">No</a>
+				<p style="margin-bottom: 1em">Delete Item</p>
+				<span>
+					Are you sure you want to delete this item?<br />
+					<i>This action is permanent and cannot be undone.</i>
+				</span>
+				<div style="margin-bottom: calc(1.3rem + 1em)">
+					<a id="delete-no">Back</a>
+					<a id="delete-yes">Yes</a>
+				</div>
 			</div>
 		</div>
 		<a id="edit-btn" onclick="toggleEdit()">EDIT</a>
-		<a id="add-item-btn" onclick="toggleAddItem()">ADD ITEM</a>
 		<script src="script.js"></script>
 	</body>
 </html>

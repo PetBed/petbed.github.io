@@ -11,7 +11,8 @@ var confirmPrice = document.getElementById("confirm-price");
 var transferDiv = document.getElementById("transfer-div");
 var placeOrder = document.getElementById("place-order");
 var editButton = document.getElementById("edit-btn");
-var addItemButton = document.getElementById("add-item-btn");
+var editControls = document.getElementById("edit-controls");
+var classTitle = document.getElementById("class-title");
 var menu = (subMenu = subMenuPrice = []);
 var curMenu;
 
@@ -29,19 +30,15 @@ async function init() {
 			subMenuPrice = json.subMenuPrice;
 		});
 
-	// usernameTitle.innerHTML = `Hello, ${getCookie("username")}${checkCookie("class") ? " (" + getCookie("class") + ")" : ""}!`;
+    // console.log(getCookie("class"))
+	usernameTitle.innerHTML = `${getCookie("username")}`
+  classTitle.innerHTML = `${checkCookie("class") ? getCookie("class") : ""}`;
 	if (getCookie("class") == "Staff") {
 		document.getElementById("edit-btn").style.display = "block";
 	}
-
+  
 	await changeSection(0);
 	updateCart();
-
-	const searchParam = new URLSearchParams(window.location.search).get("edit");
-	// console.log(searchParam);
-	if (searchParam == "true") {
-		toggleEdit();
-	}
 }
 
 function logout() {
@@ -67,15 +64,19 @@ async function changeSection(index) {
 		const newDiv = document.createElement("div");
 		newDiv.id = `item-${i}`;
 		newDiv.innerHTML = `
-      <img src="./Data/ItemImage/${curMenu},${i}.png" onerror="this.removeAttribute('src')"/>
-      <div>
+      <div style="background-image: url(./Data/ItemImage/${curMenu},${i}.png)"></div>
+      <div class="item-details">
         <p>${subMenu[index][i]}</p>
         <p>RM${subMenuPrice[index][i]}</p>
-        <button onclick="addItem('${index},${i}')">+</button>
+        <a onclick="addItem('${index},${i}')">+</a>
       </div>
     `;
 		itemsDiv.appendChild(newDiv);
 	}
+
+  // To get current edit state
+  toggleEdit();
+  toggleEdit();
 }
 
 function addItem(index) {
@@ -108,11 +109,15 @@ function updateCart() {
 		var itemIndex = cart[i].index.split(",");
 		const newDiv = document.createElement("div");
 		newDiv.innerHTML = `
-      <img src="./Data/ItemImage/${itemIndex[0]},${itemIndex[1]}.png" onerror="this.style.display='none'"/>
-      <p>${subMenu[itemIndex[0]][itemIndex[1]]}</p>
-      <button onclick="changeItemCount('${itemIndex[0]},${itemIndex[1]}', false)">-</button>
+    <div style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(../Data/ItemImage/${itemIndex[0]},${itemIndex[1]}.png)">
+      <a onclick="changeItemCount('${itemIndex[0]},${itemIndex[1]}', false)"><i class="fa fa-caret-down" aria-hidden="true"></i></a>
       <p>${cart[i].count}</p>
-      <button onclick="changeItemCount('${itemIndex[0]},${itemIndex[1]}', true)">+</button>
+      <a onclick="changeItemCount('${itemIndex[0]},${itemIndex[1]}', true)"><i class="fa fa-caret-up" aria-hidden="true"></i></a>
+    </div>
+    <div>
+      <p>${subMenu[itemIndex[0]][itemIndex[1]]}</p>
+      <p>RM${subMenuPrice[itemIndex[0]][itemIndex[1]]}</p>
+    </div>
     `;
 
 		cartDiv.appendChild(newDiv);
@@ -122,8 +127,9 @@ function updateCart() {
 		}
 	}
 
-	cartDiv.innerHTML += `<p>=RM${totalPrice}</p>`;
-	cartDiv.innerHTML += "<a onclick='confirmOrder()'>CONFIRM ORDER</a>";
+	document.getElementById("cart-details").innerHTML = `
+  <p>RM ${totalPrice}</p>
+  <a onclick='confirmOrder()'>Check Out</a>`;
 }
 
 function changeItemCount(index, increase) {
@@ -163,7 +169,9 @@ function confirmOrder() {
 		const newDiv = document.createElement("div");
 		newDiv.classList.add("confirm-item-details");
 		newDiv.innerHTML = `
-      <div class="confirm-item-count"><p>${cart[i].count}</p></div>
+      <div class="confirm-item-count" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(../Data/ItemImage/${index[0]},${index[1]}.png)">
+        <p>${cart[i].count}</p>
+      </div>
       <p>${subMenu[index[0]][index[1]]}</p>
     `;
 		confirmItems.appendChild(newDiv);
@@ -172,7 +180,7 @@ function confirmOrder() {
 			totalPrice += subMenuPrice[index[0]][index[1]];
 		}
 	}
-	confirmPrice.innerHTML = `TOTAL = RM${totalPrice}`;
+	confirmPrice.innerHTML = `RM ${totalPrice}`;
 }
 
 function sendOrder() {
@@ -202,27 +210,48 @@ function sendOrder() {
 }
 
 function onlineTransfer() {
-	transferDiv.style.display = transferDiv.style.display != "block" ? "block" : "none";
+  try {
+    document.getElementById("confirm-price-clone").remove();
+    document.getElementById("confirm-items-clone").remove();
+  } catch {}
+  var priceClone = document.getElementById("confirm-price").cloneNode(true);
+  var itemsClone = document.getElementById("confirm-items").cloneNode(true);
+  priceClone.id = "confirm-price-clone";
+  itemsClone.id = "confirm-items-clone";
+  transferDiv.prepend(priceClone);
+  transferDiv.prepend(itemsClone);
+  document.getElementById("confirm-items-clone").addEventListener("wheel", (e) => {
+    document.getElementById("confirm-items-clone").scrollLeft += e.deltaY * 0.5;
+    document.getElementById("confirm-items-clone").scrollLeft += e.deltaX * 0.5;
+  });
+	transferDiv.style.display = transferDiv.style.display != "flex" ? "flex" : "none";
 }
 
 function toggleEdit() {
+  if (getCookie("class") != "Staff") {
+    editButton.style.display = "none";
+    return;
+  }
+
 	const url = new URL(window.location);
-	if (editButton.innerHTML == "EDIT") {
-		editButton.innerHTML = "BACK";
-		addItemButton.style.display = "block";
+  const searchParam = new URLSearchParams(window.location.search).get("edit");
+  // console.log(searchParam)
+	if (searchParam != "true") {
+		editButton.style.display = "none";
+		editControls.style.display = "flex";
 		let children = itemsDiv.children;
 		for (let i = 0; i < children.length; i++) {
-			children[i].innerHTML += `<a onclick="editItem(${i})">Edit</a>`;
+			children[i].innerHTML += `<a onclick="editItem(${i})"><i class="fa fa-pencil" aria-hidden="true"></i></a>`;
 		}
 		url.searchParams.set("edit", true);
 		history.pushState(null, "", url);
 	} else {
-		editButton.innerHTML = "EDIT";
+		editButton.style.display = "block";
 		let children = itemsDiv.children;
 		for (let i = 0; i < children.length; i++) {
 			children[i].removeChild(children[i].lastChild);
 		}
-		addItemButton.style.display = "none";
+		editControls.style.display = "none";
 		history.pushState(null, "", url.href.split("?")[0]);
 	}
 }
@@ -237,7 +266,7 @@ async function editItem(index) {
 	}
 
 	editOverlay.style.display = "block";
-	document.getElementById("edit-div").style.display = "block";
+	document.getElementById("edit-div").style.display = "flex";
 	document.getElementById("delete-btn").setAttribute("onclick", `toggleDelete(${index})`);
 	document.getElementById("save-edit").setAttribute("onclick", `saveItem(${index})`);
 
@@ -303,7 +332,7 @@ async function saveItem(index) {
 
 function toggleAddItem() {
 	editOverlay.style.display = "block";
-	document.getElementById("add-item-div").style.display = "block";
+	document.getElementById("add-item-div").style.display = "flex";
 	document.getElementById("delete-div").style.display = "none";
 }
 
@@ -328,7 +357,7 @@ async function addNewItem() {
 
 function toggleDelete(index) {
 	editOverlay.style.display = "block";
-	document.getElementById("delete-div").style.display = "block";
+	document.getElementById("delete-div").style.display = "flex";
 	document.getElementById("delete-yes").setAttribute("onclick", `deleteItem(${index})`);
 	document.getElementById("delete-no").setAttribute("onclick", `editItem(${index})`);
 }
@@ -430,11 +459,10 @@ function checkIfCardValid() {
 
 // Scroll horizontally without pressing shift (Creds: https://stackoverflow.com/questions/40855884/horizontal-scroll-without-holding-shift)
 confirmItems.addEventListener("wheel", (e) => {
-	e.preventDefault();
+	// e.preventDefault();
 	confirmItems.scrollLeft += e.deltaY * 0.5;
 	confirmItems.scrollLeft += e.deltaX * 0.5;
 });
-
 document.getElementById("card-number").addEventListener("input", (e) => {
 	if (!validateLuhnAlgorithm(e.target.value)) {
 		invalidElement("number").style.opacity = 1;

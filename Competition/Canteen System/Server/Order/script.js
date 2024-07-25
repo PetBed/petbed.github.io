@@ -100,6 +100,7 @@ function addItem(index) {
 
 function updateCart() {
 	cartDiv.innerHTML = "";
+  document.getElementById("cart-details").innerHTML = "";
 	// Check if cookie exists
 	if (!getCookie("cart")) return;
 	var cart = JSON.parse(getCookie("cart")).cart;
@@ -160,6 +161,7 @@ function changeItemCount(index, increase) {
 
 function confirmOrder() {
 	confirmOverlay.style.display = confirmOverlay.style.display != "block" ? "block" : "none";
+  document.getElementById("checkmark").style.display = "none";
 	var cart = JSON.parse(getCookie("cart")).cart;
 	var totalPrice = 0;
 	confirmItems.innerHTML = "";
@@ -207,6 +209,10 @@ function sendOrder() {
 	})
 		.then((response) => response.json())
 		.then((json) => console.log(json));
+
+  document.getElementById("checkmark").style.display = "flex";
+  deleteCookie("cart");
+  updateCart();
 }
 
 function onlineTransfer() {

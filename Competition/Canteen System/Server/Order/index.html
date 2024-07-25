@@ -5,6 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Document</title>
 		<link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="../Data/Resources/header.css" />
 		<link rel="stylesheet" href="../Data/Resources/scrollbar.css" />
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -24,14 +25,14 @@
 				<div></div>
 				<div></div>
 			</div>
-			<input type="text" id="profile-select" style="position: fixed; opacity: 0" />
+			<input type="text" id="profile-select" style="position: fixed; opacity: 0; right: 1000vw" />
 			<label class="profile" for="profile-select">
 				<div>
 					<p id="username-title"></p>
-          <p id="class-title"></p>
-          <hr>
-          <a>Credits</a>
-          <hr>
+					<p id="class-title"></p>
+					<hr />
+					<a>Credits</a>
+					<hr />
 					<a onclick="logout()">Logout</a>
 				</div>
 			</label>
@@ -104,6 +105,20 @@
 					</div>
 				</div>
 				<a class="close-btn" onclick="onlineTransfer()">BACK</a>
+			</div>
+			<div id="checkmark">
+        <!-- Creds: https://codepen.io/p1p0c0/pen/VBMRzm -->
+				<div class="swal-icon swal-icon--success">
+					<span class="swal-icon--success__line swal-icon--success__line--long"></span>
+					<span class="swal-icon--success__line swal-icon--success__line--tip"></span>
+					<div class="swal-icon--success__ring"></div>
+					<div class="swal-icon--success__hide-corners"></div>
+				</div>
+        <p class="thank-you">Thank you!</p>
+        <p>Your order has been placed</p>
+        <div>
+          <a onclick="confirmOrder()">Return</a>
+        </div>
 			</div>
 		</div>
 

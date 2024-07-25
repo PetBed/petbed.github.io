@@ -20,84 +20,13 @@ input::placeholder {
   color: white;
 }
 
-/* Header */
-header {
-  position: fixed;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  width: 100%;
-  height: var(--header-height);
-  box-shadow: 0px 0px 10px 1px rgba(0,0,0,0.75);
-  font-size: 1.5em;
-  z-index: 100;
-  background-color: white;
-}
-header > * {
-  margin: 0 20px;
-}
-.menu-icon div {
-  width: 1.2em;
-  height: 5px;
-  background-color: black;
-  margin: 6px 0;
-}
-.profile {
-  background-color: grey;
-  height: 1.5em;
-  width: 1.5em;
-  border-radius: 100%;
-  position: relative;
-}
-.profile > div {
-  position: absolute;
-  height: 14em;
-  width: 10em;
-  top: 2em;
-  right: 0;
-  background-color: white;
-  box-shadow: 0 0 5px 0 rgba(0,0,0,0.75);
-  opacity: 0;
-  display: none;
-  transition: .2s ease-in-out;
-  padding: .5em;
-  box-sizing: border-box;
-}
-.profile > div:hover {
-  cursor: default;
-}
-.profile > div > a {
-  font-size: .9em;
-}
-.profile > div > a:last-child {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  font-size: .7em;
-  margin: 6px;
-}
-#username-title {
-  font-size: 1.2em;
-  font-weight: bold;
-}
-#class-title {
-  font-size: .8em;
-  color: rgb(79, 79, 79);
-  position: relative;
-  top: -.3em;
-}
-#profile-select:focus + label > div, .profile > div:hover {
-  opacity: 1;
-  display: block;
-}
-
-
 /* Main container */
 .main-container {
   display: flex;
-  height: calc(100vh - var(--header-height) - 1.8rem);
+  flex: 1;
+  /* height: calc(100vh - var(--header-height) - 1.8rem); */
   padding-bottom: 1.8rem;
-  padding-top: var(--header-height);
+  /* padding-top: var(--header-height); */
 }
 /* Cart sidebar */
 .cart-container {
@@ -387,7 +316,16 @@ p[id^="confirm-price"] {
   right: 0;
   bottom: 0;
   margin: 1.3em;
+  background-color: red;
+  color: white;
+  padding: .3em .7em;
+  transition: ease-in-out .1s;
+  border-radius: 10px;
 }
+.close-btn:hover {
+  background-color: rgb(198, 0, 0);
+}
+
 /*  */
 div[id^="confirm-items"] {
   display: flex;
@@ -426,6 +364,46 @@ div[id^="confirm-items"] {
   bottom: -15px;
   font-size: .8em;
   color: rgb(98, 98, 98);
+}
+
+
+/* Thank you! */
+#checkmark {
+  position: fixed;
+  width: 100%;
+  top: 50%;
+  transform: translate(0, -50%);
+  background-color: white;
+  box-shadow: 0px 0px 7px 1px rgba(0,0,0,0.75);
+  height: 40vh;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  font-size: 1.2em;
+}
+.thank-you {
+  font-weight: bolder;
+  font-size: 3em;
+}
+.thank-you + p {
+  color: rgb(79, 79, 79);
+}
+#checkmark > div:has(a) {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+}
+#checkmark > div:has(a) a {
+  background-color: #064759;
+  color: white;
+  padding: .3em .7em;
+  border-radius: 10px;
+  transition: ease-in-out .1s;
+}
+#checkmark > div:has(a) a:hover {
+  background-color: #EF7200;
 }
 
 /* Card things */
@@ -583,6 +561,183 @@ p[id^="invalid"] {
 #edit-btn:hover {
   background-color: #EF7200;
 }
+
+
+/* Creds: https://codepen.io/p1p0c0/pen/VBMRzm */
+.swal-icon--success {
+  border-color: #a5dc86
+}
+
+.swal-icon--success:after, .swal-icon--success:before {
+  content: "";
+  border-radius: 50%;
+  position: absolute;
+  width: 60px;
+  height: 120px;
+  background: #fff;
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg)
+}
+
+.swal-icon--success:before {
+  border-radius: 120px 0 0 120px;
+  top: -7px;
+  left: -33px;
+  -webkit-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+  -webkit-transform-origin: 60px 60px;
+  transform-origin: 60px 60px
+}
+
+.swal-icon--success:after {
+  border-radius: 0 120px 120px 0;
+  top: -11px;
+  left: 30px;
+  -webkit-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+  -webkit-transform-origin: 0 60px;
+  transform-origin: 0 60px;
+  -webkit-animation: rotatePlaceholder 4.25s ease-in;
+  animation: rotatePlaceholder 4.25s ease-in
+}
+
+.swal-icon--success__ring {
+  width: 80px;
+  height: 80px;
+  border: 4px solid hsla(98, 55%, 69%, .2);
+  border-radius: 50%;
+  box-sizing: content-box;
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  z-index: 2
+}
+
+.swal-icon--success__hide-corners {
+  width: 5px;
+  height: 90px;
+  background-color: #fff;
+  padding: 1px;
+  position: absolute;
+  left: 28px;
+  top: 8px;
+  z-index: 1;
+  -webkit-transform: rotate(-45deg);
+  transform: rotate(-45deg)
+}
+
+.swal-icon--success__line {
+  height: 5px;
+  background-color: #a5dc86;
+  display: block;
+  border-radius: 2px;
+  position: absolute;
+  z-index: 2
+}
+
+.swal-icon--success__line--tip {
+  width: 25px;
+  left: 14px;
+  top: 46px;
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg);
+  -webkit-animation: animateSuccessTip .75s;
+  animation: animateSuccessTip .75s
+}
+
+.swal-icon--success__line--long {
+  width: 47px;
+  right: 8px;
+  top: 38px;
+  -webkit-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+  -webkit-animation: animateSuccessLong .75s;
+  animation: animateSuccessLong .75s
+}
+
+.swal-icon {
+  width: 80px;
+  height: 80px;
+  border-width: 4px;
+  border-style: solid;
+  border-radius: 50%;
+  padding: 0;
+  position: relative;
+  box-sizing: content-box;
+  /* margin: 1.5em; */
+  z-index: -5;
+}
+
+@keyframes animateSuccessLong {
+  0% {
+    width: 0;
+    right: 46px;
+    top: 54px
+  }
+  65% {
+    width: 0;
+    right: 46px;
+    top: 54px
+  }
+  84% {
+    width: 55px;
+    right: 0;
+    top: 35px
+  }
+  to {
+    width: 47px;
+    right: 8px;
+    top: 38px
+  }
+}
+
+@keyframes rotatePlaceholder {
+  0% {
+    -webkit-transform: rotate(-45deg);
+    transform: rotate(-45deg)
+  }
+  5% {
+    -webkit-transform: rotate(-45deg);
+    transform: rotate(-45deg)
+  }
+  12% {
+    -webkit-transform: rotate(-405deg);
+    transform: rotate(-405deg)
+  }
+  to {
+    -webkit-transform: rotate(-405deg);
+    transform: rotate(-405deg)
+  }
+}
+
+@keyframes animateSuccessTip {
+  0% {
+    width: 0;
+    left: 1px;
+    top: 19px
+  }
+  54% {
+    width: 0;
+    left: 1px;
+    top: 19px
+  }
+  70% {
+    width: 50px;
+    left: -8px;
+    top: 37px
+  }
+  84% {
+    width: 17px;
+    left: 21px;
+    top: 48px
+  }
+  to {
+    width: 25px;
+    left: 14px;
+    top: 45px
+  }
+}
+
 /* #add-item-btn {
   position: fixed;
   left: 0;

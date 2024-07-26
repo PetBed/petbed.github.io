@@ -5,7 +5,7 @@ const reverseOption = document.getElementById("reverse");
 const filterDone = document.getElementById("filter-done");
 const filterPending = document.getElementById("filter-pending");
 
-var menu = subMenu = subMenuPrice = [];
+var menu = (subMenu = subMenuPrice = []);
 var orderListJSON, orderList, newOrderListJSON;
 var sortedOrderList = [];
 var reverseSort = false;
@@ -45,28 +45,31 @@ async function getOrders() {
 }
 
 async function init() {
-  await fetch("../Data/items.json")
+	await fetch("../Data/items.json")
 		.then((response) => response.json())
 		.then((json) => {
-        menu = json.menu;
-        subMenu = json.subMenu;
-        subMenuPrice = json.subMenuPrice;
-  });
+			menu = json.menu;
+			subMenu = json.subMenu;
+			subMenuPrice = json.subMenuPrice;
+		});
 
 	await getOrders();
 	await createTable(checkCookie("sortType") ? getCookie("sortType") : "order");
-  sortOption.value = checkCookie("sortType") ? getCookie("sortType") : "order";
+	sortOption.value = checkCookie("sortType") ? getCookie("sortType") : "order";
+	// await createTable("name");
+	// sortOption.value = "name";
 
-  function setSelectedValue(selectObj, valueToSet) {
-    for (var i = 0; i < selectObj.options.length; i++) {
-        if (selectObj.options[i].text== valueToSet) {
-            selectObj.options[i].selected = true;
-            return;
-        }
-    }
-  }
-  
-  setSelectedValue(sortOption, getCookie("sortType") != "" ? getCookie("sortType") : "Order");
+	function setSelectedValue(selectObj, valueToSet) {
+		for (var i = 0; i < selectObj.options.length; i++) {
+			if (selectObj.options[i].text == valueToSet) {
+				selectObj.options[i].selected = true;
+				return;
+			}
+		}
+	}
+
+	setSelectedValue(sortOption, getCookie("sortType") != "" ? getCookie("sortType") : "Order");
+	filterChanged(-1);
 }
 
 //==================================================
@@ -80,44 +83,52 @@ async function createTable(sortType) {
 
 	if (sortType != "order") {
 		tableHead.innerHTML = `
-        <tr>
-            <th>No.</th>
-            <th>Name</th>
-            <th>Class</th>
-            <th>Time</th>
-            <th>Order</th>
-            <th>Cost</th>
-        </tr>`;
+            <p>Name</p>
+            <p>Class</p>
+            <p>Time</p>
+            <p>Order</p>
+            <p>Cost</p>
+            `;
 
 		await sortOrderList(sortType);
 		outerloop: for (let i = 0; i < orderList.length; i++) {
 			orders = "";
 			time = "";
 			cost = 0;
-      const searchParam = new URLSearchParams(window.location.search).get("searchParam")
+			var searchParamList = new URLSearchParams(window.location.search).get("searchParam").split(",");
+			innerloop: for (let j = 0; j < orderList[sortedOrderList[i]].order.length; j++) {
+				let done = orderList[sortedOrderList[i]].order[j].done;
+				let failTestCount = 0;
+
+				if (searchParamList.indexOf("pending") != -1 && done) {
+					failTestCount += 1;
+				}
+				if (searchParamList.indexOf("done") != -1 && !done) {
+					failTestCount += 1;
+				}
+				checkFilters: if (searchParamList.indexOf("doing") != -1) {
+					for (let k = 0; k < orderList[sortedOrderList[i]].order.length; k++) {
+						if ((!done && orderList[sortedOrderList[i]].order[k].done == true) || (done && orderList[sortedOrderList[i]].order[k].done == false)) {
+							break checkFilters;
+						}
+					}
+					failTestCount += 1;
+				}
+
+				if (failTestCount >= searchParamList.length) {
+					continue outerloop;
+				}
+			}
 
 			//set order
-			for (let j = 0; j < orderList[sortedOrderList[i]].order.length; j++) {        
+			for (let j = 0; j < orderList[sortedOrderList[i]].order.length; j++) {
 				let menuIndex = orderList[sortedOrderList[i]].order[j].index[0];
 				let itemIndex = orderList[sortedOrderList[i]].order[j].index[1];
-        let done = orderList[sortedOrderList[i]].order[j].done
-        
-        checkFilters: if (searchParam === "pending" && done) {
-          continue outerloop;
-        } else if (searchParam === "done" && !done) {
-          continue outerloop;
-        } else if (searchParam === "doing") {
-          for (let k = 0; k < orderList[sortedOrderList[i]].order.length; k++) {
-            if ((!done && orderList[sortedOrderList[i]].order[k].done == true) || (done && orderList[sortedOrderList[i]].order[k].done == false)) {
-              break checkFilters;
-            }
-          };
-          continue outerloop;
-        }
+				// let done = orderList[sortedOrderList[i]].order[j].done;
 
-				orders += `<form action="../doneOrder" method="post" target="vm" onsubmit="loop()"> <button type="submit" name="orderIndex" value="${sortedOrderList[i]},${j}" class="${orderList[sortedOrderList[i]].order[j].done ? 'completed-order' : ''}">${(j + 1)}. ${subMenu[menuIndex][itemIndex]}</button></form>`;
+				orders += `<form action="../doneOrder" method="post" target="vm" onsubmit="loop()"> <button type="submit" name="orderIndex" value="${sortedOrderList[i]},${j}" class="${orderList[sortedOrderList[i]].order[j].done ? "completed-order" : ""}"><div class='item-checkbox'></div>${subMenu[menuIndex][itemIndex]}</button></form>`;
 			}
-      
+
 			//set cost
 			for (let j = 0; j < orderList[sortedOrderList[i]].order.length; j++) {
 				let menuIndex = orderList[sortedOrderList[i]].order[j].index[0];
@@ -133,12 +144,11 @@ async function createTable(sortType) {
 		}
 	} else {
 		tableHead.innerHTML = `
-        <tr>
-            <th>No.</th>
-            <th>Order Type</th>
-            <th>Count</th>
-            <th>Done</th>
-        </tr>`;
+      <p>No.</p>
+      <p>Order Type</p>
+      <p>Count</p>
+      <p>Done</p>
+    `;
 		writeOrders();
 	}
 }
@@ -147,14 +157,18 @@ async function createTable(sortType) {
 //Table construction functions
 function createTableRow(order, name, className, cost, time) {
 	//used className instead of class cause class is reserved
-	const newRow = document.createElement("tr");
+	const newRow = document.createElement("div");
 	newRow.innerHTML = `
-        <td>${tableData.childElementCount + 1}.</td>
-        <td>${name}</td>
-        <td>${className}</td>
-        <td>${time}</td>
-        <td>${order}</td>
-        <td>${cost}</td>
+        <p>${name}</p>
+        <p>${className}</p>
+        <p>${time}</p>
+        <div>${order}</div>
+        <p>${cost}</p>
+        <div class='checkmark'>
+          <div>
+            <i class="fa fa-check" aria-hidden="true"></i>
+          </div>
+        </div>
     `;
 	tableData.appendChild(newRow);
 }
@@ -252,21 +266,20 @@ function writeOrders() {
 				var newObject = {};
 				newObject.name = subMenu[orderList[i].order[j].index[0]][orderList[i].order[j].index[1]];
 				newObject.count = 1;
-        newObject.done = 0;
+				newObject.done = 0;
 				orderStatus.push(newObject);
 			}
 
-      k = orderStatus.findIndex((e) => e.name === subMenu[orderList[i].order[j].index[0]][orderList[i].order[j].index[1]]);
-      if (orderList[i].order[j].done === true) {
-        orderStatus[k].done += 1;
-      }
+			k = orderStatus.findIndex((e) => e.name === subMenu[orderList[i].order[j].index[0]][orderList[i].order[j].index[1]]);
+			if (orderList[i].order[j].done === true) {
+				orderStatus[k].done += 1;
+			}
 		}
 	}
 
-
 	for (let i = 0; i < 3; i++) {
 		var sortedOrderStatus = [];
-		const newRowHeader = document.createElement("tr");
+		const newRowHeader = document.createElement("div");
 		newRowHeader.classList.add("table-order-header");
 		newRowHeader.innerHTML = `<td colspan=4>${menu[i]}</td>`;
 		tableData.appendChild(newRowHeader);
@@ -296,7 +309,7 @@ function writeOrders() {
 //Sorting thingies
 function sortChanged() {
 	document.cookie = "sortType=" + sortOption.value;
-  createTable(getCookie("sortType"));
+	createTable(getCookie("sortType"));
 }
 
 function reverseChanged() {
@@ -307,29 +320,31 @@ function reverseChanged() {
 //==================================================
 //Filters
 function filterChanged(type) {
-  const url = new URL(window.location)
-  var searchParams = "";
-  const searchParam = new URLSearchParams(window.location.search).get("searchParam")
+	const url = new URL(window.location);
+	var searchParams = [];
+	const searchParam = new URLSearchParams(window.location.search).get("searchParam");
+	if (searchParam != "") {
+		searchParams = searchParam.split(",");
+	}
+	if (searchParams.indexOf(type) != -1) {
+		searchParams.splice(searchParams.indexOf(type), 1);
+	} else {
+		if (type != -1) searchParams.push(type);
+	}
+	let filterSelected = document.querySelectorAll("a.filter-selected");
+	Array.prototype.forEach.call(filterSelected, function (e) {
+		e.classList.remove("filter-selected");
+	});
 
-  if (type == "" || type == searchParam) {
-    document.getElementById(`filter-${type}`).classList.remove("filter-selected");
-    history.pushState(null, '', url.toString().split("?")[0]);
-    createTable(getCookie("sortType"));
-    return;
-  }
+	console.log(searchParams);
+	for (let i = 0; i < searchParams.length; i++) {
+		document.getElementById(`filter-${searchParams[i]}`).classList.add("filter-selected");
+	}
 
-  searchParams = type;
-  try {
-    document.getElementsByClassName("filter-selected")[0].classList.remove("filter-selected");
-  } catch (err) {
-    // console.warn(err);
-  }
-  document.getElementById(`filter-${type}`).classList.add("filter-selected");
-  
-  url.searchParams.set("searchParam", searchParams)
-  history.pushState(null, '', url);
+	url.searchParams.set("searchParam", searchParams.join(","));
+	history.pushState(null, "", url);
 
-  createTable(getCookie("sortType"));
+	createTable(getCookie("sortType"));
 }
 
 //==================================================
@@ -358,7 +373,7 @@ function getCookie(cname) {
 }
 
 function checkCookie(name) {
-	return document.cookie.split(';').some(c => {
-        return c.trim().startsWith(name + '=');
-    });
+	return document.cookie.split(";").some((c) => {
+		return c.trim().startsWith(name + "=");
+	});
 }

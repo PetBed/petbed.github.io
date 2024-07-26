@@ -4,23 +4,53 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
-  <link rel="stylesheet" href="style.css">
-</head>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="../Data/Resources/header.css" />
+  <link rel="stylesheet" href="../Data/Resources/scrollbar.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet" /></head>
 <body onload="init()">
   <iframe src="" frameborder="0" name="vm" style="display: none;"></iframe>
-  <form action="../newUser" method="post" target="vm">
-    <input type="text" name="username">
-    <input type="text" name="password">
-    <input type="text" name="class">
-    <button type="submit">Add</button>
-  </form>
-  <div class="table">
-    <table>
-      <thead class="table-head"></thead>
-      <tbody class="table-data"></tbody>
-    </table>
+  <header>
+    <div class="logo" style="font-family: 'Oswald', sans-serif; font-size: 1em; height: 90%; flex: 1">
+      <p style="color: #064759; font-size: 1em; text-shadow: 0.04375em 0.03125em 0px #b5b5b5; font-weight: 400">Project</p>
+      <p style="color: #ef7200; font-size: 1.6em; position: absolute; font-weight: bolder; bottom: 0">SPEED</p>
+    </div>
+    <a>Menu</a>
+    <a>Contact</a>
+    <div class="menu-icon">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+    <input type="text" id="profile-select" style="position: fixed; opacity: 0; right: 1000vw" />
+    <label class="profile" for="profile-select">
+      <div>
+        <p id="username-title"></p>
+        <p id="class-title"></p>
+        <hr />
+        <a>Credits</a>
+        <hr />
+        <a onclick="logout()">Logout</a>
+      </div>
+    </label>
+  </header>
+  <div class="main-container">
+    <form action="../newUser" method="post" target="vm">
+      <input type="text" name="username">
+      <input type="text" name="password">
+      <input type="text" name="class">
+      <button type="submit">Add</button>
+    </form>
+    <div class="table">
+      <table>
+        <thead class="table-head"></thead>
+        <tbody class="table-data"></tbody>
+      </table>
+    </div>
   </div>
-  <a onclick="logout()">Logout</a>
   <script src="script.js"></script>
 </body>
 </html>

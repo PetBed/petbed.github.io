@@ -15,11 +15,12 @@
   <iframe src="" frameborder="0" name="vm" style="display: none;"></iframe>
   <header>
     <div class="logo" style="font-family: 'Oswald', sans-serif; font-size: 1em; height: 90%; flex: 1">
-      <p style="color: #064759; font-size: 1em; text-shadow: 0.04375em 0.03125em 0px #b5b5b5; font-weight: 400">Project</p>
-      <p style="color: #ef7200; font-size: 1.6em; position: absolute; font-weight: bolder; bottom: 0">SPEED</p>
+      <p style="list-style-type: none; color: #064759; font-size: 0.75em; text-shadow: 0.04375em 0.03125em 0px #b5b5b5; font-weight: 400; padding-left: 20px;">Project</p>
+      <p style="list-style-type: none; color: #ef7200; font-size: 1.3em; position: absolute; font-weight: bolder; bottom: 0; padding-left: 20px;">SPEED</p>
     </div>
     <a>Menu</a>
-    <a>Contact</a>
+    <a>Orders</a>
+    <a href="C:\Users\PC\Documents\petbed.github.io\Competition\Canteen System\Server\Admin">Student List</a>
     <div class="menu-icon">
       <div></div>
       <div></div>
@@ -31,19 +32,21 @@
         <p id="username-title"></p>
         <p id="class-title"></p>
         <hr />
-        <a>Credits</a>
+        <a class="credits-meow">Credits</a>
         <hr />
         <a onclick="logout()">Logout</a>
       </div>
     </label>
   </header>
   <div class="main-container">
-    <form action="../newUser" method="post" target="vm">
-      <input type="text" name="username">
-      <input type="text" name="password">
-      <input type="text" name="class">
-      <button type="submit">Add</button>
-    </form>
+    <div class="form-styling">
+      <form action="../newUser" method="post" target="vm">
+        <input type="text" name="username" required placeholder=Username id="input1">
+        <input type="text" name="password" required placeholder=Password id="input2">
+        <input type="text" name="class" required placeholder=Class id="input3">
+        <button type="submit" id="addname">ADD</button>
+      </form>
+    </div>
     <div class="table">
       <table>
         <thead class="table-head"></thead>

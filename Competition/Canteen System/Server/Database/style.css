@@ -1,5 +1,5 @@
 :root {
-	--header-height: 5rem;
+	--header-height: 4rem;
 	--cart-width: 13%;
 }
 * {
@@ -12,6 +12,16 @@ body {
 a:hover,
 label:hover {
 	cursor: pointer;
+}
+#header-font{
+  font-size: 18px;
+  text-decoration: none;
+  color: black;
+  font-family: 'Oswald', sans-serif;
+  padding: 10px;
+}
+#header-font:hover{
+  color:#EF7200;
 }
 input {
 	border: none;

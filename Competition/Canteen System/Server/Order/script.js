@@ -209,10 +209,10 @@ function sendOrder() {
 	})
 		.then((response) => response.json())
 		.then((json) => console.log(json));
-
-  document.getElementById("checkmark").style.display = "flex";
-  deleteCookie("cart");
-  updateCart();
+  console.log(order.join("/"));
+  // document.getElementById("checkmark").style.display = "flex";
+  // deleteCookie("cart");
+  // updateCart();
 }
 
 function onlineTransfer() {

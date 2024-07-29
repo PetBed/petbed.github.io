@@ -63,14 +63,15 @@ async function createTable() {
           <th>Name</th>
           <th>Password</th>
           <th>Class</th>
+          <th>RM</th>
       </tr>`;
 
   for (let i = 0; i < userList.length; i++) {
-    createTableRow(userList[i].username, userList[i].password, userList[i].class == undefined ? "Teacher" : userList[i].class);
+    createTableRow(userList[i].username, userList[i].password, userList[i].class == undefined ? "Teacher" : userList[i].class, userList[i].money);
   }
 }
 
-function createTableRow(name, password, className) {
+function createTableRow(name, password, className, money) {
 	//used className instead of class cause class is reserved
 	const newRow = document.createElement("tr");
 	newRow.innerHTML = `
@@ -78,6 +79,7 @@ function createTableRow(name, password, className) {
         <td>${name}</td>
         <td>${password}</td>
         <td>${className}</td>
+        <td>${money}</td>
     `;
 	tableData.appendChild(newRow);
 }

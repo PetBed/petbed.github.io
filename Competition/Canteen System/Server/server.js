@@ -1,3 +1,4 @@
+
 const express = require("express");
 const bodyParser = require('body-parser');
 var multiparty = require('multiparty');
@@ -11,6 +12,7 @@ app.use('/orders', express.static("database"));
 app.use('/login', express.static("Login"));
 app.use('/admin', express.static("Admin"));
 app.use('/data', express.static("Data"));
+app.use('/contact', express.static("Contact"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -61,10 +63,31 @@ app.post('/newOrder', (req, res) => {
     for (i = 0; i < order.length; i++) {
       order[i] = {
         "done": false,
-        "index": order[i].split(",")}
+        "index": order[i].split(",")
+      }
     }
     return order;
   };
+  var payNow = req.body.pay;
+  var returnCheck = 0;
+  if (payNow == "true") {
+    var users = JSON.parse(fs.readFileSync('Data/users.json'));
+    var price = req.body.price;
+    var id = Number(req.body.id);
+    console.log(users.users[id].money, price);
+    if (users.users[id].money >= price) {
+      users.users[id].money -= price;
+      fs.writeFile('Data/users.json', JSON.stringify(users), err => {
+        if(err) throw err;
+      }); 
+    } else {
+      returnCheck = 1;
+      // res.sendStatus(200).send("Not enough money");
+      // res.end;
+    }
+  }
+  if (returnCheck) return;
+
 
   const newObject = {
     "name": name,
@@ -79,21 +102,28 @@ app.post('/newOrder', (req, res) => {
   var newData = JSON.stringify(data);
   fs.writeFile('Data/orders.json', newData, err => {
     if(err) throw err;
-  });
+  }); 
+  res.sendStatus(200).send("Done");
+  // res.end();
 })
 
 app.post('/newUser', (req, res) => {
   var username = req.body.username;
   var password = req.body.password;
   var className = req.body.class;
+  var uid = req.body.uid;
+  var admin = req.body.admin;
   
   var data = fs.readFileSync('Data/users.json');
   data = JSON.parse(data);
   data.users.push({
     "username": username,
-    "password": password,
-    "class": className
+    "password": password
   });
+  let curUser = data.users.length - 1;
+  if (!!className) data.users[curUser].class = className;
+  if (!!uid) data.users[curUser].uid = uid.split(" ");
+  if (admin) data.users[curUser].admin = true;
   var newData = JSON.stringify(data);
   fs.writeFile('Data/users.json', newData, err => {
     if(err) throw err;
@@ -171,6 +201,59 @@ app.post('/deleteItem', (req, res) => {
     if(err) throw err;
   });
   res.sendStatus(200);
+})
+
+app.get('/checkUsername', (req, res) => {
+  var data = JSON.parse(fs.readFileSync('Data/users.json'));
+  var uid = req.query.uid;
+  var sent = 0;
+
+  data.users.forEach((value) => {
+    if (!value.uid) return;
+    if (value.uid.join(",") == uid) {
+      sent = 1;
+      res.status(200).send(value.username);
+      res.end;
+    }
+  })
+  if (sent == 0) res.status(200).send("none");
+  // res.status = 200;
+})
+
+app.get('/checkClass', (req, res) => {
+  var data = JSON.parse(fs.readFileSync('Data/users.json'));
+  var uid = req.query.uid;
+  var sent = 0;
+
+  data.users.forEach((value) => {
+    if (!value.uid) return;
+    if (value.uid.join(",") == uid) {
+      sent = 1;
+      res.status(200).send(!value.class ? "Teacher" : value.class);
+      res.end;
+    }
+  })
+  if (sent == 0) res.status(200).send("none");
+})
+
+app.get('/checkUser', (req, res) => {
+  var data = JSON.parse(fs.readFileSync('Data/users.json'));
+  var uid = req.query.uid;
+  var sent = 0;
+
+  data.users.forEach((value) => {
+    if (!value.uid) return;
+    if (value.uid.join(",") == uid) {
+      sent = 1;
+      res.status(200).send({
+        "name": value.username,
+        "class": !value.class ? "Teacher" : value.class,
+        "money": value.money
+      });
+      res.end;
+    }
+  })
+  if (sent == 0) res.status(200).send("none");
 })
 // app.get('/test', (req, res) => {
 //   res.sendFile(__dirname + '/Database/index.html')

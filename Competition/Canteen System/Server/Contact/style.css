@@ -1,0 +1,70 @@
+:root {
+  --header-height: 4rem;
+  --cart-width: 17%;
+}
+* {
+  margin: 0;
+}
+body {
+	margin: 0;
+  background-image: url("../Data/Resources/shrek.jpg");
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: cover;
+	height: 550px;
+	background-color: #064759;
+}
+h1{
+  font-family: 'Oswald', sans-serif;
+  font-size: 80px;
+  font-weight: 100;
+  padding: 20px;
+}
+h3{
+  font-family: 'Oswald', sans-serif;
+  padding-top: 20px;
+  font-weight: 500;
+}
+.main-container p, li{
+  font-size: 13px;
+  text-align: left;
+}
+#address{
+  text-align: left;
+} 
+#contact-format{
+  display: inline-block;
+  vertical-align: top;
+  margin: 0 165px 20px ;
+}
+#header-font{
+  font-size: 18px;
+  text-decoration: none;
+  color: black;
+  font-family: 'Oswald', sans-serif;
+  padding: 9px;
+}
+#header-font:hover{
+  color:#EF7200;
+}
+a:hover, label:hover {
+  cursor: pointer;
+}
+input {
+  border: none;
+  background-color: #d9d9d9;
+  border-radius: 10px;
+}
+input::placeholder {
+  color: white;
+}
+
+/* Main container */
+.main-container {
+  text-align: center;
+  height: 35em;
+  width: 65em;
+  margin: auto;
+  background-color: #ffffff;
+  font-family: sans-serif, Arial, Helvetica;
+}

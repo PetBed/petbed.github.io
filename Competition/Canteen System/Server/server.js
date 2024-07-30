@@ -55,6 +55,7 @@ app.post('/doneOrder', (req, res) => {
 });
 
 app.post('/newOrder', (req, res) => {
+  console.log(req.body.name, req.body.class, req.body.time, req.body.orders)
   var name = req.body.name;
   var className = req.body.class;
   var time = req.body.time;
@@ -74,16 +75,18 @@ app.post('/newOrder', (req, res) => {
     var users = JSON.parse(fs.readFileSync('Data/users.json'));
     var price = req.body.price;
     var id = Number(req.body.id);
+    var paid = false;
     console.log(users.users[id].money, price);
     if (users.users[id].money >= price) {
       users.users[id].money -= price;
+      users.users[id].money == Math.round((users.users[id].money + Number.EPSILON) * 100) / 100;
       fs.writeFile('Data/users.json', JSON.stringify(users), err => {
         if(err) throw err;
       }); 
+      paid = true;
     } else {
       returnCheck = 1;
-      // res.sendStatus(200).send("Not enough money");
-      // res.end;
+      return;
     }
   }
   if (returnCheck) return;
@@ -93,7 +96,8 @@ app.post('/newOrder', (req, res) => {
     "name": name,
     "class": className,
     "order": orders(),
-    "time": time
+    "time": time,
+    "paid": paid
   };
   
   var data = fs.readFileSync('Data/orders.json');
@@ -104,7 +108,6 @@ app.post('/newOrder', (req, res) => {
     if(err) throw err;
   }); 
   res.sendStatus(200).send("Done");
-  // res.end();
 })
 
 app.post('/newUser', (req, res) => {
@@ -203,57 +206,85 @@ app.post('/deleteItem', (req, res) => {
   res.sendStatus(200);
 })
 
-app.get('/checkUsername', (req, res) => {
-  var data = JSON.parse(fs.readFileSync('Data/users.json'));
-  var uid = req.query.uid;
-  var sent = 0;
+// app.get('/checkUsername', (req, res) => {
+//   var data = JSON.parse(fs.readFileSync('Data/users.json'));
+//   var uid = req.query.uid;
+//   var sent = 0;
 
-  data.users.forEach((value) => {
-    if (!value.uid) return;
-    if (value.uid.join(",") == uid) {
-      sent = 1;
-      res.status(200).send(value.username);
-      res.end;
-    }
-  })
-  if (sent == 0) res.status(200).send("none");
-  // res.status = 200;
-})
+//   data.users.forEach((value) => {
+//     if (!value.uid) return;
+//     if (value.uid.join(",") == uid) {
+//       sent = 1;
+//       res.status(200).send(value.username);
+//       res.end;
+//     }
+//   })
+//   if (sent == 0) res.status(200).send("none");
+//   // res.status = 200;
+// })
 
-app.get('/checkClass', (req, res) => {
-  var data = JSON.parse(fs.readFileSync('Data/users.json'));
-  var uid = req.query.uid;
-  var sent = 0;
+// app.get('/checkClass', (req, res) => {
+//   var data = JSON.parse(fs.readFileSync('Data/users.json'));
+//   var uid = req.query.uid;
+//   var sent = 0;
 
-  data.users.forEach((value) => {
-    if (!value.uid) return;
-    if (value.uid.join(",") == uid) {
-      sent = 1;
-      res.status(200).send(!value.class ? "Teacher" : value.class);
-      res.end;
-    }
-  })
-  if (sent == 0) res.status(200).send("none");
-})
+//   data.users.forEach((value) => {
+//     if (!value.uid) return;
+//     if (value.uid.join(",") == uid) {
+//       sent = 1;
+//       res.status(200).send(!value.class ? "Teacher" : value.class);
+//       res.end;
+//     }
+//   })
+//   if (sent == 0) res.status(200).send("none");
+// })
 
 app.get('/checkUser', (req, res) => {
   var data = JSON.parse(fs.readFileSync('Data/users.json'));
   var uid = req.query.uid;
   var sent = 0;
 
-  data.users.forEach((value) => {
+  data.users.forEach((value, index) => {
     if (!value.uid) return;
     if (value.uid.join(",") == uid) {
       sent = 1;
       res.status(200).send({
         "name": value.username,
         "class": !value.class ? "Teacher" : value.class,
-        "money": value.money
+        "money": value.money,
+        "fingerprint": value.fingerprint,
+        "id": index
       });
-      res.end;
+      return;
     }
   })
   if (sent == 0) res.status(200).send("none");
+})
+
+app.get('/getMenu', (req, res) => {
+  var data = JSON.parse(fs.readFileSync('Data/items.json'));
+  var subMenu = "";
+  for (let i = 0; i < data.subMenu.length; i++) {
+    for (let j = 0; j < data.subMenu[i].length; j++) {
+      subMenu += `${data.subMenu[i][j]},`;
+    }
+    subMenu = subMenu.substring(0, subMenu.length - 1);
+    subMenu += "/";
+  }
+  res.status(200).send(subMenu);
+})
+
+app.get('/getMenuPrice', (req, res) => {
+  var data = JSON.parse(fs.readFileSync('Data/items.json'));
+  var subMenuPrice = "";
+  for (let i = 0; i < data.subMenuPrice.length; i++) {
+    for (let j = 0; j < data.subMenuPrice[i].length; j++) {
+      subMenuPrice += `${data.subMenuPrice[i][j]},`;
+    }
+    subMenuPrice = subMenuPrice.substring(0, subMenuPrice.length - 1);
+    subMenuPrice += "/";
+  }
+  res.status(200).send(subMenuPrice);
 })
 // app.get('/test', (req, res) => {
 //   res.sendFile(__dirname + '/Database/index.html')

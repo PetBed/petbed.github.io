@@ -67,8 +67,8 @@
 				<div id="confirm-payment-method">
 					<p style="font-size: 1.4em">Select Payment Method</p>
 					<div>
-						<a onclick="sendOrder()">UPON PICKUP</a>
-						<a onclick="onlineTransfer()">IN-CARD CREDITS</a>
+						<a onclick="sendOrder(false)">UPON PICKUP</a>
+						<a onclick="cardCredits()">IN-CARD CREDITS</a>
 						<a onclick="onlineTransfer()">ONLINE TRANSFER</a>
 					</div>
 				</div>
@@ -101,12 +101,18 @@
 							<p><b>CVC/CVV</b></p>
 							<input type="number" name="card-verification" id="card-verification" placeholder=". . ." />
 							<p id="invalid-verification">Invalid CVC/CVV</p>
-							<a onclick="sendOrder()" id="place-order">Place Order</a>
+							<a onclick="sendOrder(true, true)" id="place-order">Place Order</a>
 						</div>
 					</div>
 				</div>
 				<a class="close-btn" onclick="onlineTransfer()">BACK</a>
 			</div>
+      <div id="card-div" style="z-index: 10; display: none; box-shadow: none">
+        <p id="cur-money">Current Money in Card:</p>
+        <p class="card-money-text">Do you want to place your order?</p>
+        <a class="card-money-send" onclick="sendOrder(true, false)">YES</a>
+        <a class="close-btn" onclick="cardCredits()">BACK</a>
+      </div>
 			<div id="checkmark">
         <!-- Creds: https://codepen.io/p1p0c0/pen/VBMRzm -->
 				<div class="swal-icon swal-icon--success">

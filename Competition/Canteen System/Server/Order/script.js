@@ -9,6 +9,7 @@ var editOverlay = document.getElementById("edit-overlay");
 var confirmItems = document.getElementById("confirm-items");
 var confirmPrice = document.getElementById("confirm-price");
 var transferDiv = document.getElementById("transfer-div");
+var cardDiv = document.getElementById("card-div");
 var placeOrder = document.getElementById("place-order");
 var editButton = document.getElementById("edit-btn");
 var editControls = document.getElementById("edit-controls");
@@ -30,13 +31,13 @@ async function init() {
 			subMenuPrice = json.subMenuPrice;
 		});
 
-    // console.log(getCookie("class"))
-	usernameTitle.innerHTML = `${getCookie("username")}`
-  classTitle.innerHTML = `${checkCookie("class") ? getCookie("class") : ""}`;
+	// console.log(getCookie("class"))
+	usernameTitle.innerHTML = `${getCookie("username")}`;
+	classTitle.innerHTML = `${checkCookie("class") && getCookie("class") != "undefined" && getCookie("class") != "" ? getCookie("class") : "Teacher"}`;
 	if (getCookie("class") == "Staff") {
 		document.getElementById("edit-btn").style.display = "block";
 	}
-  
+
 	await changeSection(0);
 	updateCart();
 }
@@ -74,9 +75,9 @@ async function changeSection(index) {
 		itemsDiv.appendChild(newDiv);
 	}
 
-  // To get current edit state
-  toggleEdit();
-  toggleEdit();
+	// To get current edit state
+	toggleEdit();
+	toggleEdit();
 }
 
 function addItem(index) {
@@ -100,7 +101,7 @@ function addItem(index) {
 
 function updateCart() {
 	cartDiv.innerHTML = "";
-  document.getElementById("cart-details").innerHTML = "";
+	document.getElementById("cart-details").innerHTML = "";
 	// Check if cookie exists
 	if (!getCookie("cart")) return;
 	var cart = JSON.parse(getCookie("cart")).cart;
@@ -161,7 +162,7 @@ function changeItemCount(index, increase) {
 
 function confirmOrder() {
 	confirmOverlay.style.display = confirmOverlay.style.display != "block" ? "block" : "none";
-  document.getElementById("checkmark").style.display = "none";
+	document.getElementById("checkmark").style.display = "none";
 	var cart = JSON.parse(getCookie("cart")).cart;
 	var totalPrice = 0;
 	confirmItems.innerHTML = "";
@@ -185,7 +186,8 @@ function confirmOrder() {
 	confirmPrice.innerHTML = `RM ${totalPrice}`;
 }
 
-function sendOrder() {
+async function sendOrder(paid, transfer) {
+	var totalPrice = 0;
 	var cart = JSON.parse(getCookie("cart")).cart;
 	var order = [];
 	var date = new Date();
@@ -193,55 +195,70 @@ function sendOrder() {
 	for (let i = 0; i < cart.length; i++) {
 		for (let j = 0; j < cart[i].count; j++) {
 			order.push(cart[i].index);
+			totalPrice += subMenuPrice[cart[i].index.split(",")[0]][cart[i].index.split(",")[1]];
 		}
 	}
+
+	var obj = {
+		name: getCookie("username"),
+		class: checkCookie("class") && getCookie("class") != "undefined" && getCookie("class") != "" ? getCookie("class") : "Teacher",
+		orders: order.join("/"),
+		time: `${date.getHours() < 10 ? "0" : ""}${date.getHours()}${date.getMinutes()}`,
+	};
+
+	if (paid && !transfer) {
+		var userList = [];
+		await fetch("../Data/users.json")
+			.then((response) => response.json())
+			.then((json) => (userList = json.users));
+
+		obj.price = totalPrice;
+		obj.pay = true;
+		obj.id = userList.findIndex((x) => x.username == getCookie("username"));
+    console.log(obj);
+    return;
+	}
+
 	fetch("./newOrder", {
 		method: "POST",
-		body: JSON.stringify({
-			name: getCookie("username"),
-			class: checkCookie("class") ? getCookie("class") : "Teacher",
-			orders: order.join("/"),
-			time: `${date.getHours() < 10 ? "0" : ""}${date.getHours()}${date.getMinutes()}`,
-		}),
+		body: JSON.stringify(obj),
 		headers: {
 			"Content-type": "application/json; charset=UTF-8",
 		},
-	})
-		.then((response) => response.json())
-		.then((json) => console.log(json));
-  console.log(order.join("/"));
-  // document.getElementById("checkmark").style.display = "flex";
-  // deleteCookie("cart");
-  // updateCart();
+	});
+	console.log(order.join("/"));
+	document.getElementById("checkmark").style.display = "flex";
+	deleteCookie("cart");
+	updateCart();
 }
 
 function onlineTransfer() {
-  try {
-    document.getElementById("confirm-price-clone").remove();
-    document.getElementById("confirm-items-clone").remove();
-  } catch {}
-  var priceClone = document.getElementById("confirm-price").cloneNode(true);
-  var itemsClone = document.getElementById("confirm-items").cloneNode(true);
-  priceClone.id = "confirm-price-clone";
-  itemsClone.id = "confirm-items-clone";
-  transferDiv.prepend(priceClone);
-  transferDiv.prepend(itemsClone);
-  document.getElementById("confirm-items-clone").addEventListener("wheel", (e) => {
-    document.getElementById("confirm-items-clone").scrollLeft += e.deltaY * 0.5;
-    document.getElementById("confirm-items-clone").scrollLeft += e.deltaX * 0.5;
-  });
+	try {
+		document.getElementById("confirm-price-clone").remove();
+		document.getElementById("confirm-items-clone").remove();
+	} catch {}
+	var priceClone = document.getElementById("confirm-price").cloneNode(true);
+	var itemsClone = document.getElementById("confirm-items").cloneNode(true);
+	priceClone.id = "confirm-price-clone";
+	itemsClone.id = "confirm-items-clone";
+	transferDiv.prepend(priceClone);
+	transferDiv.prepend(itemsClone);
+	document.getElementById("confirm-items-clone").addEventListener("wheel", (e) => {
+		document.getElementById("confirm-items-clone").scrollLeft += e.deltaY * 0.5;
+		document.getElementById("confirm-items-clone").scrollLeft += e.deltaX * 0.5;
+	});
 	transferDiv.style.display = transferDiv.style.display != "flex" ? "flex" : "none";
 }
 
 function toggleEdit() {
-  if (getCookie("class") != "Staff") {
-    editButton.style.display = "none";
-    return;
-  }
+	if (getCookie("class") != "Staff") {
+		editButton.style.display = "none";
+		return;
+	}
 
 	const url = new URL(window.location);
-  const searchParam = new URLSearchParams(window.location.search).get("edit");
-  // console.log(searchParam)
+	const searchParam = new URLSearchParams(window.location.search).get("edit");
+	// console.log(searchParam)
 	if (searchParam != "true") {
 		editButton.style.display = "none";
 		editControls.style.display = "flex";
@@ -279,9 +296,9 @@ async function editItem(index) {
 	document.getElementById("edit-name").value = subMenu[curMenu][index];
 	document.getElementById("edit-price").value = subMenuPrice[curMenu][index];
 
-  // Change img resource to base 64, then to file object to be pushed into file input 
-  // Creds: https://stackoverflow.com/questions/62179675/how-to-convert-image-source-into-a-javascript-file-object
-  //        https://pqina.nl/blog/set-value-to-file-input/
+	// Change img resource to base 64, then to file object to be pushed into file input
+	// Creds: https://stackoverflow.com/questions/62179675/how-to-convert-image-source-into-a-javascript-file-object
+	//        https://pqina.nl/blog/set-value-to-file-input/
 	const toDataURL = (url) =>
 		fetch(url)
 			.then((response) => response.blob())
@@ -307,13 +324,15 @@ async function editItem(index) {
 		return new File([u8arr], filename, {type: mime});
 	}
 
-	toDataURL("./Data/ItemImage/0,0.png").then((dataUrl) => {
-		var fileData = dataURLtoFile(dataUrl, "imageName.jpg");
-    const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(fileData);
-    document.getElementById("edit-image").files = dataTransfer.files;
-		console.log(fileData);
-	});
+	try {
+		toDataURL(`./Data/ItemImage/${curMenu},${index}.png`).then((dataUrl) => {
+			var fileData = dataURLtoFile(dataUrl, "imageName.jpg");
+			const dataTransfer = new DataTransfer();
+			dataTransfer.items.add(fileData);
+			document.getElementById("edit-image").files = dataTransfer.files;
+			console.log(fileData);
+		});
+	} catch {}
 }
 
 async function saveItem(index) {
@@ -382,6 +401,30 @@ async function deleteItem(index) {
 	location.reload();
 }
 
+async function cardCredits() {
+	try {
+		document.getElementById("confirm-price-clone-2").remove();
+		document.getElementById("confirm-items-clone-2").remove();
+	} catch {}
+	var priceClone = document.getElementById("confirm-price").cloneNode(true);
+	var itemsClone = document.getElementById("confirm-items").cloneNode(true);
+	priceClone.id = "confirm-price-clone-2";
+	itemsClone.id = "confirm-items-clone-2";
+	cardDiv.prepend(priceClone);
+	cardDiv.prepend(itemsClone);
+	document.getElementById("confirm-items-clone-2").addEventListener("wheel", (e) => {
+		document.getElementById("confirm-items-clone-2").scrollLeft += e.deltaY * 0.5;
+		document.getElementById("confirm-items-clone-2").scrollLeft += e.deltaX * 0.5;
+	});
+
+	var userList = [];
+	await fetch("../Data/users.json")
+		.then((response) => response.json())
+		.then((json) => (userList = json.users));
+	console.log(userList);
+	document.getElementById("cur-money").innerHTML = `Current Money in Card: <span>RM${userList.findIndex((x) => x.username == getCookie("username"))}</span>`;
+	cardDiv.style.display = cardDiv.style.display != "flex" ? "flex" : "none";
+}
 //==============================================
 // Card validation (Creds: https://javascript.plainenglish.io/how-to-build-a-credit-card-user-interface-with-validation-in-javascript-4f190b6208ad)
 // Luhn Algorithm

@@ -56,7 +56,7 @@ async function init() {
 	await getOrders();
 	await createTable(checkCookie("sortType") ? getCookie("sortType") : "order");
 	sortOption.value = checkCookie("sortType") ? getCookie("sortType") : "order";
-	// await createTable("name");
+	// await createTable(sortOption.value);
 	// sortOption.value = "name";
 
 	function setSelectedValue(selectObj, valueToSet) {
@@ -88,6 +88,7 @@ async function createTable(sortType) {
             <p>Time</p>
             <p>Order</p>
             <p>Cost</p>
+            <p style="text-align: center">Payment</p>
             `;
 
 		await sortOrderList(sortType);
@@ -95,31 +96,32 @@ async function createTable(sortType) {
 			orders = "";
 			time = "";
 			cost = 0;
-			var searchParamList = new URLSearchParams(window.location.search).get("searchParam").split(",");
-			innerloop: for (let j = 0; j < orderList[sortedOrderList[i]].order.length; j++) {
-				let done = orderList[sortedOrderList[i]].order[j].done;
-				let failTestCount = 0;
+			var searchParamList = new URLSearchParams(window.location.search).get("searchParam") != null && new URLSearchParams(window.location.search).get("searchParam") != "" ? new URLSearchParams(window.location.search).get("searchParam").split(",") : [];
+			if (searchParamList.length != 0) {
+				innerloop: for (let j = 0; j < orderList[sortedOrderList[i]].order.length; j++) {
+					let done = orderList[sortedOrderList[i]].order[j].done;
+					let failTestCount = 0;
 
-				if (searchParamList.indexOf("pending") != -1 && done) {
-					failTestCount += 1;
-				}
-				if (searchParamList.indexOf("done") != -1 && !done) {
-					failTestCount += 1;
-				}
-				checkFilters: if (searchParamList.indexOf("doing") != -1) {
-					for (let k = 0; k < orderList[sortedOrderList[i]].order.length; k++) {
-						if ((!done && orderList[sortedOrderList[i]].order[k].done == true) || (done && orderList[sortedOrderList[i]].order[k].done == false)) {
-							break checkFilters;
-						}
+					if (searchParamList.indexOf("pending") != -1 && done) {
+						failTestCount += 1;
 					}
-					failTestCount += 1;
-				}
+					if (searchParamList.indexOf("done") != -1 && !done) {
+						failTestCount += 1;
+					}
+					checkFilters: if (searchParamList.indexOf("doing") != -1) {
+						for (let k = 0; k < orderList[sortedOrderList[i]].order.length; k++) {
+							if ((!done && orderList[sortedOrderList[i]].order[k].done == true) || (done && orderList[sortedOrderList[i]].order[k].done == false)) {
+								break checkFilters;
+							}
+						}
+						failTestCount += 1;
+					}
 
-				if (failTestCount >= searchParamList.length) {
-					continue outerloop;
+					if (failTestCount >= searchParamList.length) {
+						continue outerloop;
+					}
 				}
 			}
-
 			//set order
 			for (let j = 0; j < orderList[sortedOrderList[i]].order.length; j++) {
 				let menuIndex = orderList[sortedOrderList[i]].order[j].index[0];
@@ -140,12 +142,12 @@ async function createTable(sortType) {
 
 			//set time
 			time += orderList[sortedOrderList[i]].time.charAt(0) + orderList[sortedOrderList[i]].time.charAt(1) + ":" + orderList[sortedOrderList[i]].time.charAt(2) + orderList[sortedOrderList[i]].time.charAt(3);
-			createTableRow(orders, orderList[sortedOrderList[i]].name, orderList[sortedOrderList[i]].class, cost, time);
+			createTableRow(orders, orderList[sortedOrderList[i]].name, orderList[sortedOrderList[i]].class, cost, time, sortedOrderList[i]);
 		}
 	} else {
 		tableHead.innerHTML = `
       <p>No.</p>
-      <p>Order Type</p>
+      <p>Order Item</p>
       <p>Count</p>
       <p>Done</p>
     `;
@@ -155,7 +157,7 @@ async function createTable(sortType) {
 
 //==================================================
 //Table construction functions
-function createTableRow(order, name, className, cost, time) {
+function createTableRow(order, name, className, cost, time, index) {
 	//used className instead of class cause class is reserved
 	const newRow = document.createElement("div");
 	newRow.innerHTML = `
@@ -165,9 +167,9 @@ function createTableRow(order, name, className, cost, time) {
         <div>${order}</div>
         <p>${cost}</p>
         <div class='checkmark'>
-          <div>
+          <a onclick="orderPaid(${index})" class="${orderList[index].paid == true ? "order-paid" : ""}">
             <i class="fa fa-check" aria-hidden="true"></i>
-          </div>
+          </a>
         </div>
     `;
 	tableData.appendChild(newRow);
@@ -291,14 +293,14 @@ function writeOrders() {
 		}
 
 		for (let j = 0; j < sortedOrderStatus.length; j++) {
-			const newRow = document.createElement("tr");
-			newRow.id = `table-row-${sortedOrderStatus[j].name.toLowerCase()}`;
+			const newRow = document.createElement("div");
+      newRow.id = `table-row-${sortedOrderStatus[j].name.toLowerCase().replace(" ", "-")}`;
 
 			newRow.innerHTML = `
-            <td>${j + 1}.</td>
-            <td>${sortedOrderStatus[j].name}</td>
-            <td>${sortedOrderStatus[j].count}</td>
-            <td>${sortedOrderStatus[j].done}</td>
+            <p>${j + 1}.</p>
+            <p>${sortedOrderStatus[j].name}</p>
+            <p>${sortedOrderStatus[j].count}</p>
+            <p>${sortedOrderStatus[j].done}</p>
             `;
 			tableData.appendChild(newRow);
 		}
@@ -323,8 +325,11 @@ function filterChanged(type) {
 	const url = new URL(window.location);
 	var searchParams = [];
 	const searchParam = new URLSearchParams(window.location.search).get("searchParam");
-	if (searchParam != "") {
+	console.log(searchParam != "");
+	if (searchParam != null && searchParam != "") {
 		searchParams = searchParam.split(",");
+	} else {
+		searchParams = [];
 	}
 	if (searchParams.indexOf(type) != -1) {
 		searchParams.splice(searchParams.indexOf(type), 1);

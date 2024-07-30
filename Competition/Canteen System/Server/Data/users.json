@@ -1,1 +1,12 @@
-{"users":[{"username":"admin","password":"123","admin":true,"class":"Admin","money":0},{"username":"staff","password":"123","class":"Staff","money":0},{"username":"staff","password":"123","class":"Staff","money":0},{"username":"Noriah","password":"123","uid":["115","81","17","46"],"money":10.2},{"username":"Lau","password":"123","uid":["33","121","34","38"],"money":0},{"username":"Zara bintu Bakar","password":"123","class":"3C","uid":["99","128","4","46"],"money":0},{"username":"Tee Zhue Tong","password":"123","class":"PA","uid":["33","93","165","38"],"money":0}]}
+{
+	"users": [
+		{"username": "admin", "password": "123", "admin": true, "class": "Admin", "money": 0},
+		{"username": "staff", "password": "123", "class": "Staff", "money": 0},
+		{"username": "staff", "password": "123", "class": "Staff", "money": 0},
+		{"username": "Noriah", "password": "123", "uid": ["115", "81", "17", "46"], "money": 7.640000000000001, "fingerprint": 1},
+		{"username": "Lau", "password": "123", "uid": ["33", "121", "34", "38"], "money": 0, "fingerprint": 2},
+		{"username": "Zara bintu Bakar", "password": "123", "class": "3C", "uid": ["99", "128", "4", "46"], "money": 0, "fingerprint": 3},
+		{"username": "Tee Zhue Tong", "password": "123", "class": "PA", "uid": ["33", "93", "165", "38"], "money": 0, "fingerprint": 4},
+		{"username": "user", "password": "123", "class": "2A"}
+	]
+}

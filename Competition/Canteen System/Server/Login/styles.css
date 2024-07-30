@@ -19,12 +19,12 @@ body {
 	caret-color: white;
 }
 h1 {
-  color: white;
+	color: white;
 	font-size: 25px;
 	margin: 40px;
 	margin-top: 50px;
 }
-p{
+p {
 	color: white;
 	font-size: 14px;
 	padding: 5px;
@@ -34,11 +34,16 @@ p{
 	margin: 20px;
 	margin-left: 40px;
 } */
+input {
+  background-color: grey !important;
+  opacity: 50%;
+  color: white;
+}
 a {
 	text-decoration: none;
 }
-::placeholder{
-	color:lightgrey;
+::placeholder {
+	color: lightgrey;
 }
 #login {
 	position: absolute;
@@ -48,12 +53,6 @@ a {
 }
 #username {
 	margin-bottom: 20px;
-	background-color: grey; 
-	opacity: 30%;
-}
-#password {
-	background-color: grey; 
-	opacity: 30%;
 }
 #forgot {
 	font-size: 10px;

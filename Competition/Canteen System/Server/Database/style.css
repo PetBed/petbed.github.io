@@ -8,6 +8,7 @@
 }
 body {
 	margin: 0;
+  background-color: rgb(229, 229, 229);
 }
 a:hover,
 label:hover {
@@ -126,13 +127,17 @@ aside {
 	font-weight: bolder;
 	display: grid;
 	grid-template-columns: 3fr 1fr 1fr 2fr 1fr 1fr;
-	padding: 1.5rem 2rem;
+	padding: 1.5rem 1rem;
 	align-items: center;
 	position: relative;
 	top: 0;
 	width: 100%;
 	height: 5rem;
   padding-right: 0;
+}
+.table-head:has(+ .table-data > .table-order-header) {
+  grid-template-columns: 3fr 1fr 1fr 2fr !important;
+  padding-right: 1rem;
 }
 .table-head :first-child {
 	font-size: 1.2em;
@@ -157,13 +162,23 @@ aside {
 	position: relative;
   height: fit-content;
 }
+.table-data:has(.table-order-header) > div[id^="table-row"] {
+  grid-template-columns: 3fr 1fr 1fr 2fr !important;
+}
+.table-data:has(.table-order-header) {
+  padding-right: 1rem;
+}
+.table-order-header {
+  background-color: grey;
+  padding: 1rem;
+}
 .checkmark {
 	width: 100%;
 	height: 100%;
 	display: flex;
 	justify-content: center;
 }
-.checkmark > div {
+.checkmark > a {
 	content: "";
 	display: inline-block;
 	width: 3.5rem;

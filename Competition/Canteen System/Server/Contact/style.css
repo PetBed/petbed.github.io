@@ -58,7 +58,11 @@ input {
 input::placeholder {
   color: white;
 }
-
+#contact-format{
+  /* background-color: blue; */
+  padding: 5px;
+  border-radius: 5px;
+}
 /* Main container */
 .main-container {
   text-align: center;

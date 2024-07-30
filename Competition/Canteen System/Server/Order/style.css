@@ -1,5 +1,5 @@
 :root {
-  --header-height: 4rem;
+  --header-height: 5.8rem;
   --cart-width: 17%;
 }
 * {
@@ -7,6 +7,7 @@
 }
 body {
   margin: 0;
+  overflow-y: hidden;
 }
 #header-font{
   font-size: 18px;
@@ -122,6 +123,7 @@ input::placeholder {
   width: calc(100% - var(--cart-width));
   display: flex;
   flex-direction: column;
+  height: calc(100vh - var(--header-height));
 }
 .menu input[type="radio"] {
   display: none;
@@ -251,7 +253,9 @@ input::placeholder {
 #items a[onclick^="editItem"]:hover {
   background-color: #EF7200;
 }
-
+.item-details{
+  
+}
 
 
 body:has(div[id$="overlay"][style="display: block;"]) {
@@ -261,7 +265,7 @@ div[id$="overlay"] {
   position: fixed; /* Set in html for js to read it */
   display: none;
   width: 100vw;
-  height: calc(100vh - var(--header-height));
+  height: 100vh;
   left: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
@@ -274,7 +278,7 @@ div[id$="overlay"] > div[id$="div"] {
   display: flex;
   flex-direction: column;
   align-items: center;
-  top: 50%;
+  top: 55%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 35vw;
@@ -423,7 +427,7 @@ div[id^="confirm-items"] {
   flex: 1;
   margin-top: .5rem;
   width: inherit;
-  font-size: 1.15em;
+  font-size: 1em;
 }
 .card-details-div > :first-child {
   font-weight: bolder;

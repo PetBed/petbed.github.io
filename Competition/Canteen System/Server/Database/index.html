@@ -11,6 +11,7 @@
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 	</head>
 	<body onload="init()">
     <iframe src="" frameborder="0" name="vm" style="display: none"></iframe>
@@ -59,7 +60,10 @@
           <a id="filter-doing" onclick="filterChanged('doing')">Doing</a>
           <a id="filter-pending" onclick="filterChanged('pending')">Pending</a>
         </div>
-				<input type="checkbox" id="reverse" onclick="reverseChanged()" />
+        <div style="display: flex;">
+          <input type="checkbox" id="reverse" onclick="reverseChanged()" />
+          <label for="reverse"><i class="fa fa-sort-numeric-asc" aria-hidden="true"></i></label>
+        </div>
 			</aside>
 			<div class="table">
         <div class="table-head"></div>

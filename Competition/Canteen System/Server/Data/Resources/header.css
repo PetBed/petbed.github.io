@@ -77,3 +77,6 @@ header > * {
   opacity: 1;
   display: block;
 }
+.logo > *{
+  font-family: 'Oswald', sans-serif !important;
+}

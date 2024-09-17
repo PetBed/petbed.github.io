@@ -67,13 +67,14 @@ async function createTable() {
       </tr>`;
 
   for (let i = 0; i < userList.length; i++) {
-    createTableRow(userList[i].username, userList[i].password, userList[i].class == undefined ? "Teacher" : userList[i].class, userList[i].money);
+    createTableRow(userList[i].username, userList[i].password, userList[i].class == undefined ? "Teacher" : userList[i].class, userList[i].money, i);
   }
 }
 
-function createTableRow(name, password, className, money) {
+function createTableRow(name, password, className, money, id) {
 	//used className instead of class cause class is reserved
 	const newRow = document.createElement("tr");
+  newRow.setAttribute("onclick", `editUser(${id})`);
 	newRow.innerHTML = `
         <td>${tableData.childElementCount + 1}.</td>
         <td>${name}</td>
@@ -161,6 +162,29 @@ function sortOrderList(sortType) {
 
 		// console.log(sortedOrderList);
 	}
+}
+
+async function editUser(id) {
+  document.getElementsByClassName("overlay")[0].style.display = document.getElementsByClassName("overlay")[0].style.display == "block" ? "none" : "block";
+  if (id == -1) {
+    return;
+  }
+  var userList = [];
+	await fetch("../Data/users.json")
+		.then((response) => response.json())
+		.then((json) => (userList = json.users));
+
+  document.getElementById("user-name").value = userList[id].username;
+  document.getElementById("user-password").value = userList[id].password;
+  document.getElementById("user-class").value = userList[id].class;
+  document.getElementById("user-money").value = userList[id].money;
+  document.getElementById("user-uid").value = userList[id].uid;
+  document.getElementById("submit-btn").setAttribute("value", id);
+  document.getElementById("delete-btn").setAttribute("value", id);
+}
+
+function deleteUser(id) {
+
 }
 
 //======================================

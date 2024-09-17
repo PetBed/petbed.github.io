@@ -4,6 +4,7 @@
 }
 * {
   margin: 0;
+  font-family: "Roboto Condensed", sans-serif;
 }
 body {
   margin: 0;
@@ -396,6 +397,7 @@ div[id^="confirm-items"] {
   padding: 1.5rem;
   box-sizing: border-box;
   font-size: 1.2em;
+  z-index: 100;
 }
 .thank-you {
   font-weight: bolder;

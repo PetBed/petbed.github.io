@@ -14,6 +14,7 @@
 	/></head>
 	<body onload="init()">
 		<iframe src="" frameborder="0" name="vm" style="display: none"></iframe>
+		<iframe src="" frameborder="0" name="vm" style="display: none"></iframe>
 		<header>
 			<div class="logo" style="font-family: 'Oswald', sans-serif; font-size: 1em; height: 90%; flex: 1">
 				<p style="list-style-type: none; color: #064759; font-size: 0.75em; text-shadow: 0.04375em 0.03125em 0px #b5b5b5; font-weight: 400; padding-left: 20px">Project</p>
@@ -44,7 +45,7 @@
 					<input type="text" name="password" id="input2" required placeholder="Password" />
 					<input type="text" name="class" id="input3" placeholder="Class" />
 					<input type="text" name="uid" id="input4" placeholder="UID" />
-					<input type="checkbox" name="admin"/>
+					<input type="checkbox" name="admin" />
 					<label for="checkbox" id="adminlettering">Admin</label>
 					<button type="submit" id="addname">Add</button>
 				</form>
@@ -54,6 +55,38 @@
 					<thead class="table-head"></thead>
 					<tbody class="table-data"></tbody>
 				</table>
+			</div>
+			<div class="overlay">
+				<div class="edit-user">
+					<p class="edit-user-header">Edit User</p>
+					<form class="user-details" action="../editUser" onsubmit="location.reload()" method="post" target="vm">
+						<div>
+							<p>Username:</p>
+							<input type="text" name="name" id="user-name" placeholder="Username" />
+						</div>
+						<div>
+							<p>Password:</p>
+							<input type="text" name="password" id="user-password" placeholder="Password" />
+						</div>
+						<div>
+							<p>Class:</p>
+							<input type="text" name="class" id="user-class" placeholder="Class" />
+						</div>
+						<div>
+							<p>Money</p>
+							<input type="number" name="money" id="user-money" placeholder="Money" />
+						</div>
+						<div>
+							<p>UID</p>
+							<input type="text" name="uid" id="user-uid" placeholder="UID" />
+						</div>
+						<button type="submit" id="submit-btn" name="id" value="">Edit</button>
+					</form>
+					<form action="../deleteUser" onsubmit="location.reload()" method="post" target="vm">
+						<button id="delete-btn" type="submit" name="id" class="fa fa-trash" aria-hidden="true" style="border: none; background-color: red; font-size: 1.3em; width: 1.7em; height: 1.7em; display: flex; align-items: center; justify-content: center; position: absolute; right: 0; top: 0; margin: 0.5rem; border-radius: 100%; padding: 0.5rem; transition: 0.1s ease-in-out"></button>
+					</form>
+					<a class="close-btn" onclick="editUser(-1)" style="position: absolute; right: 0; bottom: 0; margin: 1.3em; background-color: red; color: white; padding: 0.3em 0.7em; transition: ease-in-out 0.1s; border-radius: 10px">CANCEL</a>
+				</div>
 			</div>
 		</div>
 		<script src="script.js"></script>

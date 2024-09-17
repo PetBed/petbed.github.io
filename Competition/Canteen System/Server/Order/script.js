@@ -195,6 +195,7 @@ async function sendOrder(paid, transfer) {
 	for (let i = 0; i < cart.length; i++) {
 		for (let j = 0; j < cart[i].count; j++) {
 			order.push(cart[i].index);
+      console.log(cart[i].index);
 			totalPrice += subMenuPrice[cart[i].index.split(",")[0]][cart[i].index.split(",")[1]];
 		}
 	}
@@ -213,10 +214,9 @@ async function sendOrder(paid, transfer) {
 			.then((json) => (userList = json.users));
 
 		obj.price = totalPrice;
-		obj.pay = true;
+		obj.pay = "true";
 		obj.id = userList.findIndex((x) => x.username == getCookie("username"));
     console.log(obj);
-    return;
 	}
 
 	fetch("./newOrder", {
@@ -422,7 +422,7 @@ async function cardCredits() {
 		.then((response) => response.json())
 		.then((json) => (userList = json.users));
 	console.log(userList);
-	document.getElementById("cur-money").innerHTML = `Current Money in Card: <span>RM${userList.findIndex((x) => x.username == getCookie("username"))}</span>`;
+	document.getElementById("cur-money").innerHTML = `Current Money in Card: <span>RM${userList[userList.findIndex((x) => x.username == getCookie("username"))].money}</span>`;
 	cardDiv.style.display = cardDiv.style.display != "flex" ? "flex" : "none";
 }
 //==============================================

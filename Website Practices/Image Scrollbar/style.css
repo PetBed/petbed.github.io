@@ -1,0 +1,27 @@
+* {
+    margin: 0;
+}
+body {
+    background: black;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    overflow: hidden;
+}
+
+.image-track {
+    display: flex;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-6%, -50%);
+    gap: 3vmin;
+}
+.image-track > img {
+    width: 35vmin;
+    height: 50vmin;
+    object-fit: cover;
+    object-position: 6%;
+    user-select: none;
+    -webkit-user-drag: none;
+}

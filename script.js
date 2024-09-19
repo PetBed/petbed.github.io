@@ -42,6 +42,9 @@ const paths = {
 				iconPath: "Website Practices/Huddle Landing Page/images/logo.svg",
 				url: "https://petbed.github.io/Website%20Practices/Huddle%20Landing%20Page/",
 			},
+			"Image Scrollbar": {
+				url: "https://petbed.github.io/Website%20Practices/Image%20Scrollbar/"
+			}
 		},
 	},
 	Credits: {

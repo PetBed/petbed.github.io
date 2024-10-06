@@ -17,6 +17,10 @@ const paths = {
 			Quiz: {
 				url: "https://petbed.github.io/Competition/Quiz/",
 			},
+			"NASA Space Apps Challenge": {
+        iconPath: "Competition/NASA Space Apps Challenge/Media/logo.png",
+				url: "https://petbed.github.io/Competition/NASA%20Space%20Apps%20Chellange/"
+			},
 		},
 	},
 	Games: {

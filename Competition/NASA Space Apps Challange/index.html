@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locomotive-scroll@4.1.4/dist/locomotive-scroll.min.css" /> -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locomotive-scroll@4.1.4/dist/locomotive-scroll.min.css">
+    <link rel="stylesheet" href="background.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+	</head>
+	<body>
+    <div class="stars"></div>
+    <div class="twinkling"></div> 
+    <div class="clouds"></div>
+    <!-- <img src="media/background.jpeg" id="intro-img" alt="Background" />
+    <img src="media/introLeft.jpeg" id="intro-img-left" />
+    <img src="media/introRight.jpg" id="intro-img-right"  />
+     -->
+    
+		<div id="intro" data-scroll-container>
+      <div id="intro-left">
+				<div id="left-content">
+					<div id="left-content-desc">
+						<h2>What is an Exoplanet?</h2>
+						<center><hr width="60%"
+							size = 2></center>
+						<p>The planets beyond our solar system are called “exoplanets,” and they come in a wide variety of sizes, from gas giants larger than Jupiter to small, rocky planets about as big around as Earth or Mars. They can be hot enough to boil metal or locked in deep freeze. <br /><br />They can orbit their stars so tightly that a “year” lasts only a few days; they can orbit two suns at once. Some exoplanets are sunless rogues, wandering through the galaxy in permanent darkness.Most of them orbit other stars, but some free-floating exoplanets, called rogue planets, are untethered to any star. More than 5,600 exoplanets have been confirmed out of the billions that we believe exist.</p>
+					</div>
+					<div id="left-content-sidebar">
+						<!-- <iframe src="Embeds/introPlanet.html" frameborder="0"></iframe> -->
+					</div>
+				</div>
+				<div class="intro-control">
+					<a style="opacity: 0; pointer-events: none">+</a>
+					<a onclick="slideRight()"><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+				</div>
+			</div>
+			
+      
+      <div id="intro-center" data-scroll-section>
+				<div id="intro-center-title">
+					<div class="intro-control">
+						<a onclick="slideLeft()"><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
+						<a onclick="slideRight()"><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+					</div>
+					<h1 id="title-hover"></h1>
+					<a id="intro-scroll" data-scroll href="./main.html">
+						<img src="Media/IntroPlanets/planetIce.png" alt="Intro Image" draggable="false"  style="z-index: -30;"/>
+            <img src="Media/IntroPlanets/planetGas.png" alt="Intro Image" draggable="false"  style="z-index: -30; opacity: 0;"/>
+            <img src="Media/IntroPlanets/planetTerra.png" alt="Intro Image" draggable="false"  style="z-index: -30; opacity: 0;"/>
+            <img src="Media/IntroPlanets/planetMega.png" alt="Intro Image" draggable="false"  style="z-index: -30; opacity: 0;"/>
+            <!-- <img src="Media/introPlanet.png" alt="Intro Image" draggable="false"  style="z-index: -30;"/> -->
+					</a>
+				</div>
+        <div id="intro-center-content" style="font-size: 20px;">
+          <p>
+			      The first exoplanets were discovered in the early 1990s, with 51 Pegasi b, a "hot Jupiter" orbiting a Sun-like star 50 light-years away, gaining attention in 1995. Since then, thousands more exoplanets have been found. <br /><br />Size and mass are key factors in classifying planets, and scientists have observed a notable "radius valley" or Fulton gap—a rarity of planets between 1.5 and 2 times Earth's size. This may represent a critical point in planet formation: planets larger than this often become gas giants, while smaller ones remain rocky. Some smaller planets near their stars might be the stripped cores of Neptune-like planets. 
+          </p>
+          <div id="habitability-index">
+            <div class="range-inputs">
+              <div class="range-input">
+                <label for="temperature">Temperature</label>
+                <input type="range" id="temperature" min="0" max="1" step="0.01" value="0.5">
+              </div>
+              <div class="range-input">
+                <label for="atmosphere">Atmosphere</label>
+                <input type="range" id="atmosphere" min="0" max="1" step="0.01" value="0.5">
+              </div>
+              <div class="range-input">
+                <label for="water-availability">Water Availability</label>
+                <input type="range" id="water-availability" min="0" max="1" step="0.01" value="0.5">
+              </div>
+              <div class="range-input">
+                <label for="energy-source">Energy Source Availability</label>
+                <input type="range" id="energy-source" min="0" max="1" step="0.01" value="0.5">
+              </div>
+              <div class="range-input">
+                <label for="metallicity">Metallicity and Toxicity</label>
+                <input type="range" id="metal-toxic" min="0" max="1" step="0.01" value="0.5">
+              </div>
+              <div class="range-input">
+                <label for="planet-distance">Planet Distance from Star</label>
+                <input type="range" id="planet-distance" min="0" max="30" step="0.01" value="15">
+              </div>
+              <div class="range-input">
+                <label for="habitable-center">Center of Habitable Zone</label>
+                <input type="range" id="habitable-center" min="0" max="30" step="0.01" value="15.1">
+              </div>
+              <div class="range-input">
+                <label for="habitable-range">Range of Habitable Zone</label>
+                <input type="range" id="habitable-range" min="0" max="30" step="0.01" value="15">
+              </div>
+            </div>
+            <div id="habitable-index-result">
+              <div>
+                <span id="habitable-index-value">0</span>
+              </div>
+              <p>Habitable Index</p>
+              <p style="font-size: 10px;"><i>*Not full scale simulation, real life conditions are much more complex and might differ.</i></p>
+            </div>
+          </div>
+        </div>
+			</div>
+			
+      
+      <div id="intro-right">
+				<div id="left-content">
+					<h2>Types of Exoplanets</h2>
+					<hr width="60%" 
+						size="2">
+					<br />
+          <div id="exoplanet-types">
+            <input type="radio" id="gas-giant" name="exoplanet-type" value="gas-giant">
+            <label for="gas-giant"><strong>Gas Giant</strong></label>
+            <p class="description">Gas giants are planets the size of Saturn or Jupiter, the largest planet in our solar system, or much, much larger.</p>
+
+            <input type="radio" id="neptunian" name="exoplanet-type" value="neptunian"checked>
+            <label for="neptunian"><strong>Neptunian</strong></label>
+            <p class="description">Neptunian planets are similar in size to Neptune or Uranus in our solar system. They likely have a mixture of interior compositions, but all will have hydrogen and helium-dominated outer atmospheres and rocky cores. We're also discovering mini-Neptunes, planets smaller than Neptune and bigger than Earth. No planets of this size or type exist in our solar system.</p>
+
+            <input type="radio" id="super-earths" name="exoplanet-type" value="super-earths">
+            <label for="super-earths"><strong>Super-Earths</strong></label>
+            <p class="description">Super-Earths are typically terrestrial planets that may or may not have atmospheres. They are more massive than Earth, but lighter than Neptune.</p>
+
+            <input type="radio" id="terrestrial" name="exoplanet-type" value="terrestrial">
+            <label for="terrestrial"><strong>Terrestrial Planets</strong></label>
+            <p class="description">Terrestrial planets are Earth sized and smaller, composed of rock, silicate, water or carbon. Further investigation will determine whether some of them possess atmospheres, oceans or other signs of habitability.</p>
+          </div>
+				</div>
+				<div class="intro-control">
+					<a onclick="slideLeft()"><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
+					<a style="opacity: 0; pointer-events: none">+</a>
+				</div>
+			</div>
+		</div>
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@4.1.4/dist/locomotive-scroll.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+		<script src="script.js"></script>
+	</body>
+</html>

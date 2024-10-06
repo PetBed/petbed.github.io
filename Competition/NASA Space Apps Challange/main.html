@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Rotating 3D Sphere with Three.js</title>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+		<link rel="stylesheet" href="mainstyle.css" />
+    <link rel="stylesheet" href="background.css">
+	</head>
+
+	<body>
+    <div class="stars"></div>
+    <div class="twinkling"></div> 
+    <div class="clouds"></div>
+		<h1 id="planet-name"></h1>	
+		<main>
+			<div id="back-btn"><i class="fa fa-arrow-left" aria-hidden="true" onclick="back()"></i></div>
+			<div id="planet-info-container">
+				<div id="planet-info-0" class="planet-info">
+					<div class="planet-info-top">
+						<div class="planet-info-left">
+							<div class="planet-name-target"></div>
+							<p>Proxima Centauri b is the closest known exoplanet neighbor to Earth. It orbits an M-type star, Proxima Centauri, just over 4 light-years away in the constellation Centaurus. Proxima Centauri is a flare star, prone to random brightness increases, which subjects Proxima b to intense UV radiation. Despite being in the star's habitable zone, the intense radiation may strip away essential molecules, limiting habitability.</p>
+						</div>
+						<div class="planet-info-right">
+							<img src="Media/Planets/nasa web plan (8) (1).png" alt="Proxima Centauri b" style="width: 200px; height: 200px" />
+							<ul>
+								<li><strong>Planet Type:</strong> Super Earth</li>
+								<li><strong>Planet Mass:</strong> 1.27 Earths</li>
+								<li><strong>Planet Size:</strong> ~14,000 km - ~16,583.16 km</li>
+								<li><strong>Discovery Date:</strong> 2016</li>
+							</ul>
+						</div>
+					</div>
+					<div class="planet-info-bottom">
+            <div class="flashcard-container">
+              <div class="flashcard">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">Parent Stars</div>
+                  <div class="flashcard-back">Proxima b's parent star, Proxima Centauri, is part of an odd stellar trio that astronomers still don't quite understand. The other two stars are binary, meaning that they orbit a common center of gravity. Together they're called Alpha Centauri. </div>
+                </div>
+              </div>
+							<div class="flashcard">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">Closest Earth-like Exoplanet</div>
+                  <div class="flashcard-back"> It represents the closest Earth-like exoplanet anyone has ever found, at just over 4 light-years away.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+				</div>
+				<div id="planet-info-1" class="planet-info">
+					<div class="planet-info-top">
+						<div class="planet-info-left">
+							<div class="planet-name-target"></div>
+							<p>The first validated Earth-size planet to orbit a distant star in the habitable zone -- a range of distance from a star where liquid water might pool on the planet's surface. The discovery of Kepler-186f confirms that Earth-size planets exist in the habitable zones of other stars and signals a significant step closer to finding a world similar to Earth. Kepler-186f orbits its star once every 130 days and receives one-third the energy that Earth does from the sun, placing it near the outer edge of the habitable zone. If you could stand on the surface of Kepler-186f, the brightness of its star at high noon would appear as bright as our sun is about an hour before sunset on Earth.</p>
+						</div>
+						<div class="planet-info-right">
+							<img src="Media/Planets/nasa web plan (6) (1).png" alt="Kepler-186f" style="width: 200px; height: 200px" />
+							<ul>
+								<li><strong>Planet Type:</strong> Super Earth</li>
+								<li><strong>Planet Mass:</strong> 1.71 Earths</li>
+								<li><strong>Planet Size:</strong> Less than 10% larger than Earth</li>
+								<li><strong>Planet Composition:</strong> Previous research suggests likely to be rocky</li>
+								<li><strong>Discovery Date:</strong> 2014</li>
+							</ul>
+						</div>
+					</div>
+					<div class="planet-info-bottom">
+						<div class="flashcard-container">
+              <div class="flashcard">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">Discovery</div>
+                  <div class="flashcard-back">The discovery of Kepler-186f confirms that Earth-size planets exist in the habitable zones of other stars and signals a significant step closer to finding a world similar to Earth</div>
+                </div>
+              </div>
+							<div class="flashcard">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">Future of Humankind?</div>
+                  <div class="flashcard-back">Only about 10 percent larger than Earth, Kepler-186f is the closest planet to Earth in size ever found in the habitable zone of its star</div>
+                </div>
+              </div>
+            </div>
+          </div>
+				</div>
+				<div id="planet-info-2" class="planet-info">
+					<div class="planet-info-top">
+						<div class="planet-info-left">
+							<div class="planet-name-target"></div>
+							<p>SWEEPS-11 is located approximately 27,727 light-years from Earth in the constellation Sagittarius, making it one of the most distant confirmed exoplanets. SWEEPS-11 orbits its host star extremely closely, completing one orbit in just 1.796 days (about 43 Earth hours). The planet's mass is nearly 10 times that of Jupiter, and it has a slightly larger radius than Jupiter, indicating that it is a massive gas giant. Due to its close proximity to its star, SWEEPS-11 is classified as a hot Jupiter.</p>
+						</div>
+						<div class="planet-info-right">
+							<img src="Media/Planets/nasa web plan (9) (1).png" alt="SWEEPS-11" style="width: 200px; height: 200px" />
+							<ul>
+								<li><strong>Planet Type:</strong> Hot Jupiter</li>
+								<li><strong>Planet Mass:</strong> 9.7 ± 5.6 Jupiter masses</li>
+								<li><strong>Planet Size:</strong> 1.13 Jupiter radius</li>
+								<li><strong>Planet Composition:</strong> Gas Giant</li>
+								<li><strong>Discovery Date:</strong> 2006</li>
+							</ul>
+						</div>
+					</div>
+					<div class="planet-info-bottom">
+            <div class="flashcard-container">
+              <div class="flashcard">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">Furthest Exoplanet</div>
+                  <div class="flashcard-back">Currently, this planet represents the furthest planet humans have discovered.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+				</div>
+				<div id="planet-info-3" class="planet-info">
+					<div class="planet-info-top">
+						<div class="planet-info-left">
+							<div class="planet-name-target"></div>
+							<p>Gliese 667 Cc is located within the habitable zone of the red dwarf star Gliese 667 C, which is part of a triple star system 23.62 light-years away in the constellation Scorpius. The planet orbits its M-type host star and has an equilibrium temperature of 277.4 K (4.3°C), making it slightly warmer than Earth.</p>
+						</div>
+						<div class="planet-info-right">
+							<img src="Media/Planets/nasa web plan (7) (1).png" alt="Gliese 667 Cc" style="width: 200px; height: 200px" />
+							<ul>
+								<li><strong>Planet Type:</strong> Super Earth</li>
+								<li><strong>Planet Mass:</strong> 3.7 - 3.8 Earths</li>
+								<li><strong>Planet Size:</strong> Estimated 1.5 Earth radius</li>
+								<li><strong>Discovery Date:</strong> 2013</li>
+							</ul>
+						</div>
+					</div>
+					<div class="planet-info-bottom">
+            <div class="flashcard-container">
+              <div class="flashcard">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">Habitable Zone</div>
+                  <div class="flashcard-back">Represents the first system found with a fully packed habitable zone</div>
+                </div>
+              </div>
+							<div class="flashcard">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">Star System</div>
+                  <div class="flashcard-back">GJ667 is part of a triple star system</div>
+                </div>
+              </div>
+							<div class="flashcard">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">Sunsets?</div>
+                  <div class="flashcard-back">Gliese 667A and B would be prominently visible in the sky causing an eternal dawn phenomenon. Our Sun would also be seen with the naked eye as a distant star.
+									</div>
+                </div>
+              </div>
+            </div>
+          </div>
+				</div>
+				<div id="planet-info-4" class="planet-info">
+					<div class="planet-info-top">
+						<div class="planet-info-left">
+							<div class="planet-name-target"></div>
+							<p>The weather on this world is deadly. Its winds blow up to 5,400 mph (2 km/s) at seven times the speed of sound, whipping all would-be travelers in a sickening spiral around the planet. And getting caught in the rain on this planet is more than an inconvenience; it's death by a thousand cuts. This scorching alien world possibly rains glass—sideways—in its howling winds. The cobalt blue color comes not from the reflection of a tropical ocean, as on Earth, but rather a hazy, blow-torched atmosphere containing high clouds laced with silicate particles.</p>
+						</div>
+						<div class="planet-info-right">
+							<img src="Media/Planets/nasa web plan (10) (1).png" alt="HD189733b" style="width: 200px; height: 200px" />
+							<ul>
+								<li><strong>Planet Type:</strong> Gas Giant</li>
+								<li><strong>Planet Mass:</strong> 1.13 of Jupiter</li>
+								<li><strong>Planet Size:</strong> 13% larger than Jupiter</li>
+								<li><strong>Planet Composition:</strong> Hydrogen Sulfide</li>
+								<li><strong>Discovery Date:</strong> 2005</li>
+							</ul>
+						</div>
+					</div>
+					<div class="planet-info-bottom">
+            <div class="flashcard-container">
+              <div class="flashcard">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">Hazardous Rain</div>
+                  <div class="flashcard-back">This scorching alien world possibly rains glass—sideways—in its howling winds.</div>
+                </div>
+              </div>
+							<div class="flashcard">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">Smelly!</div>
+                  <div class="flashcard-back">With an equilibrium temperature of about 1,200 K, H2O, CO and H2S are the main reservoirs for oxygen, carbon and sulfur, leading scientists to conclude it having the stench of rotten eggs</div>
+                </div>
+              </div>
+							<div class="flashcard">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">Color</div>
+                  <div class="flashcard-back">The cobalt blue color comes not from the reflection of a tropical ocean, as on Earth, but rather a hazy, blow-torched atmosphere containing high clouds laced with silicate particles. 
+									</div>
+                </div>
+              </div>
+            </div>
+          </div>
+				</div>
+				<div id="planet-info-5" class="planet-info">
+					<div class="planet-info-top">
+						<div class="planet-info-left">
+							<div class="planet-name-target"></div>
+							<p>WASP-12b is a gas giant located approximately 1,200 light-years away in the constellation Auriga. It orbits extremely close to its parent star, completing an orbit in just 1.1 days. The planet is being torn apart by its star's heat and tidal forces, which are distorting it into an egg shape and stripping away its atmosphere at a rate of 189 quadrillion tons per year. WASP-12b is tidally locked, meaning the same side always faces its star. This creates extreme temperature differences between the day and night sides and leads to strong atmospheric winds. The surface temperature of the planet reaches over 2,500 K (2,210°C), and it absorbs 94% of the light that hits it, giving it a pitch-black appearance. In 10 million years, WASP-12b may be completely consumed by its star.</p>
+						</div>
+						<div class="planet-info-right">
+							<img src="Media/Planets/nasa web plan (5) (1).png" alt="WASP-12b" style="width: 200px; height: 200px" />
+							<ul>
+								<li><strong>Planet Type:</strong> Hot Jupiter</li>
+								<li><strong>Planet Mass:</strong> 1.4 times Jupiter's mass</li>
+								<li><strong>Planet Size:</strong> 1.8 times Jupiter's radius</li>
+								<li><strong>Planet Composition:</strong> Gas Giant</li>
+								<li><strong>Discovery Date:</strong> 2009</li>
+							</ul>
+						</div>
+					</div>
+					<div class="planet-info-bottom">
+            <div class="flashcard-container">
+              <div class="flashcard">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">Death Spiral</div>
+                  <div class="flashcard-back">Astronomers have discovered that a distant, scorching hot planet twice the size of Jupiter is on a death-spiral trajectory that will send it careening into its parent star. A crash is expected to happen relatively soon, cosmically speaking.
+									</div>
+                </div>
+              </div>
+							<div class="flashcard">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">Weird Shape</div>
+                  <div class="flashcard-back">The immense gravity felt by WASP-12b at just 2.1 million miles from its star generates such great tidal forces that it is now shaped like an egg. 
+									</div>
+                </div>
+              </div>
+            </div>
+          </div>
+				</div>
+			</div>
+		</main>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+		<!-- <script src="https://gist.githubusercontent.com/turner/7d13fb0d26dc995c89cc7bddacd72b59/raw/18332cbc206404d7b9c628333d8cf0332cbf4ab4/OrbitControls.module.js"></script> -->
+		<script src="https://raw.githubusercontent.com/sole/tween.js/refs/heads/master/src/Tween.js"></script>
+		<script src="https://raw.githubusercontent.com/sole/tween.js/refs/heads/master/examples/js/RequestAnimationFrame.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+		<script src="mainscript.js"></script>
+    <script type="module"></script>
+		<script>
+			var rotateY = 0;
+
+			const scene = new THREE.Scene();
+			const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+			camera.position.set(0, 5, 50);
+			camera.rotation.z = THREE.MathUtils.degToRad(15);
+			camera.updateProjectionMatrix();
+			const renderer = new THREE.WebGLRenderer({ alpha: true });
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild(renderer.domElement);
+
+			const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+			scene.add(ambientLight);
+
+			const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+			directionalLight.position.set(1, 1, 1).normalize();
+			scene.add(directionalLight);
+
+			const textureLoader = new THREE.TextureLoader();
+
+			const sun = new THREE.Object3D();
+			scene.add(sun);
+
+			function createPlanet(size, texture, position, ring) {
+				const geo = new THREE.SphereGeometry(size, 65, 65);
+				const mat = new THREE.MeshStandardMaterial({
+					map: textureLoader.load(texture),
+				});
+				const mesh = new THREE.Mesh(geo, mat);
+				const obj = new THREE.Object3D();
+				obj.add(mesh);
+				scene.add(obj);
+				mesh.position.set(position[0], 0, position[1]);
+				return {mesh, obj, position};
+			}
+
+      function createWeirdPlanet(size, texture, position) {
+				const curve = new THREE.EllipseCurve(
+          0,  0,            // ax, aY
+          7,  5,           // xRadius, yRadius
+          0,  2 * Math.PI,  // aStartAngle, aEndAngle
+          false,            // aClockwise
+          0                 // aRotation
+        );
+        const points = curve.getPoints( 50 );
+
+        const geo = new THREE.BufferGeometry().setFromPoints( points );
+        const mat = new THREE.MeshStandardMaterial({
+					map: textureLoader.load(texture),
+				});
+        const ellipse = new THREE.Line( geo, mat );
+        // const mesh = new THREE.Mesh(ellipse, mat);
+        // const obj = new THREE.Object3D();
+        // obj.add(mesh);
+        scene.add(ellipse);
+
+				ellipse.position.set(position[0], 0, position[1]);
+				// return {mesh, obj, position};
+			}
+
+			const positions = [
+				[20, 20],
+				[-20, -20],
+				[-7.320508075688773, 27.320508075688773],
+				[7.320508075688773, -27.320508075688773],
+				[-27.320508075688773, 7.320508075688773],
+				[27.320508075688773, -7.320508075688773],
+			];
+
+			const mercury = createPlanet(5, "./Media/Planets/planet1.jpg", positions[0]);
+			const venus = createPlanet(5, "./Media/Planets/planet2.png", positions[1]);
+			const earth = createPlanet(5, "./Media/Planets/planet3.png", positions[2]);
+			const jupiter = createPlanet(5, "./Media/Planets/planet4.png", positions[3]);
+			const mars = createPlanet(5, "./Media/Planets/planet5.png", positions[4]);
+			const saturn = createPlanet(5, "./Media/Planets/planet6.png", positions[5]);
+			const planets = [mercury, venus, earth, jupiter, mars, saturn];
+			const planetNames = ["Proxima Centauri b", "Kepler-186f", "SWEEPS-11", "Gliese 667 cc", "HD189733b", "WASP-12b"];
+
+			const pointLight = new THREE.PointLight(0xffffff, 2, 300);
+			scene.add(pointLight);
+
+			function animate() {
+				//Self-rotation
+				sun.rotateY(0.004);
+				planets.forEach(planet => planet.mesh.rotateY(0.005));
+
+				if (initX === undefined) {
+					rotateY += 0.001;
+					for (let i = 0; i < planets.length; i++) {
+						if (planets[i] !== selectedPlanet) {
+							planets[i].obj.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0), rotateY);
+						}
+					}
+				}
+				renderer.render(scene, camera);
+			}
+
+			renderer.setAnimationLoop(animate);
+
+			window.addEventListener("resize", function () {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize(window.innerWidth, window.innerHeight);
+			});
+
+			let initX = undefined;
+			let mouseDownPlanet = null;
+			let isDragging = false;
+
+			window.onmousedown = (e) => {
+				initX = e.clientX;
+				isDragging = false;
+
+				mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+				mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+				raycaster.setFromCamera(mouse, camera);
+				const intersects = raycaster.intersectObjects(scene.children, true);
+
+				for (let i = 0; i < intersects.length; i++) {
+					const object = intersects[i].object;
+					for (let j = 0; j < planets.length; j++) {
+						if (object === planets[j].mesh) {
+							mouseDownPlanet = planets[j];
+							break;
+						}
+					}
+					if (mouseDownPlanet) break;
+				}
+			};
+
+			var deltaMove = 0;
+			window.onmousemove = (e) => {
+				if (initX === undefined) return;
+				isDragging = true;
+				deltaMove = e.clientX - initX;
+
+				for (let i = 0; i < planets.length; i++) {
+					if (planets[i] !== selectedPlanet) {
+						planets[i].obj.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0), rotateY + deltaMove * 0.005);
+					}
+				}
+			};
+
+			window.onmouseup = (e) => {
+				if (mouseDownPlanet && !isDragging) {
+					mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+					mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+					raycaster.setFromCamera(mouse, camera);
+					const intersects = raycaster.intersectObjects(scene.children, true);
+
+					for (let i = 0; i < intersects.length; i++) {
+						if (intersects[i].object === mouseDownPlanet.mesh) {
+							selectPlanet(mouseDownPlanet);
+							mouseDownPlanet = null;
+							initX = undefined;
+							return;
+						}
+					}
+				}
+
+				if (isDragging) {
+					rotateY = rotateY + deltaMove * 0.005;
+				}
+
+				initX = undefined;
+				mouseDownPlanet = null;
+				isDragging = false;
+			};
+
+			const raycaster = new THREE.Raycaster();
+			const mouse = new THREE.Vector2();
+
+			let selectedPlanet = null;
+
+			function selectPlanet(planet) {
+				if (selectedPlanet) {
+					// Check if the clicked planet is already selected
+					if (planet === selectedPlanet) {
+						// Animate the planet expansion
+						gsap.to(planet.mesh.scale, {
+							x: 4.6,
+							y: 4.6,
+							z: 4.6, 
+							duration: 0.5,
+							ease: "power2.out",
+						});
+
+						selectPlanetBody(planets.indexOf(planet));
+						return; // Exit the function to prevent deselection
+					}
+					deselectPlanet(selectedPlanet);
+				}
+				console.log(`Selected ${planetNames[planets.indexOf(planet)]}`);
+
+				// Store the initial position and rotation
+				const initialPosition = planet.mesh.position.clone();
+				const initialRotation = planet.obj.rotation.clone();
+
+				// Animate the planet moving to the center
+				gsap.to(planet.mesh.position, {
+					x: 0,
+					y: 0,
+					z: 0,
+					duration: 1,
+					ease: "power2.inOut",
+				});
+
+				// Animate the planet scaling up
+				gsap.to(planet.mesh.scale, {
+					x: 4.3,
+					y: 4.3,
+					z: 4.3,
+					duration: 1,
+					ease: "power2.inOut",
+				});
+
+				// Animate the planet's rotation to face the camera
+				gsap.to(planet.obj.rotation, {
+					x: 0,
+					y: 0,
+					z: 0,
+					duration: 1,
+					ease: "power2.inOut",
+				});
+
+				selectedPlanet = planet;
+				selectedPlanet.initialPosition = initialPosition;
+				selectedPlanet.initialRotation = initialRotation;
+
+				document.getElementById("planet-name").innerHTML = planetNames[planets.indexOf(planet)];
+			}
+
+			function deselectPlanet(planet) {
+				console.log(`Deselected ${planetNames[planets.indexOf(planet)]}`);
+
+				// Animate the planet scaling down
+				gsap.to(planet.mesh.scale, {
+					x: 1,
+					y: 1,
+					z: 1,
+					duration: 1,
+					ease: "power2.inOut",
+				});
+
+				// Animate the planet moving back to its original position
+				gsap.to(planet.mesh.position, {
+					x: planet.initialPosition.x,
+					y: planet.initialPosition.y,
+					z: planet.initialPosition.z,
+					duration: 1,
+					ease: "power2.inOut",
+				});
+
+				// Animate the planet's rotation back to its original rotation
+				gsap.to(planet.obj.rotation, {
+					x: planet.initialRotation.x,
+					y: planet.initialRotation.y,
+					z: planet.initialRotation.z,
+					duration: 1,
+					ease: "power2.inOut",
+				});
+
+				selectedPlanet = null;
+				document.getElementById("planet-name").innerHTML = "";
+			}
+		</script>
+	</body>
+</html>

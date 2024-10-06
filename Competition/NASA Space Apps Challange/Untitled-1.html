@@ -1,0 +1,185 @@
+<html>
+	<head>
+		<style>@import url("https://fonts.googleapis.com/css?family=Lato:400,400i,700");
+
+			* {
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+				font-family: "Lato";
+			}
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+				background: linear-gradient(
+					135deg,
+					rgba(179, 0, 172, 1) 0%,
+					rgba(125, 193, 255, 1) 100%
+				);
+			}
+			header,
+			section {
+				width: 100%;
+				height: 100vh;
+				display: grid;
+				place-content: center;
+				overflow: hidden;
+				position: relative;
+			}
+			a,
+			h1,
+			h2,
+			p,
+			.scroll-animation,
+			svg {
+				color: white;
+				fill: white;
+			}
+			section {
+				&:nth-child(even) {
+					background-color: #6ca0dc;
+				}
+				&.container {
+					position: relative;
+					.parallax {
+						position: absolute;
+						top: 0;
+						left: 0;
+						right: 0;
+						bottom: 0;
+						z-index: 0;
+						img {
+							width: 100%;
+							height: 200%;
+							object-position: center;
+							object-fit: cover;
+							filter: brightness(50%);
+						}
+					}
+					.text {
+						position: relative;
+						z-index: 1;
+					}
+				}
+			}
+			.wrapper {
+				max-width: 992px;
+				width: 100%;
+				padding: 0 15px;
+			}
+			.scroll-animation {
+				position: absolute;
+				left: 50%;
+				bottom: 10px;
+				transform: translatex(-50%);
+				svg {
+					position: absolute;
+					top: -50%;
+					left: 50%;
+					animation: arrow-bounce 1s ease-in-out infinite;
+					transform: translate(-50%, -50%);
+				}
+			}
+			@keyframes arrow-bounce {
+				0%,
+				100% {
+					transform: translate(-50%, -50%);
+				}
+				50% {
+					transform: translate(-50%, -100%);
+				}
+			}
+			ul {
+				padding: 15px 0;
+				display: flex;
+				justify-content: center;
+				li {
+					list-style: none;
+					padding: 0 15px;
+				}
+			}
+			</style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locomotive-scroll@4.1.4/dist/locomotive-scroll.min.css">
+	</head>
+	<body>
+		<main data-scroll-container>
+			<header data-scroll-section>
+				<div class="wrapper">
+					<h1>Hello Designer!</h1>
+					<p>This is an example of how you can use the locomotive scroll library, you can see its GitHub in this <a href="https://locomotivemtl.github.io/locomotive-scroll/" target="_blank">link</a> or you can see my <a href="https://youtu.be/DRWRVc87h7I">youtube</a> explanation of how to use this library.</p>
+				</div>
+				<div class="scroll-animation">
+					Scroll Down
+					<svg viewBox="0 0 448 512" width="25" title="chevron-down">
+						<path d="M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z" />
+					</svg>
+				</div>
+			</header>
+			<section data-scroll-section class="container">
+				<div class="parallax">
+					<img data-scroll data-scroll-speed="-5" src='https://images.unsplash.com/photo-1632592052900-b7e9a62adb1e?crop=entropy&cs=srgb&fm=jpg&ixid=MnwxNDU4OXwwfDF8cmFuZG9tfHx8fHx8fHx8MTYzMzQ3MzI3NQ&ixlib=rb-1.2.1&q=85' alt=''>
+				</div>
+				<div data-scroll data-scroll-speed="2" class="text">
+					<div class="wrapper">
+						<h2>Parallax effect</h2>
+						<p>As you can notice the background is created to use an image with the "img" tag to perfectly realize the offset background and the depth we can give it.</p>
+					</div>
+				</div>
+				<div class="scroll-animation">
+					Scroll Down
+					<svg viewBox="0 0 448 512" width="25" title="chevron-down">
+						<path d="M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z" />
+					</svg>
+				</div>
+			</section>
+			<section data-scroll-section>
+				<div class="wrapper">
+					<h2>Keep Scrolling</h2>
+					<p>The wonderful thing about the library, it is disabled when the viewport is less than 1000px, but only when the website loads, it does not affect if the browser resizes. Try changing the editor view to vertical and reload the code.You will notice the change when scrolling, keep this in mind when creating your animations. </p>
+				</div>
+				<div class="scroll-animation">
+					Scroll Down
+					<svg viewBox="0 0 448 512" width="25" title="chevron-down">
+				<path d="M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z" />
+			</svg>
+		</div>
+	</section>
+	<section data-scroll-section class="container">
+		<div class="parallax">
+			<img data-scroll data-scroll-speed="-5" src='https://images.unsplash.com/photo-1678338712030-6b529c30bd41?crop=entropy&cs=tinysrgb&fm=jpg&ixid=MnwzMjM4NDZ8MHwxfHJhbmRvbXx8fHx8fHx8fDE2NzkwODIwMDE&ixlib=rb-4.0.3&q=80' alt=''>
+		</div>
+		<div data-scroll data-scroll-speed="2" class="text">
+			<div class="wrapper">
+				<h2>Did you like this library?</h2>
+				<p>For more front-end code follow me on:</p>
+				<ul>
+					<li data-scroll data-scroll-speed="5">
+						<a href="https://youtu.be/DRWRVc87h7I" target="_blank">
+							<svg xmlns="http://www.w3.org/2000/svg" width="35" fill="currentColor" class="bi bi-youtube" viewBox="0 0 16 16">
+								<path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.108-.082 2.06l-.008.105-.009.104c-.05.572-.124 1.14-.235 1.558a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z" />
+							</svg>
+						</a>
+					</li>
+					<li data-scroll data-scroll-speed="3">
+						<a href="#">
+							<svg id="icons" xmlns="http://www.w3.org/2000/svg" width="35" viewBox="0 0 512 512">
+								<path d="M412.19,118.66a109.27,109.27,0,0,1-9.45-5.5,132.87,132.87,0,0,1-24.27-20.62c-18.1-20.71-24.86-41.72-27.35-56.43h.1C349.14,23.9,350,16,350.13,16H267.69V334.78c0,4.28,0,8.51-.18,12.69,0,.52-.05,1-.08,1.56,0,.23,0,.47-.05.71,0,.06,0,.12,0,.18a70,70,0,0,1-35.22,55.56,68.8,68.8,0,0,1-34.11,9c-38.41,0-69.54-31.32-69.54-70s31.13-70,69.54-70a68.9,68.9,0,0,1,21.41,3.39l.1-83.94a153.14,153.14,0,0,0-118,34.52,161.79,161.79,0,0,0-35.3,43.53c-3.48,6-16.61,30.11-18.2,69.24-1,22.21,5.67,45.22,8.85,54.73v.2c2,5.6,9.75,24.71,22.38,40.82A167.53,167.53,0,0,0,115,470.66v-.2l.2.2C155.11,497.78,199.36,496,199.36,496c7.66-.31,33.32,0,62.46-13.81,32.32-15.31,50.72-38.12,50.72-38.12a158.46,158.46,0,0,0,27.64-45.93c7.46-19.61,9.95-43.13,9.95-52.53V176.49c1,.6,14.32,9.41,14.32,9.41s19.19,12.3,49.13,20.31c21.48,5.7,50.42,6.9,50.42,6.9V131.27C453.86,132.37,433.27,129.17,412.19,118.66Z" />
+							</svg>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</section>
+  <script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@4.1.4/dist/locomotive-scroll.min.js"></script>
+	<script>
+		const LocoScroll = new LocomotiveScroll({
+			el: document.querySelector("[data-scroll-container]"),
+			smooth: true
+		});
+		
+		</script>
+</main>
+</body>
+</html>

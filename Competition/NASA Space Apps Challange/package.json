@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "locomotive-scroll": "^4.1.4",
+    "three": "^0.169.0"
+  }
+}

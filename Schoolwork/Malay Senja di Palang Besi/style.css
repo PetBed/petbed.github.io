@@ -1,28 +1,102 @@
 * {
   margin: 0;
+  position: relative;
   box-sizing: border-box;
-  /* font-family: Arial, Helvetica, sans-serif; */
-}
-h1 {
-  text-align: center;
-  margin: 1em;
-}
-body {
-  padding: 0 10%;
 }
 
-.content {
-  display: inline-flex;
-  flex-wrap: wrap;
-  text-align: center;
+header {
+  height: 80vh;
+  background-color: lightslategray;
+  display: flex;
+  justify-content: right;
   align-items: center;
 }
-.text {
-  flex: 3;
-  margin: 0 2em;
+
+.header-title {
+  display: inline-block;
+  width: fit-content;
+  height: fit-content;
+  display: inline-flex;
+  font-size: 4em;
+  right: 10%;
 }
-img {
-  /* width: 40%; */
-  height: 10em;
-  flex: 1;
+
+.header-title > div {
+  width: fit-content;
+  height: 100%;
+  margin-right: 3px;
+  text-align: right;
+  
+  & :nth-child(1) {
+    text-align: left;
+    left: .06em;
+  }
+  
+  & :nth-child(2) {
+    font-size: .85em;
+  }
+  
+  & :nth-child(3) {
+    top: -.3em;
+    left: .02em;
+  }
+  
+  & :nth-child(4) {
+    top: -.5em;
+  }
+}
+.header-title > p {
+  writing-mode: vertical-lr;
+  text-orientation: upright;
+  letter-spacing: -.2em;
+  font-size: .3em;
+  top: 4.2em;
+  font-style: italic;
+}
+.maksud {
+  overflow-x: hidden !important;
+  overflow-y: hidden;
+}
+
+.maksud-section {
+  margin: 1em 0;
+  background-color: antiquewhite;
+  padding: 2em;
+  z-index: 1;
+}
+
+section {
+  margin: 2em 0;
+}
+
+.pengajaran {
+  display: flex;
+  overflow-x: hidden;
+}
+
+.pengajaran-title {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pengajaran-section {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: right;
+  width: 80%;
+  align-items: center;
+  overflow-y: hidden;
+}
+.pengajaran-section i {
+  margin-right: 1em;
+  cursor: pointer;
+  padding: 15px;
+  display: inline-block;
+  transform-origin: center;
+}
+.pengajaran-item {
+  background-color: aqua;
+  margin: .5em 0;
+  padding: .5em 1em;
 }

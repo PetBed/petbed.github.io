@@ -3,133 +3,78 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- <link rel="stylesheet" href="style.css"> -->
   <title>Document</title>
-  <style>
-    :root {
-      --border-size: 1px;
-    }
-
-    * {
-      margin: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      height: 100vh;
-      width: 100vw;
-      display: flex;
-      overflow-x: hidden;
-    }
-
-    input {
-      display: none;
-    }
-
-    .content {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      display: inline-flex;
-      flex-direction: column;
-      /* justify-content: stretch; */
-    }
-
-    .sidebar {
-      display: inline-flex;
-      text-align: center;
-      justify-content: center;
-      align-items: center;
-    }
-
-    label {
-      border-right: black solid var(--border-size);
-      width: 100%;
-      height: 50%;
-      border-bottom: black solid var(--border-size);
-      display: inline-flex;
-      justify-content: space-between;
-      align-items: center;
-      position: relative;
-      align-self: stretch;
-    }
-    
-    label div {
-      background-color: grey;
-      height: 100%;
-      display: flex;
-      flex-shrink: 0;
-      width: 0;
-      overflow: hidden;
-      transition: 0.3s ease-in-out;
-      align-items: center;
-    }
-
-    label p {
-      flex-grow: 1;
-      text-align: center;
-    }
-
-    @media only screen and (hover: none) {
-      input:checked + label div {
-        width: 70%;
-      }
-    }
-
-    @media (max-width: 400px) {
-      body {
-        padding-top: 2em;
-        flex-direction: column-reverse;
-      }
-    }
-
-    @media (min-width: 401px) and (hover) {
-      label:hover div {
-        width: 70%;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="animation.css">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 </head>
 <body>
-  <div class="content">
-    <input type="checkbox" name="card1" id="card1">
-    <label for="card1">
-      <p>meow</p>
-      <div class="sidebar">
-        <ul>
-          <li>meow 1</li>
-          <li>meow 2</li>
-          <li>meow 3</li>
-        </ul>
+  <header>
+    <div class="header-title">
+      <div>
+        <h1 style="display: inline;">Senja</h1>
+        <h1 style="display: inline;">di</h1>
+        <h1>Palang</h1>
+        <h1>Besi</h1>
       </div>
-    </label>
-    
-    <input type="checkbox" name="card2" id="card2">
-    <label for="card2">
-      <p>meow</p>
-      <div class="sidebar">
-        <ul>
-          <li>meow 1</li>
-          <li>meow 2</li>
-          <li>meow 3</li>
-        </ul>
-      </div>
-    </label>
+      <p>karya Pena Alam</p>
+    </div>
+  </header>
 
-    <input type="checkbox" name="card3" id="card3">
-    <label for="card3">
-      <p>meow</p>
-      <div class="sidebar">
-        <ul>
-          <li>meow 1</li>
-          <li>meow 2</li>
-          <li>meow 3</li>
-        </ul>
+  <section class="maksud">
+    <div class="maksud-section">
+      <p>Rangkap 1</p>
+      <p>
+        Senja mula menangis
+        <br> remang membongkar sendu
+        <br> mengutus kuntum-kuntum serakan cahaya
+        <br> berlari di celah jambangan bunga dedawai
+        <br> menari mengikat ramah kekosongan
+        <br> dalam kotak tidur sepi nan pedar hati.
+      </p>
+    </div>
+
+    <div class="maksud-section">
+      <p>Rangkap 1</p>
+      <p>
+        Senja mula menangis
+        <br> remang membongkar sendu
+        <br> mengutus kuntum-kuntum serakan cahaya
+        <br> berlari di celah jambangan bunga dedawai
+        <br> menari mengikat ramah kekosongan
+        <br> dalam kotak tidur sepi nan pedar hati.
+      </p>
+    </div>
+
+    <div class="maksud-section">
+      <p>Rangkap 1</p>
+      <p>
+        Senja mula menangis
+        <br> remang membongkar sendu
+        <br> mengutus kuntum-kuntum serakan cahaya
+        <br> berlari di celah jambangan bunga dedawai
+        <br> menari mengikat ramah kekosongan
+        <br> dalam kotak tidur sepi nan pedar hati.
+      </p>
+    </div>
+  </section>
+
+  <section class="pengajaran">
+    <p class="pengajaran-title">Pengajaran</p>
+    <div class="pengajaran-section">
+      <i class="fa fa-angle-double-left"></i>
+      <div>
+        <div class="pengajaran-item">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex molestiae in obcaecati dicta explicabo, possimus tenetur voluptatum, voluptate veniam.</div>
+        <div class="pengajaran-item">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex molestiae in obcaecati dicta explicabo, possimus tenetur voluptatum, voluptate veniam, consectetur numquam officiis adipisci natus.</div>
+        <div class="pengajaran-item">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex molestiae in obcaecati dicta explicabo, possimus tenetur voluptatum, voluptate veniam, consectetur numquam officiis adipisci natus.</div>
+        <div class="pengajaran-item">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex molestiae in obcaecati dicta explicabo, possimus tenetur voluptatum, voluptate veniam, consectetur numquam officiis adipisci natus.</div>
       </div>
-    </label>
-  </div>
-  <div class="sidebar">
-    <h1>UNSUR BUNYI</h1>
-  </div>
+    </div>
+  </section>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

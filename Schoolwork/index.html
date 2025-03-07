@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- <link rel="stylesheet" href="style.css"> -->
+  <title>Document</title>
+  <style>
+    :root {
+      --border-size: 1px;
+    }
+
+    * {
+      margin: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      overflow-x: hidden;
+    }
+
+    input {
+      display: none;
+    }
+
+    .content {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      /* justify-content: stretch; */
+    }
+
+    .sidebar {
+      display: inline-flex;
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+    }
+
+    label {
+      border-right: black solid var(--border-size);
+      width: 100%;
+      height: 50%;
+      border-bottom: black solid var(--border-size);
+      display: inline-flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      align-self: stretch;
+    }
+    
+    label div {
+      background-color: grey;
+      height: 100%;
+      display: flex;
+      flex-shrink: 0;
+      width: 0;
+      overflow: hidden;
+      transition: 0.3s ease-in-out;
+      align-items: center;
+    }
+
+    label p {
+      flex-grow: 1;
+      text-align: center;
+    }
+
+    @media only screen and (hover: none) {
+      input:checked + label div {
+        width: 70%;
+      }
+    }
+
+    @media (max-width: 400px) {
+      body {
+        padding-top: 2em;
+        flex-direction: column-reverse;
+      }
+    }
+
+    @media (min-width: 401px) and (hover) {
+      label:hover div {
+        width: 70%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <input type="checkbox" name="card1" id="card1">
+    <label for="card1">
+      <p>meow</p>
+      <div class="sidebar">
+        <ul>
+          <li>meow 1</li>
+          <li>meow 2</li>
+          <li>meow 3</li>
+        </ul>
+      </div>
+    </label>
+    
+    <input type="checkbox" name="card2" id="card2">
+    <label for="card2">
+      <p>meow</p>
+      <div class="sidebar">
+        <ul>
+          <li>meow 1</li>
+          <li>meow 2</li>
+          <li>meow 3</li>
+        </ul>
+      </div>
+    </label>
+
+    <input type="checkbox" name="card3" id="card3">
+    <label for="card3">
+      <p>meow</p>
+      <div class="sidebar">
+        <ul>
+          <li>meow 1</li>
+          <li>meow 2</li>
+          <li>meow 3</li>
+        </ul>
+      </div>
+    </label>
+  </div>
+  <div class="sidebar">
+    <h1>UNSUR BUNYI</h1>
+  </div>
+</body>
+</html>

@@ -10,26 +10,28 @@ input {
 
 .title {
   display: inline-block;  
-  margin-bottom: -3.5em;
   /* flex-direction: column; */
 }
 .title h1 {
   margin-top: 0.3em;
   font-size: 4em;
-  
 }
 .title hr {
   display: inline-block;
   padding: 0;
 }
 .title img {
-  width: 100%;
+  width: 80%;
   margin: 1em 0;
   padding: 0.5em;
 }
 
+header {
+  /* height: fit-content !important; */
+}
 
 .bentuk {
+  margin-top: -1.5em;
   display: flex;
   font-size: 1.25em;
 }
@@ -43,5 +45,35 @@ input {
 
   & li {
     margin: 1em 0;
+  }
+}
+
+@media (max-width: 768px) and (min-width: 426px) {
+  .title {
+    font-size: .5em !important;
+  }
+  .title img {
+    width: 100% !important;
+  }
+
+  .bentuk {
+    margin-top: 40px;
+  }
+}
+
+@media (max-width: 426px) {
+  .title {
+    font-size: 1em !important;
+  }
+  .title img {
+    width: 100% !important;
+  }
+
+  .bentuk {
+    margin-top: 40px;
+  }
+  
+  .bentuk img {
+    display: none;
   }
 }

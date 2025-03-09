@@ -45,50 +45,52 @@ sections.forEach((section, index) => {
 });
 
 // Add animation for maksud-content elements
-let offset = 0;
-maksudContents.forEach((content, index) => {
-  const contentPos = content.getBoundingClientRect();
-  console.log(contentPos)
-  const animation = gsap.timeline({
-    scrollTrigger: {
-      trigger: content,
-      start: "top 50%",
-      end: "top 50%",
-      toggleActions: "play none none reverse",
-      // markers: true,
-    }
-  });
+if (window.innerWidth > 426) {
+  let offset = 0;
+  maksudContents.forEach((content, index) => {
+    const contentPos = content.getBoundingClientRect();
+    console.log(contentPos)
+    const animation = gsap.timeline({
+      scrollTrigger: {
+        trigger: content,
+        start: "top 50%",
+        end: "top 50%",
+        toggleActions: "play none none reverse",
+        // markers: true,
+      }
+    });
 
-  animation.fromTo(content,
-    {
-      x: `-${contentPos.left + 600}px`, // Start right at the edge of the left side of the viewport, out of frame
-      y: `${30 * offset}em`,
-      rotation: -3,
-      duration: 0
-    },
-    {
-      y: 0,
-    })
-    .to(content, {
-      x: 0,
-      opacity: 1,
-      duration: .5,
-      ease: "none",
-    })
-    .to(content, {
-      rotation: "+=6",
-      yoyo: true,
-      repeat: 10,
-      duration: 0.1,
-      ease: "none"
-    }, 0) // Start at the same time
-    .to(content, {
-      rotation: 0,
-      duration: 0.1,
-      ease: "none"
-    }); // End with rotation being 0
-  offset++;
-});
+    animation.fromTo(content,
+      {
+        x: `-${contentPos.left + 600}px`, // Start right at the edge of the left side of the viewport, out of frame
+        y: `${30 * offset}em`,
+        rotation: -3,
+        duration: 0
+      },
+      {
+        y: 0,
+      })
+      .to(content, {
+        x: 0,
+        opacity: 1,
+        duration: .5,
+        ease: "none",
+      })
+      .to(content, {
+        rotation: "+=6",
+        yoyo: true,
+        repeat: 10,
+        duration: 0.1,
+        ease: "none"
+      }, 0) // Start at the same time
+      .to(content, {
+        rotation: 0,
+        duration: 0.1,
+        ease: "none"
+      }); // End with rotation being 0
+    offset++;
+  });
+}
 
 offset = 0;
 pengajaranContents.forEach((content, index) => {
@@ -100,7 +102,7 @@ pengajaranContents.forEach((content, index) => {
       start: `top ${50 - 30 * offset}%`,
       end: "top 50%",
       toggleActions: "play none none reverse",
-      markers: true,
+      // markers: true,
     }
   });
 

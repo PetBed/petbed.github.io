@@ -79,8 +79,18 @@ header hr {
   }
 }
 
-input[type="checkbox"]:checked + div label {
+input[type="checkbox"]:checked + div label{
   transform: translate(0, 0);
+}
+
+@media (hover: hover) {
+  .bunyi-content label:hover {
+    transform: translate(0, 0);
+  }
+
+  .bunyi-content label:hover::after {
+    content: '<';
+  }
 }
 input[type="checkbox"]:checked + div label::after {
   content: '<';
@@ -143,14 +153,32 @@ input[type="checkbox"]:checked + div label::after {
   align-items: center;
   gap: 10px;
 } */
-
 .gaya {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+.gaya-title {
+  width: 33%;
+  margin-bottom: 1em;
+  & > hr {
+    width: 100%;
+  }
+
+  & > h1 {
+    text-align: center;
+    font-size: 4em;
+  } 
+}
+.gaya-content {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  gap: 7em 16em;
   padding: 20px;
   justify-items: center;
   align-items: center;
+  width: 100%;
 }
 
 @media screen and (max-width: 768px) {
@@ -159,10 +187,14 @@ input[type="checkbox"]:checked + div label::after {
   }
 }
 
+.gaya-content label {
+  width: 90%;
+  height: 13em;
+}
 .flip-card {
   background-color: transparent;
-  width: 300px;
-  height: 200px;
+  width: 100%;
+  height: 100%;
   border: 1px solid #f1f1f1;
   perspective: 1000px; /* Remove this if you don't want the 3D effect */
 }
@@ -178,8 +210,14 @@ input[type="checkbox"]:checked + div label::after {
 }
 
 /* Do an horizontal flip when you move the mouse over the flip box container */
-.gaya input:checked + label .flip-card .flip-card-inner,  .flip-card:hover .flip-card-inner{
+.gaya input:checked + label .flip-card .flip-card-inner{
   transform: rotateY(180deg);
+}
+
+@media (hover: hover) {
+  .flip-card:hover .flip-card-inner{
+    transform: rotateY(180deg);
+  }
 }
 
 /* Position the front and back side */
@@ -194,12 +232,54 @@ input[type="checkbox"]:checked + div label::after {
 /* Style the front side (fallback if image is missing) */
 .flip-card-front {
   background-color: #bbb;
+  background-image: url(../Images/bgnewspaper.jpeg);
   color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Style the back side */
 .flip-card-back {
   background-color: dodgerblue;
-  color: white;
+  color: black;
+  background-image: url(../Images/bgnewspaper.jpeg);
   transform: rotateY(180deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) and (min-width: 426px) {
+  .title {
+    font-size: 1em !important;
+  }
+  .title img {
+    width: 100% !important;
+  }
+
+  .gaya-title {
+    width: 80%;
+  }
+  .gaya-content {
+    gap: 4em 10em;
+  }
+}
+
+@media (max-width: 426px) {
+  .title {
+    font-size: 1em !important;
+  }
+  .title img {
+    width: 100% !important;
+  }
+
+  .gaya-title {
+    width: 80%;
+    font-size: .5em;
+  }
+  .gaya-content {
+    gap: .8em 1em;
+  }
 }

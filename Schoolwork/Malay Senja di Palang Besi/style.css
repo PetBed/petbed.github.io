@@ -63,9 +63,14 @@
   margin: 1em 0;
   background-color: rgb(226, 226, 226);
   padding: 2em;
-  padding-left: 27em;
   z-index: 1;
-  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  & p {
+    width: 40%;
+  }
 }
 
 h3 {
@@ -142,4 +147,63 @@ h3 {
   background-color: rgb(226, 226, 226);
   margin: .5em 0;
   padding: 1em 2em;
+}
+
+@media (max-width: 768px) and (min-width: 426px) {
+  .title {
+    font-size: 1em;
+  }
+  .title img {
+    width: 70%;
+  }
+  .pengajaran-section {
+    overflow-x: hidden;
+  }
+}
+@media (max-width: 426px) {
+  .title {
+    font-size: 3em !important;
+  }
+  .title img {
+    width: 60% !important;
+  }
+
+  .sajak-content {
+    padding: 1em;
+
+    & p {
+      width: 100%;
+    }
+  }
+
+  .maksud {
+    height: auto;
+  }
+  .maksud img {
+    display: none;
+  }
+  .maksud > div {
+    height: auto;
+    position: relative;
+    display: block;
+  }
+  .maksud > div > div {
+    display: block;
+  }
+
+  .maksud > div > div > div {
+    display: block;
+  }
+  .maksud-content {
+    margin: 1.5em;
+  }
+
+  .pengajaran-title {
+    writing-mode: vertical-lr;
+    text-orientation: upright;
+  }
+  .pengajaran-section {
+    overflow-x: hidden;
+    font-size: .8em;
+  }
 }

@@ -1,29 +1,24 @@
-* {
-  margin: 0;
-  position: relative;
-  box-sizing: border-box;
-}
 
-header {
-  height: 80vh;
-  background-color: lightslategray;
-  display: flex;
-  justify-content: right;
-  align-items: center;
-}
 
-.header-title {
+/* ========================================================================= */
+/* Title */
+.title {
   display: inline-block;
   width: fit-content;
-  height: fit-content;
   display: inline-flex;
-  font-size: 4em;
-  right: 10%;
+  font-size: 3em;
+  padding: 1em 0 !important;
+  align-self: center;
+  width: 100%;
+  justify-content: space-between;
 }
-
-.header-title > div {
+.title > div {
+  display: flex;
+  /* align-items: center; */
+}
+.title > div > div {
   width: fit-content;
-  height: 100%;
+  height: fit-content;
   margin-right: 3px;
   text-align: right;
   
@@ -45,58 +40,106 @@ header {
     top: -.5em;
   }
 }
-.header-title > p {
+.title p {
   writing-mode: vertical-lr;
   text-orientation: upright;
   letter-spacing: -.2em;
   font-size: .3em;
-  top: 4.2em;
+  /* top: 4.2em; */
   font-style: italic;
 }
-.maksud {
+.title img {
+  width: 75%;
+}
+
+/* ========================================================================= */
+/* Sajak */
+.sajak {
   overflow-x: hidden !important;
   overflow-y: hidden;
 }
 
-.maksud-section {
+.sajak-content {
   margin: 1em 0;
-  background-color: antiquewhite;
+  background-color: rgb(226, 226, 226);
   padding: 2em;
+  padding-left: 27em;
   z-index: 1;
+  text-align: left;
 }
 
-section {
-  margin: 2em 0;
+h3 {
+  text-align: center;
 }
 
-.pengajaran {
+
+/* ========================================================================= */
+/* Maksud */
+.maksud {
+  height: 150em;
+}
+.maksud > div {
+  height: 100vh;
+  position: sticky;
+  top: 0;
   display: flex;
-  overflow-x: hidden;
+  justify-content: center;
+  flex-direction: column;
+}
+.maksud > div > div {
+  display: grid;
+  text-align: justify;
+  align-items: center;
+  grid-template-columns: 4fr 1fr;
+  gap: 2em; /* meow? */ 
+
+}
+.maksud > div > div > div {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2em;
+
+  & p:has(b) {
+    margin-bottom: 1em;
+    text-align: center;
+  }
+}
+.maksud img {
+  width: 100%;
+}
+
+/* ========================================================================= */
+/* Pengjaran */
+.pengajaran {
+  overflow-x: visible;
+  height: 150em;
+}
+.pengajaran > div {
+  display: flex;
+  position: sticky;
+  height: 100vh;
+  top: 0;
+  align-items: center;
 }
 
 .pengajaran-title {
   flex-grow: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: left;
 }
 .pengajaran-section {
   flex-shrink: 0;
   display: flex;
+  flex-direction: column;
   justify-content: right;
   width: 80%;
-  align-items: center;
-  overflow-y: hidden;
-}
-.pengajaran-section i {
-  margin-right: 1em;
-  cursor: pointer;
-  padding: 15px;
-  display: inline-block;
-  transform-origin: center;
+  align-items: stretch;
+  /* overflow-y: hidden; */
+  overflow-x: visible;
 }
 .pengajaran-item {
-  background-color: aqua;
+  background-color: rgb(226, 226, 226);
   margin: .5em 0;
-  padding: .5em 1em;
+  padding: 1em 2em;
 }

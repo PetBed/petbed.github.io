@@ -1,0 +1,205 @@
+* {
+  margin: 0;
+  position: relative;
+  box-sizing: border-box;
+}
+
+input {
+  display: none;
+}
+
+.title {
+  display: block;  
+  width: 100vw;
+  align-self: center;
+}
+.title h1 {
+  margin-top: 1em;
+  margin-bottom: -.3em;
+}
+header {
+  margin-bottom: -2.5em;
+}
+header hr {
+  display: inline-block;
+  padding: 0;
+}
+
+.bunyi {
+  display: flex;
+  overflow-x: hidden;
+  height: 80%;
+  border-bottom: solid black 1px;
+  width: 100vw;
+  justify-self: flex-start;
+}
+.bunyi-container {
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+}
+.bunyi-content {
+  border-bottom: solid black 1px;
+  flex-grow: 1;
+  
+  & p {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  & > label {
+    cursor: pointer;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 95%;
+    display: flex;
+    align-items: center;
+    background-color: #666;
+    transform: translate(-100%, 0);
+    padding: 1em;
+    transition: ease-in-out 0.3s;
+  }
+  & > label::after {
+    content: '>';
+    height: 100%;
+    width: 5.27%;
+    background-color: #666; 
+    position: absolute;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translate(99%, 0);
+    padding: 1em 0;
+    box-sizing: border-box;
+  }
+}
+
+input[type="checkbox"]:checked + div label {
+  transform: translate(0, 0);
+}
+input[type="checkbox"]:checked + div label::after {
+  content: '<';
+}
+
+.bunyi-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  border-left: 1px solid black;
+  
+  & h1 {
+    text-align: center;
+  }
+}
+/* .bunyi-container{
+  width: 70%;
+}
+.bunyi-sidebar{
+  width: 30%;
+  background-color: #f1f1f1;
+  padding: 20px;
+  display: flex;
+}
+.bunyi-sidebar ul {
+  width: 50%;
+  border-right: solid black 1px;
+}
+.bunyi-sidebar-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  
+  & h1 {
+    text-align: center;
+  }
+}
+
+.bunyi-content {
+  display: none; 
+  background-color: aquamarine;
+  padding: 20px;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.bunyi-sidebar label {
+  display: block;
+  padding: 10px;
+  cursor: pointer;
+  margin-bottom: 5px;
+  transition: background-color 0.3s;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+} */
+
+.gaya {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  padding: 20px;
+  justify-items: center;
+  align-items: center;
+}
+
+@media screen and (max-width: 768px) {
+  .gaya {
+    grid-template-columns: 1fr;
+  }
+}
+
+.flip-card {
+  background-color: transparent;
+  width: 300px;
+  height: 200px;
+  border: 1px solid #f1f1f1;
+  perspective: 1000px; /* Remove this if you don't want the 3D effect */
+}
+
+/* This container is needed to position the front and back side */
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+
+/* Do an horizontal flip when you move the mouse over the flip box container */
+.gaya input:checked + label .flip-card .flip-card-inner,  .flip-card:hover .flip-card-inner{
+  transform: rotateY(180deg);
+}
+
+/* Position the front and back side */
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden; /* Safari */
+  backface-visibility: hidden;
+}
+
+/* Style the front side (fallback if image is missing) */
+.flip-card-front {
+  background-color: #bbb;
+  color: black;
+}
+
+/* Style the back side */
+.flip-card-back {
+  background-color: dodgerblue;
+  color: white;
+  transform: rotateY(180deg);
+}

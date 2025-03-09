@@ -1,7 +1,9 @@
 gsap.registerPlugin(ScrollTrigger);
 
-// Select all maksud-section elements
-const sections = document.querySelectorAll('.maksud-section');
+// Select all sajak-content elements
+const sections = document.querySelectorAll('.sajak-content');
+const maksudContents = document.querySelectorAll('.maksud-content');
+const pengajaranContents = document.querySelectorAll('.pengajaran-item');
 
 // Apply animation to each section
 sections.forEach((section, index) => {
@@ -9,10 +11,10 @@ sections.forEach((section, index) => {
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: section,
-      start: "top 80%", 
-      end: "top 45%",
+      start: "top 50%", 
+      end: "top 50%",
       scrub: 1,  // Add scrub with a value of 1 for smooth scrolling
-      markers: true,
+      // markers: true,
     }
   });
 
@@ -42,48 +44,80 @@ sections.forEach((section, index) => {
   });
 });
 
-// Add this after your existing GSAP animations
-const pengajaranSection = document.querySelector('.pengajaran-section');
-const toggleButton = pengajaranSection.querySelector('i');
-
-// Set initial position
-gsap.set(pengajaranSection, {
-  x: '90%'  // Start position off-screen
-});
-
-let isOpen = false;
-
-toggleButton.addEventListener('click', () => {
-  isOpen = !isOpen;
-  
-  gsap.to(toggleButton, {
-    rotateY: isOpen ? 180 : 0,
-    duration: 0.6,
-    ease: "power2.inOut"
-  });
-  
-  gsap.to(pengajaranSection, {
-    x: isOpen ? '0%' : '90%',
-    scale: isOpen ? 1 : 0.95,
-    duration: 0.8,
-    ease: "elastic.out(1, 0.8)",
-    onComplete: () => {
-      if (!isOpen) {
-        iconAnimation.restart();
-      }
+// Add animation for maksud-content elements
+let offset = 0;
+maksudContents.forEach((content, index) => {
+  const contentPos = content.getBoundingClientRect();
+  console.log(contentPos)
+  const animation = gsap.timeline({
+    scrollTrigger: {
+      trigger: content,
+      start: "top 50%",
+      end: "top 50%",
+      toggleActions: "play none none reverse",
+      // markers: true,
     }
   });
+
+  animation.fromTo(content,
+    {
+      x: `-${contentPos.left + 600}px`, // Start right at the edge of the left side of the viewport, out of frame
+      y: `${30 * offset}em`,
+      rotation: -3,
+      duration: 0
+    },
+    {
+      y: 0,
+    })
+    .to(content, {
+      x: 0,
+      opacity: 1,
+      duration: .5,
+      ease: "none",
+    })
+    .to(content, {
+      rotation: "+=6",
+      yoyo: true,
+      repeat: 10,
+      duration: 0.1,
+      ease: "none"
+    }, 0) // Start at the same time
+    .to(content, {
+      rotation: 0,
+      duration: 0.1,
+      ease: "none"
+    }); // End with rotation being 0
+  offset++;
 });
 
-const iconAnimation = gsap.timeline({repeat: -1})
-  .to(toggleButton, {
-    transform: 'translateX(-10px)',
-    duration: 0.8,
-    ease: "power1.inOut"
-  })
-  .to(toggleButton, {
-    transform: 'translateX(0px)',
-    duration: 0.8,
-    ease: "power1.inOut"
+offset = 0;
+pengajaranContents.forEach((content, index) => {
+  const contentPos = content.getBoundingClientRect();
+  console.log(contentPos)
+  const animation = gsap.timeline({
+    scrollTrigger: {
+      trigger: content,
+      start: `top ${50 - 30 * offset}%`,
+      end: "top 50%",
+      toggleActions: "play none none reverse",
+      markers: true,
+    }
   });
 
+  animation.fromTo(content,
+    {
+      x: `${contentPos.left + content.offsetWidth * .7}px`, // Start right at the edge of the left side of the viewport, out of frame
+      // y: `${10 * offset}em`,
+      duration: 0,
+    },
+    {
+      // y: 0,
+    })
+    .to(content, {
+      x: 0,
+      opacity: 1,
+      duration: .5,
+      ease: "none",
+    });
+  offset++;
+});

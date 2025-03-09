@@ -1,0 +1,96 @@
+* {
+  margin: 0;
+  position: relative;
+  box-sizing: border-box;
+  position: relative;
+}
+@font-face {
+  font-family: EngraversOldEnglish;
+  src: url('Fonts/engravers-old-english.otf');
+  font-weight: normal;
+  font-style: normal;
+}
+body {
+  padding: 1em 6em;
+  padding-top: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+hr {
+  padding: 0;
+  border: 1.5px solid #000;
+}
+
+header {
+  height: 100vh;
+  /* background-color: rgb(222, 222, 222); */
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+  /* align-items: center; */
+  & > * {
+    display: grid;
+    grid-template-columns: 1fr 5fr 1fr;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+/* ========================================================================= */
+/* Sections */
+section {
+  margin: 2em 0;
+}
+
+.publisher-quote, .info-volume {
+  justify-self: center;
+  font-size: .5em;
+}
+.publisher-best, .info-author {
+  justify-self: center;
+  font-size: .5em
+}
+
+.publisher {
+  flex-grow: 2;
+  /* padding: 1em 2em; */
+}
+
+.info {
+  flex-grow: 1;
+}
+
+.publisher-name {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* "THE" */
+  & p:first-child {
+    writing-mode: sideways-lr;
+    font-size: 1.7em;
+    font-style: italic;
+  }
+/* NEW YORK (ONLY) */
+  & .fancy {
+    font-family: EngraversOldEnglish, sans-serif;
+    font-weight: normal;
+    font-size: 1.5em;
+  }
+  /* NEW YORK TIMES*/
+  & p:last-child {
+    display: inline-block;
+    font-size: 3.5em;
+    padding-bottom: 0.1em;
+    font-weight: bold;
+  }
+}
+
+  
+
+.title {
+  height: 80%;
+}

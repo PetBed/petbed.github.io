@@ -23,6 +23,7 @@ input {
   font-size: 2em;
   font-weight: 400;
   margin-bottom: 1em;
+  width: 80%;
 }
 .title p {
   font-size: 1em;

@@ -29,7 +29,7 @@ header hr {
   display: flex;
   overflow-x: hidden;
   height: 80%;
-  border-bottom: solid black 1px;
+  border-bottom: solid black 0.5px;
   width: 100vw;
   justify-self: flex-start;
 }
@@ -37,10 +37,13 @@ header hr {
   width: 80%;
   display: flex;
   flex-direction: column;
+  text-align: left;
+  
 }
 .bunyi-content {
   border-bottom: solid black 1px;
   flex-grow: 1;
+  
   
   & p {
     width: 100%;
@@ -48,6 +51,7 @@ header hr {
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 2.5em;
   }
   & > label {
     cursor: pointer;
@@ -58,7 +62,7 @@ header hr {
     width: 95%;
     display: flex;
     align-items: center;
-    background-color: #666;
+    background-color: #eee;
     transform: translate(-100%, 0);
     padding: 1em;
     transition: ease-in-out 0.3s;
@@ -67,7 +71,7 @@ header hr {
     content: '>';
     height: 100%;
     width: 5.27%;
-    background-color: #666; 
+    background-color: #eee; 
     position: absolute;
     right: 0;
     display: flex;
@@ -107,52 +111,6 @@ input[type="checkbox"]:checked + div label::after {
     text-align: center;
   }
 }
-/* .bunyi-container{
-  width: 70%;
-}
-.bunyi-sidebar{
-  width: 30%;
-  background-color: #f1f1f1;
-  padding: 20px;
-  display: flex;
-}
-.bunyi-sidebar ul {
-  width: 50%;
-  border-right: solid black 1px;
-}
-.bunyi-sidebar-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-grow: 1;
-  
-  & h1 {
-    text-align: center;
-  }
-}
-
-.bunyi-content {
-  display: none; 
-  background-color: aquamarine;
-  padding: 20px;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-}
-
-.bunyi-sidebar label {
-  display: block;
-  padding: 10px;
-  cursor: pointer;
-  margin-bottom: 5px;
-  transition: background-color 0.3s;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 10px;
-} */
 .gaya {
   display: flex;
   flex-direction: column;
@@ -231,24 +189,30 @@ input[type="checkbox"]:checked + div label::after {
 
 /* Style the front side (fallback if image is missing) */
 .flip-card-front {
-  background-color: #bbb;
+  background-color: rgb(243, 243, 243);
   background-image: url(../Images/bgnewspaper.jpeg);
   color: black;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-weight: bolder;
+  font-size: 3em;
+  outline-style: solid;
+  outline-width: 1px;
 }
 
 /* Style the back side */
 .flip-card-back {
-  background-color: dodgerblue;
+  background-color: rgb(243, 243, 243);;
   color: black;
-  background-image: url(../Images/bgnewspaper.jpeg);
   transform: rotateY(180deg);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  outline-style: solid;
+  outline-width: 1px;
+  font-size: 1.2em;
 }
 
 @media (max-width: 768px) and (min-width: 426px) {
@@ -275,11 +239,34 @@ input[type="checkbox"]:checked + div label::after {
     width: 100% !important;
   }
 
+  .gaya {
+    margin-top: 85vh;
+  }
   .gaya-title {
     width: 80%;
     font-size: .5em;
   }
   .gaya-content {
     gap: .8em 1em;
+  }
+  header {
+
+  }
+  .bunyi {
+    flex-direction: column-reverse;
+    height: 100vh;
+  }
+  .bunyi-container {
+    width: 100%;
+    height: 80%;
+
+  }
+  .bunyi-title {
+    & h1 {
+      margin-top: 0;
+      margin-bottom: 0;
+      width: 80%;
+      font-size: 6em;
+    }
   }
 }

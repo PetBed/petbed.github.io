@@ -55,8 +55,9 @@ input {
     width: 100%;
     left: 10%;
     
-    & p {
+    & div {
       position: absolute;
+      display: inline-block;
       height: 49%;
     }
   }
@@ -82,7 +83,8 @@ input {
   & div:nth-child(5) {
     width: 70%;
 
-    & p {
+    & div {
+      display: inline-block;
       position: absolute;
       height: 75%;
       bottom: 5em;
@@ -91,7 +93,8 @@ input {
   }
   & div:nth-child(6) {
     width: 80%;
-    & p {
+    & div {
+      display: inline-block;
       position: absolute;
       height: 115%;
       top: -4em;
@@ -99,13 +102,13 @@ input {
     }
   }
 
-  & p {
-    background-color: beige;
+  & > div > div {
+    background-color: rgb(234, 234, 234);
     padding: 2em;
     z-index: 1;
     text-align: justify;
     display: flex;
-    /* align-items: center; */
+    align-items: center;
   }
 
 }
@@ -125,7 +128,7 @@ input {
     position: relative;
     left: 6%;
     
-    & p {
+    & div {
       height: 93%;
     }
   }
@@ -140,7 +143,7 @@ input {
     left: 24%;
     top: -10%;
 
-    & p {
+    & div {
       position: absolute;
       height: 90%;
     }
@@ -158,13 +161,13 @@ input {
     top: 18%;
   }
 
-  & p {
-    background-color: beige;
+  & > div > div {
+    background-color: rgb(234, 234, 234);
     padding: 2em;
     z-index: 1;
     text-align: justify;
     display: flex;
-    /* align-items: center; */
+    align-items: center;
   }
 
 }

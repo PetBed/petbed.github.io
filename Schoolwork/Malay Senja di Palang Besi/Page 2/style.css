@@ -111,6 +111,12 @@ input {
     align-items: center;
   }
 
+  & > div:has(div)  {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
 }
 
 .nilai-content {

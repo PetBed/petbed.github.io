@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <img src="" alt="">
+  <div class="main-container">
+    <div class="login-container">
+      <h1>Login</h1>
+      <form onsubmit="loginUser()" target="dummyframe">
+        <input type="text" name="login-username" placeholder="Email / Username" id="login-email">
+        <input type="password" name="login-password" placeholder="Password" id="login-password">
+        <p id="login-status" style="color: red;"></p>
+        <button type="submit">Login</button>
+      </form>
+    </div>
+    <div class="register-container">
+      <h1>Register</h1>
+      <form onsubmit="createUser()" target="dummyframe">
+        <input type="text" name="username" placeholder="Username" id="register-username">
+        <input type="text" name="email" placeholder="Email" id="register-email">
+        <input type="password" name="password" placeholder="Password" id="register-password">
+        <p id="register-status"></p>
+        <button type="submit">Register</button>
+      </form>
+    </div>
+  </div>
+  <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
+  <script src="../globalVariables.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

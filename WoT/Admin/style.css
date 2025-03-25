@@ -1,0 +1,33 @@
+* {
+  margin: 0;
+  box-sizing: border-box;
+  padding: 0;
+}
+
+#users-table-header {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Adjust the number of columns as needed */
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #f1f1f1;
+}
+
+#users-table-body {
+  padding: 0 20px;
+}
+
+.users-table-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Match the header's column layout */
+  align-items: left;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f1f1;
+
+  & > div {
+    display: flex;
+    justify-content: space-between;
+  }
+  & i {
+    cursor: pointer;
+  }
+}

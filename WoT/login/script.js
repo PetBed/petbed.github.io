@@ -89,7 +89,7 @@ async function loginUser() {
       console.log('Storage IDed:', localStorage.getItem('userId'));
 
       // Redirect to the dashboard
-      window.location.href = '/dashboard';
+      window.location.href = '../dashboard';
     } else {
       console.error('Failed to log in user:', response.statusText);
       document.getElementById('login-status').innerHTML = 'Invalid email/username or password';
@@ -104,6 +104,6 @@ window.addEventListener('load', async function () {
   if (localStorage.getItem('userId')) {
     console.log('User ID:', localStorage.getItem('userId'));
 
-    this.window.location.href = '/dashboard';
+    window.location.href = '../dashboard';
   }
 });

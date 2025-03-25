@@ -3,7 +3,7 @@ var userId, userData;
 
 async function logoutUser() {
   await localStorage.removeItem('userId');
-  window.location.href = '/login';
+  window.location.href = '../login';
 }
 
 
@@ -24,7 +24,7 @@ window.addEventListener('load', async function () {
     });
     if (!response.ok) {
       this.setTimeout(() => {
-        window.location.href = '/login';
+        window.location.href = '../login';
       }, 1000);
 
       throw new Error(`HTTP error! status: ${response.status}`);

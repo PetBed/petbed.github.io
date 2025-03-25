@@ -54,7 +54,7 @@ const paths = {
   "Personal Projects": {
     contents: {
       "WoT": {
-        url: "https://petbed.github.io/WoT/",
+        url: "https://petbed.github.io/WoT/login/",
       },
     },
   }

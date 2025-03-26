@@ -40,9 +40,9 @@ async function createUser() {
       console.log('User registered successfully:', data);
 
       // Clear form values
-      username.value = '';
-      email.value = '';
-      password.value = '';
+      document.getElementById('register-username').value = '';
+      document.getElementById('register-email').value = '';
+      document.getElementById('register-password').value = '';
 
       document.getElementById('register-status').innerHTML = 'User registered successfully';
     } else {

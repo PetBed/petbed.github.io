@@ -1,24 +1,22 @@
-* {
-  margin: 0;
-  box-sizing: border-box;
-  padding: 0;
-}
-
-#users-table-header {
+#users-table-header, #notes-table-header {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* Adjust the number of columns as needed */
   align-items: center;
   padding: 10px 20px;
   background-color: #f1f1f1;
 }
+#users-table-header {
+  grid-template-columns: repeat(4, 1fr);
+}
+#notes-table-header {
+  grid-template-columns: repeat(4, 1fr);
+}
 
-#users-table-body {
+#users-table-body, #notes-table-body {
   padding: 0 20px;
 }
 
-.users-table-row {
+.users-table-row, .notes-table-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* Match the header's column layout */
   align-items: left;
   padding: 10px 0;
   border-bottom: 1px solid #f1f1f1;
@@ -30,4 +28,10 @@
   & i {
     cursor: pointer;
   }
+}
+.users-table-row {
+  grid-template-columns: repeat(4, 1fr);
+}
+.notes-table-row {
+  grid-template-columns: repeat(4, 1fr);
 }

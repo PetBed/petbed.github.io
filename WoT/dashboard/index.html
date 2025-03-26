@@ -3,12 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../src/header.css">  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
   <title>Document</title>
 </head>
 <body>
   <h1 id="title-username">Hello</h1>
+  
+  <form onsubmit="createNote()" target="dummyframe">
+    <input type="text" name="title" placeholder="Title" id="note-title">
+    <input type="text" name="content" placeholder="Content" id="note-content">
+    <button type="submit">Create Note</button>
+    <p id="note-status"></p>
+  </form>
+
+  <div id="notes-container">
+    <h1>Notes</h1>
+    <div id="notes-body">
+
+    </div>
+  </div>
+
+  </div>
+
+  <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
   <a onclick=logoutUser() style="cursor: pointer; text-decoration: underline; color: blueviolet;">Logout</a>
-  <script src="../globalVariables.js"></script>
+  <script src="../src/globalVariables.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

@@ -1,7 +1,8 @@
 var userId, userData;
 var notes = [];
 
-async function createNote() {
+async function createNote(event) {
+  event.preventDefault();
   // Get form elements
   const title = document.getElementById('note-title');
   const content = document.getElementById('note-content');
@@ -64,52 +65,64 @@ async function deleteNote(id) {
   }
 }
 
-async function editNote(id) {
+async function updateNote(element) {
+  console.log('Parent ID:', element.closest('.note-item').id);
+  const noteId = element.closest('.note-item').id;
+  const note = notes.find(note => note._id === noteId);
+  const updatedNote = {
+    title: element.parentElement.querySelector('.note-item-title').value,
+    content: element.parentElement.querySelector('.note-item-content').value,
+    user: userId
+  };
+
+  try {
+    const response = await fetch(`${apiUrl}notes?id=${noteId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedNote),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Note updated successfully:', data);
+    hasUnsavedChanges = false;
+  } catch (error) {
+    console.error('Error updating note:', error);
+  }
+}
+
+async function editNote() {
   const titleInput = document.querySelectorAll(`.note-item-title`);
   const contentInput = document.querySelectorAll(`.note-item-content`);
 
-  console.log(titleInput, contentInput);
-  titleInput.forEach((titleElement, index) => {
-    titleElement.addEventListener('blur', async () => {
-      updateNote(titleElement);
-    });
-  });
-
-  contentInput.forEach((contentElement, index) => {
-    contentElement.addEventListener('blur', async () => {
-      updateNote(contentElement);
-    });
-  });
-
-  async function updateNote(element) {
-    console.log('Parent ID:', element.closest('.note-item').id);
-    const noteId = element.closest('.note-item').id;
-    const note = notes.find(note => note._id === noteId);
-    const updatedNote = {
-      title: element.parentElement.querySelector('.note-item-title').value,
-      content: element.parentElement.querySelector('.note-item-content').value,
-      user: userId
-    };
-
-    try {
-      const response = await fetch(`${apiUrl}notes?id=${noteId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedNote),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('Note updated successfully:', data);
-    } catch (error) {
-      console.error('Error updating note:', error);
-    }
+  // Debounce the updateNote function
+  const debouncedUpdateNote = debounce(updateNote, 150);
   
+  titleInput.forEach((titleElement) => {
+    titleElement.addEventListener('input', () => {
+      hasUnsavedChanges = true;
+      debouncedUpdateNote(titleElement);
+    });
+  });
+  
+  contentInput.forEach((contentElement) => {
+    contentElement.addEventListener('input', () => {
+      hasUnsavedChanges = true;
+      debouncedUpdateNote(contentElement);
+    });
+  });
+
+  function debounce(func, delay) {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), delay);
+    };
   }
 }
 
@@ -191,12 +204,20 @@ window.addEventListener('load', async function () {
   editNote();
 });
 
-window.onbeforeunload = function(event) {
-  const unsavedChanges = Array.from(document.querySelectorAll('.note-item-title, .note-item-content'))
-    .some(input => document.activeElement === input);
+let hasUnsavedChanges = false;
 
-  if (unsavedChanges) {
-    event.preventDefault();
-    event.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+function trackChanges() {
+  const inputs = document.querySelectorAll('.note-item-title, .note-item-content');
+  inputs.forEach((input) => {
+    input.addEventListener('input', () => {
+      hasUnsavedChanges = true; // Set the flag when the user edits a note
+    });
+  });
+}
+
+window.onbeforeunload = function (event) {
+  if (hasUnsavedChanges) {
+    // Show confirmation dialog only if there are unsaved changes
+    event.returnValue = 'You have unsaved changes. Do you really want to leave?';
   }
 };

@@ -2,7 +2,6 @@ var userId, userData;
 var notes = [];
 
 async function createNote(event) {
-  event.preventDefault();
   // Get form elements
   const title = document.getElementById('note-title');
   const content = document.getElementById('note-content');

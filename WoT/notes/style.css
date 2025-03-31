@@ -1,0 +1,105 @@
+body {
+  width: 100vw;
+  height: 100vh;
+  padding: 2em;
+  display: flex;
+}
+
+#note-title:focus, #note-content:focus, .note-item input:focus, .note-item textarea:focus {
+  outline: none;
+}
+
+#note-title, #note-content, .note-item input, .note-item textarea {
+  resize: none;
+  width: 100%;
+  background-color: #f9f9f9;
+  padding: .5rem;
+  vertical-align: top;
+  border: 0;
+
+}
+
+#new-note {
+  height: 85%;
+  width: 30%;
+  display: flex;
+  justify-content: center;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-right: 2em;
+
+  & form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+  }
+
+  & button {
+    display: flex;
+    align-items: center;
+    margin-top: .5rem;
+    flex-grow: 0;
+    background-color: #ffffff00;
+    border: none;
+    cursor: pointer;
+    width: fit-content;
+    font-size: 1em;
+    align-self: flex-end;
+
+    & i {
+      margin-left: .2em;
+      font-size: 1.3em;
+    }
+  }
+
+  & div {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    border: grey solid 1px;
+  }
+
+  & #note-title {
+    font-size: 1.3em;
+  }
+
+  & #note-content {
+    flex-grow: 1;
+    padding-top: 0;
+  }
+}
+
+#notes-body {
+  flex-grow: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-auto-rows: 20em;
+  gap: 1em;
+  height: calc(100vh - 2em);
+  overflow-y: scroll;
+
+  & .note-item {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    & input {
+      font-size: 1.2em;
+    }
+
+    & textarea {
+      flex-grow: 1;
+      padding-top: 0;
+    }
+
+    & i {
+      position: absolute;
+      top: .5em;
+      right: .5em;
+      cursor: pointer;
+    }
+  }
+}
+

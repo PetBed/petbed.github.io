@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../src/header.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+</head>
+<body>
+  <section id="new-note">
+    <form onsubmit="createNote()" target="dummyframe">
+      <div>
+        <input name="title" placeholder="Title" id="note-title"></input>
+        <textarea name="content" placeholder="Content" id="note-content"></textarea>
+      </div>
+      <button type="submit">New Note <i class="fa fa-plus-square-o" aria-hidden="true"></i></button>
+    </form>
+  </section>
+
+  <div id="notes-body"></div>
+
+  <iframe name="dummyframe" style="display: none;" id="dummyframe"></iframe>
+  <script src="../src/globalVariables.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

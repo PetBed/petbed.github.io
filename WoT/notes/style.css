@@ -1,8 +1,9 @@
 body {
   width: 100vw;
   height: 100vh;
-  padding: 2em;
+  padding: 1em;
   display: flex;
+  background-color: #f9f9f9;
 }
 
 #note-title:focus, #note-content:focus, .note-item input:focus, .note-item textarea:focus {
@@ -12,16 +13,15 @@ body {
 #note-title, #note-content, .note-item input, .note-item textarea {
   resize: none;
   width: 100%;
-  background-color: #f9f9f9;
+  background-color: #f0f0f0;
   padding: .5rem;
   vertical-align: top;
   border: 0;
-
 }
 
 #new-note {
   height: 85%;
-  width: 30%;
+  width: 40%;
   display: flex;
   justify-content: center;
   top: 50%;
@@ -103,3 +103,8 @@ body {
   }
 }
 
+@media (max-width: 769px) {
+  #notes-body {
+    grid-template-columns: 1fr 1fr;
+  }
+}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../src/header.css">  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <title>Document</title>
+</head>
+<body>
+  <div id="toolbar">
+    <div>
+      <a href="google.com"><img src="../src/notes.png" alt=""></a>
+      <a><img src="../src/notes.png" alt=""></a>
+      <a><img src="../src/notes.png" alt=""></a>
+      <a><img src="../src/notes.png" alt=""></a>
+    </div>
+    <div id="toolbar-separator"></div>
+    <div>
+      <a><img src="../src/notes.png" alt=""></a>
+    </div>
+  </div>
+
+  <div id="left-sidebar">
+    <div id="profile">
+      <img src="../src/profile.png" alt="">
+      <div>
+        <p id="profile-username">John Doe</p>
+        <p id="profile-email">johndoe@gmail.com</p>
+      </div>
+    </div>
+    
+    <div id="tasks">
+      <div id="tasks-create">
+        <a id="create-task"></a>
+        <a id="create-note"></a>
+      </div>
+      <div id="tasks-seperator"></div>
+      <div id="tasks-list">
+        <div class="task-item"></div>
+        <div class="task-item"></div>
+        <div class="task-item"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="events">
+    <p id="date">02 Wednesday</p>
+    <div id="events-list">
+      <div id="event-item"></div>
+      <div id="event-item"></div>
+      <div id="event-item"></div>
+    </div>
+  </div>
+
+  <div id="screen">
+    <div class="window">
+      <div class="window-controls">
+        <a></a>
+        <a></a>
+        <a></a>
+      </div>
+      <iframe src="../notes/" frameborder="0"></iframe>
+    </div>
+  </div>
+
+  <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
+  <script src="../src/globalVariables.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

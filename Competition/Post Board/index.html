@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="posts-container">
+  </div>
+
+  <div class="post" id="new-post">
+    <form onsubmit="newPost()" target="dummyframe">
+      <textarea id="post-content" name="content" placeholder="Write your thoughts..."></textarea>
+      <button type="submit" value="Post">+</button>
+    </form>
+  </div>
+
+
+  <iframe name="dummyframe" style="display: none;" id="dummyframe"></iframe>
+  <script src="script.js"></script>
+</body>
+</html>

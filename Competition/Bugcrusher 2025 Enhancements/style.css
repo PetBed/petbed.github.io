@@ -1,0 +1,51 @@
+
+.section-home{
+  padding-bottom: 4em;
+  margin-top: 4em;
+}
+
+.section-home > h2{
+  padding: 0 0 0 2.5em;
+}
+
+.section-home hr{
+  height: 1.5px;
+  color: black;
+  background-color: black;
+}
+
+.gallery-images{
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
+  width: 90vw;
+  margin: 2em 4em;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  padding-bottom: 4em;
+}
+
+#img-in-gal{
+  display: inline-block;
+  max-width: 15em;
+  height: 20em;
+}
+
+.gallery-images #img-in-gal:nth-child(-n+10){
+  margin-right: 3em;
+}
+
+#img-in-gal:hover{
+  transform: scale(0.9);
+  transition: 0.4s;
+  /* box-shadow: ; */
+}
+
+/* .additional-promo-main, .additional-promo-text{
+  margin: 0;
+} */
+
+.wof-people{
+  display: flex;
+}
+  

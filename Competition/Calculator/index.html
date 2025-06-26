@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<link rel="stylesheet" href="style.css" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	</head>
+	<body>
+		<div>
+			<table id="calculator">
+				<tr>
+					<td colspan="3">
+						<div id="calc-display">
+							<p>RM</p>
+							<input type="text" id="result" contenteditable="false" />
+						</div>
+					</td>
+				</tr>
+
+				<tr>
+					<td><button onclick="appendNumber(1)" value="1">1</button></td>
+					<td><button onclick="appendNumber(2)" value="2">2</button></td>
+					<td><button onclick="appendNumber(3)" value="3">3</button></td>
+				</tr>
+				<tr>
+					<td><button onclick="appendNumber(4)" value="4">4</button></td>
+					<td><button onclick="appendNumber(5)" value="5">5</button></td>
+					<td><button onclick="appendNumber(6)" value="6">6</button></td>
+				</tr>
+				<tr>
+					<td><button onclick="appendNumber(7)" value="7">7</button></td>
+					<td><button onclick="appendNumber(8)" value="8">8</button></td>
+					<td><button onclick="appendNumber(9)" value="9">9</button></td>
+				</tr>
+				<tr>
+					<td><button onclick="appendNumber('.')" value=".">.</button></td>
+					<td><button onclick="appendNumber(0)" value="0">0</button></td>
+					<td
+						><button onclick="deleteNumber()" value="d"><i class="material-icons">backspace</i></button></td
+					>
+				</tr>
+			</table>
+
+      <div>
+        <p>The money could feed <b id="calculator-children">0</b> children for <b id="calculator-time">0</b> days.</p>
+      </div>
+		</div>
+		<script src="script.js"></script>
+	</body>
+</html>

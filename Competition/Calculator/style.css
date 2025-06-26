@@ -1,0 +1,46 @@
+* {
+  box-sizing: border-box;
+}
+table { 
+  border: 1px solid black; 
+  margin-left: auto; 
+  margin-right: auto; 
+} 
+
+button { 
+  width: 100%; 
+  padding: 20px 40px; 
+  background-color: green; 
+  color: white; 
+  font-size: 24px; 
+  font-weight: bold; 
+  border: none; 
+  border-radius: 5px; 
+} 
+
+#calc-display {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  border-radius: 5px; 
+  border: 2px solid black; 
+  padding: 8px;
+  & p {
+    text-align: center;
+    margin: 0;
+    line-height: normal;
+    height: fit-content;
+    padding: 20px 0; 
+    font-size: 24px;
+    margin-right: 12px;
+  }
+  & input[type="text"] { 
+    padding: 20px 0; 
+    font-weight: bold; 
+    border: none; 
+    pointer-events: none;
+    flex: 1;
+    font-size: 24px;
+  }
+}

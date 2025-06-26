@@ -21,6 +21,18 @@ const paths = {
 				iconPath: "Competition/NASA Space Apps Challenge/Media/logo.png",
 				url: "https://petbed.github.io/Competition/NASA%20Space%20Apps%20Challenge/",
 			},
+			"Gallery of Events & Wall of Fame": {
+				url: "https://petbed.github.io/Competition/Bugcrusher%202025%20Enhancements/",
+			},
+			Calculator: {
+				url: "https://petbed.github.io/Competition/Calculator/",
+			},
+			"Post Board": {
+				url: "https://petbed.github.io/Competition/Post%20Board/",
+			},
+			"SDG News Scrapper": {
+				url: "https://petbed.github.io/Competition/SDG%20News%20Scrapper/",
+			},
 		},
 	},
 	Games: {
@@ -48,16 +60,19 @@ const paths = {
 			},
 		},
 	},
+	"Personal Projects": {
+		contents: {
+			WoT: {
+				url: "https://petbed.github.io/WoT/login/",
+			},
+			"Hamilton Ipsum": {
+				url: "https://petbed.github.io/Misc/Hamilton%20Ipsum/",
+			}
+		},
+	},
 	Credits: {
 		img: "Resources/credits.png",
 	},
-  "Personal Projects": {
-    contents: {
-      "WoT": {
-        url: "https://petbed.github.io/WoT/login/",
-      },
-    },
-  }
 };
 var currentDate, timestamp;
 

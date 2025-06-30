@@ -33,6 +33,12 @@ const paths = {
 			"SDG News Scrapper": {
 				url: "https://petbed.github.io/Competition/SDG%20News%20Scrapper/",
 			},
+			"Memory Game": {
+				url: "https://petbed.github.io/Competition/Memory%20Game/",
+			},
+      "News Ticker": {
+        url: "https://petbed.github.io/Competition/News%20Ticker/",
+      }
 		},
 	},
 	Games: {
@@ -67,7 +73,7 @@ const paths = {
 			},
 			"Hamilton Ipsum": {
 				url: "https://petbed.github.io/Misc/Hamilton%20Ipsum/",
-			}
+			},
 		},
 	},
 	Credits: {

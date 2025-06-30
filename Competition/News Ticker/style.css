@@ -1,0 +1,25 @@
+.ticker {
+  background-color: rgba(40, 5, 79, 0.85);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* bottom: 46rem; */
+  height: 2rem;
+  display: inline-block;
+  overflow: hidden;
+  
+  & p {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    width: auto;
+    color: white;
+    margin: 0;
+  }
+  
+  & a {
+    color: white;
+  }
+}

@@ -1,0 +1,82 @@
+[
+  {
+    "innerHTML": {
+      "first": "First 1",
+      "second": "Second 1"
+    },
+
+    "name": "card1",
+    "backgroundColor": "#D73027"
+  },
+  {
+    "innerHTML": {
+      "first": "First 2",
+      "second": "Second 2"
+    },
+
+    "name": "card2",
+    "backgroundColor": "#F46D43"
+  },
+  {
+    "innerHTML": {
+      "first": "First 3",
+      "second": "Second 3"
+    },
+    
+    "name": "card3",
+    "backgroundColor": "#FDAE61"
+  },
+  {
+    "innerHTML": {
+      "first": "First 4",
+      "second": "Second 4"
+    },
+    
+    "name": "card4",
+    "backgroundColor": "#FEE08B"
+  },
+  {
+    "innerHTML": {
+      "first": "First 5",
+      "second": "Second 5"
+    },
+    
+    "name": "card5",
+    "backgroundColor": "#FFFFBF"
+  },
+  {
+    "innerHTML": {
+      "first": "First 6",
+      "second": "Second 6"
+    },
+    
+    "name": "card6",
+    "backgroundColor": "#D9EF8b"
+  },
+  {
+    "innerHTML": {
+      "first": "First 7",
+      "second": "Second 7"
+    },
+    
+    "name": "card7",
+    "backgroundColor": "#A6C96A"
+  },
+  {
+    "innerHTML": {
+      "first": "First 8",
+      "second": "Second 8"
+    },
+        "name": "card8",
+    "backgroundColor": "#66BD63"
+  },
+  {
+    "innerHTML": {
+      "first": "First 9",
+      "second": "Second 9"
+    },
+    
+    "name": "card9",
+    "backgroundColor": "#1A9650"
+  }
+]

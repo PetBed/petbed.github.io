@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+		<link href="styles.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+	</head>
+	<body onload="init()">
+		<div class="logo" style="font-family: 'Oswald', sans-serif; font-size: 2em; position: absolute; left: 3rem; top: 2rem;">
+      <p style="padding: 0; color: #064759; font-size: 0.9em; text-shadow: 0.04375em 0.03125em 0px #b5b5b5; font-weight: 400">Project</p>
+      <p style="padding: 0; color: #EF7200; font-size: 1.5em; position: relative; top: -0.43em  ; font-weight: bolder;">SPEED</p>
+    </div>
+		<div class="main-container" id="login" style="display: block">
+			<div class="container">
+				<div class="form">
+					<h1>Sign In</h1>
+					<div class="input">
+						<p>Username</p>
+						<input type="text" id="username" placeholder="Username"/>
+					</div>
+
+					<div class="input">
+						<p>Password</p>
+						<input type="text" id="password" placeholder="Password"/>
+						<br>
+							<a href="SHREK.jpg">
+						<p id="forgot">Forgot password?</p>
+							</a>
+					</div>
+					
+					
+
+					<p id="result" style="display: none"></p>
+					<a class="login-btn" onclick="login()">Sign In</a>
+					
+					<div style="display: flex; width: 300px; margin-top: 8px;">
+            <input type="checkbox" id="remember-me">
+            <label for="remember-me" style="color:rgb(255, 255, 255); padding-left: 5px; padding-top: 2px; font-size: 10px;">Remember me</label>
+
+          </div>
+				</div>
+			</div>
+		</div>
+		<script src="script.js"></script>
+	</body>
+</html>

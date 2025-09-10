@@ -1,0 +1,65 @@
+table {
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0;
+	font-size: 2rem;
+}
+.table {
+	height: 80vh;
+	overflow: scroll;
+}
+
+thead {
+	position: sticky;
+	top: 0;
+	background-color: white;
+}
+
+td,
+th {
+	border: solid black 2px;
+}
+tr:nth-child(odd):not(:has(th)) {
+	background-color: lightgray;
+}
+th {
+	border-left: none;
+}
+td {
+	padding: 5px;
+	vertical-align: text-top;
+	border-top: none;
+	border-left: none;
+}
+table th:first-child,
+table td:first-child {
+	/* Apply a left border on the first <td> or <th> in a row */
+	border-left: 2px solid;
+}
+tr th:nth-child(1) {
+	width: 0;
+	white-space: nowrap;
+}
+tr td:nth-child(1) {
+	font-weight: bold;
+}
+
+header:has(> #sort-options option:nth-child(2):checked) + div tr td:nth-child(2) {
+	font-style: italic;
+}
+header:has(> #sort-options option:nth-child(3):checked) + div tr td:nth-child(3) {
+	font-style: italic;
+}
+header:has(> #sort-options option:nth-child(4):checked) + div tr td:nth-child(4) {
+	font-style: italic;
+}
+header:has(> #sort-options option:nth-child(5):checked) + div tr td:nth-child(6) {
+	font-style: italic;
+}
+
+table input {
+	display: none;
+}
+table input:checked + label {
+	text-decoration: line-through;
+}

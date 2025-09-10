@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<header>
+			<h1>Orders</h1>
+			<select id="sort-options" name="sort-options" onchange="sortChanged()">
+				<option value="order" selected>Order</option>
+				<option value="name">Name</option>
+				<option value="class">Class</option>
+				<option value="time">Time</option>
+				<option value="price">Price</option>
+			</select>
+			<input type="checkbox" id="reverse" onclick="reverseChanged()" />
+		</header>
+		<div class="table">
+			<table>
+				<thead class="table-head"></thead>
+				<tbody class="table-data"></tbody>
+			</table>
+		</div>
+		<script src="script.js"></script>
+		<script type="module" src="nameList.js"></script>
+		<script type="module" src="generateRandom.js"></script>
+	</body>
+</html>

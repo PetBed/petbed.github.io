@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="../Data/Resources/header.css" />
+		<link rel="stylesheet" href="../Data/Resources/scrollbar.css" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet" />
+	</head>
+	<body onload="init()">
+		<header>
+			<div class="logo" style="font-family: 'Oswald', sans-serif; font-size: 1em; height: 90%; flex: 1">
+				<p style="color: #064759; font-size: 0.75em; text-shadow: 0.04375em 0.03125em 0px #b5b5b5; font-weight: 400; padding-left: 20px;">Project</p>
+				<p style="color: #ef7200; font-size: 1.3em; position: absolute; font-weight: bolder; bottom: 0; padding-left: 20px;">SPEED</p>
+			</div>
+			<a href="#" id="header-font">Menu</a>
+			<a href="#" id="header-font">Contact</a>
+			<div class="menu-icon">
+				<div></div>
+				<div></div>
+				<div></div>
+			</div>
+			<input type="text" id="profile-select" style="position: fixed; opacity: 0; right: 1000vw" />
+			<label class="profile" for="profile-select">
+				<div>
+					<p id="username-title"></p>
+					<p id="class-title"></p>
+					<hr />
+					<a>Credits</a>
+					<hr />
+					<a onclick="logout()" id="header-font">Logout</a>
+				</div>
+			</label>
+		</header>
+			<div class="main-container">
+				<h1>CONTACT US</h1>
+				<hr>
+						<h3>Our Address</h3><br>
+						<div id="contact-format">
+						<p id="address">YEE 9103<br>
+							SMK BINTULU,<br>
+							KM 5, JALAN SULTAN ISKANDAR,<br>
+							97000 BINTULU,<br>
+							SARAWAK.</p>
+					</div>
+					<h3>Our Email</h3><br>
+						<div id="contact-format">
+							<p>smk.bintulu@yahoo.com</p><br>
+							<p>kantinsmkb@gmail.com</p>
+						</div>
+				<br>
+				<p>Phone: 09019109198<br>Fax: dcjwdcnjwnjdckj</p>
+			</div>
+		<script src="script.js"></script>
+	</body>
+</html>

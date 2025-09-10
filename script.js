@@ -36,9 +36,9 @@ const paths = {
 			"Memory Game": {
 				url: "https://petbed.github.io/Competition/Memory%20Game/",
 			},
-      "News Ticker": {
-        url: "https://petbed.github.io/Competition/News%20Ticker/",
-      }
+			"News Ticker": {
+				url: "https://petbed.github.io/Competition/News%20Ticker/",
+			},
 		},
 	},
 	Games: {
@@ -73,6 +73,13 @@ const paths = {
 			},
 			"Hamilton Ipsum": {
 				url: "https://petbed.github.io/Misc/Hamilton%20Ipsum/",
+			},
+			Misc: {
+				contents: {
+					"Flood System Docs": {
+						url: "https://petbed.github.io/Misc/Flood%20System%20Docs/",
+					},
+				},
 			},
 		},
 	},

@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Flood Alert System Wiring Guide</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chosen Palette: Warm Neutrals -->
+  <!-- Application Structure Plan: The SPA is designed as an interactive hub. The primary feature is a two-column wiring dashboard for the ESP32 and ESP8266. Clicking a component reveals its wiring table and highlights pins on a visual diagram, making hardware assembly intuitive. A new section has been added below this to provide direct downloads of the source code and list required software libraries, centralizing all project assets into one accessible page. -->
+  <!-- Visualization & Content Choices: Report Info: Component pin mappings -> Goal: Organize & Inform -> Viz/Presentation Method: Interactive lists paired with visual diagrams built from HTML/CSS and wiring tables -> Interaction: On-click show/hide of tables and pin highlighting on diagrams -> Justification: This method turns a passive reference document into an active tool. The new download/library section uses simple anchor tags and lists to provide all necessary software components, making project setup straightforward. -> Library/Method: Vanilla JS for UI interaction. Tailwind CSS for styling. CONFIRMING NO SVG/Mermaid. -->
+  <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+  <style>
+    body {
+      background-color: #f5f5f4;
+      /* Neutral-100 */
+    }
+
+    .board-pin {
+      transition: all 0.3s ease-in-out;
+    }
+
+    .details-section {
+      transition: all 0.5s ease-in-out;
+      max-height: 0;
+      overflow: hidden;
+    }
+
+    .details-section.active {
+      max-height: 500px;
+    }
+
+    .component-btn.active {
+      background-color: #a8a29e;
+      /* Neutral-400 */
+      color: #ffffff;
+    }
+
+    .pin-highlight-power {
+      background-color: #ef4444 !important;
+      color: white;
+    }
+
+    /* red-500 */
+    .pin-highlight-gnd {
+      background-color: #1f2937 !important;
+      color: white;
+    }
+
+    /* gray-800 */
+    .pin-highlight-data {
+      background-color: #3b82f6 !important;
+      color: white;
+    }
+
+    /* blue-500 */
+    .pin-highlight-analog {
+      background-color: #a855f7 !important;
+      color: white;
+    }
+
+    /* purple-500 */
+    .pin-highlight-red {
+      background-color: #dc2626 !important;
+      color: white;
+    }
+
+    /* red-600 */
+    .pin-highlight-green {
+      background-color: #16a34a !important;
+      color: white;
+    }
+
+    /* green-600 */
+    .pin-highlight-blue {
+      background-color: #2563eb !important;
+      color: white;
+    }
+
+    /* blue-600 */
+  </style>
+</head>
+
+<body class="text-stone-800 antialiased">
+  <div class="container mx-auto p-4 md:p-8">
+    <header class="text-center mb-10">
+      <h1 class="text-4xl md:text-5xl font-bold text-stone-700">Flood Alert System</h1>
+    </header>
+
+    <main class="space-y-12">
+      <!-- Wiring Guide Section -->
+      <section>
+        <div class="text-center">
+          <h2 class="text-3xl font-bold text-stone-700">Interactive Wiring Guide</h2>
+          <p class="mt-2 max-w-3xl mx-auto text-stone-600">This guide provides a visual reference for all hardware
+            connections. Click on a component name under either microcontroller to see its detailed wiring table and
+            highlight the corresponding pins on the board diagram.</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mt-8">
+          <!-- ESP32 Section -->
+          <div id="esp32-section" class="bg-white p-6 rounded-xl shadow-lg border border-stone-200">
+            <h3 class="text-2xl font-bold mb-4 text-center text-stone-700">ESP32</h3>
+            <div class="board-diagram-container mb-6 p-4 bg-stone-100 rounded-lg">
+              <div id="esp32-board"
+                class="bg-stone-800 text-white p-2 rounded-md grid grid-cols-2 gap-1 text-xs font-mono relative">
+                <div
+                  class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-stone-600 font-bold text-lg">
+                  ESP32</div>
+              </div>
+            </div>
+            <div class="space-y-4">
+              <h4 class="font-semibold text-lg text-center text-stone-600">Components</h4>
+              <div id="esp32-components" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            </div>
+            <div id="esp32-details" class="mt-6"></div>
+          </div>
+
+          <!-- ESP8266 Section -->
+          <div id="esp8266-section" class="bg-white p-6 rounded-xl shadow-lg border border-stone-200">
+            <h3 class="text-2xl font-bold mb-4 text-center text-stone-700">ESP8266</h3>
+            <div class="board-diagram-container mb-6 p-4 bg-stone-100 rounded-lg">
+              <div id="esp8266-board"
+                class="bg-blue-900 text-white p-2 rounded-md grid grid-cols-2 gap-1 text-xs font-mono relative">
+                <div
+                  class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-blue-700 font-bold text-lg">
+                  ESP8266</div>
+              </div>
+            </div>
+            <div class="space-y-4">
+              <h4 class="font-semibold text-lg text-center text-stone-600">Components</h4>
+              <div id="esp8266-components" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            </div>
+            <div id="esp8266-details" class="mt-6"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Download Section -->
+      <section class="bg-white p-6 rounded-xl shadow-lg border border-stone-200">
+        <div class="text-center">
+          <h2 class="text-3xl font-bold text-stone-700">Project Software Setup</h2>
+          <p class="mt-2 max-w-3xl mx-auto text-stone-600">Follow these steps in order to configure your Arduino IDE,
+            download the source code, and install the required libraries.</p>
+        </div>
+        <div class="mt-8 space-y-10 max-w-4xl mx-auto">
+          <div>
+            <h3 class="text-xl font-bold text-stone-700 text-center">1. Install Board Definitions</h3>
+            <p class="text-center text-stone-600 mt-1 mb-4">You must first teach the Arduino IDE how to use ESP32 and
+              ESP8266 boards.</p>
+            <ol class="list-decimal list-inside space-y-2 bg-stone-50 p-4 rounded-md border border-stone-200">
+              <li>Open Arduino IDE, go to <span class="font-mono bg-stone-200 px-1 rounded">File</span> > <span
+                  class="font-mono bg-stone-200 px-1 rounded">Preferences</span>.</li>
+              <li>Find the "Additional Boards Manager URLs" field and add the following URLs, separated by a comma:
+                <code
+                  class="block bg-stone-200 p-2 rounded mt-2 text-sm break-words">https://dl.espressif.com/dl/package_esp32_index.json, http://arduino.esp8266.com/stable/package_esp8266com_index.json</code>
+              </li>
+              <li>Go to <span class="font-mono bg-stone-200 px-1 rounded">Tools</span> > <span
+                  class="font-mono bg-stone-200 px-1 rounded">Board</span> > <span
+                  class="font-mono bg-stone-200 px-1 rounded">Boards Manager...</span></li>
+              <li>Search for and install "<span class="font-semibold">esp32</span>" by Espressif Systems.</li>
+              <li>Search for and install "<span class="font-semibold">esp8266</span>" by ESP8266 Community.</li>
+            </ol>
+          </div>
+
+          <div>
+            <h3 class="text-xl font-bold text-stone-700 text-center">2. Download Source Code</h3>
+            <p class="text-center text-stone-600 mt-1 mb-4">Get the Arduino source code (.ino files) for both
+              microcontrollers.</p>
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+              <a href="./ESP32.txt" download="Flood_System_ESP32.ino"
+                class="w-full sm:w-auto flex items-center justify-center gap-2 bg-stone-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-stone-700 transition-colors duration-300 shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Download ESP32 Code
+              </a>
+              <a href="./ESP8266.txt" download="Flood_System_ESP8266.ino"
+                class="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-900 transition-colors duration-300 shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Download ESP8266 Code
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-xl font-bold text-stone-700 text-center">3. Install Required Libraries</h3>
+            <p class="text-center text-stone-600 mt-1 mb-4">Use the Library Manager in the Arduino IDE (Sketch > Include
+              Library > Manage Libraries) to install the following:</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h4 class="font-semibold text-lg text-stone-600 mb-2">For ESP32:</h4>
+                <ul class="list-disc list-inside bg-stone-50 p-4 rounded-md border border-stone-200">
+                  <li>Blynk</li>
+                  <li>ArduinoJson</li>
+                  <li>NTPClient</li>
+                  <li>MD_Parola</li>
+                  <li>MD_MAX72XX</li>
+                  <li>TinyGPS++</li>
+                </ul>
+              </div>
+              <div>
+                <h4 class="font-semibold text-lg text-stone-600 mb-2">For ESP8266:</h4>
+                <ul class="list-disc list-inside bg-stone-50 p-4 rounded-md border border-stone-200">
+                  <li>ArduinoJson</li>
+                </ul>
+                <p class="text-sm text-stone-500 mt-2">Note: The other ESP8266 libraries are typically included with the
+                  ESP8266 board definition.</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-xl font-bold text-stone-700 text-center">4. Configure Project Variables</h3>
+            <p class="text-center text-stone-600 mt-1 mb-4">Before uploading, you need to customize some variables in
+              the code to match your environment.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h4 class="font-semibold text-lg text-stone-600 mb-2">ESP32 Configuration (`Flood_System_ESP32.ino`)
+                </h4>
+                <ul class="space-y-3 text-sm bg-stone-50 p-4 rounded-md border border-stone-200">
+                  <li><strong>WiFi Credentials:</strong> Change <code>ssid</code> and <code>password</code> to your WiFi
+                    network name and password.</li>
+                  <li><strong>Blynk Token:</strong> Replace <code>BLYNK_AUTH_TOKEN</code> with the token from your Blynk
+                    project.</li>
+                  <li><strong>Flood Thresholds:</strong>
+                    <ul class="list-disc list-inside ml-4 mt-1">
+                      <li><code>MIN_FLOOD_THRESHOLD</code>: The water sensor value that triggers a potential flood
+                        state.</li>
+                      <li><code>MAX_FLOOD_THRESHOLD</code>: The value used for the top end of the progress bar/RGB
+                        gradient.</li>
+                    </ul>
+                  </li>
+                  <li><strong>Timers & Delays:</strong> (Values are in milliseconds)
+                    <ul class="list-disc list-inside ml-4 mt-1">
+                      <li><code>ALARM_ACTIVATION_DELAY</code>: How long the water must be high before the alarm sounds
+                        (e.g., <code>10 * 60 * 1000</code> is 10 minutes).</li>
+                      <li><code>ALARM_SHUTOFF_DELAY</code>: Grace period the alarm continues after water recedes.</li>
+                      <li><code>BLYNK_TIMER_RESET_DELAY</code>: Grace period before the Blynk timer resets after an
+                        event ends.</li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 class="font-semibold text-lg text-stone-600 mb-2">ESP8266 Configuration (`Flood_System_ESP8266.ino`)
+                </h4>
+                <ul class="space-y-3 text-sm bg-stone-50 p-4 rounded-md border border-stone-200">
+                  <li><strong>WiFi Credentials:</strong> Must be the <strong>same</strong> <code>ssid</code> and
+                    <code>password</code> as the ESP32.</li>
+                  <li><strong>Server Address:</strong>
+                    <ul class="list-disc list-inside ml-4 mt-1">
+                      <li>Change the IP in <code>serverName</code> to match your ESP32's IP address.</li>
+                      <li>You can find the ESP32's IP address in the Arduino IDE's Serial Monitor (115200 baud) when you
+                        first run the ESP32 code.</li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-xl font-bold text-stone-700 text-center">5. Troubleshooting Guide</h3>
+            <p class="text-center text-stone-600 mt-1 mb-4">If things aren't working as expected, here are some common
+              issues and how to solve them. The most powerful tool for debugging is the <span
+                class="font-semibold">Serial Monitor</span> in the Arduino IDE (set the baud rate to 115200).</p>
+            <div class="space-y-4">
+              <div class="bg-stone-50 p-4 rounded-lg border border-stone-200">
+                <h4 class="font-bold text-stone-800">Problem: ESP8266 sensor data is not appearing on the ESP32 or in
+                  Blynk.</h4>
+                <div class="text-sm mt-2">
+                  <p class="font-semibold">Possible Causes:</p>
+                  <ul class="list-disc list-inside ml-4 text-stone-600">
+                    <li>Incorrect WiFi credentials on one or both devices.</li>
+                    <li>Incorrect ESP32 IP address in the ESP8266's <code>serverName</code> variable.</li>
+                    <li>ESP32 and ESP8266 are on different WiFi networks.</li>
+                  </ul>
+                  <p class="font-semibold mt-2">Solutions:</p>
+                  <ul class="list-disc list-inside ml-4 text-stone-600">
+                    <li>Double-check that the <code>ssid</code> and <code>password</code> are identical in both
+                      <code>.ino</code> files.</li>
+                    <li>Run the ESP32 code and check its Serial Monitor for the "IP Address: ..." line. Copy this exact
+                      IP into the <code>serverName</code> variable in the ESP8266 code and re-upload.</li>
+                    <li>Open the ESP8266's Serial Monitor. If it can't reach the server, it will print "POST failed".
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="bg-stone-50 p-4 rounded-lg border border-stone-200">
+                <h4 class="font-bold text-stone-800">Problem: The Blynk app shows "Device Offline".</h4>
+                <div class="text-sm mt-2">
+                  <p class="font-semibold">Possible Causes:</p>
+                  <ul class="list-disc list-inside ml-4 text-stone-600">
+                    <li>Incorrect <code>BLYNK_AUTH_TOKEN</code> in the ESP32 code.</li>
+                    <li>The ESP32 has no internet connection.</li>
+                  </ul>
+                  <p class="font-semibold mt-2">Solutions:</p>
+                  <ul class="list-disc list-inside ml-4 text-stone-600">
+                    <li>Copy the Auth Token from your Blynk project's settings and paste it carefully into the
+                      <code>BLYNK_AUTH_TOKEN</code> variable.</li>
+                    <li>Check the ESP32's Serial Monitor to confirm it has successfully connected to your WiFi network.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="bg-stone-50 p-4 rounded-lg border border-stone-200">
+                <h4 class="font-bold text-stone-800">Problem: The alarm doesn't sound after the 10-minute delay.</h4>
+                <div class="text-sm mt-2">
+                  <p class="font-semibold">Possible Causes:</p>
+                  <ul class="list-disc list-inside ml-4 text-stone-600">
+                    <li>The water level is flickering above and below the <code>MIN_FLOOD_THRESHOLD</code>, resetting
+                      the pre-alarm timer.</li>
+                    <li>The buzzer is wired incorrectly or is faulty.</li>
+                  </ul>
+                  <p class="font-semibold mt-2">Solutions:</p>
+                  <ul class="list-disc list-inside ml-4 text-stone-600">
+                    <li>Watch the ESP32's Serial Monitor. It prints state changes like "ALARM_OFF -> ALARM_PENDING". If
+                      you see it flickering back to "ALARM_OFF", your sensor value is unstable.</li>
+                    <li>For faster testing, temporarily set the <code>ALARM_ACTIVATION_DELAY</code> to a short value
+                      (like <code>15 * 1000</code> for 15 seconds), then test by submerging the sensor.</li>
+                    <li>Double-check the buzzer's connection to pin D13 and GND.</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="bg-stone-50 p-4 rounded-lg border border-stone-200">
+                <h4 class="font-bold text-stone-800">Problem: The LED Matrix display is garbled or blank.</h4>
+                <div class="text-sm mt-2">
+                  <p class="font-semibold">Possible Causes:</p>
+                  <ul class="list-disc list-inside ml-4 text-stone-600">
+                    <li>Incorrect SPI pin connections (DIN, CS, CLK).</li>
+                    <li>Loose power or ground connections.</li>
+                  </ul>
+                  <p class="font-semibold mt-2">Solutions:</p>
+                  <ul class="list-disc list-inside ml-4 text-stone-600">
+                    <li>Carefully verify the wiring: DIN to D23, CS to D5, and CLK to D18.</li>
+                    <li>Ensure the arrows on the back of the modules are all pointing in the same direction, connecting
+                      <code>DOUT</code> of one module to <code>DIN</code> of the next.</li>
+                    <li>Make sure the matrix has a solid connection to 5V (VIN) and GND.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const wiringData = {
+      esp32: {
+        pins: [
+          { name: '3V3', side: 'left' }, { name: 'VIN', side: 'right' },
+          { name: 'GND', side: 'left' }, { name: 'GND', side: 'right' },
+          { name: 'D15', side: 'left' }, { name: 'D13', side: 'right' },
+          { name: 'D2', side: 'left' }, { name: 'D12', side: 'right' },
+          { name: 'D4', side: 'left' }, { name: 'D14', side: 'right' },
+          { name: 'D16', side: 'left' }, { name: 'D27', side: 'right' },
+          { name: 'D17', side: 'left' }, { name: 'D26', side: 'right' },
+          { name: 'D5', side: 'left' }, { name: 'D25', side: 'right' },
+          { name: 'D18', side: 'left' }, { name: 'D33', side: 'right' },
+          { name: 'D19', side: 'left' }, { name: 'D32', side: 'right' },
+          { name: 'D21', side: 'left' }, { name: 'D35', side: 'right' },
+          { name: 'D22', side: 'left' }, { name: 'D34', side: 'right' },
+          { name: 'D23', side: 'left' }, { name: 'EN', side: 'right' },
+        ],
+        components: [
+          {
+            id: 'matrix',
+            name: 'MAX7219 LED Matrix',
+            pins: [
+              { name: 'VCC', boardPin: 'VIN', type: 'power' },
+              { name: 'GND', boardPin: 'GND', type: 'gnd' },
+              { name: 'DIN', boardPin: 'D23', type: 'data' },
+              { name: 'CS', boardPin: 'D5', type: 'data' },
+              { name: 'CLK', boardPin: 'D18', type: 'data' }
+            ],
+            headers: ['Component Pin', 'ESP32 Pin', 'GPIO #', 'Notes'],
+            rows: [
+              ['VCC', 'VIN', '-', 'Connect to 5V'],
+              ['GND', 'GND', '-', 'Common Ground'],
+              ['DIN (Data)', 'D23', 'GPIO23', 'MOSI'],
+              ['CS (Chip Sel)', 'D5', 'GPIO5', 'Chip Select'],
+              ['CLK (Clock)', 'D18', 'GPIO18', 'SCK'],
+            ]
+          },
+          {
+            id: 'buzzer',
+            name: 'Buzzer',
+            pins: [
+              { name: 'Positive (+)', boardPin: 'D13', type: 'data' },
+              { name: 'Negative (-)', boardPin: 'GND', type: 'gnd' }
+            ],
+            headers: ['Component Pin', 'ESP32 Pin', 'GPIO #', 'Notes'],
+            rows: [
+              ['Positive (+)', 'D13', 'GPIO13', ''],
+              ['Negative (-)', 'GND', '-', 'Connect to any Ground pin'],
+            ]
+          },
+          {
+            id: 'rgb_local',
+            name: 'RGB LED',
+            pins: [
+              { name: 'Red', boardPin: 'D25', type: 'red' },
+              { name: 'Green', boardPin: 'D26', type: 'green' },
+              { name: 'Blue', boardPin: 'D27', type: 'blue' },
+              { name: 'Cathode', boardPin: 'GND', type: 'gnd' }
+            ],
+            headers: ['Component Pin', 'ESP32 Pin', 'GPIO #', 'Notes'],
+            rows: [
+              ['Red', 'D25', 'GPIO25', 'Connect via a ~220-330 Ohm resistor'],
+              ['Green', 'D26', 'GPIO26', 'Connect via a ~220-330 Ohm resistor'],
+              ['Blue', 'D27', 'GPIO27', 'Connect via a ~220-330 Ohm resistor'],
+              ['Cathode (GND)', 'GND', '-', 'The longest leg, connect to Ground'],
+            ]
+          },
+          {
+            id: 'gps',
+            name: 'GPS Module',
+            pins: [
+              { name: 'VCC', boardPin: '3V3', type: 'power' },
+              { name: 'GND', boardPin: 'GND', type: 'gnd' },
+              { name: 'TXD', boardPin: 'D16', type: 'data' },
+              { name: 'RXD', boardPin: 'D17', type: 'data' }
+            ],
+            headers: ['Component Pin', 'ESP32 Pin', 'GPIO #', 'Notes'],
+            rows: [
+              ['VCC', '3V3', '-', 'Connect to 3.3V'],
+              ['GND', 'GND', '-', 'Common Ground'],
+              ['TXD', 'D16 (RX2)', 'GPIO16', 'GPS Transmit to ESP32 Receive'],
+              ['RXD', 'D17 (TX2)', 'GPIO17', 'GPS Receive from ESP32 Transmit'],
+            ]
+          }
+        ]
+      },
+      esp8266: {
+        pins: [
+          { name: 'A0', side: 'left' }, { name: '3V3', side: 'right' },
+          { name: 'GND', side: 'left' }, { name: 'GND', side: 'right' },
+          { name: 'D1', side: 'left' }, { name: 'D2', side: 'right' },
+          { name: 'D3', side: 'left' }, { name: 'D4', side: 'right' },
+          { name: 'D5', side: 'left' }, { name: 'D6', side: 'right' },
+          { name: 'D7', side: 'left' }, { name: 'D8', side: 'right' }
+        ],
+        components: [
+          {
+            id: 'water',
+            name: 'Water Level Sensor',
+            pins: [
+              { name: 'S', boardPin: 'A0', type: 'analog' },
+              { name: 'VCC', boardPin: '3V3', type: 'power' },
+              { name: 'GND', boardPin: 'GND', type: 'gnd' }
+            ],
+            headers: ['Component Pin', 'ESP8266 Pin', 'Notes'],
+            rows: [
+              ['S (Signal)', 'A0', 'Analog read pin'],
+              ['VCC / +', '3V3', 'Connect to 3.3V'],
+              ['GND / -', 'GND', 'Common Ground'],
+            ]
+          },
+          {
+            id: 'rain',
+            name: 'Rain Sensor Module',
+            pins: [
+              { name: 'DO', boardPin: 'D1', type: 'data' },
+              { name: 'VCC', boardPin: '3V3', type: 'power' },
+              { name: 'GND', boardPin: 'GND', type: 'gnd' }
+            ],
+            headers: ['Component Pin', 'ESP8266 Pin', 'GPIO #', 'Notes'],
+            rows: [
+              ['DO (Digital)', 'D1', 'GPIO5', 'Digital Output'],
+              ['VCC', '3V3', '-', 'Connect to 3.3V'],
+              ['GND', 'GND', '-', 'Common Ground'],
+            ]
+          },
+          {
+            id: 'rgb_remote',
+            name: 'RGB LED',
+            pins: [
+              { name: 'Red', boardPin: 'D5', type: 'red' },
+              { name: 'Green', boardPin: 'D6', type: 'green' },
+              { name: 'Blue', boardPin: 'D7', type: 'blue' },
+              { name: 'Cathode', boardPin: 'GND', type: 'gnd' }
+            ],
+            headers: ['Component Pin', 'ESP8266 Pin', 'GPIO #', 'Notes'],
+            rows: [
+              ['Red', 'D5', 'GPIO14', 'Connect via a ~220-330 Ohm resistor'],
+              ['Green', 'D6', 'GPIO12', 'Connect via a ~220-330 Ohm resistor'],
+              ['Blue', 'D7', 'GPIO13', 'Connect via a ~220-330 Ohm resistor'],
+              ['Cathode (GND)', 'GND', '-', 'The longest leg, connect to Ground'],
+            ]
+          }
+        ]
+      }
+    };
+
+    function createBoard(boardId, boardData) {
+      const boardEl = document.getElementById(boardId);
+      const leftPins = boardData.pins.filter(p => p.side === 'left');
+      const rightPins = boardData.pins.filter(p => p.side === 'right');
+
+      let html = '<div class="flex flex-col gap-1">';
+      leftPins.forEach(pin => {
+        html += `<div id="${boardId}-${pin.name.toLowerCase().replace(/ /g, '')}" class="board-pin bg-stone-500 rounded-sm px-2 py-1 text-right">${pin.name}</div>`;
+      });
+      html += '</div><div class="flex flex-col gap-1">';
+      rightPins.forEach(pin => {
+        html += `<div id="${boardId}-${pin.name.toLowerCase().replace(/ /g, '')}" class="board-pin bg-stone-500 rounded-sm px-2 py-1">${pin.name}</div>`;
+      });
+      html += '</div>';
+      boardEl.innerHTML += html;
+    }
+
+    function createComponentUI(boardPrefix, boardData) {
+      const componentsContainer = document.getElementById(`${boardPrefix}-components`);
+      const detailsContainer = document.getElementById(`${boardPrefix}-details`);
+      let activeComponentId = null;
+
+      boardData.components.forEach(component => {
+        const btn = document.createElement('button');
+        btn.textContent = component.name;
+        btn.dataset.componentId = component.id;
+        btn.className = 'component-btn w-full text-left p-3 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors duration-200 border border-stone-200';
+        componentsContainer.appendChild(btn);
+
+        let detailsHtml = `<div id="details-${boardPrefix}-${component.id}" class="details-section bg-stone-50 border border-stone-200 rounded-lg">
+                    <div class="p-4"><div class="overflow-x-auto"><table class="w-full text-left text-sm">
+                    <thead class="bg-stone-200"><tr>`;
+        component.headers.forEach(header => {
+          detailsHtml += `<th class="p-2 font-semibold">${header}</th>`;
+        });
+        detailsHtml += `</tr></thead><tbody>`;
+        component.rows.forEach(row => {
+          detailsHtml += `<tr class="border-b border-stone-200">`;
+          row.forEach(cell => {
+            detailsHtml += `<td class="p-2">${cell}</td>`;
+          });
+          detailsHtml += `</tr>`;
+        });
+        detailsHtml += `</tbody></table></div></div></div>`;
+        detailsContainer.innerHTML += detailsHtml;
+
+        btn.addEventListener('click', () => {
+          const isAlreadyActive = activeComponentId === component.id;
+
+          document.querySelectorAll(`#${boardPrefix}-section .board-pin`).forEach(pin => {
+            pin.classList.remove('pin-highlight-power', 'pin-highlight-gnd', 'pin-highlight-data', 'pin-highlight-analog', 'pin-highlight-red', 'pin-highlight-green', 'pin-highlight-blue');
+          });
+          document.querySelectorAll(`#${boardPrefix}-section .details-section`).forEach(sec => sec.classList.remove('active'));
+          document.querySelectorAll(`#${boardPrefix}-section .component-btn`).forEach(b => b.classList.remove('active'));
+
+          if (!isAlreadyActive) {
+            btn.classList.add('active');
+            document.getElementById(`details-${boardPrefix}-${component.id}`).classList.add('active');
+            component.pins.forEach(pinInfo => {
+              const pinElements = document.querySelectorAll(`#${boardPrefix}-board-${pinInfo.boardPin.toLowerCase().replace(/ /g, '')}`);
+              pinElements.forEach(pinEl => {
+                if (pinEl) {
+                  pinEl.classList.add(`pin-highlight-${pinInfo.type}`);
+                }
+              });
+            });
+            activeComponentId = component.id;
+          } else {
+            activeComponentId = null;
+          }
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      createBoard('esp32-board', wiringData.esp32);
+      createComponentUI('esp32', wiringData.esp32);
+      createBoard('esp8266-board', wiringData.esp8266);
+      createComponentUI('esp8266', wiringData.esp8266);
+    });
+  </script>
+</body>
+
+</html>

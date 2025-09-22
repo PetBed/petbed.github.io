@@ -72,7 +72,7 @@ const paths = {
 				url: "https://petbed.github.io/WoT/login/",
 			},
       "Study Companion": {
-        url: "https://petbed.github.io/Study%Website/",
+        url: "https://petbed.github.io/Study%20Website/",
       },
 			"Hamilton Ipsum": {
 				url: "https://petbed.github.io/Misc/Hamilton%20Ipsum/",

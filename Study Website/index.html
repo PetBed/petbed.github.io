@@ -109,7 +109,7 @@
             let studyChart = null; let currentDate = new Date(); let events = {}; let tasks = []; let studyLogs = {}; let selectedDate = null; let timerInterval = null; let timeLeft = 25 * 60; let isPaused = true; let currentMode = 'focus'; let studyStreak = 0; let lastStudyDay = ''; let currentUser = null;
 
             // --- Constants & Config ---
-            const API_URL = 'http://localhost:3005'; // Your server URL
+            const API_URL = 'https://wot-tau.vercel.app'; // Your server URL
             const subjectColors = { 'Malay': '#8B0000', 'Chinese': '#E63946', 'English': '#1D3557', 'Moral': '#6A4C93', 'History': '#D2691E', 'Geography': '#606C38', 'RBT': '#6C757D', 'PJK': '#9EF01A', 'Science': '#2D6A4F', 'Mathematics': '#00B4D8', 'Art': '#E6399B', 'Other': '#64748b' };
             const RBT_ACCENT = '#FFD60A';
             const exams = [ { subject: 'Malay Paper 1', date: '2025-10-03T06:50:00' }, { subject: 'Malay Paper 2', date: '2025-10-03T08:25:00' }, { subject: 'Chinese', date: '2025-10-03T09:45:00' }, { subject: 'English Paper 1', date: '2025-10-07T06:50:00' }, { subject: 'English Paper 2', date: '2025-10-07T08:25:00' }, { subject: 'Moral', date: '2025-10-07T09:45:00' }, { subject: 'History', date: '2025-10-08T07:00:00' }, { subject: 'Geography', date: '2025-10-08T09:40:00' }, { subject: 'RBT', date: '2025-10-09T06:50:00' }, { subject: 'PJK', date: '2025-10-09T08:20:00' }, { subject: 'Science', date: '2025-10-09T09:40:00' }, { subject: 'Mathematics', date: '2025-10-10T07:00:00' }, { subject: 'Art', date: '2025-10-10T09:40:00' } ];

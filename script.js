@@ -71,6 +71,9 @@ const paths = {
 			WoT: {
 				url: "https://petbed.github.io/WoT/login/",
 			},
+      "Study Companion": {
+        url: "https://petbed.github.io/Study%Website/",
+      },
 			"Hamilton Ipsum": {
 				url: "https://petbed.github.io/Misc/Hamilton%20Ipsum/",
 			},

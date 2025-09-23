@@ -1,289 +1,299 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .calendar-grid { grid-template-columns: repeat(7, minmax(0, 1fr)); }
-        .day { transition: all 0.2s ease-in-out; }
-        .day:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(0,0,0,0.1); }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .task-item:hover .delete-task-btn { opacity: 1; }
-        .nav-btn { transition: all 0.2s ease-in-out; }
-        .nav-btn.active { background-color: #3b82f6; color: white; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class', // This enables the 'dark:' variants
+      theme: {
+        extend: {
+          // You can extend your theme here if needed
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 text-slate-800">
-    <div id="app-container" class="min-h-screen flex-col p-4 md:p-8 hidden">
-        <header class="mb-8 flex justify-between items-start">
+
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-300">
+  <!-- Loading Indicator -->
+  <div id="loading-indicator" class="min-h-screen flex-col items-center justify-center hidden">
+    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+    <p class="mt-4 text-slate-500 font-semibold dark:text-slate-400">Loading your dashboard...</p>
+  </div>
+
+  <!-- Main App Container -->
+  <div id="app-container" class="min-h-screen flex-col p-4 md:p-8 hidden">
+    <header class="mb-8 flex justify-between items-start">
+      <div>
+        <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">Study Dashboard</h1>
+        <p id="welcome-message" class="text-slate-500 mt-1 dark:text-slate-400"></p>
+        <div class="mt-4 flex items-center bg-slate-200 dark:bg-slate-800 rounded-lg p-1 max-w-md">
+          <button id="nav-dashboard"
+            class="nav-btn active w-1/3 text-center py-2 px-4 rounded-md font-semibold">Dashboard</button>
+          <button id="nav-study"
+            class="nav-btn w-1/3 text-center py-2 px-4 rounded-md font-semibold text-slate-600 dark:text-slate-300">Study
+            Tracker</button>
+          <button id="nav-tasks"
+            class="nav-btn w-1/3 text-center py-2 px-4 rounded-md font-semibold text-slate-600 dark:text-slate-300">Tasks</button>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button id="settings-btn"
+          class="p-2 rounded-lg bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+            </path>
+          </svg>
+        </button>
+        <button id="logout-btn"
+          class="py-2 px-4 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition">Logout</button>
+      </div>
+    </header>
+
+    <!-- Dashboard Page -->
+    <main id="dashboard-page" class="">
+      <div id="motivational-quote"
+        class="text-center bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm mb-8 text-slate-600 dark:text-slate-400 italic">
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 space-y-8">
+          <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+            <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Study Time Analysis</h2>
+            <div class="h-80 relative"><canvas id="study-chart"></canvas></div>
+          </div>
+        </div>
+        <div class="space-y-8">
+          <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+            <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Upcoming Exams</h2>
+            <div id="upcoming-exams-container" class="space-y-3"></div>
+          </div>
+          <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+            <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Daily Streak</h2>
+            <div id="streak-container"
+              class="text-center p-4 bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-200 dark:border-orange-500/30 rounded-lg">
+            </div>
+          </div>
+          <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+            <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Your Next 3 Tasks</h2>
+            <div id="next-todos-container" class="space-y-3"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Study Tracker Page -->
+    <main id="study-page" class="hidden flex-grow grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2 space-y-8">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+          <div id="calendar-feature">
+            <div class="flex items-center justify-between mb-6">
+              <h2 id="month-year" class="text-xl font-bold text-slate-900 dark:text-slate-100"></h2>
+              <div class="flex items-center space-x-2"><button id="prev-month"
+                  class="p-2 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600"><svg
+                    xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                  </svg></button><button id="next-month"
+                  class="p-2 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600"><svg
+                    xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg></button></div>
+            </div>
+            <div class="grid calendar-grid gap-1 text-center font-semibold text-slate-600 dark:text-slate-400 mb-2">
+              <div>Sun</div>
+              <div>Mon</div>
+              <div>Tue</div>
+              <div>Wed</div>
+              <div>Thu</div>
+              <div>Fri</div>
+              <div>Sat</div>
+            </div>
+            <div id="calendar-days" class="grid calendar-grid gap-2"></div>
+          </div>
+        </div>
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+          <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-6">Exam Countdowns</h2>
+          <div id="countdown-container"></div>
+        </div>
+      </div>
+      <div class="space-y-8">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+          <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">Study Tracker</h3>
+          <div class="space-y-4">
+            <div class="text-center p-4 bg-slate-100 dark:bg-slate-700 rounded-lg">
+              <p id="mode-indicator" class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase">Focus
+              </p>
+              <p id="timer-display" class="text-6xl font-bold font-mono text-slate-800 dark:text-slate-200 my-2">25:00
+              </p><select id="pomodoro-subject"
+                class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700"></select>
+            </div>
+            <div class="flex space-x-2"><input type="number" id="focus-duration" value="25"
+                class="w-full p-2 text-center border rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700"><input
+                type="number" id="break-duration" value="5"
+                class="w-full p-2 text-center border rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700">
+            </div>
+            <div class="grid grid-cols-2 gap-2"><button id="play-pause-btn"
+                class="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg">Start</button><button
+                id="skip-btn"
+                class="w-full py-3 px-4 bg-slate-200 text-slate-700 font-semibold rounded-lg dark:bg-slate-600 dark:text-slate-200">Skip</button>
+            </div>
             <div>
-                <h1 class="text-3xl md:text-4xl font-bold text-slate-900">Study Dashboard</h1>
-                <p id="welcome-message" class="text-slate-500 mt-1"></p>
-                 <div class="mt-4 flex items-center bg-slate-200 rounded-lg p-1 max-w-sm">
-                    <button id="nav-dashboard" class="nav-btn active w-1/2 text-center py-2 px-4 rounded-md font-semibold">Dashboard</button>
-                    <button id="nav-study" class="nav-btn w-1/2 text-center py-2 px-4 rounded-md font-semibold text-slate-600">Study Tracker</button>
-                </div>
+              <h4 class="text-md font-bold text-slate-800 dark:text-slate-200 mt-4 mb-2">Study Log</h4>
+              <div id="study-log-container" class="space-y-2 max-h-40 overflow-y-auto pr-2"></div>
             </div>
-            <button id="logout-btn" class="ml-4 py-2 px-4 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition">Logout</button>
-        </header>
+          </div>
+        </div>
+      </div>
+    </main>
 
-        <main id="dashboard-page" class="">
-             <div id="motivational-quote" class="text-center bg-white p-4 rounded-2xl shadow-sm mb-8 text-slate-600 italic"></div>
-             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-2 space-y-8">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm">
-                        <h2 class="text-xl font-bold text-slate-900 mb-4">Study Time Analysis</h2>
-                        <div class="h-80 relative"><canvas id="study-chart"></canvas></div>
-                    </div>
-                </div>
-                <div class="space-y-8">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm"><h2 class="text-xl font-bold text-slate-900 mb-4">Upcoming Exams</h2><div id="upcoming-exams-container" class="space-y-3"></div></div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm"><h2 class="text-xl font-bold text-slate-900 mb-4">Daily Streak</h2><div id="streak-container" class="text-center p-4 bg-orange-50 border-2 border-orange-200 rounded-lg"></div></div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm"><h2 class="text-xl font-bold text-slate-900 mb-4">Your Next 3 Tasks</h2><div id="next-todos-container" class="space-y-3"></div></div>
-                </div>
+    <!-- Tasks Page -->
+    <main id="tasks-page" class="hidden flex-grow grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-1 space-y-8">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+          <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">Add New Task</h3>
+          <div class="space-y-2">
+            <input type="text" id="task-page-input" placeholder="Enter a new task..."
+              class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700">
+            <div class="grid grid-cols-3 gap-2">
+              <select id="task-page-subject"
+                class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700"></select>
+              <input type="number" id="task-page-time" placeholder="Mins"
+                class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700">
+              <input type="date" id="task-page-deadline"
+                class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 dark:text-slate-300">
             </div>
-        </main>
+            <button id="task-page-add-btn" class="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg">Add
+              Task</button>
+          </div>
+          <div id="task-page-error" class="text-red-500 text-xs text-center mt-2 h-4"></div>
+        </div>
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+          <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">Filter & Sort</h3>
+          <div class="space-y-4">
+            <div>
+              <label for="filter-subject" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Filter by
+                Subject</label>
+              <select id="filter-subject"
+                class="mt-1 block w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700">
+                <option value="all">All Subjects</option>
+              </select>
+            </div>
+            <div>
+              <label for="filter-status" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Filter by
+                Status</label>
+              <select id="filter-status"
+                class="mt-1 block w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700">
+                <option value="all">All</option>
+                <option value="inprogress">In Progress</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+            <div>
+              <label for="sort-tasks" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Sort
+                By</label>
+              <select id="sort-tasks"
+                class="mt-1 block w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700">
+                <option value="dueDate">Due Date</option>
+                <option value="time">Time to Complete</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+        <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">All Tasks</h2>
+        <div id="full-task-list" class="space-y-3 max-h-[75vh] overflow-y-auto pr-2"></div>
+      </div>
+    </main>
 
-        <main id="study-page" class="hidden flex-grow grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 space-y-8">
-                <div class="bg-white p-6 rounded-2xl shadow-sm"><div id="calendar-feature"><div class="flex items-center justify-between mb-6"><h2 id="month-year" class="text-xl font-bold text-slate-900"></h2><div class="flex items-center space-x-2"><button id="prev-month" class="p-2 rounded-full bg-slate-100 hover:bg-slate-200"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button><button id="next-month" class="p-2 rounded-full bg-slate-100 hover:bg-slate-200"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></button></div></div><div class="grid calendar-grid gap-1 text-center font-semibold text-slate-600 mb-2"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div><div id="calendar-days" class="grid calendar-grid gap-2"></div></div></div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm"><h2 class="text-xl font-bold text-slate-900 mb-6">Exam Countdowns</h2><div id="countdown-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div></div>
-            </div>
-            <div class="space-y-8">
-                <div class="bg-white p-6 rounded-2xl shadow-sm"><h3 class="text-lg font-bold text-slate-900 mb-4">Task List</h3><div class="mb-4 space-y-2"><input type="text" id="task-input" placeholder="Enter a new task..." class="w-full p-2 border border-slate-300 rounded-lg"><div class="grid grid-cols-3 gap-2"><select id="task-subject" class="w-full p-2 border border-slate-300 rounded-lg text-sm"></select><input type="number" id="task-time" placeholder="Mins" class="w-full p-2 border border-slate-300 rounded-lg"><input type="date" id="task-deadline" class="w-full p-2 border border-slate-300 rounded-lg text-sm"></div><button id="add-task-btn" class="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg">Add Task</button></div><div id="task-list" class="space-y-2 max-h-60 overflow-y-auto pr-2"></div></div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm"><h3 class="text-lg font-bold text-slate-900 mb-4">Study Tracker</h3><div class="space-y-4"><div class="text-center p-4 bg-slate-100 rounded-lg"><p id="mode-indicator" class="text-sm font-semibold text-slate-500 uppercase">Focus</p><p id="timer-display" class="text-6xl font-bold font-mono text-slate-800 my-2">25:00</p><select id="pomodoro-subject" class="w-full p-2 border border-slate-300 rounded-lg text-sm"></select></div><div class="flex space-x-2"><input type="number" id="focus-duration" value="25" class="w-full p-2 text-center border rounded-lg"><input type="number" id="break-duration" value="5" class="w-full p-2 text-center border rounded-lg"></div><div class="grid grid-cols-2 gap-2"><button id="play-pause-btn" class="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg">Start</button><button id="skip-btn" class="w-full py-3 px-4 bg-slate-200 text-slate-700 font-semibold rounded-lg">Skip</button></div><div><h4 class="text-md font-bold text-slate-800 mt-4 mb-2">Study Log</h4><div id="study-log-container" class="space-y-2 max-h-40 overflow-y-auto pr-2"></div></div></div></div>
-            </div>
-        </main>
+  </div>
+  <div id="event-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 w-full max-w-md">
+      <h3 class="text-xl font-bold mb-4 dark:text-slate-100">Add Event</h3>
+      <p id="modal-date" class="mb-6 text-slate-500 dark:text-slate-400"></p><input type="text" id="event-title"
+        class="w-full p-3 border rounded-lg mb-4 bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600"
+        placeholder="Event title">
+      <div class="flex justify-end space-x-3"><button id="close-modal"
+          class="px-4 py-2 bg-slate-100 rounded-lg dark:bg-slate-600 dark:text-slate-200">Cancel</button><button
+          id="save-event" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Save</button></div>
     </div>
-    <div id="event-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden"><div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md"><h3 class="text-xl font-bold mb-4">Add Event</h3><p id="modal-date" class="mb-6 text-slate-500"></p><input type="text" id="event-title" class="w-full p-3 border rounded-lg mb-4" placeholder="Event title"><div class="flex justify-end space-x-3"><button id="close-modal" class="px-4 py-2 bg-slate-100 rounded-lg">Cancel</button><button id="save-event" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Save</button></div></div></div>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- DOM Elements ---
-            const appContainer = document.getElementById('app-container');
-            const logoutBtn = document.getElementById('logout-btn');
-            const welcomeMessage = document.getElementById('welcome-message');
-            const dashboardPage = document.getElementById('dashboard-page');
-            const studyPage = document.getElementById('study-page');
-            const navDashboard = document.getElementById('nav-dashboard');
-            const navStudy = document.getElementById('nav-study');
-            const monthYearEl = document.getElementById('month-year');
-            const calendarDaysEl = document.getElementById('calendar-days');
-            const prevMonthBtn = document.getElementById('prev-month');
-            const nextMonthBtn = document.getElementById('next-month');
-            const countdownContainer = document.getElementById('countdown-container');
-            const taskListEl = document.getElementById('task-list');
-            const taskInput = document.getElementById('task-input');
-            const taskSubjectSelect = document.getElementById('task-subject');
-            const taskTimeInput = document.getElementById('task-time');
-            const taskDeadlineInput = document.getElementById('task-deadline');
-            const addTaskBtn = document.getElementById('add-task-btn');
-            const timerDisplay = document.getElementById('timer-display');
-            const modeIndicator = document.getElementById('mode-indicator');
-            const pomodoroSubjectSelect = document.getElementById('pomodoro-subject');
-            const focusDurationInput = document.getElementById('focus-duration');
-            const breakDurationInput = document.getElementById('break-duration');
-            const playPauseBtn = document.getElementById('play-pause-btn');
-            const skipBtn = document.getElementById('skip-btn');
-            const studyLogContainer = document.getElementById('study-log-container');
-            const eventModal = document.getElementById('event-modal');
-            const closeModalBtn = document.getElementById('close-modal');
-            const saveEventBtn = document.getElementById('save-event');
-            const eventTitleInput = document.getElementById('event-title');
-            const modalDateEl = document.getElementById('modal-date');
-            const upcomingExamsContainer = document.getElementById('upcoming-exams-container');
-            const nextTodosContainer = document.getElementById('next-todos-container');
-            const studyChartCanvas = document.getElementById('study-chart');
-            const motivationalQuoteEl = document.getElementById('motivational-quote');
-            const streakContainerEl = document.getElementById('streak-container');
-            
-            // --- State ---
-            let studyChart = null; let currentDate = new Date(); let events = {}; let tasks = []; let studyLogs = {}; let selectedDate = null; let timerInterval = null; let timeLeft = 25 * 60; let isPaused = true; let currentMode = 'focus'; let studyStreak = 0; let lastStudyDay = ''; let currentUser = null;
+  </div>
 
-            // --- Constants & Config ---
-            const API_URL = 'https://wot-tau.vercel.app'; // Your server URL
-            const subjectColors = { 'Malay': '#8B0000', 'Chinese': '#E63946', 'English': '#1D3557', 'Moral': '#6A4C93', 'History': '#D2691E', 'Geography': '#606C38', 'RBT': '#6C757D', 'PJK': '#9EF01A', 'Science': '#2D6A4F', 'Mathematics': '#00B4D8', 'Art': '#E6399B', 'Other': '#64748b' };
-            const RBT_ACCENT = '#FFD60A';
-            const exams = [ { subject: 'Malay Paper 1', date: '2025-10-03T06:50:00' }, { subject: 'Malay Paper 2', date: '2025-10-03T08:25:00' }, { subject: 'Chinese', date: '2025-10-03T09:45:00' }, { subject: 'English Paper 1', date: '2025-10-07T06:50:00' }, { subject: 'English Paper 2', date: '2025-10-07T08:25:00' }, { subject: 'Moral', date: '2025-10-07T09:45:00' }, { subject: 'History', date: '2025-10-08T07:00:00' }, { subject: 'Geography', date: '2025-10-08T09:40:00' }, { subject: 'RBT', date: '2025-10-09T06:50:00' }, { subject: 'PJK', date: '2025-10-09T08:20:00' }, { subject: 'Science', date: '2025-10-09T09:40:00' }, { subject: 'Mathematics', date: '2025-10-10T07:00:00' }, { subject: 'Art', date: '2025-10-10T09:40:00' } ];
-            const quotes = [ "The secret of getting ahead is getting started.", "The expert in anything was once a beginner.", "Believe you can and you're halfway there.", "Well done is better than well said.", "Strive for progress, not perfection.", "The future belongs to those who believe in the beauty of their dreams.", "Success is the sum of small efforts, repeated day in and day out.", "Don't watch the clock; do what it does. Keep going.", "It does not matter how slowly you go as long as you do not stop.", "The pain you feel today will be the strength you feel tomorrow." ];
-            
-            // --- UTILITY FUNCTIONS (Defined early to prevent ReferenceError) ---
-            const getDateString = (d) => d.toISOString().split('T')[0];
-            const getColorForSubject = (s) => Object.keys(subjectColors).find(k=>s.toLowerCase().includes(k.toLowerCase()))?subjectColors[Object.keys(subjectColors).find(k=>s.toLowerCase().includes(k.toLowerCase()))]:subjectColors['Other'];
-            const formatTime = (s) => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
-            const formatLogTime = (s) => {
-                const hours = Math.floor(s / 3600);
-                const minutes = Math.floor((s % 3600) / 60);
-                const seconds = Math.floor(s % 60);
-                return `${hours > 0 ? `${hours}h ` : ''}${minutes > 0 ? `${minutes}m ` : ''}${seconds}s`;
-            };
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden z-50">
+    <div
+      class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 w-full max-w-md space-y-6 transform transition-all">
+      <div class="flex justify-between items-center">
+        <h3 class="text-2xl font-bold text-slate-800 dark:text-slate-100">Settings</h3>
+        <button id="close-settings-modal"
+          class="p-2 rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
 
-            // --- App Initialization & Auth Check ---
-            async function checkAuthAndInitialize() {
-                const user = localStorage.getItem('studyUser');
-                if (user) {
-                    currentUser = JSON.parse(user);
-                    appContainer.style.display = 'flex';
-                    welcomeMessage.textContent = `Welcome back, ${currentUser.username}!`;
-                    await initializeApp();
-                } else {
-                    window.location.href = 'auth.html';
-                }
-            }
+      <form id="update-username-form">
+        <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-2">Change Username</h4>
+        <div class="flex gap-2">
+          <input type="text" id="new-username-input"
+            class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-slate-700"
+            placeholder="New username">
+          <button type="submit"
+            class="py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">Save</button>
+        </div>
+        <p id="username-message" class="text-xs mt-2 h-4"></p>
+      </form>
 
-            async function initializeApp() {
-                await loadDataFromDB();
-                populateCalendarWithExams();
-                renderCalendar();
-                renderCountdowns();
-                const populateSubjects = () => [taskSubjectSelect, pomodoroSubjectSelect].forEach(sel => { sel.innerHTML = ''; Object.keys(subjectColors).forEach(s => sel.add(new Option(s, s))); });
-                populateSubjects();
-                renderTasks();
-                renderStudyLogs();
-                updateTimerDisplay();
-                showPage('dashboard');
-            }
+      <hr class="dark:border-slate-600">
 
-            function handleLogout() {
-                localStorage.removeItem('studyUser');
-                currentUser = null;
-                window.location.href = 'auth.html';
-            }
+      <form id="update-password-form">
+        <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-2">Change Password</h4>
+        <div class="space-y-2">
+          <input type="password" id="current-password-input"
+            class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-slate-700"
+            placeholder="Current Password" required>
+          <input type="password" id="new-password-input"
+            class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-slate-700"
+            placeholder="New Password" required>
+          <button type="submit"
+            class="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">Update
+            Password</button>
+        </div>
+        <p id="password-message" class="text-xs mt-2 h-4"></p>
+      </form>
 
-            // --- Event Listeners ---
-            logoutBtn.addEventListener('click', handleLogout);
-            navDashboard.addEventListener('click', () => showPage('dashboard'));
-            navStudy.addEventListener('click', () => showPage('study'));
-            prevMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); });
-            nextMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); });
-            addTaskBtn.addEventListener('click', addTask); taskInput.addEventListener('keydown', (e) => e.key === 'Enter' && addTask());
-            playPauseBtn.addEventListener('click', playPauseTimer);
-            skipBtn.addEventListener('click', () => { 
-                if(currentMode === 'focus') { saveStudyLogs(); } 
-                switchMode(currentMode === 'focus' ? 'break' : 'focus'); 
-            });
-            focusDurationInput.addEventListener('change', () => currentMode === 'focus' && switchMode('focus'));
-            breakDurationInput.addEventListener('change', () => currentMode === 'break' && switchMode('break'));
-            closeModalBtn.addEventListener('click', closeModal); saveEventBtn.addEventListener('click', saveEvent); eventModal.addEventListener('click', (e) => e.target === eventModal && closeModal());
-            setInterval(updateAllCountdowns, 1000);
-            
-            // --- Data Management (DB & Local) ---
-            async function loadDataFromDB() {
-                await loadTasks();
-                await loadStudyLogs();
-                await loadStreak(); // Now fetches from DB
-                checkStreak();
-            }
+      <hr class="dark:border-slate-600">
 
-            function showPage(page) { if (page === 'dashboard') { dashboardPage.classList.remove('hidden'); studyPage.classList.add('hidden'); navDashboard.classList.add('active'); navStudy.classList.remove('active'); renderDashboard(); } else { dashboardPage.classList.add('hidden'); studyPage.classList.remove('hidden'); navDashboard.classList.remove('active'); navStudy.classList.add('active'); } }
-            function renderDashboard() { renderMotivationalQuote(); renderUpcomingExams(); renderStudyChart(); renderNextTodos(); renderStreak(); }
-            function renderMotivationalQuote() { motivationalQuoteEl.textContent = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`; }
-            function renderUpcomingExams() { const now = new Date(); const upcoming = exams.filter(e => new Date(e.date) > now).sort((a,b) => new Date(a.date) - new Date(b.date)); upcomingExamsContainer.innerHTML = ''; if (upcoming.length === 0) { upcomingExamsContainer.innerHTML = `<p class="text-slate-500">No upcoming exams!</p>`; return; } const nextDate = new Date(upcoming[0].date).toDateString(); const nextExams = upcoming.filter(e => new Date(e.date).toDateString() === nextDate); upcomingExamsContainer.innerHTML = `<p class="text-sm font-semibold text-slate-600 mb-2">On ${new Date(nextExams[0].date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>`; nextExams.forEach(exam => { const el = document.createElement('div'); el.className = 'flex items-center p-3 bg-slate-100 rounded-lg'; el.innerHTML = `<div class="w-1.5 h-10 rounded-full mr-3" style="background-color: ${getColorForSubject(exam.subject)};"></div><div><p class="font-semibold text-slate-800">${exam.subject}</p><p class="text-sm text-slate-500">${new Date(exam.date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</p></div>`; upcomingExamsContainer.appendChild(el); }); }
-            function renderStudyChart() { const ctx = studyChartCanvas.getContext('2d'); const labels = Object.keys(studyLogs); const data = labels.map(label => (studyLogs[label] / 3600).toFixed(2)); if (studyChart) studyChart.destroy(); if (labels.length === 0) { ctx.clearRect(0, 0, studyChartCanvas.width, studyChartCanvas.height); ctx.font = "16px Inter"; ctx.fillStyle = "#94a3b8"; ctx.textAlign = "center"; ctx.fillText("Log study time to see your progress!", studyChartCanvas.width / 2, 50); return; } studyChart = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Hours Studied', data, backgroundColor: labels.map(l => subjectColors[l] || subjectColors['Other']), borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { display: false }, title: { display: true, text: 'Hours' } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } }); }
-            function renderNextTodos() { const incomplete = tasks.filter(t => !t.completed).slice(0, 3); nextTodosContainer.innerHTML = ''; if (incomplete.length === 0) { nextTodosContainer.innerHTML = `<div class="text-center p-4 bg-green-50 border-2 border-green-200 rounded-lg"><p class="font-semibold text-green-700">All caught up!</p></div>`; return; } incomplete.forEach(task => { const el = document.createElement('div'); el.className = 'flex items-start p-3 bg-slate-100 rounded-lg space-x-3'; el.innerHTML = `<div class="mt-1 w-2.5 h-2.5 rounded-full" style="background-color: ${getColorForSubject(task.subject)};"></div><div><p class="font-semibold text-slate-800">${task.text}</p><p class="text-sm text-slate-500">Due: ${new Date(task.deadline).toLocaleDateString()}</p></div>`; nextTodosContainer.appendChild(el); }); }
-            function renderStreak() { streakContainerEl.innerHTML = `<p class="text-slate-600">You're on a</p><p class="text-3xl font-bold text-orange-600">${studyStreak} day streak! 🔥</p>`; }
-            
-            async function checkStreak() { 
-                const today = new Date(); 
-                const yesterday = new Date(today); 
-                yesterday.setDate(yesterday.getDate() - 1); 
-                const todayStr = getDateString(today); 
-                const yesterdayStr = getDateString(yesterday); 
-                if (lastStudyDay && lastStudyDay !== todayStr && lastStudyDay !== yesterdayStr) { 
-                    studyStreak = 0; 
-                    await saveStreak(); 
-                } 
-            }
-            async function updateStreak() { 
-                const todayStr = getDateString(new Date()); 
-                const yesterday = new Date(); 
-                yesterday.setDate(yesterday.getDate() - 1); 
-                const yesterdayStr = getDateString(yesterday); 
-                if (lastStudyDay === todayStr) return; 
-                if (lastStudyDay === yesterdayStr) { 
-                    studyStreak++; 
-                } else { 
-                    studyStreak = 1; 
-                } 
-                lastStudyDay = todayStr; 
-                await saveStreak(); 
-            }
+      <div>
+        <h4 class="font-semibold text-slate-700 dark:text-slate-300 mb-2">Appearance</h4>
+        <div class="flex items-center justify-between">
+          <label for="dark-mode-toggle" class="text-slate-600 dark:text-slate-400">Dark Mode</label>
+          <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+            <input type="checkbox" name="dark-mode-toggle" id="dark-mode-toggle"
+              class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
+            <label for="dark-mode-toggle"
+              class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer dark:bg-slate-600"></label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            // --- Task Management (DB) ---
-            async function loadTasks() { if (!currentUser) return; try { const response = await fetch(`${API_URL}/api/study/tasks?userId=${currentUser.id}`); tasks = await response.json(); renderTasks(); renderDashboard(); } catch (error) { console.error("Failed to fetch tasks:", error); } }
-            async function addTask() { const text = taskInput.value.trim(); const subject = taskSubjectSelect.value; const time = taskTimeInput.value; const deadline = taskDeadlineInput.value; if (!text || !subject || !time || !deadline) return; const newTask = { text, subject, time, deadline, userId: currentUser.id }; try { await fetch(`${API_URL}/api/study/tasks`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newTask) }); taskInput.value = taskTimeInput.value = taskDeadlineInput.value = ''; await loadTasks(); } catch (error) { console.error("Failed to add task:", error); } }
-            async function toggleTask(task) { try { await fetch(`${API_URL}/api/study/tasks/${task._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ completed: !task.completed }) }); await loadTasks(); } catch (error) { console.error("Failed to toggle task:", error); } }
-            async function deleteTask(taskId) { try { await fetch(`${API_URL}/api/study/tasks/${taskId}`, { method: 'DELETE' }); await loadTasks(); } catch (error) { console.error("Failed to delete task:", error); } }
-            
-            // --- Study Log Management (DB) ---
-            async function loadStudyLogs() { if (!currentUser) return; try { const response = await fetch(`${API_URL}/api/study/logs?userId=${currentUser.id}`); const logsFromServer = await response.json(); studyLogs = (Array.isArray(logsFromServer)) ? Object.fromEntries(logsFromServer) : logsFromServer; renderStudyLogs(); renderDashboard(); } catch (error) { console.error("Failed to fetch study logs:", error); } }
-            async function saveStudyLogs() { if (!currentUser) return; try { await fetch(`${API_URL}/api/study/logs`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: currentUser.id, studyLogs }) }); await updateStreak(); renderDashboard(); } catch (error) { console.error("Failed to save study logs:", error); } }
-
-            // --- Streak Management (DB) ---
-            async function loadStreak() {
-                if (!currentUser) return;
-                try {
-                    const response = await fetch(`${API_URL}/api/study/streak?userId=${currentUser.id}`);
-                    const data = await response.json();
-                    if (data.error) {
-                        console.error("Failed to load streak:", data.error);
-                        studyStreak = 0;
-                        lastStudyDay = '';
-                    } else {
-                        studyStreak = data.studyStreak;
-                        lastStudyDay = data.lastStudyDay;
-                    }
-                } catch (error) {
-                    console.error("Failed to fetch streak:", error);
-                    studyStreak = 0;
-                    lastStudyDay = '';
-                }
-            }
-            async function saveStreak() {
-                if (!currentUser) return;
-                try {
-                    await fetch(`${API_URL}/api/study/streak`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            userId: currentUser.id,
-                            studyStreak,
-                            lastStudyDay
-                        })
-                    });
-                    renderDashboard();
-                } catch (error) {
-                    console.error("Failed to save streak:", error);
-                }
-            }
-            
-            // --- Core Functionality ---
-            function populateCalendarWithExams() { exams.forEach(exam => { const d = new Date(exam.date); const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }); if (!events[dateStr]) events[dateStr] = []; events[dateStr].push(`${timeStr} - ${exam.subject}`); }); }
-            function renderCalendar() { calendarDaysEl.innerHTML = ''; const year = currentDate.getFullYear(), month = currentDate.getMonth(); monthYearEl.textContent = `${new Date(year, month).toLocaleString('en-US', { month: 'long' })} ${year}`; const firstDay = new Date(year, month, 1).getDay(); const daysInMonth = new Date(year, month + 1, 0).getDate(); for (let i = 0; i < firstDay; i++) calendarDaysEl.appendChild(document.createElement('div')); for (let i = 1; i <= daysInMonth; i++) { const dayEl = document.createElement('div'); dayEl.className = 'day cursor-pointer p-2 md:p-3 rounded-xl flex flex-col items-start min-h-[90px]'; const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; dayEl.dataset.date = dateStr; const dayNum = document.createElement('span'); dayNum.textContent = i; dayNum.className = 'text-sm font-medium'; if (new Date().toDateString() === new Date(dateStr+'T00:00:00').toDateString()) dayNum.className += ' bg-blue-600 text-white rounded-full w-7 h-7 flex items-center justify-center'; else dayNum.className += ' text-slate-700'; dayEl.appendChild(dayNum); if (events[dateStr]) { const eventsContainer = document.createElement('div'); eventsContainer.className = 'mt-1 text-xs space-y-1 w-full overflow-hidden'; events[dateStr].slice(0, 2).forEach(txt => { const pill = document.createElement('div'); pill.className = 'p-1 rounded text-[10px] truncate font-medium'; const color = getColorForSubject(txt); pill.style.backgroundColor = color + '20'; pill.style.color = color; pill.textContent = txt; eventsContainer.appendChild(pill); }); dayEl.appendChild(eventsContainer); } dayEl.addEventListener('click', () => openModal(dateStr)); calendarDaysEl.appendChild(dayEl); } }
-            function renderCountdowns() { countdownContainer.innerHTML = ''; exams.forEach((exam, i) => { const card = document.createElement('div'); card.className = 'p-4 rounded-lg bg-slate-100'; card.style.borderLeft = `4px solid ${getColorForSubject(exam.subject)}`; const header = document.createElement('div'); header.className = 'flex items-center justify-between'; header.innerHTML = `<p class="font-bold text-slate-800">${exam.subject}</p>${exam.subject.toLowerCase().includes('rbt') ? `<div class="w-3 h-3 rounded-full" style="background-color:${RBT_ACCENT};"></div>`:''}`; const timerEl = document.createElement('p'); timerEl.id = `timer-${i}`; timerEl.className = 'text-xl font-mono text-slate-600 mt-1'; card.appendChild(header); card.appendChild(timerEl); countdownContainer.appendChild(card); }); }
-            function updateAllCountdowns() { exams.forEach((exam, i) => { const el = document.getElementById(`timer-${i}`); if(!el) return; const diff = new Date(exam.date).getTime() - new Date().getTime(); if(diff > 0) { const d=Math.floor(diff/(1e3*60*60*24)), h=Math.floor((diff%(1e3*60*60*24))/(1e3*60*60)), m=Math.floor((diff%(1e3*60*60))/(1e3*60)), s=Math.floor((diff%(1e3*60))/1e3); el.textContent = `${String(d).padStart(2,'0')}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`; } else { el.textContent = 'Exam has started!'; el.classList.add('text-green-600', 'font-semibold'); } }); }
-            function renderTasks() { taskListEl.innerHTML = ''; if (!tasks.length) { taskListEl.innerHTML = `<p class="text-slate-400 text-center py-4">No tasks yet. Add one!</p>`; return; } tasks.forEach(task => { const el = document.createElement('div'); el.className = 'task-item flex items-start justify-between p-3 bg-slate-100 rounded-lg group'; el.dataset.id = task._id; const completed = task.completed ? ' line-through text-slate-400' : ''; el.innerHTML = `<div class="flex items-start flex-grow"><input type="checkbox" ${task.completed ? 'checked':''} class="task-checkbox mt-1 mr-3 h-5 w-5 rounded border-gray-300 text-blue-600 cursor-pointer"><div><p class="font-medium text-slate-700 ${completed}">${task.text}</p><div class="flex items-center space-x-2 text-xs mt-1 ${completed}"><span class="flex items-center font-semibold" style="color:${getColorForSubject(task.subject)};"><span class="w-2 h-2 rounded-full mr-1.5" style="background-color:${getColorForSubject(task.subject)};"></span>${task.subject}</span><span>•</span><span>${task.time} mins</span><span>•</span><span>${new Date(task.deadline).toLocaleDateString()}</span></div></div></div><button class="delete-task-btn opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 ml-2"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`; el.querySelector('.task-checkbox').addEventListener('change', () => toggleTask(task)); el.querySelector('.delete-task-btn').addEventListener('click', () => deleteTask(task._id)); taskListEl.appendChild(el); }); }
-            function renderStudyLogs() { studyLogContainer.innerHTML = ''; if(!Object.keys(studyLogs).length) { studyLogContainer.innerHTML = `<p class="text-slate-400 text-center py-2">No sessions logged.</p>`; return; } for(const subject in studyLogs) { const el = document.createElement('div'); el.className = 'flex items-center justify-between p-2 bg-slate-100 rounded-md text-sm'; el.innerHTML = `<div class="flex items-center"><span class="w-2.5 h-2.5 rounded-full mr-2" style="background-color:${getColorForSubject(subject)};"></span><span class="font-medium text-slate-700">${subject}</span></div><span class="font-semibold text-slate-600">${formatLogTime(studyLogs[subject] || 0)}</span>`; studyLogContainer.appendChild(el); } }
-            function updateTimerDisplay() { timerDisplay.textContent = formatTime(timeLeft); }
-            function playNotificationSound() { const a=new(window.AudioContext||window.webkitAudioContext)();const o=a.createOscillator();o.type='sine';o.frequency.setValueAtTime(600,a.currentTime);o.connect(a.destination);o.start();setTimeout(()=>o.stop(),200);}
-            function switchMode(mode) { clearInterval(timerInterval); timerInterval = null; isPaused = true; currentMode = mode; modeIndicator.textContent = mode; playPauseBtn.textContent = 'Start'; timeLeft = (mode === 'focus' ? focusDurationInput.value : breakDurationInput.value) * 60; updateTimerDisplay(); }
-            function playPauseTimer() { isPaused = !isPaused; playPauseBtn.textContent = isPaused ? 'Resume' : 'Pause'; if(isPaused) { clearInterval(timerInterval); saveStudyLogs(); } else { timerInterval = setInterval(() => { timeLeft--; if(currentMode === 'focus') { const subject = pomodoroSubjectSelect.value; studyLogs[subject] = (studyLogs[subject] || 0) + 1; renderStudyLogs(); } updateTimerDisplay(); if(timeLeft <= 0) { playNotificationSound(); if(currentMode === 'focus') { saveStudyLogs(); } switchMode(currentMode === 'focus' ? 'break' : 'focus'); } }, 1000); } }
-            function openModal(date) { selectedDate = date; modalDateEl.textContent = new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); eventTitleInput.value = ''; eventModal.classList.remove('hidden'); }
-            function closeModal() { eventModal.classList.add('hidden'); }
-            function saveEvent() { const title = eventTitleInput.value.trim(); if (title && selectedDate) { if (!events[selectedDate]) events[selectedDate] = []; events[selectedDate].push(`Custom: ${title}`); renderCalendar(); closeModal(); } }
-            
-            // --- App Start ---
-            checkAuthAndInitialize();
-        });
-    </script>
+  <script src="script.js" defer></script>
 </body>
-</html>
 
+</html>

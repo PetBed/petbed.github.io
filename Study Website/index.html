@@ -293,69 +293,6 @@
     </div>
   </div>
 
-  <!-- START: Add this new code block for the Edit Task Modal -->
-  <div id="edit-task-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden z-50">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 w-full max-w-lg space-y-4">
-      <div class="flex justify-between items-center">
-        <h3 class="text-2xl font-bold text-slate-800 dark:text-slate-100">Edit Task</h3>
-        <button id="close-edit-modal-btn"
-          class="p-2 rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-      <form id="edit-task-form" class="space-y-4">
-        <input type="hidden" id="edit-task-id">
-        <div>
-          <label for="edit-task-input"
-            class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Task</label>
-          <input type="text" id="edit-task-input" required
-            class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700">
-        </div>
-        <div class="grid grid-cols-3 gap-2">
-          <div>
-            <label for="edit-task-subject"
-              class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Subject</label>
-            <select id="edit-task-subject"
-              class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700"></select>
-          </div>
-          <div>
-            <label for="edit-task-time"
-              class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Mins</label>
-            <input type="number" id="edit-task-time" required
-              class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700">
-          </div>
-          <div>
-            <label for="edit-task-deadline"
-              class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Deadline</label>
-            <input type="date" id="edit-task-deadline" required
-              class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700">
-          </div>
-        </div>
-        <div>
-          <h4 class="text-md font-semibold text-slate-700 dark:text-slate-300 mb-2">Sub-tasks</h4>
-          <div id="edit-subtasks-list" class="space-y-2 max-h-32 overflow-y-auto pr-2"></div>
-          <div class="flex items-center gap-2 mt-2">
-            <input type="text" id="edit-new-subtask-input" placeholder="Add a sub-task..."
-              class="w-full text-sm p-1 border border-slate-200 dark:border-slate-600 rounded bg-white dark:bg-slate-700">
-            <button type="button" id="edit-add-subtask-btn"
-              class="text-xs bg-blue-500 text-white rounded px-2 py-1">Add</button>
-          </div>
-        </div>
-        <div class="flex justify-end space-x-2">
-          <button type="button" id="cancel-edit-btn"
-            class="px-4 py-2 bg-slate-100 rounded-lg dark:bg-slate-600 dark:text-slate-200">Cancel</button>
-          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Save Changes</button>
-        </div>
-        <p id="edit-task-error" class="text-red-500 text-xs text-center mt-2 h-4"></p>
-      </form>
-    </div>
-  </div>
-  <!-- END: Add this new code block for the Edit Task Modal -->
-
   <script src="script.js" defer></script>
 </body>
 

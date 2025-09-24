@@ -54,6 +54,17 @@ document.addEventListener("DOMContentLoaded", function () {
 	const usernameMessageEl = document.getElementById("username-message");
 	const passwordMessageEl = document.getElementById("password-message");
 	const darkModeToggle = document.getElementById("dark-mode-toggle");
+	// NEW: Edit Task Modal Elements
+	const editTaskModal = document.getElementById("edit-task-modal");
+	const editTaskText = document.getElementById("edit-task-text");
+	const editTaskSubject = document.getElementById("edit-task-subject");
+	const editTaskTime = document.getElementById("edit-task-time");
+	const editTaskDeadline = document.getElementById("edit-task-deadline");
+	const editSubtaskList = document.getElementById("edit-subtask-list");
+	const editAddSubtaskInput = document.getElementById("edit-add-subtask-input");
+	const editAddSubtaskBtn = document.getElementById("edit-add-subtask-btn");
+	const cancelEditTaskBtn = document.getElementById("cancel-edit-task-btn");
+	const saveEditTaskBtn = document.getElementById("save-edit-task-btn");
 
 	// --- State ---
 	let studyChart = null;
@@ -72,9 +83,10 @@ document.addEventListener("DOMContentLoaded", function () {
 	let taskSubjectFilter = "all";
 	let taskStatusFilter = "all";
 	let taskSort = "dueDate";
+	let editingTaskId = null; // NEW: To track which task is being edited
 
 	// --- Constants & Config ---
-	const API_URL = "https://wot-tau.vercel.app";
+	const API_URL = "https://wot-tau.vercel.app"; //http://localhost:3005
 	const subjectColors = {Malay: "#8B0000", Chinese: "#E63946", English: "#1D3557", Moral: "#6A4C93", History: "#D2691E", Geography: "#606C38", RBT: "#6C757D", PJK: "#9EF01A", Science: "#2D6A4F", Mathematics: "#00B4D8", Art: "#E6399B", Other: "#64748b"};
 	const RBT_ACCENT = "#FFD60A";
 	const exams = [
@@ -134,7 +146,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		renderCalendar();
 		renderCountdowns();
 		const populateSubjects = () => {
-			const selects = [taskSubjectSelect, pomodoroSubjectSelect, filterSubjectEl];
+			const selects = [taskSubjectSelect, pomodoroSubjectSelect, filterSubjectEl, editTaskSubject];
 			selects.forEach((sel) => {
 				if (sel.id === "filter-subject") {
 					while (sel.options.length > 1) sel.remove(1);
@@ -184,25 +196,29 @@ document.addEventListener("DOMContentLoaded", function () {
 		const taskItem = target.closest(".task-item");
 		const subtaskItem = target.closest(".subtask-item");
 
-		if (target.classList.contains("task-checkbox") && taskItem) {
+		if (target.closest(".task-checkbox") && taskItem) {
 			const task = tasks.find((t) => t._id === taskItem.dataset.id);
 			if (task) toggleTask(task);
-		}
-		if (target.closest(".delete-task-btn") && taskItem) {
+		} else if (target.closest(".delete-task-btn") && taskItem) {
 			deleteTask(taskItem.dataset.id);
-		}
-		if (target.classList.contains("add-subtask-btn")) {
+		} else if (target.closest(".add-subtask-btn")) {
 			const taskId = target.dataset.taskId;
 			const inputEl = document.getElementById(`subtask-input-${taskId}`);
 			if (inputEl) {
 				addSubTask(taskId, inputEl.value);
 				inputEl.value = "";
 			}
-		}
-		if (target.classList.contains("subtask-checkbox") && subtaskItem) {
+		} else if (target.closest(".subtask-checkbox") && subtaskItem) {
 			const taskId = subtaskItem.dataset.parentId;
 			const subtaskId = subtaskItem.dataset.id;
 			toggleSubTask(taskId, subtaskId, target.checked);
+		} else if (target.closest(".edit-task-btn") && taskItem) {
+			openEditModal(taskItem.dataset.id); // CHANGED
+		} else if (target.closest(".delete-subtask-btn") && subtaskItem) {
+			// CHANGED
+			const taskId = subtaskItem.dataset.parentId;
+			const subtaskId = subtaskItem.dataset.id;
+			deleteSubTask(taskId, subtaskId);
 		}
 	});
 
@@ -235,6 +251,38 @@ document.addEventListener("DOMContentLoaded", function () {
 	saveEventBtn.addEventListener("click", saveEvent);
 	eventModal.addEventListener("click", (e) => e.target === eventModal && closeModal());
 	setInterval(updateAllCountdowns, 1000);
+
+	// NEW: Edit Modal Listeners
+	cancelEditTaskBtn.addEventListener("click", closeEditModal);
+	saveEditTaskBtn.addEventListener("click", saveTaskEdits);
+	editAddSubtaskBtn.addEventListener("click", () => {
+		if (editingTaskId && editAddSubtaskInput.value.trim()) {
+			addSubTask(editingTaskId, editAddSubtaskInput.value.trim(), true);
+			editAddSubtaskInput.value = "";
+		}
+	});
+	editSubtaskList.addEventListener("click", (e) => {
+		const subtaskItem = e.target.closest(".subtask-item-edit");
+		if (!subtaskItem) return;
+		const subtaskId = subtaskItem.dataset.id;
+
+		if (e.target.closest(".delete-subtask-btn-edit")) {
+			deleteSubTask(editingTaskId, subtaskId, true);
+		} else if (e.target.closest(".subtask-text-edit")) {
+			const currentText = e.target.textContent;
+			const newText = prompt("Edit sub-task:", currentText);
+			if (newText && newText.trim() !== currentText) {
+				updateSubTask(
+					editingTaskId,
+					subtaskId,
+					{
+						text: newText.trim(),
+					},
+					true
+				);
+			}
+		}
+	});
 
 	// --- Data Management (DB & Local) ---
 	async function loadDataFromDB() {
@@ -319,7 +367,6 @@ document.addEventListener("DOMContentLoaded", function () {
 			document.documentElement.classList.remove("dark");
 		}
 
-		// THE FIX: Ensure settings object exists before assigning to it
 		if (!currentUser.settings) {
 			currentUser.settings = {};
 		}
@@ -334,11 +381,8 @@ document.addEventListener("DOMContentLoaded", function () {
 			});
 		} catch (error) {
 			console.error("Failed to save dark mode preference:", error);
-			// Revert UI on failure if needed
 			if (isDarkMode) document.documentElement.classList.remove("dark");
 			else document.documentElement.classList.add("dark");
-
-			// Also revert the local state
 			currentUser.settings.darkMode = !isDarkMode;
 			localStorage.setItem("studyUser", JSON.stringify(currentUser));
 		}
@@ -525,7 +569,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	// --- Sub-task functions ---
-	async function addSubTask(taskId, text) {
+	async function addSubTask(taskId, text, fromModal = false) {
+		// MODIFIED
 		if (!text.trim()) return;
 		const task = tasks.find((t) => t._id === taskId);
 		if (!task) return;
@@ -533,7 +578,14 @@ document.addEventListener("DOMContentLoaded", function () {
 		const optimisticSubTask = {_id: tempSubId, text, completed: false};
 		if (!task.subTasks) task.subTasks = [];
 		task.subTasks.push(optimisticSubTask);
-		renderTasksPage();
+
+		if (fromModal) {
+			// MODIFIED
+			renderSubtasksInModal(taskId);
+		} else {
+			renderTasksPage();
+		}
+
 		try {
 			const response = await fetch(`${API_URL}/api/study/tasks/${taskId}/subtasks`, {
 				method: "POST",
@@ -541,14 +593,28 @@ document.addEventListener("DOMContentLoaded", function () {
 				body: JSON.stringify({text}),
 			});
 			if (!response.ok) throw new Error("Server error");
+
+			// Replace temp task with real one from server
 			const updatedTask = await response.json();
 			const taskIndex = tasks.findIndex((t) => t._id === taskId);
 			if (taskIndex !== -1) tasks[taskIndex] = updatedTask;
-			renderTasksPage();
+
+			if (fromModal) {
+				renderSubtasksInModal(taskId);
+			} else {
+				renderTasksPage();
+			}
 		} catch (error) {
 			console.error("Failed to add sub-task:", error);
-			task.subTasks = task.subTasks.filter((st) => st._id !== tempSubId);
-			renderTasksPage();
+			const taskToRevert = tasks.find((t) => t._id === taskId);
+			if (taskToRevert) {
+				taskToRevert.subTasks = taskToRevert.subTasks.filter((st) => st._id !== tempSubId);
+			}
+			if (fromModal) {
+				renderSubtasksInModal(taskId);
+			} else {
+				renderTasksPage();
+			}
 		}
 	}
 	async function toggleSubTask(taskId, subtaskId, completed) {
@@ -559,16 +625,58 @@ document.addEventListener("DOMContentLoaded", function () {
 		subTask.completed = completed;
 		renderTasksPage();
 		try {
-			const response = await fetch(`${API_URL}/api/study/tasks/${taskId}/subtasks/${subtaskId}`, {
-				method: "PUT",
-				headers: {"Content-Type": "application/json"},
-				body: JSON.stringify({completed}),
-			});
-			if (!response.ok) throw new Error("Server error");
+			await updateSubTask(taskId, subtaskId, {completed});
 		} catch (error) {
 			console.error("Failed to toggle sub-task:", error);
 			subTask.completed = oldStatus;
 			renderTasksPage();
+		}
+	}
+
+	async function updateSubTask(taskId, subtaskId, updates, fromModal = false) {
+		// MODIFIED
+		try {
+			const response = await fetch(`${API_URL}/api/study/tasks/${taskId}/subtasks/${subtaskId}`, {
+				method: "PUT",
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify(updates),
+			});
+			if (!response.ok) throw new Error("Server error");
+
+			const updatedTask = await response.json();
+			const taskIndex = tasks.findIndex((t) => t._id === taskId);
+			if (taskIndex !== -1) tasks[taskIndex] = updatedTask;
+
+			if (fromModal) {
+				renderSubtasksInModal(taskId);
+			} else {
+				renderTasksPage();
+			}
+		} catch (error) {
+			console.error("Failed to update sub-task:", error);
+			// Optional: add logic to revert optimistic update on failure
+		}
+	}
+
+	async function deleteSubTask(taskId, subtaskId, fromModal = false) {
+		// MODIFIED
+		try {
+			const response = await fetch(`${API_URL}/api/study/tasks/${taskId}/subtasks/${subtaskId}`, {
+				method: "DELETE",
+			});
+			if (!response.ok) throw new Error("Server error");
+
+			const updatedTask = await response.json();
+			const taskIndex = tasks.findIndex((t) => t._id === taskId);
+			if (taskIndex !== -1) tasks[taskIndex] = updatedTask;
+
+			if (fromModal) {
+				renderSubtasksInModal(taskId);
+			} else {
+				renderTasksPage();
+			}
+		} catch (error) {
+			console.error("Failed to delete sub-task:", error);
 		}
 	}
 
@@ -783,9 +891,14 @@ document.addEventListener("DOMContentLoaded", function () {
 				task.subTasks.forEach((st) => {
 					const subCompletedClass = st.completed ? " line-through text-slate-500" : "dark:text-slate-300";
 					subtasksHtml += `
-                        <div class="subtask-item flex items-center" data-id="${st._id}" data-parent-id="${task._id}">
-                            <input type="checkbox" ${st.completed ? "checked" : ""} class="subtask-checkbox h-4 w-4 rounded border-gray-300 text-blue-600 cursor-pointer">
-                            <p class="ml-2 text-sm ${subCompletedClass}">${st.text}</p>
+                        <div class="subtask-item group flex items-center justify-between" data-id="${st._id}" data-parent-id="${task._id}">
+                            <div class="flex items-center flex-grow">
+                                <input type="checkbox" ${st.completed ? "checked" : ""} class="subtask-checkbox h-4 w-4 rounded border-gray-300 text-blue-600 cursor-pointer">
+                                <span class="subtask-text-view ml-2 text-sm cursor-pointer ${subCompletedClass}">${st.text}</span>
+                            </div>
+                            <button class="delete-subtask-btn text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
                         </div>
                     `;
 				});
@@ -796,15 +909,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 <div class="flex items-start justify-between group">
                     <div class="flex items-start flex-grow">
                         <input type="checkbox" ${task.completed ? "checked" : ""} class="task-checkbox mt-1 mr-3 h-5 w-5 rounded border-gray-300 text-blue-600 cursor-pointer">
-                        <div>
+                        <div class="task-details-view w-full">
                             <p class="font-medium text-slate-700 dark:text-slate-200 ${completedClass}">${task.text}</p>
-                            <div class="flex items-center space-x-2 text-xs mt-1 ${completedClass}">
+                            <div class="flex flex-wrap items-center gap-x-2 text-xs mt-1 ${completedClass}">
                                 <span class="flex items-center font-semibold" style="color:${getColorForSubject(task.subject)};"><span class="w-2 h-2 rounded-full mr-1.5" style="background-color:${getColorForSubject(task.subject)};"></span>${task.subject}</span>
                                 <span class="dark:text-slate-400">•</span><span class="dark:text-slate-400">${task.time} mins</span><span class="dark:text-slate-400">•</span><span class="dark:text-slate-400">${new Date(task.deadline).toLocaleDateString()}</span>
                             </div>
                         </div>
                     </div>
-                    <button class="delete-task-btn opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 ml-2"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                    <div class="flex items-center">
+                         <button class="edit-task-btn opacity-0 group-hover:opacity-100 text-slate-400 hover:text-blue-500 mr-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                        <button class="delete-task-btn opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    </div>
                 </div>
                 ${progressBarHtml}
                 ${subtasksHtml}
@@ -816,6 +936,9 @@ document.addEventListener("DOMContentLoaded", function () {
 			fullTaskListEl.appendChild(el);
 		});
 	}
+
+	// REMOVED old inline-edit functions: enterEditMode, saveTaskChanges, enterSubtaskEditMode
+
 	function renderStudyLogs() {
 		studyLogContainer.innerHTML = "";
 		if (!Object.keys(studyLogs).length) {
@@ -893,6 +1016,91 @@ document.addEventListener("DOMContentLoaded", function () {
 			renderCalendar();
 			closeModal();
 		}
+	}
+
+	// --- NEW: Edit Task Modal Functions ---
+	function openEditModal(taskId) {
+		const task = tasks.find((t) => t._id === taskId);
+		if (!task) return;
+
+		editingTaskId = taskId;
+		editTaskText.value = task.text;
+		editTaskSubject.value = task.subject;
+		editTaskTime.value = task.time;
+		editTaskDeadline.value = new Date(task.deadline).toISOString().split("T")[0];
+
+		renderSubtasksInModal(taskId);
+
+		editTaskModal.classList.remove("hidden");
+	}
+
+	function closeEditModal() {
+		editingTaskId = null;
+		editTaskModal.classList.add("hidden");
+	}
+
+	async function saveTaskEdits() {
+		if (!editingTaskId) return;
+
+		// Fix: Capture the ID in a local variable before it's nulled by closeEditModal()
+		const taskIdToSave = editingTaskId;
+
+		const updates = {
+			text: editTaskText.value.trim(),
+			subject: editTaskSubject.value,
+			time: editTaskTime.value,
+			deadline: editTaskDeadline.value,
+		};
+
+		// Optimistic UI update
+		const taskIndex = tasks.findIndex((t) => t._id === taskIdToSave);
+		if (taskIndex > -1) {
+			// Important: Merge updates with existing subTasks to avoid deleting them
+			const existingSubTasks = tasks[taskIndex].subTasks || [];
+			tasks[taskIndex] = {...tasks[taskIndex], ...updates, subTasks: existingSubTasks};
+			renderTasksPage();
+		}
+
+		closeEditModal();
+
+		try {
+			// Use the locally saved ID for the fetch request
+			await fetch(`${API_URL}/api/study/tasks/${taskIdToSave}`, {
+				method: "PUT",
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify(updates),
+			});
+			// Reload tasks from server to get the final state
+			await loadTasks();
+		} catch (error) {
+			console.error("Failed to save task changes:", error);
+			// If save fails, reload tasks from server to revert the optimistic update
+			await loadTasks();
+		}
+	}
+
+	function renderSubtasksInModal(taskId) {
+		const task = tasks.find((t) => t._id === taskId);
+		editSubtaskList.innerHTML = "";
+		if (!task || !task.subTasks || task.subTasks.length === 0) {
+			editSubtaskList.innerHTML = '<p class="text-slate-400 text-sm text-center">No sub-tasks yet.</p>';
+			return;
+		}
+
+		task.subTasks.forEach((st) => {
+			const subtaskEl = document.createElement("div");
+			subtaskEl.className = "subtask-item-edit group flex items-center justify-between p-2 bg-slate-100 dark:bg-slate-700/50 rounded-lg";
+			subtaskEl.dataset.id = st._id;
+			const subCompletedClass = st.completed ? " line-through text-slate-500" : "dark:text-slate-300";
+
+			subtaskEl.innerHTML = `
+                <span class="subtask-text-edit text-sm cursor-pointer ${subCompletedClass}">${st.text}</span>
+                <button class="delete-subtask-btn-edit text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+            `;
+			editSubtaskList.appendChild(subtaskEl);
+		});
 	}
 
 	// --- App Start ---

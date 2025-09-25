@@ -85,6 +85,11 @@ document.addEventListener("DOMContentLoaded", function () {
 	let taskSort = "dueDate";
 	let editingTaskId = null; // NEW: To track which task is being edited
 
+	// EDITED: Replaced miniTimerWindow with variables for Picture-in-Picture
+	let pipVideoElement = null;
+	let pipCanvas = null;
+	let pipContext = null;
+
 	// --- Constants & Config ---
 	const API_URL = "https://wot-tau.vercel.app"; //http://localhost:3005
 	const subjectColors = {Malay: "#8B0000", Chinese: "#E63946", English: "#1D3557", Moral: "#6A4C93", History: "#D2691E", Geography: "#606C38", RBT: "#6C757D", PJK: "#9EF01A", Science: "#2D6A4F", Mathematics: "#00B4D8", Art: "#E6399B", Other: "#64748b"};
@@ -283,6 +288,9 @@ document.addEventListener("DOMContentLoaded", function () {
 			}
 		}
 	});
+
+  	document.addEventListener("visibilitychange", handleVisibilityChangeForPiP);
+
 
 	// --- Data Management (DB & Local) ---
 	async function loadDataFromDB() {
@@ -952,9 +960,13 @@ document.addEventListener("DOMContentLoaded", function () {
 			studyLogContainer.appendChild(el);
 		}
 	}
+
 	function updateTimerDisplay() {
 		timerDisplay.textContent = formatTime(timeLeft);
+		// EDITED: Call the new PiP update function instead of the old one
+		updatePiPTimer();
 	}
+
 	function playNotificationSound() {
 		const a = new (window.AudioContext || window.webkitAudioContext)();
 		const o = a.createOscillator();
@@ -964,6 +976,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		o.start();
 		setTimeout(() => o.stop(), 200);
 	}
+
 	function switchMode(mode) {
 		clearInterval(timerInterval);
 		timerInterval = null;
@@ -973,14 +986,28 @@ document.addEventListener("DOMContentLoaded", function () {
 		playPauseBtn.textContent = "Start";
 		timeLeft = (mode === "focus" ? focusDurationInput.value : breakDurationInput.value) * 60;
 		updateTimerDisplay();
+		// NEW: Ensure PiP window closes when switching modes
+		closePiPTimer();
 	}
+
 	function playPauseTimer() {
+		// EDITED: Added debug logs
+		console.log("[DEBUG] playPauseTimer called. Current isPaused state:", isPaused);
 		isPaused = !isPaused;
+		console.log("[DEBUG] isPaused state toggled to:", isPaused);
 		playPauseBtn.textContent = isPaused ? "Resume" : "Pause";
 		if (isPaused) {
+			console.log("[DEBUG] Timer is being paused. Clearing interval.");
 			clearInterval(timerInterval);
 			saveStudyLogs();
+			// NEW: Close PiP window when paused
+			closePiPTimer();
 		} else {
+			console.log("[DEBUG] Timer is starting/resuming.");
+			// NEW: Check if PiP should be opened when starting the timer
+			if (document.visibilityState === "hidden") {
+				handleVisibilityChangeForPiP();
+			}
 			timerInterval = setInterval(() => {
 				timeLeft--;
 				if (currentMode === "focus") {
@@ -997,6 +1024,7 @@ document.addEventListener("DOMContentLoaded", function () {
 					switchMode(currentMode === "focus" ? "break" : "focus");
 				}
 			}, 1000);
+			console.log("[DEBUG] Interval set with ID:", timerInterval);
 		}
 	}
 	function openModal(date) {
@@ -1101,6 +1129,95 @@ document.addEventListener("DOMContentLoaded", function () {
             `;
 			editSubtaskList.appendChild(subtaskEl);
 		});
+	}
+
+	// DELETED old mini-timer functions: handleVisibilityChange, openMiniTimer, updateMiniTimerDisplay
+
+	// --- NEW: Replaced all mini-timer functions with Picture-in-Picture logic ---
+
+	function handleVisibilityChangeForPiP() {
+		const timerIsActive = timerInterval && !isPaused;
+		// If the page is hidden and the timer is running, try to open PiP
+		if (document.visibilityState === "hidden" && timerIsActive) {
+			openPiPTimer();
+		}
+		// If the page is visible and there's a PiP window open, close it
+		else if (document.visibilityState === "visible") {
+			closePiPTimer();
+		}
+	}
+
+	async function openPiPTimer() {
+		// First, check if a PiP window is already open
+		if (document.pictureInPictureElement) {
+			return;
+		}
+
+		// Create canvas and video elements if they don't exist
+		if (!pipVideoElement) {
+			pipVideoElement = document.createElement("video");
+			pipVideoElement.autoplay = true;
+			pipVideoElement.muted = true; // Video must be muted to autoplay
+
+			pipCanvas = document.createElement("canvas");
+			pipCanvas.width = 400;
+			pipCanvas.height = 200;
+			pipContext = pipCanvas.getContext("2d");
+
+			pipVideoElement.srcObject = pipCanvas.captureStream();
+
+			// When user closes PiP manually, we ensure our state is clean
+			pipVideoElement.addEventListener("leavepictureinpicture", () => {
+				pipVideoElement.pause();
+			});
+		}
+
+		updatePiPTimer(); // Draw the initial state
+
+		try {
+			await pipVideoElement.play();
+			await pipVideoElement.requestPictureInPicture();
+		} catch (error) {
+			console.error("PiP Error:", error);
+		}
+	}
+
+	function updatePiPTimer() {
+		// Only draw if the canvas and context exist
+		if (!pipContext) return;
+
+		const isDarkMode = document.documentElement.classList.contains("dark");
+		const bgColor = isDarkMode ? "#1e293b" : "#f1f5f9";
+		const textColor = isDarkMode ? "#f1f5f9" : "#1e293b";
+		const modeColor = isDarkMode ? "#94a3b8" : "#64748b";
+
+		// Background
+		pipContext.fillStyle = bgColor;
+		pipContext.fillRect(0, 0, pipCanvas.width, pipCanvas.height);
+
+		// Mode Text (e.g., "Focus")
+		pipContext.fillStyle = modeColor;
+		pipContext.font = "24px 'Inter', sans-serif";
+		pipContext.textAlign = "center";
+		pipContext.fillText(currentMode.charAt(0).toUpperCase() + currentMode.slice(1), pipCanvas.width / 2, 60);
+
+		// Timer Text
+		pipContext.fillStyle = textColor;
+		pipContext.font = "bold 70px 'Inter', sans-serif";
+		pipContext.fillText(formatTime(timeLeft), pipCanvas.width / 2, 140);
+	}
+
+	async function closePiPTimer() {
+		if (document.pictureInPictureElement) {
+			try {
+				await document.exitPictureInPicture();
+			} catch (error) {
+				console.error("Error exiting PiP:", error);
+			}
+		}
+		if (pipVideoElement && !pipVideoElement.paused) {
+			pipVideoElement.pause();
+		}
 	}
 
 	// --- App Start ---

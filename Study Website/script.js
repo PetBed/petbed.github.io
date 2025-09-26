@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	let shuffledFlashcards = [];
 
 	// --- Constants & Config ---
-	const API_URL = "http://localhost:3005";
+	const API_URL = "https://wot-tau.vercel.app"; // local: http://localhost:3005
 	const subjectColors = {Malay: "#8B0000", Chinese: "#E63946", English: "#1D3557", Moral: "#6A4C93", History: "#D2691E", Geography: "#606C38", RBT: "#6C757D", PJK: "#9EF01A", Science: "#2D6A4F", Mathematics: "#00B4D8", Art: "#E6399B", Other: "#64748b"};
 	const RBT_ACCENT = "#FFD60A";
 	const exams = [

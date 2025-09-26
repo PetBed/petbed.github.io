@@ -1,4 +1,3 @@
-// EDITED: This global function is required by the YouTube Iframe Player API
 function onYouTubeIframeAPIReady() {
 	window.dispatchEvent(new Event("youtubeApiReady"));
 }
@@ -69,31 +68,26 @@ document.addEventListener("DOMContentLoaded", function () {
 	const editAddSubtaskBtn = document.getElementById("edit-add-subtask-btn");
 	const cancelEditTaskBtn = document.getElementById("cancel-edit-task-btn");
 	const saveEditTaskBtn = document.getElementById("save-edit-task-btn");
-	// EDITED: Added Sound Library DOM Elements
 	const youtubePlayerContainer = document.getElementById("youtube-player-container");
 	const soundLibraryList = document.getElementById("sound-library-list");
 	const addSoundForm = document.getElementById("add-sound-form");
 	const soundNameInput = document.getElementById("sound-name-input");
 	const soundUrlInput = document.getElementById("sound-url-input");
 	const soundErrorMessage = document.getElementById("sound-error-message");
-	// EDITED: Add new element for displaying API errors
 	const soundLibraryError = document.getElementById("sound-library-error");
-	// ADDED: Flashcard DOM Elements
 	const flashcardsPage = document.getElementById("flashcards-page");
 	const navFlashcards = document.getElementById("nav-flashcards");
-	// View 1: Sets List
 	const flashcardSetsView = document.getElementById("flashcard-sets-view");
 	const createSetBtn = document.getElementById("create-set-btn");
 	const flashcardSetsGrid = document.getElementById("flashcard-sets-grid");
-	// View 2: Single Set
 	const flashcardSingleSetView = document.getElementById("flashcard-single-set-view");
 	const backToSetsBtn = document.getElementById("back-to-sets-btn");
 	const singleSetName = document.getElementById("single-set-name");
 	const singleSetSubject = document.getElementById("single-set-subject");
 	const studySetBtn = document.getElementById("study-set-btn");
+	const shuffleStudyBtn = document.getElementById("shuffle-study-btn");
 	const addEditCardsBtn = document.getElementById("add-edit-cards-btn");
 	const singleSetCardsGrid = document.getElementById("single-set-cards-grid");
-	// View 3: Study Mode
 	const flashcardStudyView = document.getElementById("flashcard-study-view");
 	const studyBackBtn = document.getElementById("study-back-btn");
 	const flashcardFlipper = document.getElementById("flashcard-flipper");
@@ -102,7 +96,6 @@ document.addEventListener("DOMContentLoaded", function () {
 	const prevCardBtn = document.getElementById("prev-card-btn");
 	const nextCardBtn = document.getElementById("next-card-btn");
 	const cardCounter = document.getElementById("card-counter");
-	// Set Modal
 	const flashcardSetModal = document.getElementById("flashcard-set-modal");
 	const flashcardSetModalTitle = document.getElementById("flashcard-set-modal-title");
 	const flashcardSetForm = document.getElementById("flashcard-set-form");
@@ -110,7 +103,6 @@ document.addEventListener("DOMContentLoaded", function () {
 	const flashcardSetNameInput = document.getElementById("flashcard-set-name-input");
 	const flashcardSetSubjectInput = document.getElementById("flashcard-set-subject-input");
 	const cancelSetModalBtn = document.getElementById("cancel-set-modal-btn");
-	// Card Modal
 	const flashcardCardModal = document.getElementById("flashcard-card-modal");
 	const flashcardCardModalTitle = document.getElementById("flashcard-card-modal-title");
 	const flashcardCardForm = document.getElementById("flashcard-card-form");
@@ -143,16 +135,14 @@ document.addEventListener("DOMContentLoaded", function () {
 	let pipVideoElement = null;
 	let pipCanvas = null;
 	let pipContext = null;
-	// EDITED: Added state for Sound Library
 	let soundLibrary = [];
 	let ytPlayer = null;
 	let currentPlayingSoundId = null;
-	// EDITED: Add state to track if the YouTube API is ready and functional
 	let isYouTubeApiReady = false;
-	// ADDED: Flashcard State
 	let flashcardSets = [];
 	let currentFlashcardSet = null;
 	let currentCardIndex = 0;
+	let shuffledFlashcards = [];
 
 	// --- Constants & Config ---
 	const API_URL = "http://localhost:3005";
@@ -251,7 +241,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	navDashboard.addEventListener("click", () => showPage("dashboard"));
 	navStudy.addEventListener("click", () => showPage("study"));
 	navTasks.addEventListener("click", () => showPage("tasks"));
-  navFlashcards.addEventListener("click", () => showPage("flashcards"));
+	navFlashcards.addEventListener("click", () => showPage("flashcards"));
 
 	prevMonthBtn.addEventListener("click", () => {
 		currentDate.setMonth(currentDate.getMonth() - 1);
@@ -313,7 +303,6 @@ document.addEventListener("DOMContentLoaded", function () {
 		if (currentMode === "focus") {
 			saveStudyLogs();
 		}
-		// EDITED: Stop music on skip
 		if (ytPlayer && typeof ytPlayer.stopVideo === "function") {
 			ytPlayer.stopVideo();
 			youtubePlayerContainer.classList.add("hidden");
@@ -361,10 +350,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	});
 
 	document.addEventListener("visibilitychange", handleVisibilityChangeForPiP);
-	// EDITED: Added event listener for the sound library form
 	addSoundForm.addEventListener("submit", handleAddSound);
 
-	// EDITED: Set a timeout to check if the YouTube API loads, and listen for the ready event
 	const apiReadyTimeout = setTimeout(() => {
 		if (!isYouTubeApiReady) {
 			displaySoundLibraryError("The YouTube player API did not load in time. This may be due to network restrictions.");
@@ -382,9 +369,8 @@ document.addEventListener("DOMContentLoaded", function () {
 		await loadTasks();
 		await loadStudyLogs();
 		await loadStreak();
-		// EDITED: Load sound library data
 		await loadSoundLibrary();
-    await loadFlashcardSets();
+		await loadFlashcardSets();
 		checkStreak();
 	}
 
@@ -1067,7 +1053,6 @@ document.addEventListener("DOMContentLoaded", function () {
 		timeLeft = (mode === "focus" ? focusDurationInput.value : breakDurationInput.value) * 60;
 		updateTimerDisplay();
 		closePiPTimer();
-		// EDITED: Stop music on mode switch
 		if (ytPlayer && typeof ytPlayer.stopVideo === "function") {
 			ytPlayer.stopVideo();
 			youtubePlayerContainer.classList.add("hidden");
@@ -1083,7 +1068,6 @@ document.addEventListener("DOMContentLoaded", function () {
 			clearInterval(timerInterval);
 			saveStudyLogs();
 			closePiPTimer();
-			// EDITED: Pause music when timer is paused
 			if (ytPlayer && typeof ytPlayer.pauseVideo === "function" && currentPlayingSoundId) {
 				ytPlayer.pauseVideo();
 			}
@@ -1091,7 +1075,6 @@ document.addEventListener("DOMContentLoaded", function () {
 			if (document.visibilityState === "hidden") {
 				handleVisibilityChangeForPiP();
 			}
-			// EDITED: Play music when timer is started/resumed
 			if (ytPlayer && typeof ytPlayer.playVideo === "function" && currentPlayingSoundId) {
 				ytPlayer.playVideo();
 			}
@@ -1296,14 +1279,12 @@ document.addEventListener("DOMContentLoaded", function () {
 			renderSoundLibrary();
 		} catch (error) {
 			console.error("Error loading sound library:", error);
-			// EDITED: Display error if fetching fails
 			displaySoundLibraryError("Could not load your saved sounds from the database.", error);
 		}
 	}
 
 	// Render the list of sounds
 	function renderSoundLibrary() {
-		// EDITED: Don't render if the API isn't ready
 		if (!isYouTubeApiReady) return;
 		soundLibraryList.innerHTML = "";
 		if (soundLibrary.length === 0) {
@@ -1427,14 +1408,12 @@ document.addEventListener("DOMContentLoaded", function () {
 				},
 			});
 		} catch (error) {
-			// EDITED: Catch initialization errors and display them
 			displaySoundLibraryError("The YouTube player could not be initialized.", error);
 		}
 	}
 
 	// Handle playing a sound when the play button is clicked
 	function handlePlaySound(soundId, url) {
-		// EDITED: Check if player is available before trying to play
 		if (!ytPlayer) {
 			displaySoundLibraryError("YouTube player is not available.");
 			return;
@@ -1463,7 +1442,6 @@ document.addEventListener("DOMContentLoaded", function () {
 		return match && match[2].length === 11 ? match[2] : null;
 	}
 
-	// EDITED: New function to display errors in the sound library UI
 	function displaySoundLibraryError(userMessage, systemError = null) {
 		soundLibraryList.classList.add("hidden");
 		addSoundForm.classList.add("hidden");
@@ -1479,104 +1457,102 @@ document.addEventListener("DOMContentLoaded", function () {
 		soundLibraryError.innerHTML = errorMessage;
 	}
 
-  // ==========================================
-    // FLASHCARD API CALLS
-    // ==========================================
-    async function loadFlashcardSets() {
-        if (!currentUser) return;
-        try {
-            const response = await fetch(`${API_URL}/api/study/flashcard-sets?userId=${currentUser.id}`);
-            flashcardSets = await response.json();
-            renderFlashcardSets();
-        } catch (error) {
-            console.error("Failed to load flashcard sets:", error);
-        }
-    }
+	// ==========================================
+	// FLASHCARD API CALLS
+	// ==========================================
+	async function loadFlashcardSets() {
+		if (!currentUser) return;
+		try {
+			const response = await fetch(`${API_URL}/api/study/flashcard-sets?userId=${currentUser.id}`);
+			flashcardSets = await response.json();
+			renderFlashcardSets();
+		} catch (error) {
+			console.error("Failed to load flashcard sets:", error);
+		}
+	}
 
-    async function saveFlashcardSet(id, name, subject) {
-        const isEditing = !!id;
-        const url = isEditing ? `${API_URL}/api/study/flashcard-sets/${id}` : `${API_URL}/api/study/flashcard-sets`;
-        const method = isEditing ? 'PUT' : 'POST';
-        
-        try {
-            const response = await fetch(url, {
-                method: method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, subject, userId: currentUser.id })
-            });
-            if (!response.ok) throw new Error('Failed to save set');
-            await loadFlashcardSets();
-            closeSetModal();
-        } catch (error) {
-            console.error('Error saving flashcard set:', error);
-            // You might want to show an error message in the modal
-        }
-    }
-    
-    async function deleteFlashcardSet(setId) {
-        if (!confirm('Are you sure you want to delete this entire set? This action cannot be undone.')) return;
-        try {
-            await fetch(`${API_URL}/api/study/flashcard-sets/${setId}`, { method: 'DELETE' });
-            await loadFlashcardSets(); // Refresh the list view
-        } catch (error) {
-            console.error('Error deleting set:', error);
-        }
-    }
+	async function saveFlashcardSet(id, name, subject) {
+		const isEditing = !!id;
+		const url = isEditing ? `${API_URL}/api/study/flashcard-sets/${id}` : `${API_URL}/api/study/flashcard-sets`;
+		const method = isEditing ? "PUT" : "POST";
 
-    async function saveFlashcard(setId, cardId, front, back) {
-        const isEditing = !!cardId;
-        const url = isEditing 
-            ? `${API_URL}/api/study/flashcard-sets/${setId}/cards/${cardId}` 
-            : `${API_URL}/api/study/flashcard-sets/${setId}/cards`;
-        const method = isEditing ? 'PUT' : 'POST';
+		try {
+			const response = await fetch(url, {
+				method: method,
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify({name, subject, userId: currentUser.id}),
+			});
+			if (!response.ok) throw new Error("Failed to save set");
+			await loadFlashcardSets();
+			closeSetModal();
+		} catch (error) {
+			console.error("Error saving flashcard set:", error);
+			// You might want to show an error message in the modal
+		}
+	}
 
-        try {
-            const response = await fetch(url, {
-                method: method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ front, back })
-            });
-            if (!response.ok) throw new Error('Failed to save card');
-            currentFlashcardSet = await response.json(); // Update the current set with the response
-            const setIndex = flashcardSets.findIndex(set => set._id === setId);
-            if(setIndex !== -1) flashcardSets[setIndex] = currentFlashcardSet;
+	async function deleteFlashcardSet(setId) {
+		if (!confirm("Are you sure you want to delete this entire set? This action cannot be undone.")) return;
+		try {
+			await fetch(`${API_URL}/api/study/flashcard-sets/${setId}`, {method: "DELETE"});
+			await loadFlashcardSets(); // Refresh the list view
+		} catch (error) {
+			console.error("Error deleting set:", error);
+		}
+	}
 
-            renderSingleSetView(currentFlashcardSet); // Re-render the cards grid
-            closeCardModal();
-        } catch (error) {
-            console.error('Error saving card:', error);
-        }
-    }
-    
-    async function deleteFlashcard(setId, cardId) {
-         if (!confirm('Delete this card?')) return;
-         try {
-            const response = await fetch(`${API_URL}/api/study/flashcard-sets/${setId}/cards/${cardId}`, { method: 'DELETE' });
-             if (!response.ok) throw new Error('Failed to delete card');
-            currentFlashcardSet = await response.json();
-            const setIndex = flashcardSets.findIndex(set => set._id === setId);
-            if(setIndex !== -1) flashcardSets[setIndex] = currentFlashcardSet;
-            renderSingleSetView(currentFlashcardSet);
-         } catch(error) {
-             console.error('Error deleting card:', error);
-         }
-    }
-    
-    // ==========================================
-    // FLASHCARD RENDERING & LOGIC
-    // ==========================================
+	async function saveFlashcard(setId, cardId, front, back) {
+		const isEditing = !!cardId;
+		const url = isEditing ? `${API_URL}/api/study/flashcard-sets/${setId}/cards/${cardId}` : `${API_URL}/api/study/flashcard-sets/${setId}/cards`;
+		const method = isEditing ? "PUT" : "POST";
 
-    function renderFlashcardSets() {
-        flashcardSetsGrid.innerHTML = '';
-        if (flashcardSets.length === 0) {
-            flashcardSetsGrid.innerHTML = `<p class="text-slate-500 dark:text-slate-400 col-span-full text-center">You haven't created any flashcard sets yet. Click "Create New Set" to start!</p>`;
-            return;
-        }
-        flashcardSets.forEach(set => {
-            const el = document.createElement('div');
-            el.className = 'set-card group relative bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm cursor-pointer hover:shadow-lg transition-shadow';
-            el.dataset.setId = set._id;
-            el.innerHTML = `
+		try {
+			const response = await fetch(url, {
+				method: method,
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify({front, back}),
+			});
+			if (!response.ok) throw new Error("Failed to save card");
+			currentFlashcardSet = await response.json(); // Update the current set with the response
+			const setIndex = flashcardSets.findIndex((set) => set._id === setId);
+			if (setIndex !== -1) flashcardSets[setIndex] = currentFlashcardSet;
+
+			renderSingleSetView(currentFlashcardSet); // Re-render the cards grid
+			closeCardModal();
+		} catch (error) {
+			console.error("Error saving card:", error);
+		}
+	}
+
+	async function deleteFlashcard(setId, cardId) {
+		if (!confirm("Delete this card?")) return;
+		try {
+			const response = await fetch(`${API_URL}/api/study/flashcard-sets/${setId}/cards/${cardId}`, {method: "DELETE"});
+			if (!response.ok) throw new Error("Failed to delete card");
+			currentFlashcardSet = await response.json();
+			const setIndex = flashcardSets.findIndex((set) => set._id === setId);
+			if (setIndex !== -1) flashcardSets[setIndex] = currentFlashcardSet;
+			renderSingleSetView(currentFlashcardSet);
+		} catch (error) {
+			console.error("Error deleting card:", error);
+		}
+	}
+
+	// ==========================================
+	// FLASHCARD RENDERING & LOGIC
+	// ==========================================
+
+	function renderFlashcardSets() {
+		flashcardSetsGrid.innerHTML = "";
+		if (flashcardSets.length === 0) {
+			flashcardSetsGrid.innerHTML = `<p class="text-slate-500 dark:text-slate-400 col-span-full text-center">You haven't created any flashcard sets yet. Click "Create New Set" to start!</p>`;
+			return;
+		}
+		flashcardSets.forEach((set) => {
+			const el = document.createElement("div");
+			el.className = "set-card group relative bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm cursor-pointer hover:shadow-lg transition-shadow";
+			el.dataset.setId = set._id;
+			el.innerHTML = `
                 <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button data-action="edit" class="p-1.5 bg-slate-100 dark:bg-slate-700 rounded-md hover:bg-slate-200 dark:hover:bg-slate-600">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -1589,164 +1565,236 @@ document.addEventListener("DOMContentLoaded", function () {
                 <p class="text-sm text-slate-500 dark:text-slate-400" style="color:${getColorForSubject(set.subject)};">${set.subject}</p>
                 <p class="text-sm text-slate-400 dark:text-slate-500 mt-2">${set.flashcards.length} cards</p>
             `;
-            flashcardSetsGrid.appendChild(el);
-        });
-    }
+			flashcardSetsGrid.appendChild(el);
+		});
+	}
 
-    function renderSingleSetView(set) {
-        currentFlashcardSet = set;
-        singleSetName.textContent = set.name;
-        singleSetSubject.textContent = set.subject;
-        singleSetCardsGrid.innerHTML = '';
-        if (set.flashcards.length === 0) {
-            singleSetCardsGrid.innerHTML = `<p class="text-slate-500 dark:text-slate-400 col-span-full text-center">This set is empty. Click "Add/Edit Cards" to create your first flashcard.</p>`;
-        } else {
-            set.flashcards.forEach(card => {
-                const el = document.createElement('div');
-                el.className = 'relative bg-slate-100 dark:bg-slate-700 p-3 rounded-lg text-center';
-                el.innerHTML = `<p class="text-sm text-slate-700 dark:text-slate-200 truncate">${card.front}</p>`;
-                singleSetCardsGrid.appendChild(el);
-            });
-        }
-        showFlashcardView('single-set');
-    }
-    
-    function renderStudyView() {
-        if (!currentFlashcardSet || currentFlashcardSet.flashcards.length === 0) return;
-        
-        flashcardFlipper.classList.remove('is-flipped');
-        const card = currentFlashcardSet.flashcards[currentCardIndex];
-        flashcardFront.textContent = card.front;
-        flashcardBack.textContent = card.back;
-        cardCounter.textContent = `${currentCardIndex + 1} / ${currentFlashcardSet.flashcards.length}`;
-        
-        showFlashcardView('study');
-    }
+	function renderSingleSetView(set) {
+		currentFlashcardSet = set;
+		singleSetName.textContent = set.name;
+		singleSetSubject.textContent = set.subject;
+		singleSetCardsGrid.innerHTML = "";
 
-    function showFlashcardView(viewName) {
-        flashcardSetsView.classList.add('hidden');
-        flashcardSingleSetView.classList.add('hidden');
-        flashcardStudyView.classList.add('hidden');
+		if (set.flashcards.length === 0) {
+			singleSetCardsGrid.innerHTML = `<p class="text-slate-500 dark:text-slate-400 col-span-full text-center">This set is empty. Click "Add/Edit Cards" to create your first flashcard.</p>`;
+		} else {
+			set.flashcards.forEach((card) => {
+				const el = document.createElement("div");
+				// Use relative and group for hover-reveal buttons
+				el.className = "relative group perspective";
+				el.innerHTML = `
+                    <div class="card-preview-flipper" data-card-id="${card._id}">
+                        <div class="card-preview-face front">${card.front}</div>
+                        <div class="card-preview-face back">${card.back}</div>
+                    </div>
+                    <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                        <button data-action="edit-card" data-card-id="${card._id}" class="p-1.5 bg-slate-100 dark:bg-slate-800 rounded-md hover:bg-slate-200 dark:hover:bg-slate-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                        <button data-action="delete-card" data-card-id="${card._id}" class="p-1.5 bg-slate-100 dark:bg-slate-800 rounded-md hover:bg-red-200 dark:hover:bg-red-800/50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    </div>
+                `;
+				singleSetCardsGrid.appendChild(el);
+			});
+		}
+		showFlashcardView("single-set");
+	}
 
-        if (viewName === 'sets') flashcardSetsView.classList.remove('hidden');
-        else if (viewName === 'single-set') flashcardSingleSetView.classList.remove('hidden');
-        else if (viewName === 'study') flashcardStudyView.classList.remove('hidden');
-    }
+	function renderStudyView() {
+		const studyDeck = shuffledFlashcards.length > 0 ? shuffledFlashcards : currentFlashcardSet.flashcards;
 
-    // Modal Handlers
-    function openSetModal(set = null) {
-        flashcardSetForm.reset();
-        flashcardSetSubjectInput.innerHTML = '';
-        Object.keys(subjectColors).forEach(s => flashcardSetSubjectInput.add(new Option(s, s)));
-        
-        if (set) { // Editing existing set
-            flashcardSetModalTitle.textContent = 'Edit Flashcard Set';
-            editingSetIdInput.value = set._id;
-            flashcardSetNameInput.value = set.name;
-            flashcardSetSubjectInput.value = set.subject;
-        } else { // Creating new set
-            flashcardSetModalTitle.textContent = 'Create New Set';
-            editingSetIdInput.value = '';
-        }
-        flashcardSetModal.classList.remove('hidden');
-    }
-    function closeSetModal() {
-        flashcardSetModal.classList.add('hidden');
-    }
+		if (!currentFlashcardSet || studyDeck.length === 0) return;
 
-    function openCardModal(card = null) {
-        flashcardCardForm.reset();
-        cardPreviewFlipper.classList.remove('is-flipped');
-        updateCardPreview();
-        
-        if (card) { // Editing
-            flashcardCardModalTitle.textContent = 'Edit Card';
-            editingCardIdInput.value = card._id;
-            cardFrontInput.value = card.front;
-            cardBackInput.value = card.back;
-        } else { // Adding
-            flashcardCardModalTitle.textContent = 'Add New Card';
-            editingCardIdInput.value = '';
-        }
-        updateCardPreview();
-        flashcardCardModal.classList.remove('hidden');
-    }
-    function closeCardModal() {
-        flashcardCardModal.classList.add('hidden');
-    }
-    
-    function updateCardPreview() {
-        cardPreviewFront.textContent = cardFrontInput.value || 'Front of Card';
-        cardPreviewBack.textContent = cardBackInput.value || 'Back of Card';
-    }
+		flashcardFlipper.classList.remove("is-flipped");
+		const card = studyDeck[currentCardIndex];
+		flashcardFront.textContent = card.front;
+		flashcardBack.textContent = card.back;
+		cardCounter.textContent = `${currentCardIndex + 1} / ${studyDeck.length}`;
 
+		showFlashcardView("study");
+	}
 
-    // ADDED: Flashcard Event Listeners
-    createSetBtn.addEventListener('click', () => openSetModal());
-    cancelSetModalBtn.addEventListener('click', closeSetModal);
-    flashcardSetForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        saveFlashcardSet(editingSetIdInput.value, flashcardSetNameInput.value, flashcardSetSubjectInput.value);
-    });
+	function showFlashcardView(viewName) {
+		flashcardSetsView.classList.add("hidden");
+		flashcardSingleSetView.classList.add("hidden");
+		flashcardStudyView.classList.add("hidden");
 
-    flashcardSetsGrid.addEventListener('click', (e) => {
-        const card = e.target.closest('.set-card');
-        if (!card) return;
-        
-        const setId = card.dataset.setId;
-        const action = e.target.closest('button')?.dataset.action;
+		if (viewName !== "study") {
+			shuffledFlashcards = [];
+		}
 
-        if (action === 'edit') {
-            const setToEdit = flashcardSets.find(s => s._id === setId);
-            openSetModal(setToEdit);
-        } else if (action === 'delete') {
-            deleteFlashcardSet(setId);
-        } else {
-            // Clicked on the card itself, open the single set view
-            const setToView = flashcardSets.find(s => s._id === setId);
-            if (setToView) renderSingleSetView(setToView);
-        }
-    });
-    
-    backToSetsBtn.addEventListener('click', () => showFlashcardView('sets'));
-    studyBackBtn.addEventListener('click', () => showFlashcardView('single-set'));
+		if (viewName === "sets") flashcardSetsView.classList.remove("hidden");
+		else if (viewName === "single-set") flashcardSingleSetView.classList.remove("hidden");
+		else if (viewName === "study") flashcardStudyView.classList.remove("hidden");
+	}
 
-    addEditCardsBtn.addEventListener('click', () => openCardModal());
-    cancelCardModalBtn.addEventListener('click', closeCardModal);
-    flashcardCardForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        saveFlashcard(currentFlashcardSet._id, editingCardIdInput.value, cardFrontInput.value, cardBackInput.value);
-    });
-    
-    // Listeners for live preview in card modal
-    cardFrontInput.addEventListener('input', updateCardPreview);
-    cardBackInput.addEventListener('input', updateCardPreview);
-    cardPreviewFlipper.addEventListener('click', () => cardPreviewFlipper.classList.toggle('is-flipped'));
+	// Modal Handlers
+	function openSetModal(set = null) {
+		flashcardSetForm.reset();
+		flashcardSetSubjectInput.innerHTML = "";
+		Object.keys(subjectColors).forEach((s) => flashcardSetSubjectInput.add(new Option(s, s)));
 
-    // Study mode listeners
-    studySetBtn.addEventListener('click', () => {
-        if(currentFlashcardSet.flashcards.length > 0) {
-            currentCardIndex = 0;
-            renderStudyView();
-        } else {
-            alert("This set has no cards to study. Add some cards first!");
-        }
-    });
+		if (set) {
+			// Editing existing set
+			flashcardSetModalTitle.textContent = "Edit Flashcard Set";
+			editingSetIdInput.value = set._id;
+			flashcardSetNameInput.value = set.name;
+			flashcardSetSubjectInput.value = set.subject;
+		} else {
+			// Creating new set
+			flashcardSetModalTitle.textContent = "Create New Set";
+			editingSetIdInput.value = "";
+		}
+		flashcardSetModal.classList.remove("hidden");
+	}
+	function closeSetModal() {
+		flashcardSetModal.classList.add("hidden");
+	}
 
-    flashcardFlipper.addEventListener('click', () => flashcardFlipper.classList.toggle('is-flipped'));
-    
-    nextCardBtn.addEventListener('click', () => {
-        if (currentCardIndex < currentFlashcardSet.flashcards.length - 1) {
-            currentCardIndex++;
-            renderStudyView();
-        }
-    });
-    prevCardBtn.addEventListener('click', () => {
-        if (currentCardIndex > 0) {
-            currentCardIndex--;
-            renderStudyView();
-        }
-    });
+	function openCardModal(card = null) {
+		flashcardCardForm.reset();
+		cardPreviewFlipper.classList.remove("is-flipped");
+		updateCardPreview();
+
+		if (card) {
+			// Editing
+			flashcardCardModalTitle.textContent = "Edit Card";
+			editingCardIdInput.value = card._id;
+			cardFrontInput.value = card.front;
+			cardBackInput.value = card.back;
+		} else {
+			// Adding
+			flashcardCardModalTitle.textContent = "Add New Card";
+			editingCardIdInput.value = "";
+		}
+		updateCardPreview();
+		flashcardCardModal.classList.remove("hidden");
+	}
+	function closeCardModal() {
+		flashcardCardModal.classList.add("hidden");
+	}
+
+	function updateCardPreview() {
+		cardPreviewFront.textContent = cardFrontInput.value || "Front of Card";
+		cardPreviewBack.textContent = cardBackInput.value || "Back of Card";
+	}
+
+	function startStudySession(shuffle = false) {
+		if (!currentFlashcardSet || currentFlashcardSet.flashcards.length === 0) {
+			alert("This set has no cards to study. Add some cards first!");
+			return;
+		}
+
+		if (shuffle) {
+			// Fisher-Yates shuffle algorithm
+			const array = [...currentFlashcardSet.flashcards];
+			for (let i = array.length - 1; i > 0; i--) {
+				const j = Math.floor(Math.random() * (i + 1));
+				[array[i], array[j]] = [array[j], array[i]];
+			}
+			shuffledFlashcards = array;
+		} else {
+			shuffledFlashcards = []; // Ensure we use the default order
+		}
+
+		currentCardIndex = 0;
+		renderStudyView();
+	}
+
+	createSetBtn.addEventListener("click", () => openSetModal());
+	cancelSetModalBtn.addEventListener("click", closeSetModal);
+	flashcardSetForm.addEventListener("submit", (e) => {
+		e.preventDefault();
+		saveFlashcardSet(editingSetIdInput.value, flashcardSetNameInput.value, flashcardSetSubjectInput.value);
+	});
+
+	flashcardSetsGrid.addEventListener("click", (e) => {
+		const card = e.target.closest(".set-card");
+		if (!card) return;
+
+		const setId = card.dataset.setId;
+		const action = e.target.closest("button")?.dataset.action;
+
+		if (action === "edit") {
+			const setToEdit = flashcardSets.find((s) => s._id === setId);
+			openSetModal(setToEdit);
+		} else if (action === "delete") {
+			deleteFlashcardSet(setId);
+		} else {
+			// Clicked on the card itself, open the single set view
+			const setToView = flashcardSets.find((s) => s._id === setId);
+			if (setToView) renderSingleSetView(setToView);
+		}
+	});
+
+	singleSetCardsGrid.addEventListener("click", (e) => {
+		const flipper = e.target.closest(".card-preview-flipper");
+		const editBtn = e.target.closest('[data-action="edit-card"]');
+		const deleteBtn = e.target.closest('[data-action="delete-card"]');
+
+		if (editBtn) {
+			const cardId = editBtn.dataset.cardId;
+			const cardToEdit = currentFlashcardSet.flashcards.find((c) => c._id === cardId);
+			if (cardToEdit) openCardModal(cardToEdit);
+		} else if (deleteBtn) {
+			const cardId = deleteBtn.dataset.cardId;
+			deleteFlashcard(currentFlashcardSet._id, cardId);
+		} else if (flipper) {
+			// Only flip the card if not clicking on a button inside it
+			flipper.classList.toggle("is-flipped");
+		}
+	});
+
+	backToSetsBtn.addEventListener("click", () => showFlashcardView("sets"));
+	studyBackBtn.addEventListener("click", () => showFlashcardView("single-set"));
+
+	addEditCardsBtn.addEventListener("click", () => openCardModal());
+	cancelCardModalBtn.addEventListener("click", closeCardModal);
+	flashcardCardForm.addEventListener("submit", (e) => {
+		e.preventDefault();
+		saveFlashcard(currentFlashcardSet._id, editingCardIdInput.value, cardFrontInput.value, cardBackInput.value);
+	});
+
+	// Listeners for live preview in card modal
+	cardFrontInput.addEventListener("input", updateCardPreview);
+	cardBackInput.addEventListener("input", updateCardPreview);
+	cardPreviewFlipper.addEventListener("click", () => cardPreviewFlipper.classList.toggle("is-flipped"));
+
+	// Study mode listeners
+	studySetBtn.addEventListener("click", () => startStudySession(false)); // Study in order
+	shuffleStudyBtn.addEventListener("click", () => startStudySession(true)); // Study shuffled
+
+	flashcardFlipper.addEventListener("click", () => flashcardFlipper.classList.toggle("is-flipped"));
+
+	nextCardBtn.addEventListener("click", () => {
+		const studyDeck = shuffledFlashcards.length > 0 ? shuffledFlashcards : currentFlashcardSet.flashcards;
+		if (currentFlashcardSet && currentCardIndex < studyDeck.length - 1) {
+			flashcardFlipper.style.transition = "none";
+			flashcardFlipper.classList.remove("is-flipped");
+
+			currentCardIndex++;
+			renderStudyView();
+
+			flashcardFlipper.offsetHeight;
+
+			flashcardFlipper.style.transition = "transform 0.6s";
+		}
+	});
+	prevCardBtn.addEventListener("click", () => {
+		if (currentFlashcardSet && currentCardIndex > 0) {
+			flashcardFlipper.style.transition = "none";
+			flashcardFlipper.classList.remove("is-flipped");
+
+			currentCardIndex--;
+			renderStudyView();
+
+			flashcardFlipper.offsetHeight;
+
+			flashcardFlipper.style.transition = "transform 0.6s";
+		}
+	});
 
 	// --- App Start ---
 	checkAuthAndInitialize();

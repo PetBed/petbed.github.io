@@ -81,3 +81,55 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     transition: all .2s ease-in-out;
 }
 
+/* ADDED: Styles for the flashcard feature */
+.perspective {
+    perspective: 1000px;
+}
+
+#flashcard-flipper, #card-preview-flipper {
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    cursor: pointer;
+}
+
+.flashcard-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden; /* Safari */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    border-radius: 1rem;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#flashcard-front, #card-preview-front {
+    background-color: white;
+    color: #1e293b;
+}
+
+.dark #flashcard-front, .dark #card-preview-front {
+    background-color: #334155; /* slate-700 */
+    color: #f1f5f9; /* slate-100 */
+}
+
+#flashcard-back, #card-preview-back {
+    background-color: #e2e8f0; /* slate-200 */
+    color: #1e293b;
+    transform: rotateY(180deg);
+}
+
+.dark #flashcard-back, .dark #card-preview-back {
+    background-color: #1e293b; /* slate-800 */
+    color: #f1f5f9; /* slate-100 */
+}
+
+#flashcard-flipper.is-flipped, #card-preview-flipper.is-flipped {
+    transform: rotateY(180deg);
+}
+

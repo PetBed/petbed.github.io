@@ -76,6 +76,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	const soundNameInput = document.getElementById("sound-name-input");
 	const soundUrlInput = document.getElementById("sound-url-input");
 	const soundErrorMessage = document.getElementById("sound-error-message");
+	// EDITED: Add new element for displaying API errors
+	const soundLibraryError = document.getElementById("sound-library-error");
 
 	// --- State ---
 	let studyChart = null;
@@ -102,6 +104,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	let soundLibrary = [];
 	let ytPlayer = null;
 	let currentPlayingSoundId = null;
+	// EDITED: Add state to track if the YouTube API is ready and functional
+	let isYouTubeApiReady = false;
 
 	// --- Constants & Config ---
 	const API_URL = "https://wot-tau.vercel.app"; //http://localhost:3005
@@ -310,8 +314,19 @@ document.addEventListener("DOMContentLoaded", function () {
 	document.addEventListener("visibilitychange", handleVisibilityChangeForPiP);
 	// EDITED: Added event listener for the sound library form
 	addSoundForm.addEventListener("submit", handleAddSound);
-	// EDITED: Listen for custom event that signals the YouTube API is ready
-	window.addEventListener("youtubeApiReady", initializeYoutubePlayer);
+
+	// EDITED: Set a timeout to check if the YouTube API loads, and listen for the ready event
+	const apiReadyTimeout = setTimeout(() => {
+		if (!isYouTubeApiReady) {
+			displaySoundLibraryError("The YouTube player API did not load in time. This may be due to network restrictions.");
+		}
+	}, 5000); // 5-second timeout
+
+	window.addEventListener("youtubeApiReady", () => {
+		clearTimeout(apiReadyTimeout); // Clear the timeout if the API loads successfully
+		isYouTubeApiReady = true;
+		initializeYoutubePlayer();
+	});
 
 	// --- Data Management (DB & Local) ---
 	async function loadDataFromDB() {
@@ -1231,11 +1246,15 @@ document.addEventListener("DOMContentLoaded", function () {
 			renderSoundLibrary();
 		} catch (error) {
 			console.error("Error loading sound library:", error);
+			// EDITED: Display error if fetching fails
+			displaySoundLibraryError("Could not load your saved sounds from the database.", error);
 		}
 	}
 
 	// Render the list of sounds
 	function renderSoundLibrary() {
+		// EDITED: Don't render if the API isn't ready
+		if (!isYouTubeApiReady) return;
 		soundLibraryList.innerHTML = "";
 		if (soundLibrary.length === 0) {
 			soundLibraryList.innerHTML = `<p class="text-slate-400 text-center text-sm py-2">Your sound library is empty.</p>`;
@@ -1345,21 +1364,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	// Initialize the YouTube player
 	function initializeYoutubePlayer() {
-		if (ytPlayer) return;
-		ytPlayer = new YT.Player("youtube-player", {
-			height: "195",
-			width: "348",
-			playerVars: {
-				playsinline: 1,
-				controls: 0, // Hide controls for a cleaner look
-				modestbranding: 1,
-				loop: 1, // Loop the video
-			},
-		});
+		if (ytPlayer || !isYouTubeApiReady) return;
+		try {
+			ytPlayer = new YT.Player("youtube-player", {
+				height: "195",
+				width: "348",
+				playerVars: {
+					playsinline: 1,
+					controls: 0, // Hide controls for a cleaner look
+					modestbranding: 1,
+					loop: 1, // Loop the video
+				},
+			});
+		} catch (error) {
+			// EDITED: Catch initialization errors and display them
+			displaySoundLibraryError("The YouTube player could not be initialized.", error);
+		}
 	}
 
 	// Handle playing a sound when the play button is clicked
 	function handlePlaySound(soundId, url) {
+		// EDITED: Check if player is available before trying to play
+		if (!ytPlayer) {
+			displaySoundLibraryError("YouTube player is not available.");
+			return;
+		}
+
 		const videoId = parseYoutubeUrl(url);
 		if (!videoId) {
 			alert("Invalid YouTube URL provided.");
@@ -1370,7 +1400,6 @@ document.addEventListener("DOMContentLoaded", function () {
 		youtubePlayerContainer.classList.remove("hidden");
 		ytPlayer.loadVideoById(videoId);
 
-		// If timer is already running, play video. Otherwise, it will start when timer starts.
 		if (!isPaused) {
 			ytPlayer.playVideo();
 		}
@@ -1382,6 +1411,22 @@ document.addEventListener("DOMContentLoaded", function () {
 		const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
 		const match = url.match(regExp);
 		return match && match[2].length === 11 ? match[2] : null;
+	}
+
+	// EDITED: New function to display errors in the sound library UI
+	function displaySoundLibraryError(userMessage, systemError = null) {
+		soundLibraryList.classList.add("hidden");
+		addSoundForm.classList.add("hidden");
+		soundLibraryError.classList.remove("hidden");
+
+		let errorMessage = `<p class="font-semibold text-red-800 dark:text-red-300">Sound Library Unavailable</p>
+                            <p class="text-sm text-red-700 dark:text-red-400 mt-1">${userMessage}</p>`;
+
+		if (systemError) {
+			errorMessage += `<p class="text-xs text-red-600 dark:text-red-500 mt-2 font-mono">Details: ${systemError.message || systemError}</p>`;
+		}
+
+		soundLibraryError.innerHTML = errorMessage;
 	}
 
 	// --- App Start ---

@@ -154,10 +154,14 @@
             </div>
           </div>
         </div>
-        <!-- EDITED: Added Sound Library Section -->
         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
           <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">Sound Library</h3>
           <div class="space-y-4">
+            <!-- EDITED: Add a container for the error message -->
+            <div id="sound-library-error"
+              class="hidden p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400 rounded">
+              <!-- Error message will be injected here by JS -->
+            </div>
             <div id="youtube-player-container" class="hidden rounded-lg overflow-hidden">
               <div id="youtube-player"></div>
             </div>

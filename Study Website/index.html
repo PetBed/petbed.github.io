@@ -154,6 +154,27 @@
             </div>
           </div>
         </div>
+        <!-- EDITED: Added Sound Library Section -->
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+          <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">Sound Library</h3>
+          <div class="space-y-4">
+            <div id="youtube-player-container" class="hidden rounded-lg overflow-hidden">
+              <div id="youtube-player"></div>
+            </div>
+            <div id="sound-library-list" class="space-y-2 max-h-48 overflow-y-auto pr-2">
+              <!-- Sound items will be injected here by JS -->
+            </div>
+            <form id="add-sound-form" class="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+              <input type="text" id="sound-name-input" placeholder="Name (e.g., Lofi Beats)" required
+                class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700">
+              <input type="url" id="sound-url-input" placeholder="YouTube Video URL" required
+                class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700">
+              <button type="submit" id="add-sound-btn"
+                class="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg text-sm">Add Sound</button>
+              <p id="sound-error-message" class="text-red-500 text-xs text-center h-4"></p>
+            </form>
+          </div>
+        </div>
       </div>
     </main>
 
@@ -344,6 +365,8 @@
     </div>
   </div>
 
+  <!-- EDITED: Added YouTube Player API Script -->
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script src="script.js" defer></script>
 </body>
 

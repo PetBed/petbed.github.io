@@ -681,7 +681,6 @@ document.addEventListener("DOMContentLoaded", function () {
 			}
 		} catch (error) {
 			console.error("Failed to update sub-task:", error);
-			// Optional: add logic to revert optimistic update on failure
 		}
 	}
 
@@ -1096,30 +1095,22 @@ document.addEventListener("DOMContentLoaded", function () {
 			time: editTaskTime.value,
 			deadline: editTaskDeadline.value,
 		};
-
-		// Optimistic UI update
 		const taskIndex = tasks.findIndex((t) => t._id === taskIdToSave);
 		if (taskIndex > -1) {
-			// Important: Merge updates with existing subTasks to avoid deleting them
 			const existingSubTasks = tasks[taskIndex].subTasks || [];
 			tasks[taskIndex] = {...tasks[taskIndex], ...updates, subTasks: existingSubTasks};
 			renderTasksPage();
 		}
-
 		closeEditModal();
-
 		try {
-			// Use the locally saved ID for the fetch request
 			await fetch(`${API_URL}/api/study/tasks/${taskIdToSave}`, {
 				method: "PUT",
 				headers: {"Content-Type": "application/json"},
 				body: JSON.stringify(updates),
 			});
-			// Reload tasks from server to get the final state
 			await loadTasks();
 		} catch (error) {
 			console.error("Failed to save task changes:", error);
-			// If save fails, reload tasks from server to revert the optimistic update
 			await loadTasks();
 		}
 	}
@@ -1189,18 +1180,12 @@ document.addEventListener("DOMContentLoaded", function () {
 		const bgColor = isDarkMode ? "#1e293b" : "#f1f5f9";
 		const textColor = isDarkMode ? "#f1f5f9" : "#1e293b";
 		const modeColor = isDarkMode ? "#94a3b8" : "#64748b";
-
-		// Background
 		pipContext.fillStyle = bgColor;
 		pipContext.fillRect(0, 0, pipCanvas.width, pipCanvas.height);
-
-		// Mode Text (e.g., "Focus")
 		pipContext.fillStyle = modeColor;
 		pipContext.font = "24px 'Inter', sans-serif";
 		pipContext.textAlign = "center";
 		pipContext.fillText(currentMode.charAt(0).toUpperCase() + currentMode.slice(1), pipCanvas.width / 2, 60);
-
-		// Timer Text
 		pipContext.fillStyle = textColor;
 		pipContext.font = "bold 70px 'Inter', sans-serif";
 		pipContext.fillText(formatTime(timeLeft), pipCanvas.width / 2, 140);

@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		return `${hours > 0 ? `${hours}h ` : ""}${minutes > 0 ? `${minutes}m ` : ""}${seconds}s`;
 	};
 
-  function parseMarkdown(text) {
+	function parseMarkdown(text) {
 		// Configure marked to add breaks for newlines (like GitHub Flavored Markdown)
 		marked.setOptions({
 			breaks: true,
@@ -1652,7 +1652,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	}
 
-  async function saveCardOrder(setId, orderedIds) {
+	async function saveCardOrder(setId, orderedIds) {
 		const originalOrder = [...currentFlashcardSet.flashcards]; // Backup current order
 		try {
 			const response = await fetch(`${API_URL}/api/study/flashcard-sets/${setId}/reorder-cards`, {
@@ -1935,11 +1935,48 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	});
 
-  singleSetCardsGrid.addEventListener("dragstart", (e) => {
+	// Helper function to determine where to place the dragged item based on cursor position.
+	function handleDragPlacement(clientX, clientY) {
+		const currentlyDragged = document.querySelector(".is-dragging");
+		if (!currentlyDragged) return;
+
+		if (draggedGhost) draggedGhost.style.display = "none";
+		const overElement = document.elementFromPoint(clientX, clientY)?.closest(".flashcard-preview-container:not(.is-dragging)");
+		if (draggedGhost) draggedGhost.style.display = "";
+
+		if (overElement) {
+			const box = overElement.getBoundingClientRect();
+			const isVerticalLayout = window.innerWidth < 768;
+			const isAfter = isVerticalLayout ? clientY > box.top + box.height / 2 : clientX > box.left + box.width / 2;
+
+			if (isAfter) {
+				singleSetCardsGrid.insertBefore(currentlyDragged, overElement.nextSibling);
+			} else {
+				singleSetCardsGrid.insertBefore(currentlyDragged, overElement);
+			}
+		}
+	}
+
+	// Helper function to finalize the drop, update the data, and save the new order.
+	function finalizeDrop() {
+		if (!draggedItem) return;
+
+		const newOrderedCards = [...singleSetCardsGrid.querySelectorAll(".flashcard-preview-container")].map((el) => {
+			const cardId = el.dataset.cardId;
+			return currentFlashcardSet.flashcards.find((c) => c._id === cardId);
+		});
+		currentFlashcardSet.flashcards = newOrderedCards;
+
+		const orderedIds = newOrderedCards.map((c) => c._id);
+		saveCardOrder(currentFlashcardSet._id, orderedIds);
+		renderSingleSetView(currentFlashcardSet);
+	}
+
+	// --- Desktop Mouse Drag Events ---
+	singleSetCardsGrid.addEventListener("dragstart", (e) => {
 		const draggableTarget = e.target.closest(".flashcard-preview-container");
 		if (draggableTarget) {
 			draggedItem = draggableTarget;
-			// A brief timeout allows the browser to render the drag image before we apply styling.
 			setTimeout(() => {
 				if (draggedItem) draggedItem.classList.add("is-dragging");
 			}, 0);
@@ -1948,50 +1985,83 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	});
 
-	// This listener determines where the dragged card should be placed.
 	singleSetCardsGrid.addEventListener("dragover", (e) => {
 		e.preventDefault();
 		if (!draggedItem) return;
-
-		// Find the card being hovered over, ignoring the one being dragged.
-		const overElement = e.target.closest(".flashcard-preview-container:not(.is-dragging)");
-
-		// If we are not hovering over a valid drop target, do nothing. This prevents errors in gaps.
-		if (overElement === null) return;
-
-		const box = overElement.getBoundingClientRect();
-		// Determine if the cursor is in the left or right half of the target card.
-		const isAfter = e.clientX > box.left + box.width / 2;
-
-		if (isAfter) {
-			// Insert the dragged item after the target card.
-			singleSetCardsGrid.insertBefore(draggedItem, overElement.nextSibling);
-		} else {
-			// Insert the dragged item before the target card.
-			singleSetCardsGrid.insertBefore(draggedItem, overElement);
-		}
+		handleDragPlacement(e.clientX, e.clientY);
 	});
 
-	// This listener finalizes the drop and saves the new order.
 	singleSetCardsGrid.addEventListener("drop", (e) => {
 		e.preventDefault();
 		if (draggedItem) {
 			draggedItem.classList.remove("is-dragging");
-
-			// Update the local data array to match the new DOM order.
-			const newOrderedCards = [...singleSetCardsGrid.querySelectorAll(".flashcard-preview-container")].map((el) => {
-				const cardId = el.dataset.cardId;
-				return currentFlashcardSet.flashcards.find((c) => c._id === cardId);
-			});
-			currentFlashcardSet.flashcards = newOrderedCards;
-
-			// Save the new order to the backend.
-			const orderedIds = newOrderedCards.map((c) => c._id);
-			saveCardOrder(currentFlashcardSet._id, orderedIds);
-
-			// Re-render to correctly update the data-index attributes for the next drag operation.
-			renderSingleSetView(currentFlashcardSet);
+			finalizeDrop();
 			draggedItem = null;
+		}
+	});
+
+	// --- Mobile Touch Drag Events ---
+	singleSetCardsGrid.addEventListener(
+		"touchstart",
+		(e) => {
+			const handle = e.target.closest(".drag-handle");
+			if (handle) {
+				// EDITED: Immediately prevent default to stop the page from scrolling. This is the key fix.
+				e.preventDefault();
+
+				isTouchDragging = true;
+				draggedItem = handle.closest(".flashcard-preview-container");
+				draggedItem.classList.add("is-dragging");
+
+				// Create and position the ghost element right away for immediate feedback
+				draggedGhost = draggedItem.cloneNode(true);
+				draggedGhost.classList.add("drag-ghost");
+				document.body.appendChild(draggedGhost);
+
+				const touch = e.touches[0];
+				// Position the ghost to be centered on the touch point
+				draggedGhost.style.left = `${touch.clientX - draggedGhost.offsetWidth / 2}px`;
+				draggedGhost.style.top = `${touch.clientY - draggedGhost.offsetHeight / 2}px`;
+			}
+		},
+		{passive: false}
+	); // EDITED: Added { passive: false } to allow preventDefault to work reliably.
+
+	document.addEventListener(
+		"touchmove",
+		(e) => {
+			if (isTouchDragging && draggedItem) {
+				// Prevent scrolling while dragging
+				e.preventDefault();
+
+				const touch = e.touches[0];
+
+				// Move the ghost element
+				if (draggedGhost) {
+					draggedGhost.style.left = `${touch.clientX - draggedGhost.offsetWidth / 2}px`;
+					draggedGhost.style.top = `${touch.clientY - draggedGhost.offsetHeight / 2}px`;
+				}
+
+				// Determine drop position in real-time
+				handleDragPlacement(touch.clientX, touch.clientY);
+			}
+		},
+		{passive: false}
+	); // EDITED: Added { passive: false } here as well.
+
+	document.addEventListener("touchend", (e) => {
+		if (isTouchDragging && draggedItem) {
+			if (draggedGhost) {
+				document.body.removeChild(draggedGhost);
+			}
+			draggedItem.classList.remove("is-dragging");
+
+			finalizeDrop(); // Finalize and save the new order
+
+			// Reset all state
+			draggedGhost = null;
+			draggedItem = null;
+			isTouchDragging = false;
 		}
 	});
 

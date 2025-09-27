@@ -301,6 +301,7 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     pointer-events: none; /* Make it non-interactive so events go to elements underneath */
     z-index: 9999;
     opacity: 0.7;
-    transform: scale(0.95) rotate(4deg); /* A slight tilt and shrink effect */
+    /* transform: scale(0.95) rotate(4deg); A slight tilt and shrink effect */
     box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    width: 200px; /* Fixed width for the ghost */
 }

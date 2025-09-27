@@ -1940,9 +1940,14 @@ document.addEventListener("DOMContentLoaded", function () {
 		const currentlyDragged = document.querySelector(".is-dragging");
 		if (!currentlyDragged) return;
 
-		if (draggedGhost) draggedGhost.style.display = "none";
+		// Only hide/show the ghost if it exists (for mobile touch events)
+		if (draggedGhost) {
+			draggedGhost.style.display = "none";
+		}
 		const overElement = document.elementFromPoint(clientX, clientY)?.closest(".flashcard-preview-container:not(.is-dragging)");
-		if (draggedGhost) draggedGhost.style.display = "";
+		if (draggedGhost) {
+			draggedGhost.style.display = "";
+		}
 
 		if (overElement) {
 			const box = overElement.getBoundingClientRect();
@@ -1957,7 +1962,6 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	}
 
-	// Helper function to finalize the drop, update the data, and save the new order.
 	function finalizeDrop() {
 		if (!draggedItem) return;
 
@@ -1977,8 +1981,15 @@ document.addEventListener("DOMContentLoaded", function () {
 		const draggableTarget = e.target.closest(".flashcard-preview-container");
 		if (draggableTarget) {
 			draggedItem = draggableTarget;
+			// This timeout is crucial for the browser to correctly render the drag preview.
 			setTimeout(() => {
-				if (draggedItem) draggedItem.classList.add("is-dragging");
+				if (draggedItem) {
+					draggedItem.classList.add("is-dragging");
+
+          draggedGhost = draggedItem.cloneNode(true);
+					draggedGhost.classList.add("drag-ghost");
+					document.body.appendChild(draggedGhost);
+				}
 			}, 0);
 		} else {
 			e.preventDefault();
@@ -1994,8 +2005,15 @@ document.addEventListener("DOMContentLoaded", function () {
 	singleSetCardsGrid.addEventListener("drop", (e) => {
 		e.preventDefault();
 		if (draggedItem) {
-			draggedItem.classList.remove("is-dragging");
+			// The dragend listener will handle cleanup
 			finalizeDrop();
+		}
+	});
+
+	singleSetCardsGrid.addEventListener("dragend", (e) => {
+		// This ensures cleanup happens regardless of where the drop occurs.
+		if (draggedItem) {
+			draggedItem.classList.remove("is-dragging");
 			draggedItem = null;
 		}
 	});
@@ -2006,48 +2024,38 @@ document.addEventListener("DOMContentLoaded", function () {
 		(e) => {
 			const handle = e.target.closest(".drag-handle");
 			if (handle) {
-				// EDITED: Immediately prevent default to stop the page from scrolling. This is the key fix.
 				e.preventDefault();
-
 				isTouchDragging = true;
 				draggedItem = handle.closest(".flashcard-preview-container");
 				draggedItem.classList.add("is-dragging");
 
-				// Create and position the ghost element right away for immediate feedback
 				draggedGhost = draggedItem.cloneNode(true);
 				draggedGhost.classList.add("drag-ghost");
 				document.body.appendChild(draggedGhost);
 
 				const touch = e.touches[0];
-				// Position the ghost to be centered on the touch point
 				draggedGhost.style.left = `${touch.clientX - draggedGhost.offsetWidth / 2}px`;
 				draggedGhost.style.top = `${touch.clientY - draggedGhost.offsetHeight / 2}px`;
 			}
 		},
 		{passive: false}
-	); // EDITED: Added { passive: false } to allow preventDefault to work reliably.
+	);
 
 	document.addEventListener(
 		"touchmove",
 		(e) => {
 			if (isTouchDragging && draggedItem) {
-				// Prevent scrolling while dragging
 				e.preventDefault();
-
 				const touch = e.touches[0];
-
-				// Move the ghost element
 				if (draggedGhost) {
 					draggedGhost.style.left = `${touch.clientX - draggedGhost.offsetWidth / 2}px`;
 					draggedGhost.style.top = `${touch.clientY - draggedGhost.offsetHeight / 2}px`;
 				}
-
-				// Determine drop position in real-time
 				handleDragPlacement(touch.clientX, touch.clientY);
 			}
 		},
 		{passive: false}
-	); // EDITED: Added { passive: false } here as well.
+	);
 
 	document.addEventListener("touchend", (e) => {
 		if (isTouchDragging && draggedItem) {
@@ -2055,10 +2063,7 @@ document.addEventListener("DOMContentLoaded", function () {
 				document.body.removeChild(draggedGhost);
 			}
 			draggedItem.classList.remove("is-dragging");
-
-			finalizeDrop(); // Finalize and save the new order
-
-			// Reset all state
+			finalizeDrop();
 			draggedGhost = null;
 			draggedItem = null;
 			isTouchDragging = false;

@@ -1307,7 +1307,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			el.className = `sound-item group flex items-center justify-between p-2 rounded-lg text-sm ${isPlaying ? "bg-blue-100 dark:bg-blue-900/50" : "hover:bg-slate-100 dark:hover:bg-slate-700/50"}`;
 			el.innerHTML = `
                 <span class="font-medium text-slate-700 dark:text-slate-200 truncate">${sound.name}</span>
-                <div class="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="flex items-center md:opacity-0 group-hover:opacity-100 transition-opacity">
                     <button data-url="${sound.url}" data-id="${sound._id}" class="play-sound-btn p-1 text-slate-500 hover:text-blue-500">
                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                     </button>

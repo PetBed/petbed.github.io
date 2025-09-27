@@ -179,10 +179,17 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     transform: rotateY(180deg);
 }
 
-.flashcard-face > *, .card-preview-face > * {
+.flashcard-face > *:first-child, .card-preview-face > *:first-child {
+    margin-top: 0;
+}
+.flashcard-face > *:last-child, .card-preview-face > *:last-child {
+    margin-bottom: 0;
+}
+
+/* .flashcard-face > *, .card-preview-face > * {
     margin-left: auto;
     margin-right: auto;
-}
+} */
 
 .flashcard-face h1, .card-preview-face h1,
 .flashcard-face h2, .card-preview-face h2,
@@ -198,7 +205,6 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 .flashcard-face h2, .card-preview-face h2 { font-size: 1.5em; }
 .flashcard-face h3, .card-preview-face h3 { font-size: 1.25em; }
 .flashcard-face h4, .card-preview-face h4 { font-size: 1.1em; }
-
 
 .flashcard-face ul, .flashcard-face ol,
 .card-preview-face ul, .card-preview-face ol {
@@ -259,3 +265,36 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     border-top-color: #334155;
 }
 
+.flashcard-preview-container {
+    position: relative;
+    /* This container holds the card and the drag handle */
+}
+
+.drag-handle {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    cursor: grab;
+    color: #94a3b8; /* slate-400 */
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 20; /* Ensure it's above the card face */
+}
+
+.flashcard-preview-container:hover .drag-handle {
+    opacity: 1;
+}
+
+.flashcard-preview-container.is-dragging .card-preview-flipper {
+    opacity: 0.4;
+    cursor: grabbing;
+}
+
+.drag-over {
+    /* Visual cue for drop target */
+    background-color: #e0f2fe; /* sky-100 */
+}
+
+.dark .drag-over {
+    background-color: #0c4a6e; /* sky-900 */
+}

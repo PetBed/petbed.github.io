@@ -143,6 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	let currentFlashcardSet = null;
 	let currentCardIndex = 0;
 	let shuffledFlashcards = [];
+	let draggedItem = null;
 
 	// --- Constants & Config ---
 	const API_URL = "https://wot-tau.vercel.app"; // local: http://localhost:3005
@@ -1483,68 +1484,190 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	async function saveFlashcardSet(id, name, subject) {
 		const isEditing = !!id;
-		const url = isEditing ? `${API_URL}/api/study/flashcard-sets/${id}` : `${API_URL}/api/study/flashcard-sets`;
-		const method = isEditing ? "PUT" : "POST";
+		closeSetModal(); // Close modal immediately for better UX
 
-		try {
-			const response = await fetch(url, {
-				method: method,
-				headers: {"Content-Type": "application/json"},
-				body: JSON.stringify({name, subject, userId: currentUser.id}),
-			});
-			if (!response.ok) throw new Error("Failed to save set");
-			await loadFlashcardSets();
-			closeSetModal();
-		} catch (error) {
-			console.error("Error saving flashcard set:", error);
-			// You might want to show an error message in the modal
+		if (isEditing) {
+			// --- Optimistic Update for EDIT ---
+			const setIndex = flashcardSets.findIndex((s) => s._id === id);
+			if (setIndex === -1) return;
+
+			const originalSet = {...flashcardSets[setIndex]}; // Backup original
+			flashcardSets[setIndex] = {...originalSet, name, subject}; // Update local state
+			renderFlashcardSets(); // Re-render UI immediately
+
+			try {
+				const response = await fetch(`${API_URL}/api/study/flashcard-sets/${id}`, {
+					method: "PUT",
+					headers: {"Content-Type": "application/json"},
+					body: JSON.stringify({name, subject, userId: currentUser.id}),
+				});
+				if (!response.ok) throw new Error("Failed to save set");
+				// Server has confirmed the update, no need to do anything if successful
+			} catch (error) {
+				console.error("Error updating flashcard set:", error);
+				// --- Revert on Failure ---
+				flashcardSets[setIndex] = originalSet; // Restore from backup
+				renderFlashcardSets();
+				alert("Failed to update the set. Please try again.");
+			}
+		} else {
+			// --- Optimistic Update for CREATE ---
+			const tempId = `temp_${Date.now()}`;
+			const newSet = {_id: tempId, name, subject, flashcards: [], userId: currentUser.id};
+			flashcardSets.push(newSet);
+			renderFlashcardSets();
+
+			try {
+				const response = await fetch(`${API_URL}/api/study/flashcard-sets`, {
+					method: "POST",
+					headers: {"Content-Type": "application/json"},
+					body: JSON.stringify({name, subject, userId: currentUser.id}),
+				});
+				if (!response.ok) throw new Error("Failed to create set");
+				const createdSet = await response.json();
+				// --- Replace temp object with real one from server ---
+				const tempIndex = flashcardSets.findIndex((s) => s._id === tempId);
+				if (tempIndex !== -1) {
+					flashcardSets[tempIndex] = createdSet;
+				}
+				renderFlashcardSets(); // Re-render to update IDs, etc.
+			} catch (error) {
+				console.error("Error creating flashcard set:", error);
+				// --- Revert on Failure ---
+				flashcardSets = flashcardSets.filter((s) => s._id !== tempId);
+				renderFlashcardSets();
+				alert("Failed to create the set. Please try again.");
+			}
 		}
 	}
 
 	async function deleteFlashcardSet(setId) {
 		if (!confirm("Are you sure you want to delete this entire set? This action cannot be undone.")) return;
+
+		// --- Optimistic Update ---
+		const setIndex = flashcardSets.findIndex((s) => s._id === setId);
+		if (setIndex === -1) return;
+		const deletedSet = flashcardSets[setIndex]; // Backup
+		flashcardSets.splice(setIndex, 1); // Remove from local state
+		renderFlashcardSets(); // Update UI
+
 		try {
-			await fetch(`${API_URL}/api/study/flashcard-sets/${setId}`, {method: "DELETE"});
-			await loadFlashcardSets(); // Refresh the list view
+			const response = await fetch(`${API_URL}/api/study/flashcard-sets/${setId}`, {method: "DELETE"});
+			if (!response.ok) throw new Error("Failed to delete set");
+			// Success, no further action needed
 		} catch (error) {
 			console.error("Error deleting set:", error);
+			// --- Revert on Failure ---
+			flashcardSets.splice(setIndex, 0, deletedSet); // Add back to original position
+			renderFlashcardSets();
+			alert("Failed to delete the set. Please try again.");
 		}
 	}
 
 	async function saveFlashcard(setId, cardId, front, back) {
 		const isEditing = !!cardId;
-		const url = isEditing ? `${API_URL}/api/study/flashcard-sets/${setId}/cards/${cardId}` : `${API_URL}/api/study/flashcard-sets/${setId}/cards`;
-		const method = isEditing ? "PUT" : "POST";
+		closeCardModal();
 
-		try {
-			const response = await fetch(url, {
-				method: method,
-				headers: {"Content-Type": "application/json"},
-				body: JSON.stringify({front, back}),
-			});
-			if (!response.ok) throw new Error("Failed to save card");
-			currentFlashcardSet = await response.json(); // Update the current set with the response
-			const setIndex = flashcardSets.findIndex((set) => set._id === setId);
-			if (setIndex !== -1) flashcardSets[setIndex] = currentFlashcardSet;
+		const set = currentFlashcardSet;
+		if (!set) return;
 
-			renderSingleSetView(currentFlashcardSet); // Re-render the cards grid
-			closeCardModal();
-		} catch (error) {
-			console.error("Error saving card:", error);
+		if (isEditing) {
+			// --- Optimistic Update for EDIT ---
+			const cardIndex = set.flashcards.findIndex((c) => c._id === cardId);
+			if (cardIndex === -1) return;
+
+			const originalCard = {...set.flashcards[cardIndex]};
+			set.flashcards[cardIndex] = {...originalCard, front, back};
+			renderSingleSetView(set);
+
+			try {
+				const response = await fetch(`${API_URL}/api/study/flashcard-sets/${setId}/cards/${cardId}`, {
+					method: "PUT",
+					headers: {"Content-Type": "application/json"},
+					body: JSON.stringify({front, back}),
+				});
+				if (!response.ok) throw new Error("Failed to save card");
+				// Success
+			} catch (error) {
+				console.error("Error updating card:", error);
+				// --- Revert ---
+				set.flashcards[cardIndex] = originalCard;
+				renderSingleSetView(set);
+				alert("Failed to update the card.");
+			}
+		} else {
+			// --- Optimistic Update for CREATE ---
+			const tempId = `temp_card_${Date.now()}`;
+			const newCard = {_id: tempId, front, back};
+			set.flashcards.push(newCard);
+			renderSingleSetView(set);
+
+			try {
+				const response = await fetch(`${API_URL}/api/study/flashcard-sets/${setId}/cards`, {
+					method: "POST",
+					headers: {"Content-Type": "application/json"},
+					body: JSON.stringify({front, back}),
+				});
+				if (!response.ok) throw new Error("Failed to create card");
+				const updatedSet = await response.json();
+				// --- Replace local set with updated from server to get correct IDs ---
+				currentFlashcardSet = updatedSet;
+				const setIndex = flashcardSets.findIndex((s) => s._id === setId);
+				if (setIndex !== -1) flashcardSets[setIndex] = updatedSet;
+				renderSingleSetView(updatedSet);
+			} catch (error) {
+				console.error("Error creating card:", error);
+				// --- Revert ---
+				set.flashcards = set.flashcards.filter((c) => c._id !== tempId);
+				renderSingleSetView(set);
+				alert("Failed to create the card.");
+			}
 		}
 	}
 
 	async function deleteFlashcard(setId, cardId) {
 		if (!confirm("Delete this card?")) return;
+
+		const set = currentFlashcardSet;
+		if (!set) return;
+
+		// --- Optimistic Update ---
+		const cardIndex = set.flashcards.findIndex((c) => c._id === cardId);
+		if (cardIndex === -1) return;
+
+		const deletedCard = set.flashcards[cardIndex];
+		set.flashcards.splice(cardIndex, 1);
+		renderSingleSetView(set);
+
 		try {
 			const response = await fetch(`${API_URL}/api/study/flashcard-sets/${setId}/cards/${cardId}`, {method: "DELETE"});
 			if (!response.ok) throw new Error("Failed to delete card");
-			currentFlashcardSet = await response.json();
-			const setIndex = flashcardSets.findIndex((set) => set._id === setId);
-			if (setIndex !== -1) flashcardSets[setIndex] = currentFlashcardSet;
-			renderSingleSetView(currentFlashcardSet);
+			// Success
 		} catch (error) {
 			console.error("Error deleting card:", error);
+			// --- Revert ---
+			set.flashcards.splice(cardIndex, 0, deletedCard);
+			renderSingleSetView(set);
+			alert("Failed to delete the card.");
+		}
+	}
+
+  async function saveCardOrder(setId, orderedIds) {
+		const originalOrder = [...currentFlashcardSet.flashcards]; // Backup current order
+		try {
+			const response = await fetch(`${API_URL}/api/study/flashcard-sets/${setId}/reorder-cards`, {
+				method: "PUT",
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify({orderedIds}),
+			});
+			if (!response.ok) throw new Error("Failed to save new order");
+			// Success, the local state is already correct.
+		} catch (error) {
+			console.error("Error saving card order:", error);
+			// --- Revert on Failure ---
+			currentFlashcardSet.flashcards = originalOrder;
+			renderSingleSetView(currentFlashcardSet);
+			alert("Could not save the new card order. Please try again.");
 		}
 	}
 
@@ -1588,12 +1711,18 @@ document.addEventListener("DOMContentLoaded", function () {
 		if (set.flashcards.length === 0) {
 			singleSetCardsGrid.innerHTML = `<p class="text-slate-500 dark:text-slate-400 col-span-full text-center">This set is empty. Click "Add/Edit Cards" to create your first flashcard.</p>`;
 		} else {
-			set.flashcards.forEach((card) => {
+			set.flashcards.forEach((card, index) => {
 				const el = document.createElement("div");
-				// Use relative and group for hover-reveal buttons
-				el.className = "relative group perspective";
+				el.className = "flashcard-preview-container group perspective";
+				el.setAttribute("draggable", "true");
+				el.dataset.index = index;
+				el.dataset.cardId = card._id;
+
 				el.innerHTML = `
-                    <div class="card-preview-flipper" data-card-id="${card._id}">
+                    <div class="drag-handle" title="Drag to reorder">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>
+                    </div>
+                    <div class="card-preview-flipper">
                         <div class="card-preview-face front">${parseMarkdown(card.front)}</div>
                         <div class="card-preview-face back">${parseMarkdown(card.back)}</div>
                     </div>
@@ -1803,6 +1932,66 @@ document.addEventListener("DOMContentLoaded", function () {
 			flashcardFlipper.offsetHeight;
 
 			flashcardFlipper.style.transition = "transform 0.6s";
+		}
+	});
+
+  singleSetCardsGrid.addEventListener("dragstart", (e) => {
+		const draggableTarget = e.target.closest(".flashcard-preview-container");
+		if (draggableTarget) {
+			draggedItem = draggableTarget;
+			// A brief timeout allows the browser to render the drag image before we apply styling.
+			setTimeout(() => {
+				if (draggedItem) draggedItem.classList.add("is-dragging");
+			}, 0);
+		} else {
+			e.preventDefault();
+		}
+	});
+
+	// This listener determines where the dragged card should be placed.
+	singleSetCardsGrid.addEventListener("dragover", (e) => {
+		e.preventDefault();
+		if (!draggedItem) return;
+
+		// Find the card being hovered over, ignoring the one being dragged.
+		const overElement = e.target.closest(".flashcard-preview-container:not(.is-dragging)");
+
+		// If we are not hovering over a valid drop target, do nothing. This prevents errors in gaps.
+		if (overElement === null) return;
+
+		const box = overElement.getBoundingClientRect();
+		// Determine if the cursor is in the left or right half of the target card.
+		const isAfter = e.clientX > box.left + box.width / 2;
+
+		if (isAfter) {
+			// Insert the dragged item after the target card.
+			singleSetCardsGrid.insertBefore(draggedItem, overElement.nextSibling);
+		} else {
+			// Insert the dragged item before the target card.
+			singleSetCardsGrid.insertBefore(draggedItem, overElement);
+		}
+	});
+
+	// This listener finalizes the drop and saves the new order.
+	singleSetCardsGrid.addEventListener("drop", (e) => {
+		e.preventDefault();
+		if (draggedItem) {
+			draggedItem.classList.remove("is-dragging");
+
+			// Update the local data array to match the new DOM order.
+			const newOrderedCards = [...singleSetCardsGrid.querySelectorAll(".flashcard-preview-container")].map((el) => {
+				const cardId = el.dataset.cardId;
+				return currentFlashcardSet.flashcards.find((c) => c._id === cardId);
+			});
+			currentFlashcardSet.flashcards = newOrderedCards;
+
+			// Save the new order to the backend.
+			const orderedIds = newOrderedCards.map((c) => c._id);
+			saveCardOrder(currentFlashcardSet._id, orderedIds);
+
+			// Re-render to correctly update the data-index attributes for the next drag operation.
+			renderSingleSetView(currentFlashcardSet);
+			draggedItem = null;
 		}
 	});
 

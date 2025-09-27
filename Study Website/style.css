@@ -98,14 +98,14 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     height: 100%;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden; /* Safari */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    /* EDITED: Removed flex properties and changed text-align */
+    display: block;
+    text-align: left;
     padding: 2rem;
-    text-align: center;
     border-radius: 1rem;
-    font-size: 1.5rem;
+    font-size: 1rem; /* Base font size */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow-y: auto; /* Allow scrolling for long content */
 }
 
 #flashcard-front, #card-preview-front {
@@ -147,15 +147,14 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     height: 100%;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden; /* Safari */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    /* EDITED: Removed flex properties and changed text-align */
+    display: block;
+    text-align: left;
     padding: 1rem;
-    text-align: center;
     border-radius: 0.5rem;
     font-size: 0.875rem; /* Smaller font size */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+    overflow-y: auto; /* Allow scrolling */
     word-break: break-word;
 }
 
@@ -178,5 +177,85 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 }
 .card-preview-flipper.is-flipped {
     transform: rotateY(180deg);
+}
+
+.flashcard-face > *, .card-preview-face > * {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.flashcard-face h1, .card-preview-face h1,
+.flashcard-face h2, .card-preview-face h2,
+.flashcard-face h3, .card-preview-face h3,
+.flashcard-face h4, .card-preview-face h4 {
+    margin-top: 0.75em;
+    margin-bottom: 0.25em;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.flashcard-face h1, .card-preview-face h1 { font-size: 1.8em; }
+.flashcard-face h2, .card-preview-face h2 { font-size: 1.5em; }
+.flashcard-face h3, .card-preview-face h3 { font-size: 1.25em; }
+.flashcard-face h4, .card-preview-face h4 { font-size: 1.1em; }
+
+
+.flashcard-face ul, .flashcard-face ol,
+.card-preview-face ul, .card-preview-face ol {
+    text-align: left;
+    list-style-position: outside;
+    padding-left: 1.5em; /* Proper indentation */
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+.flashcard-face ul, .card-preview-face ul { list-style-type: disc; }
+.flashcard-face ol, .card-preview-face ol { list-style-type: decimal; }
+
+.flashcard-face li,
+.card-preview-face li {
+    margin-bottom: 0.25rem;
+}
+
+.flashcard-face p,
+.card-preview-face p {
+    margin: 0.5rem 0;
+}
+
+.flashcard-face code,
+.card-preview-face code {
+    background-color: rgba(0,0,0,0.08);
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+
+.dark .flashcard-face code,
+.dark .card-preview-face code {
+    background-color: rgba(255,255,255,0.1);
+}
+
+.flashcard-face blockquote,
+.card-preview-face blockquote {
+    border-left: 4px solid #cbd5e1;
+    padding-left: 1rem;
+    margin-left: 0;
+    color: #64748b;
+    font-style: italic;
+}
+.dark .flashcard-face blockquote,
+.dark .card-preview-face blockquote {
+    border-left-color: #475569;
+    color: #94a3b8;
+}
+
+.flashcard-face hr,
+.card-preview-face hr {
+    border-top: 1px solid #e2e8f0;
+    margin: 1em 0;
+}
+.dark .flashcard-face hr,
+.dark .card-preview-face hr {
+    border-top-color: #334155;
 }
 

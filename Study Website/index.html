@@ -17,6 +17,10 @@
     }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- ADDED: Scripts for Markdown rendering and sanitization -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.10/dist/purify.min.js"></script>
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -34,14 +38,14 @@
       <div>
         <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">Study Dashboard</h1>
         <p id="welcome-message" class="text-slate-500 mt-1 dark:text-slate-400"></p>
-        <div class="mt-4 flex items-center bg-slate-200 dark:bg-slate-800 rounded-lg p-1 max-w-md">
+        <div class="mt-4 flex items-center bg-slate-200 dark:bg-slate-800 rounded-lg p-1 max-w-lg">
           <button id="nav-dashboard"
-            class="nav-btn active w-1/3 text-center py-2 px-4 rounded-md font-semibold">Dashboard</button>
+            class="nav-btn active w-1/4 text-center py-2 px-4 rounded-md font-semibold">Dashboard</button>
           <button id="nav-study"
-            class="nav-btn w-1/3 text-center py-2 px-4 rounded-md font-semibold text-slate-600 dark:text-slate-300">Study
+            class="nav-btn w-1/4 text-center py-2 px-4 rounded-md font-semibold text-slate-600 dark:text-slate-300">Study
             Tracker</button>
           <button id="nav-tasks"
-            class="nav-btn w-1/3 text-center py-2 px-4 rounded-md font-semibold text-slate-600 dark:text-slate-300">Tasks</button>
+            class="nav-btn w-1/4 text-center py-2 px-4 rounded-md font-semibold text-slate-600 dark:text-slate-300">Tasks</button>
           <button id="nav-flashcards"
             class="nav-btn w-1/4 text-center py-2 px-4 rounded-md font-semibold text-slate-600 dark:text-slate-300">Flashcards</button>
         </div>
@@ -159,16 +163,13 @@
         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
           <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">Sound Library</h3>
           <div class="space-y-4">
-            <!-- EDITED: Add a container for the error message -->
             <div id="sound-library-error"
               class="hidden p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400 rounded">
-              <!-- Error message will be injected here by JS -->
             </div>
             <div id="youtube-player-container" class="hidden rounded-lg overflow-hidden">
               <div id="youtube-player"></div>
             </div>
             <div id="sound-library-list" class="space-y-2 max-h-48 overflow-y-auto pr-2">
-              <!-- Sound items will be injected here by JS -->
             </div>
             <form id="add-sound-form" class="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-700">
               <input type="text" id="sound-name-input" placeholder="Name (e.g., Lofi Beats)" required
@@ -255,7 +256,6 @@
             Set</button>
         </div>
         <div id="flashcard-sets-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <!-- Flashcard sets will be dynamically inserted here -->
         </div>
       </div>
 
@@ -287,7 +287,6 @@
         </div>
         <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">Cards in this Set</h3>
         <div id="single-set-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          <!-- Card previews will be dynamically inserted here -->
         </div>
       </div>
 
@@ -295,7 +294,7 @@
       <div id="flashcard-study-view" class="hidden flex flex-col items-center">
         <div class="w-full max-w-2xl mb-6">
           <button id="study-back-btn"
-            class="p-2 rounded-lg bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition">
+            class="flex items-center gap-2 p-2 rounded-lg bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2">
               <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -511,7 +510,6 @@
     </div>
   </div>
 
-  <!-- EDITED: Added YouTube Player API Script -->
   <script src="https://www.youtube.com/iframe_api"></script>
   <script src="script.js" defer></script>
 </body>

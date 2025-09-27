@@ -176,6 +176,16 @@ document.addEventListener("DOMContentLoaded", function () {
 		return `${hours > 0 ? `${hours}h ` : ""}${minutes > 0 ? `${minutes}m ` : ""}${seconds}s`;
 	};
 
+  function parseMarkdown(text) {
+		// Configure marked to add breaks for newlines (like GitHub Flavored Markdown)
+		marked.setOptions({
+			breaks: true,
+		});
+		const rawHtml = marked.parse(text);
+		// Sanitize the HTML to prevent XSS attacks
+		return DOMPurify.sanitize(rawHtml);
+	}
+
 	// --- App Initialization & Auth Check ---
 	async function checkAuthAndInitialize() {
 		const user = localStorage.getItem("studyUser");
@@ -1584,8 +1594,8 @@ document.addEventListener("DOMContentLoaded", function () {
 				el.className = "relative group perspective";
 				el.innerHTML = `
                     <div class="card-preview-flipper" data-card-id="${card._id}">
-                        <div class="card-preview-face front">${card.front}</div>
-                        <div class="card-preview-face back">${card.back}</div>
+                        <div class="card-preview-face front">${parseMarkdown(card.front)}</div>
+                        <div class="card-preview-face back">${parseMarkdown(card.back)}</div>
                     </div>
                     <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                         <button data-action="edit-card" data-card-id="${card._id}" class="p-1.5 bg-slate-100 dark:bg-slate-800 rounded-md hover:bg-slate-200 dark:hover:bg-slate-600">
@@ -1609,8 +1619,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 		flashcardFlipper.classList.remove("is-flipped");
 		const card = studyDeck[currentCardIndex];
-		flashcardFront.textContent = card.front;
-		flashcardBack.textContent = card.back;
+		flashcardFront.innerHTML = parseMarkdown(card.front);
+		flashcardBack.innerHTML = parseMarkdown(card.back);
 		cardCounter.textContent = `${currentCardIndex + 1} / ${studyDeck.length}`;
 
 		showFlashcardView("study");
@@ -1677,8 +1687,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	function updateCardPreview() {
-		cardPreviewFront.textContent = cardFrontInput.value || "Front of Card";
-		cardPreviewBack.textContent = cardBackInput.value || "Back of Card";
+		cardPreviewFront.innerHTML = parseMarkdown(cardFrontInput.value || "Front of Card");
+		cardPreviewBack.innerHTML = parseMarkdown(cardBackInput.value || "Back of Card");
 	}
 
 	function startStudySession(shuffle = false) {

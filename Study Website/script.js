@@ -113,6 +113,13 @@ document.addEventListener("DOMContentLoaded", function () {
 	const cardPreviewFront = document.getElementById("card-preview-front");
 	const cardPreviewBack = document.getElementById("card-preview-back");
 	const cancelCardModalBtn = document.getElementById("cancel-card-modal-btn");
+	const importSetBtn = document.getElementById("import-set-btn");
+	const exportEditSetBtn = document.getElementById("export-edit-set-btn");
+	const flashcardTextModal = document.getElementById("flashcard-text-modal");
+	const flashcardTextModalTitle = document.getElementById("flashcard-text-modal-title");
+	const flashcardTextArea = document.getElementById("flashcard-text-area");
+	const flashcardTextError = document.getElementById("flashcard-text-error");
+	const flashcardTextModalButtons = document.getElementById("flashcard-text-modal-buttons");
 
 	// --- State ---
 	let studyChart = null;
@@ -143,11 +150,11 @@ document.addEventListener("DOMContentLoaded", function () {
 	let currentFlashcardSet = null;
 	let currentCardIndex = 0;
 	let shuffledFlashcards = [];
-	let draggedItem = null;
-  let sortableInstance = null;
+	let sortableInstance = null;
+	let textModalMode = "import"; // can be 'import' or 'edit
 
 	// --- Constants & Config ---
-	const API_URL = "https://wot-tau.vercel.app"; // local: http://localhost:3005
+	const API_URL = "http://localhost:3005"; // local: http://localhost:3005
 	const subjectColors = {Malay: "#8B0000", Chinese: "#E63946", English: "#1D3557", Moral: "#6A4C93", History: "#D2691E", Geography: "#606C38", RBT: "#6C757D", PJK: "#9EF01A", Science: "#2D6A4F", Mathematics: "#00B4D8", Art: "#E6399B", Other: "#64748b"};
 	const RBT_ACCENT = "#FFD60A";
 	const exams = [
@@ -254,6 +261,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	navStudy.addEventListener("click", () => showPage("study"));
 	navTasks.addEventListener("click", () => showPage("tasks"));
 	navFlashcards.addEventListener("click", () => showPage("flashcards"));
+  importSetBtn.addEventListener("click", () => openImportExportModal("import"));
+  exportEditSetBtn.addEventListener("click", () => openImportExportModal("edit", currentFlashcardSet));
 
 	prevMonthBtn.addEventListener("click", () => {
 		currentDate.setMonth(currentDate.getMonth() - 1);
@@ -1483,38 +1492,45 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	}
 
-	async function saveFlashcardSet(id, name, subject) {
+	async function saveFlashcardSet(id, name, subject, flashcards = null) {
 		const isEditing = !!id;
-		closeSetModal(); // Close modal immediately for better UX
+		closeSetModal();
+
+		const updateData = {name, subject, userId: currentUser.id};
+		if (flashcards !== null) {
+			updateData.flashcards = flashcards; // Add flashcards array if it's provided
+		}
 
 		if (isEditing) {
-			// --- Optimistic Update for EDIT ---
 			const setIndex = flashcardSets.findIndex((s) => s._id === id);
 			if (setIndex === -1) return;
 
-			const originalSet = {...flashcardSets[setIndex]}; // Backup original
-			flashcardSets[setIndex] = {...originalSet, name, subject}; // Update local state
-			renderFlashcardSets(); // Re-render UI immediately
+			const originalSet = {...flashcardSets[setIndex]};
+			flashcardSets[setIndex] = {...originalSet, ...updateData};
+			renderFlashcardSets();
 
 			try {
 				const response = await fetch(`${API_URL}/api/study/flashcard-sets/${id}`, {
 					method: "PUT",
 					headers: {"Content-Type": "application/json"},
-					body: JSON.stringify({name, subject, userId: currentUser.id}),
+					body: JSON.stringify(updateData),
 				});
 				if (!response.ok) throw new Error("Failed to save set");
-				// Server has confirmed the update, no need to do anything if successful
+				// If we updated text, we need to refresh the single set view
+				if (flashcards !== null) {
+					currentFlashcardSet = await response.json();
+					renderSingleSetView(currentFlashcardSet);
+				}
 			} catch (error) {
 				console.error("Error updating flashcard set:", error);
-				// --- Revert on Failure ---
-				flashcardSets[setIndex] = originalSet; // Restore from backup
+				flashcardSets[setIndex] = originalSet;
 				renderFlashcardSets();
 				alert("Failed to update the set. Please try again.");
 			}
 		} else {
-			// --- Optimistic Update for CREATE ---
+			// Logic for creating a new set remains the same
 			const tempId = `temp_${Date.now()}`;
-			const newSet = {_id: tempId, name, subject, flashcards: [], userId: currentUser.id};
+			const newSet = {_id: tempId, name, subject, flashcards: flashcards || [], userId: currentUser.id};
 			flashcardSets.push(newSet);
 			renderFlashcardSets();
 
@@ -1522,19 +1538,17 @@ document.addEventListener("DOMContentLoaded", function () {
 				const response = await fetch(`${API_URL}/api/study/flashcard-sets`, {
 					method: "POST",
 					headers: {"Content-Type": "application/json"},
-					body: JSON.stringify({name, subject, userId: currentUser.id}),
+					body: JSON.stringify(newSet),
 				});
 				if (!response.ok) throw new Error("Failed to create set");
 				const createdSet = await response.json();
-				// --- Replace temp object with real one from server ---
 				const tempIndex = flashcardSets.findIndex((s) => s._id === tempId);
 				if (tempIndex !== -1) {
 					flashcardSets[tempIndex] = createdSet;
 				}
-				renderFlashcardSets(); // Re-render to update IDs, etc.
+				renderFlashcardSets();
 			} catch (error) {
 				console.error("Error creating flashcard set:", error);
-				// --- Revert on Failure ---
 				flashcardSets = flashcardSets.filter((s) => s._id !== tempId);
 				renderFlashcardSets();
 				alert("Failed to create the set. Please try again.");
@@ -1963,33 +1977,6 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	});
 
-	// Helper function to determine where to place the dragged item based on cursor position.
-	function handleDragPlacement(clientX, clientY) {
-		const currentlyDragged = document.querySelector(".is-dragging");
-		if (!currentlyDragged) return;
-
-		// Only hide/show the ghost if it exists (for mobile touch events)
-		if (draggedGhost) {
-			draggedGhost.style.display = "none";
-		}
-		const overElement = document.elementFromPoint(clientX, clientY)?.closest(".flashcard-preview-container:not(.is-dragging)");
-		if (draggedGhost) {
-			draggedGhost.style.display = "";
-		}
-
-		if (overElement) {
-			const box = overElement.getBoundingClientRect();
-			const isVerticalLayout = window.innerWidth < 768;
-			const isAfter = isVerticalLayout ? clientY > box.top + box.height / 2 : clientX > box.left + box.width / 2;
-
-			if (isAfter) {
-				singleSetCardsGrid.insertBefore(currentlyDragged, overElement.nextSibling);
-			} else {
-				singleSetCardsGrid.insertBefore(currentlyDragged, overElement);
-			}
-		}
-	}
-
 	// --- Desktop Mouse Drag Events ---
 	singleSetCardsGrid.addEventListener("dragstart", (e) => {
 		const draggableTarget = e.target.closest(".flashcard-preview-container");
@@ -1999,6 +1986,110 @@ document.addEventListener("DOMContentLoaded", function () {
 			e.preventDefault();
 		}
 	});
+
+  function openImportExportModal(mode, set = null) {
+		textModalMode = mode;
+		flashcardTextError.textContent = "";
+		flashcardTextModalButtons.innerHTML = "";
+
+		if (mode === "import") {
+			flashcardTextModalTitle.textContent = "Import New Set";
+			flashcardTextArea.value = "";
+			flashcardTextArea.readOnly = false;
+			// Add Import and Cancel buttons
+			flashcardTextModalButtons.innerHTML = `
+                <button id="cancel-text-modal-btn" class="px-4 py-2 bg-slate-100 rounded-lg dark:bg-slate-600 dark:text-slate-200">Cancel</button>
+                <button id="import-text-btn" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg">Import Set</button>
+            `;
+			document.getElementById("import-text-btn").addEventListener("click", handleImportSet);
+		} else if (mode === "edit" && set) {
+			flashcardTextModalTitle.textContent = "Export / Edit Set as Text";
+			flashcardTextArea.value = generateSetAsText(set);
+			flashcardTextArea.readOnly = false;
+			// Add Save, Copy, and Close buttons
+			flashcardTextModalButtons.innerHTML = `
+                <button id="cancel-text-modal-btn" class="px-4 py-2 bg-slate-100 rounded-lg dark:bg-slate-600 dark:text-slate-200">Close</button>
+                <button id="copy-text-btn" class="px-4 py-2 bg-slate-200 text-slate-700 font-semibold rounded-lg dark:bg-slate-500 dark:text-slate-200">Copy to Clipboard</button>
+                <button id="save-text-btn" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg">Save Changes</button>
+            `;
+			document.getElementById("save-text-btn").addEventListener("click", () => handleEditTextSet(set._id));
+			document.getElementById("copy-text-btn").addEventListener("click", handleCopyToClipboard);
+		}
+
+		document.getElementById("cancel-text-modal-btn").addEventListener("click", closeImportExportModal);
+		flashcardTextModal.classList.remove("hidden");
+	}
+
+	function closeImportExportModal() {
+		flashcardTextModal.classList.add("hidden");
+	}
+
+	function generateSetAsText(set) {
+		let text = `Name: ${set.name}\n`;
+		text += `Subject: ${set.subject}\n`;
+		text += set.flashcards.map((card) => `---\n${card.front}\n///\n${card.back}`).join("\n");
+		return text;
+	}
+
+	function parseTextToSet(text) {
+		const lines = text.split("\n");
+		const nameLine = lines.find((line) => line.toLowerCase().startsWith("name:"));
+		const subjectLine = lines.find((line) => line.toLowerCase().startsWith("subject:"));
+
+		if (!nameLine || !subjectLine) return null;
+
+		const name = nameLine.substring(5).trim();
+		const subject = subjectLine.substring(8).trim();
+
+		if (!name || !subject) return null;
+
+		const cardText = text.substring(text.indexOf("---")).trim();
+		const cardBlocks = cardText.split(/\n---\n/);
+
+		const flashcards = cardBlocks
+			.map((block) => {
+				const parts = block.replace(/^---/, "").trim().split("\n///\n");
+				if (parts.length === 2) {
+					return {front: parts[0].trim(), back: parts[1].trim()};
+				}
+				return null;
+			})
+			.filter(Boolean); // Filter out any null entries from invalid blocks
+
+		return {name, subject, flashcards};
+	}
+
+	function handleImportSet() {
+		const text = flashcardTextArea.value;
+		const parsedSet = parseTextToSet(text);
+
+		if (!parsedSet) {
+			flashcardTextError.textContent = "Invalid format. Please provide Name, Subject, and at least one card.";
+			return;
+		}
+
+		saveFlashcardSet(null, parsedSet.name, parsedSet.subject, parsedSet.flashcards);
+		closeImportExportModal();
+	}
+
+	function handleEditTextSet(setId) {
+		const text = flashcardTextArea.value;
+		const parsedSet = parseTextToSet(text);
+
+		if (!parsedSet) {
+			flashcardTextError.textContent = "Invalid format. Please ensure Name and Subject lines are present.";
+			return;
+		}
+
+		saveFlashcardSet(setId, parsedSet.name, parsedSet.subject, parsedSet.flashcards);
+		closeImportExportModal();
+	}
+
+	function handleCopyToClipboard() {
+		flashcardTextArea.select();
+		document.execCommand("copy");
+		alert("Copied to clipboard!");
+	}
 
 	// --- App Start ---
 	checkAuthAndInitialize();

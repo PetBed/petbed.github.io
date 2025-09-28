@@ -144,6 +144,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	let currentCardIndex = 0;
 	let shuffledFlashcards = [];
 	let draggedItem = null;
+  let sortableInstance = null;
 
 	// --- Constants & Config ---
 	const API_URL = "https://wot-tau.vercel.app"; // local: http://localhost:3005
@@ -1703,6 +1704,12 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	function renderSingleSetView(set) {
+		// Destroy any existing Sortable instance to prevent memory leaks
+		if (sortableInstance) {
+			sortableInstance.destroy();
+			sortableInstance = null;
+		}
+
 		currentFlashcardSet = set;
 		singleSetName.textContent = set.name;
 		singleSetSubject.textContent = set.subject;
@@ -1714,8 +1721,6 @@ document.addEventListener("DOMContentLoaded", function () {
 			set.flashcards.forEach((card, index) => {
 				const el = document.createElement("div");
 				el.className = "flashcard-preview-container group perspective";
-				el.setAttribute("draggable", "true");
-				el.dataset.index = index;
 				el.dataset.cardId = card._id;
 
 				el.innerHTML = `
@@ -1736,6 +1741,30 @@ document.addEventListener("DOMContentLoaded", function () {
                     </div>
                 `;
 				singleSetCardsGrid.appendChild(el);
+			});
+
+			// ADDED: Initialize Sortable.js after rendering the cards
+			sortableInstance = new Sortable(singleSetCardsGrid, {
+				animation: 150, // ms, for smooth animation
+				handle: ".drag-handle", // Restrict drag start to this handle
+				ghostClass: "sortable-ghost", // Class for the drop placeholder
+				dragClass: "sortable-drag", // Class for the item being dragged
+				onEnd: (evt) => {
+					// Get the new order of card IDs from the DOM
+					const newOrderedIds = [...evt.to.children].map((item) => item.dataset.cardId);
+
+					// Create a map for efficient lookup of the original card objects
+					const cardMap = new Map(currentFlashcardSet.flashcards.map((card) => [card._id.toString(), card]));
+
+					// Reorder the actual data array based on the new ID order
+					currentFlashcardSet.flashcards = newOrderedIds.map((id) => cardMap.get(id));
+
+					// Save the new order to the backend
+					saveCardOrder(currentFlashcardSet._id, newOrderedIds);
+
+					// A light re-render to update internal state without destroying the Sortable instance
+					renderSingleSetView(currentFlashcardSet);
+				},
 			});
 		}
 		showFlashcardView("single-set");
@@ -1880,8 +1909,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		} else if (deleteBtn) {
 			const cardId = deleteBtn.dataset.cardId;
 			deleteFlashcard(currentFlashcardSet._id, cardId);
-		} else if (flipper) {
-			// Only flip the card if not clicking on a button inside it
+		} else if (flipper && !e.target.closest(".drag-handle")) {
 			flipper.classList.toggle("is-flipped");
 		}
 	});
@@ -1962,111 +1990,13 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	}
 
-	function finalizeDrop() {
-		if (!draggedItem) return;
-
-		const newOrderedCards = [...singleSetCardsGrid.querySelectorAll(".flashcard-preview-container")].map((el) => {
-			const cardId = el.dataset.cardId;
-			return currentFlashcardSet.flashcards.find((c) => c._id === cardId);
-		});
-		currentFlashcardSet.flashcards = newOrderedCards;
-
-		const orderedIds = newOrderedCards.map((c) => c._id);
-		saveCardOrder(currentFlashcardSet._id, orderedIds);
-		renderSingleSetView(currentFlashcardSet);
-	}
-
 	// --- Desktop Mouse Drag Events ---
 	singleSetCardsGrid.addEventListener("dragstart", (e) => {
 		const draggableTarget = e.target.closest(".flashcard-preview-container");
 		if (draggableTarget) {
 			draggedItem = draggableTarget;
-			// This timeout is crucial for the browser to correctly render the drag preview.
-			setTimeout(() => {
-				if (draggedItem) {
-					draggedItem.classList.add("is-dragging");
-
-          draggedGhost = draggedItem.cloneNode(true);
-					draggedGhost.classList.add("drag-ghost");
-					document.body.appendChild(draggedGhost);
-				}
-			}, 0);
 		} else {
 			e.preventDefault();
-		}
-	});
-
-	singleSetCardsGrid.addEventListener("dragover", (e) => {
-		e.preventDefault();
-		if (!draggedItem) return;
-		handleDragPlacement(e.clientX, e.clientY);
-	});
-
-	singleSetCardsGrid.addEventListener("drop", (e) => {
-		e.preventDefault();
-		if (draggedItem) {
-			// The dragend listener will handle cleanup
-			finalizeDrop();
-		}
-	});
-
-	singleSetCardsGrid.addEventListener("dragend", (e) => {
-		// This ensures cleanup happens regardless of where the drop occurs.
-		if (draggedItem) {
-			draggedItem.classList.remove("is-dragging");
-			draggedItem = null;
-		}
-	});
-
-	// --- Mobile Touch Drag Events ---
-	singleSetCardsGrid.addEventListener(
-		"touchstart",
-		(e) => {
-			const handle = e.target.closest(".drag-handle");
-			if (handle) {
-				e.preventDefault();
-				isTouchDragging = true;
-				draggedItem = handle.closest(".flashcard-preview-container");
-				draggedItem.classList.add("is-dragging");
-
-				draggedGhost = draggedItem.cloneNode(true);
-				draggedGhost.classList.add("drag-ghost");
-				document.body.appendChild(draggedGhost);
-
-				const touch = e.touches[0];
-				draggedGhost.style.left = `${touch.clientX - draggedGhost.offsetWidth / 2}px`;
-				draggedGhost.style.top = `${touch.clientY - draggedGhost.offsetHeight / 2}px`;
-			}
-		},
-		{passive: false}
-	);
-
-	document.addEventListener(
-		"touchmove",
-		(e) => {
-			if (isTouchDragging && draggedItem) {
-				e.preventDefault();
-				const touch = e.touches[0];
-				if (draggedGhost) {
-					draggedGhost.style.left = `${touch.clientX - draggedGhost.offsetWidth / 2}px`;
-					draggedGhost.style.top = `${touch.clientY - draggedGhost.offsetHeight / 2}px`;
-				}
-				handleDragPlacement(touch.clientX, touch.clientY);
-			}
-		},
-		{passive: false}
-	);
-
-	document.addEventListener("touchend", (e) => {
-		if (isTouchDragging && draggedItem) {
-			if (draggedGhost) {
-				document.body.removeChild(draggedGhost);
-			}
-			draggedItem.classList.remove("is-dragging");
-			finalizeDrop();
-			draggedGhost = null;
-			draggedItem = null;
-			isTouchDragging = false;
 		}
 	});
 

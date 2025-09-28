@@ -282,26 +282,11 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     opacity: 1;
 }
 
-.flashcard-preview-container.is-dragging .card-preview-flipper {
+.sortable-ghost {
     opacity: 0.4;
+}
+
+.sortable-drag {
     cursor: grabbing;
 }
 
-.drag-over {
-    /* Visual cue for drop target */
-    background-color: #e0f2fe; /* sky-100 */
-}
-
-.dark .drag-over {
-    background-color: #0c4a6e; /* sky-900 */
-}
-
-.drag-ghost {
-    position: fixed; /* Use fixed positioning to follow finger */
-    pointer-events: none; /* Make it non-interactive so events go to elements underneath */
-    z-index: 9999;
-    opacity: 0.7;
-    /* transform: scale(0.95) rotate(4deg); A slight tilt and shrink effect */
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    width: 200px; /* Fixed width for the ghost */
-}

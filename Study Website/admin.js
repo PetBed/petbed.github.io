@@ -1,11 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
 	// --- CONFIG & STATE ---
 	const API_URL = "https://wot-tau.vercel.app"; // Use the same API URL as your main app
-	const AUTHORIZED_EMAILS = ["roti_canai_telur@outlook.com", "test@test.com"]; // IMPORTANT: Change these to your actual admin emails
+	const AUTHORIZED_EMAILS = ["test@test.com", "roti_canai_telur@outlook.com"]; // IMPORTANT: Change these to your actual admin emails
 
 	let currentBaseItems = [];
 	let currentItemModels = [];
-	let currentBaseItem = null; // The base item currently being viewed/edited
+	let currentBaseItem = null;
+	let currentImageBase64 = null;
 
 	// --- DOM ELEMENTS ---
 	const authGate = document.getElementById("auth-gate");
@@ -52,6 +53,11 @@ document.addEventListener("DOMContentLoaded", () => {
 	const itemModelAestheticInput = document.getElementById("item-model-aesthetic");
 	const itemModelLimitedEditionCheckbox = document.getElementById("item-model-limited-edition");
 	const itemModelMaxSerialInput = document.getElementById("item-model-max-serial");
+	const itemModelImageInput = document.getElementById("item-model-image-input");
+	const itemModelImagePreview = document.getElementById("item-model-image-preview");
+	const itemModelImagePlaceholder = document.getElementById("item-model-image-placeholder");
+	const itemModelUploadBtn = document.getElementById("item-model-upload-btn");
+	const itemModelRemoveImageBtn = document.getElementById("item-model-remove-image-btn");
 
 	// --- AUTHORIZATION ---
 	function checkAuth() {
@@ -137,6 +143,10 @@ document.addEventListener("DOMContentLoaded", () => {
 	itemModelForm.addEventListener("submit", handleSaveItemModel);
 	itemModelsList.addEventListener("click", handleItemModelListClick);
 
+	itemModelUploadBtn.addEventListener("click", () => itemModelImageInput.click());
+	itemModelImageInput.addEventListener("change", handleImageSelection);
+	itemModelRemoveImageBtn.addEventListener("click", handleRemoveImage);
+
 	// --- BASE ITEM LOGIC ---
 
 	function renderBaseItems() {
@@ -182,10 +192,12 @@ document.addEventListener("DOMContentLoaded", () => {
 		baseItemModal.classList.remove("flex");
 	}
 
+	// EDITED: This function is now optimistic for Create and Edit operations.
 	async function handleSaveBaseItem(e) {
 		e.preventDefault();
 		const id = editingBaseItemIdInput.value;
 		const isEditing = !!id;
+		closeBaseItemModal();
 
 		const parseRange = (str) =>
 			str
@@ -203,21 +215,56 @@ document.addEventListener("DOMContentLoaded", () => {
 			},
 		};
 
-		try {
-			const url = isEditing ? `${API_URL}/api/admin/base-items/${id}` : `${API_URL}/api/admin/base-items`;
-			const method = isEditing ? "PUT" : "POST";
-			await fetch(url, {
-				method,
-				headers: {"Content-Type": "application/json"},
-				body: JSON.stringify(data),
-			});
-			closeBaseItemModal();
-			fetchBaseItems();
-		} catch (error) {
-			console.error("Failed to save base item:", error);
+		if (isEditing) {
+			const itemIndex = currentBaseItems.findIndex((i) => i._id === id);
+			if (itemIndex === -1) return;
+
+			const originalItem = {...currentBaseItems[itemIndex]};
+			currentBaseItems[itemIndex] = {...originalItem, ...data};
+			renderBaseItems();
+
+			try {
+				const response = await fetch(`${API_URL}/api/admin/base-items/${id}`, {
+					method: "PUT",
+					headers: {"Content-Type": "application/json"},
+					body: JSON.stringify(data),
+				});
+				if (!response.ok) throw new Error("Server update failed");
+			} catch (error) {
+				console.error("Failed to save base item:", error);
+				currentBaseItems[itemIndex] = originalItem;
+				renderBaseItems();
+				alert("Failed to update base item. Reverting changes.");
+			}
+		} else {
+			const tempId = `temp_${Date.now()}`;
+			const optimisticItem = {...data, _id: tempId};
+			currentBaseItems.push(optimisticItem);
+			renderBaseItems();
+
+			try {
+				const response = await fetch(`${API_URL}/api/admin/base-items`, {
+					method: "POST",
+					headers: {"Content-Type": "application/json"},
+					body: JSON.stringify(data),
+				});
+				if (!response.ok) throw new Error("Server create failed");
+				const savedItem = await response.json();
+				const itemIndex = currentBaseItems.findIndex((i) => i._id === tempId);
+				if (itemIndex !== -1) {
+					currentBaseItems[itemIndex] = savedItem;
+				}
+				renderBaseItems();
+			} catch (error) {
+				console.error("Failed to create base item:", error);
+				currentBaseItems = currentBaseItems.filter((i) => i._id !== tempId);
+				renderBaseItems();
+				alert("Failed to create base item. Reverting changes.");
+			}
 		}
 	}
 
+	// EDITED: This function is now optimistic for Delete operations.
 	async function handleBaseItemListClick(e) {
 		const button = e.target.closest("button");
 		if (!button) return;
@@ -230,8 +277,21 @@ document.addEventListener("DOMContentLoaded", () => {
 			openBaseItemModal(item);
 		} else if (action === "delete") {
 			if (confirm(`Are you sure you want to delete "${item.name}"? This will also delete all its models.`)) {
-				await fetch(`${API_URL}/api/admin/base-items/${id}`, {method: "DELETE"});
-				fetchBaseItems();
+				const itemIndex = currentBaseItems.findIndex((i) => i._id === id);
+				if (itemIndex === -1) return;
+
+				const deletedItem = currentBaseItems.splice(itemIndex, 1)[0];
+				renderBaseItems();
+
+				try {
+					const response = await fetch(`${API_URL}/api/admin/base-items/${id}`, {method: "DELETE"});
+					if (!response.ok) throw new Error("Server delete failed");
+				} catch (error) {
+					console.error("Failed to delete base item:", error);
+					currentBaseItems.splice(itemIndex, 0, deletedItem);
+					renderBaseItems();
+					alert("Failed to delete base item. Reverting changes.");
+				}
 			}
 		} else if (action === "view-models") {
 			currentBaseItem = item;
@@ -246,17 +306,22 @@ document.addEventListener("DOMContentLoaded", () => {
 		itemModelsList.innerHTML = "";
 		currentItemModels.forEach((model) => {
 			const modelCard = document.createElement("div");
-			modelCard.className = "bg-white p-4 rounded-lg shadow-sm grid grid-cols-4 gap-4 items-center";
+			modelCard.className = "bg-white p-4 rounded-lg shadow-sm grid grid-cols-5 gap-4 items-center";
 			modelCard.innerHTML = `
-                <div>
+                <div class="col-span-1">
+                    <img src="${model.imageBase64 || "https://placehold.co/100x100/e2e8f0/94a3b8?text=No+Image"}" alt="${model.name}" class="w-20 h-20 object-cover rounded-md bg-slate-200">
+                </div>
+                <div class="col-span-3">
                     <p class="font-bold">${model.name}</p>
                     <p class="text-sm text-slate-500 font-mono">${model.modelId}</p>
+                    <div class="text-xs mt-2">
+                        <span class="font-semibold">Rarity:</span> ${model.rarity} | 
+                        <span class="font-semibold">Colors:</span> ${model.colorOptions.join(", ") || "N/A"}
+                    </div>
                 </div>
-                <div><span class="font-semibold">Rarity:</span> ${model.rarity}</div>
-                <div><span class="font-semibold">Colors:</span> ${model.colorOptions.join(", ") || "N/A"}</div>
-                <div class="flex justify-end gap-2">
-                    <button data-action="edit" data-id="${model._id}" class="text-sm bg-slate-200 py-1 px-3 rounded-md">Edit</button>
-                    <button data-action="delete" data-id="${model._id}" class="text-sm bg-red-500 text-white py-1 px-3 rounded-md">Delete</button>
+                <div class="col-span-1 flex flex-col items-end gap-2">
+                    <button data-action="edit" data-id="${model._id}" class="text-sm bg-slate-200 py-1 px-3 rounded-md w-full text-center">Edit</button>
+                    <button data-action="delete" data-id="${model._id}" class="text-sm bg-red-500 text-white py-1 px-3 rounded-md w-full text-center">Delete</button>
                 </div>
             `;
 			itemModelsList.appendChild(modelCard);
@@ -265,6 +330,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	function openItemModelModal(model = null) {
 		itemModelForm.reset();
+		currentImageBase64 = null;
+		updateImagePreview(null);
+
 		if (model) {
 			itemModelModalTitle.textContent = "Edit Item Model";
 			editingItemModelIdInput.value = model._id;
@@ -272,6 +340,12 @@ document.addEventListener("DOMContentLoaded", () => {
 			itemModelIdInput.value = model.modelId;
 			itemModelRarityInput.value = model.rarity;
 			itemModelColorsInput.value = model.colorOptions.join(",");
+
+			if (model.imageBase64) {
+				currentImageBase64 = model.imageBase64;
+				updateImagePreview(model.imageBase64);
+			}
+
 			if (model.modelStats) {
 				itemModelWeightInput.value = model.modelStats.weightRange?.join(",") || "";
 				itemModelPriceInput.value = model.modelStats.priceRange?.join(",") || "";
@@ -281,9 +355,20 @@ document.addEventListener("DOMContentLoaded", () => {
 				itemModelLimitedEditionCheckbox.checked = model.limitedEdition.isLimited;
 				itemModelMaxSerialInput.value = model.limitedEdition.maxSerial || "";
 			}
+			if (currentBaseItem && currentBaseItem.defaultStats) {
+				itemModelWeightInput.placeholder = `${currentBaseItem.defaultStats.weightRange.join(",")}`;
+				itemModelPriceInput.placeholder = `${currentBaseItem.defaultStats.priceRange.join(",")}`;
+				itemModelAestheticInput.placeholder = `${currentBaseItem.defaultStats.aestheticRange.join(",")}`;
+			}
 		} else {
 			itemModelModalTitle.textContent = "Create New Model";
 			editingItemModelIdInput.value = "";
+
+			if (currentBaseItem && currentBaseItem.defaultStats) {
+				itemModelWeightInput.placeholder = `${currentBaseItem.defaultStats.weightRange.join(",")}`;
+				itemModelPriceInput.placeholder = `${currentBaseItem.defaultStats.priceRange.join(",")}`;
+				itemModelAestheticInput.placeholder = `${currentBaseItem.defaultStats.aestheticRange.join(",")}`;
+			}
 		}
 		itemModelModal.classList.remove("hidden");
 		itemModelModal.classList.add("flex");
@@ -294,10 +379,12 @@ document.addEventListener("DOMContentLoaded", () => {
 		itemModelModal.classList.remove("flex");
 	}
 
+	// EDITED: This function is now optimistic for Create and Edit operations.
 	async function handleSaveItemModel(e) {
 		e.preventDefault();
 		const id = editingItemModelIdInput.value;
 		const isEditing = !!id;
+		closeItemModelModal();
 
 		const parseRange = (str) =>
 			str
@@ -312,6 +399,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			name: itemModelNameInput.value,
 			modelId: itemModelIdInput.value,
 			rarity: itemModelRarityInput.value,
+			imageBase64: currentImageBase64,
 			colorOptions: itemModelColorsInput.value
 				.split(",")
 				.map((c) => c.trim())
@@ -327,21 +415,56 @@ document.addEventListener("DOMContentLoaded", () => {
 			},
 		};
 
-		try {
-			const url = isEditing ? `${API_URL}/api/admin/item-models/${id}` : `${API_URL}/api/admin/item-models`;
-			const method = isEditing ? "PUT" : "POST";
-			await fetch(url, {
-				method,
-				headers: {"Content-Type": "application/json"},
-				body: JSON.stringify(data),
-			});
-			closeItemModelModal();
-			fetchItemModels(currentBaseItem._id);
-		} catch (error) {
-			console.error("Failed to save item model:", error);
+		if (isEditing) {
+			const modelIndex = currentItemModels.findIndex((m) => m._id === id);
+			if (modelIndex === -1) return;
+
+			const originalModel = {...currentItemModels[modelIndex]};
+			currentItemModels[modelIndex] = {...originalModel, ...data};
+			renderItemModels();
+
+			try {
+				const response = await fetch(`${API_URL}/api/admin/item-models/${id}`, {
+					method: "PUT",
+					headers: {"Content-Type": "application/json"},
+					body: JSON.stringify(data),
+				});
+				if (!response.ok) throw new Error("Server update failed");
+			} catch (error) {
+				console.error("Failed to save item model:", error);
+				currentItemModels[modelIndex] = originalModel;
+				renderItemModels();
+				alert("Failed to update item model.");
+			}
+		} else {
+			const tempId = `temp_model_${Date.now()}`;
+			const optimisticModel = {...data, _id: tempId};
+			currentItemModels.push(optimisticModel);
+			renderItemModels();
+
+			try {
+				const response = await fetch(`${API_URL}/api/admin/item-models`, {
+					method: "POST",
+					headers: {"Content-Type": "application/json"},
+					body: JSON.stringify(data),
+				});
+				if (!response.ok) throw new Error("Server create failed");
+				const savedModel = await response.json();
+				const modelIndex = currentItemModels.findIndex((m) => m._id === tempId);
+				if (modelIndex !== -1) {
+					currentItemModels[modelIndex] = savedModel;
+				}
+				renderItemModels();
+			} catch (error) {
+				console.error("Failed to save item model:", error);
+				currentItemModels = currentItemModels.filter((m) => m._id !== tempId);
+				renderItemModels();
+				alert("Failed to create item model.");
+			}
 		}
 	}
 
+	// EDITED: This function is now optimistic for Delete operations.
 	async function handleItemModelListClick(e) {
 		const button = e.target.closest("button");
 		if (!button) return;
@@ -354,10 +477,95 @@ document.addEventListener("DOMContentLoaded", () => {
 			openItemModelModal(model);
 		} else if (action === "delete") {
 			if (confirm(`Are you sure you want to delete "${model.name}"?`)) {
-				await fetch(`${API_URL}/api/admin/item-models/${id}`, {method: "DELETE"});
-				fetchItemModels(currentBaseItem._id);
+				const modelIndex = currentItemModels.findIndex((m) => m._id === id);
+				if (modelIndex === -1) return;
+
+				const deletedModel = currentItemModels.splice(modelIndex, 1)[0];
+				renderItemModels();
+
+				try {
+					const response = await fetch(`${API_URL}/api/admin/item-models/${id}`, {method: "DELETE"});
+					if (!response.ok) throw new Error("Server delete failed");
+				} catch (error) {
+					console.error("Failed to delete item model:", error);
+					currentItemModels.splice(modelIndex, 0, deletedModel);
+					renderItemModels();
+					alert("Failed to delete item model.");
+				}
 			}
 		}
+	}
+
+	// --- IMAGE HANDLING LOGIC ---
+
+	async function handleImageSelection(event) {
+		const file = event.target.files[0];
+		if (!file) return;
+
+		try {
+			const compressedBase64 = await compressAndEncodeImage(file);
+			currentImageBase64 = compressedBase64;
+			updateImagePreview(compressedBase64);
+		} catch (error) {
+			console.error("Image compression error:", error);
+			alert("Failed to process image.");
+		}
+	}
+
+	function handleRemoveImage() {
+		currentImageBase64 = ""; // Set to empty string to signal removal
+		updateImagePreview(null);
+		itemModelImageInput.value = ""; // Clear the file input
+	}
+
+	function updateImagePreview(base64String) {
+		if (base64String) {
+			itemModelImagePreview.src = base64String;
+			itemModelImagePreview.classList.remove("hidden");
+			itemModelImagePlaceholder.classList.add("hidden");
+		} else {
+			itemModelImagePreview.src = "";
+			itemModelImagePreview.classList.add("hidden");
+			itemModelImagePlaceholder.classList.remove("hidden");
+		}
+	}
+
+	function compressAndEncodeImage(file, maxWidth = 512, maxHeight = 512, quality = 0.8) {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.readAsDataURL(file);
+			reader.onload = (event) => {
+				const img = new Image();
+				img.src = event.target.result;
+				img.onload = () => {
+					const canvas = document.createElement("canvas");
+					let width = img.width;
+					let height = img.height;
+
+					if (width > height) {
+						if (width > maxWidth) {
+							height *= maxWidth / width;
+							width = maxWidth;
+						}
+					} else {
+						if (height > maxHeight) {
+							width *= maxHeight / height;
+							height = maxHeight;
+						}
+					}
+
+					canvas.width = width;
+					canvas.height = height;
+					const ctx = canvas.getContext("2d");
+					ctx.drawImage(img, 0, 0, width, height);
+
+					const dataUrl = canvas.toDataURL("image/jpeg", quality);
+					resolve(dataUrl);
+				};
+				img.onerror = (error) => reject(error);
+			};
+			reader.onerror = (error) => reject(error);
+		});
 	}
 
 	// --- KICKSTART ---

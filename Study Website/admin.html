@@ -1,171 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collectibles Admin Panel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collectibles Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
 </head>
+
 <body class="bg-slate-100 text-slate-800">
 
-    <!-- Authorization Gate -->
-    <div id="auth-gate" class="min-h-screen flex items-center justify-center">
-        <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-            <h1 class="text-2xl font-bold mb-4 text-center">Admin Access</h1>
-            <p class="text-slate-600 text-center mb-6">Enter your authorized email to proceed.</p>
-            <input type="email" id="auth-email-input" class="w-full p-2 border border-slate-300 rounded-md mb-4" placeholder="admin@example.com">
-            <button id="auth-submit-btn" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700">Submit</button>
-            <p id="auth-error" class="text-red-500 text-center mt-4 h-4"></p>
-        </div>
+  <!-- Authorization Gate -->
+  <div id="auth-gate" class="min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
+      <h1 class="text-2xl font-bold mb-4 text-center">Admin Access</h1>
+      <p class="text-slate-600 text-center mb-6">Enter your authorized email to proceed.</p>
+      <input type="email" id="auth-email-input" class="w-full p-2 border border-slate-300 rounded-md mb-4"
+        placeholder="admin@example.com">
+      <button id="auth-submit-btn"
+        class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700">Submit</button>
+      <p id="auth-error" class="text-red-500 text-center mt-4 h-4"></p>
+    </div>
+  </div>
+
+  <!-- Main Admin Panel (hidden by default) -->
+  <div id="admin-panel" class="hidden p-8">
+    <header class="flex justify-between items-center mb-8">
+      <h1 class="text-3xl font-bold">Collectibles Admin</h1>
+      <button id="logout-btn" class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600">Logout</button>
+    </header>
+
+    <!-- Main View: Base Items Management -->
+    <div id="base-items-view">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-semibold">Base Item Categories</h2>
+        <button id="show-create-base-item-modal-btn"
+          class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Create Base Item</button>
+      </div>
+      <div id="base-items-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Base Items will be loaded here -->
+      </div>
     </div>
 
-    <!-- Main Admin Panel (hidden by default) -->
-    <div id="admin-panel" class="hidden p-8">
-        <header class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold">Collectibles Admin</h1>
-            <button id="logout-btn" class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600">Logout</button>
-        </header>
-
-        <!-- Main View: Base Items Management -->
-        <div id="base-items-view">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-semibold">Base Item Categories</h2>
-                <button id="show-create-base-item-modal-btn" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Create Base Item</button>
-            </div>
-            <div id="base-items-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Base Items will be loaded here -->
-            </div>
-        </div>
-
-        <!-- Detail View: Item Models Management -->
-        <div id="item-models-view" class="hidden">
-            <div class="flex items-center gap-4 mb-6">
-                 <button id="back-to-base-items-btn" class="p-2 rounded-lg bg-slate-200 hover:bg-slate-300 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                </button>
-                <h2 class="text-2xl font-semibold">Models for <span id="current-base-item-name" class="font-bold"></span></h2>
-            </div>
-             <div class="flex justify-end mb-6">
-                <button id="show-create-item-model-modal-btn" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Create New Model</button>
-            </div>
-            <div id="item-models-list" class="space-y-4">
-                <!-- Item Models will be loaded here -->
-            </div>
-        </div>
+    <!-- Detail View: Item Models Management -->
+    <div id="item-models-view" class="hidden">
+      <div class="flex items-center gap-4 mb-6">
+        <button id="back-to-base-items-btn" class="p-2 rounded-lg bg-slate-200 hover:bg-slate-300 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+        </button>
+        <h2 class="text-2xl font-semibold">Models for <span id="current-base-item-name" class="font-bold"></span></h2>
+      </div>
+      <div class="flex justify-end mb-6">
+        <button id="show-create-item-model-modal-btn"
+          class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Create New Model</button>
+      </div>
+      <div id="item-models-list" class="space-y-4">
+        <!-- Item Models will be loaded here -->
+      </div>
     </div>
+  </div>
 
-    <!-- Modal for Creating/Editing Base Items -->
-    <div id="base-item-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
-        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
-            <h3 id="base-item-modal-title" class="text-xl font-bold mb-6">Create Base Item</h3>
-            <form id="base-item-form" class="space-y-4">
-                <input type="hidden" id="editing-base-item-id">
+  <!-- Modal for Creating/Editing Base Items -->
+  <div id="base-item-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
+      <h3 id="base-item-modal-title" class="text-xl font-bold mb-6">Create Base Item</h3>
+      <form id="base-item-form" class="space-y-4">
+        <input type="hidden" id="editing-base-item-id">
+        <div>
+          <label for="base-item-name" class="block text-sm font-medium text-slate-700">Name (e.g., Pencil)</label>
+          <input type="text" id="base-item-name" class="w-full p-2 mt-1 border rounded-md" required>
+        </div>
+        <div>
+          <label for="base-item-id" class="block text-sm font-medium text-slate-700">Item ID (e.g., pencil)</label>
+          <input type="text" id="base-item-id" class="w-full p-2 mt-1 border rounded-md" required>
+        </div>
+        <fieldset class="border p-4 rounded-md">
+          <legend class="font-medium px-2">Default Stat Ranges</legend>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="base-item-weight" class="block text-xs">Weight (min,max)</label>
+              <input type="text" id="base-item-weight" class="w-full p-2 mt-1 border rounded-md" placeholder="5,10">
+            </div>
+            <div>
+              <label for="base-item-price" class="block text-xs">Price (min,max)</label>
+              <input type="text" id="base-item-price" class="w-full p-2 mt-1 border rounded-md" placeholder="0.5,1.5">
+            </div>
+            <div>
+              <label for="base-item-aesthetic" class="block text-xs">Aesthetic (min,max)</label>
+              <input type="text" id="base-item-aesthetic" class="w-full p-2 mt-1 border rounded-md" placeholder="40,70">
+            </div>
+          </div>
+        </fieldset>
+        <div class="flex justify-end gap-4 pt-4">
+          <button type="button" id="cancel-base-item-modal-btn"
+            class="bg-slate-200 py-2 px-4 rounded-md">Cancel</button>
+          <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md">Save Base Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal for Creating/Editing Item Models -->
+  <div id="item-model-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-3xl">
+      <h3 id="item-model-modal-title" class="text-xl font-bold mb-6">Create Item Model</h3>
+      <form id="item-model-form" class="space-y-4">
+        <input type="hidden" id="editing-item-model-id">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Left Column: Details -->
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="item-model-name" class="block text-sm font-medium text-slate-700">Name</label>
+                <input type="text" id="item-model-name" class="w-full p-2 mt-1 border rounded-md" required>
+              </div>
+              <div>
+                <label for="item-model-id" class="block text-sm font-medium text-slate-700">Model ID</label>
+                <input type="text" id="item-model-id" class="w-full p-2 mt-1 border rounded-md" required>
+              </div>
+            </div>
+            <div>
+              <label for="item-model-rarity" class="block text-sm font-medium text-slate-700">Rarity</label>
+              <select id="item-model-rarity" class="w-full p-2 mt-1 border rounded-md" required>
+                <option>common</option>
+                <option>uncommon</option>
+                <option>rare</option>
+                <option>epic</option>
+                <option>legendary</option>
+                <option>mythic</option>
+              </select>
+            </div>
+            <div>
+              <label for="item-model-colors" class="block text-sm font-medium text-slate-700">Color Options
+                (comma-separated)</label>
+              <input type="text" id="item-model-colors" class="w-full p-2 mt-1 border rounded-md"
+                placeholder="yellow,black,silver">
+            </div>
+            <fieldset class="border p-4 rounded-md">
+              <legend class="font-medium px-2">Model-Specific Stat Ranges (optional)</legend>
+              <div class="grid grid-cols-3 gap-4">
                 <div>
-                    <label for="base-item-name" class="block text-sm font-medium text-slate-700">Name (e.g., Pencil)</label>
-                    <input type="text" id="base-item-name" class="w-full p-2 mt-1 border rounded-md" required>
+                  <label for="item-model-weight" class="block text-xs">Weight (min,max)</label>
+                  <input type="text" id="item-model-weight" class="w-full p-2 mt-1 border rounded-md" placeholder="6,8">
                 </div>
                 <div>
-                    <label for="base-item-id" class="block text-sm font-medium text-slate-700">Item ID (e.g., pencil)</label>
-                    <input type="text" id="base-item-id" class="w-full p-2 mt-1 border rounded-md" required>
+                  <label for="item-model-price" class="block text-xs">Price (min,max)</label>
+                  <input type="text" id="item-model-price" class="w-full p-2 mt-1 border rounded-md"
+                    placeholder="0.5,0.7">
                 </div>
-                <fieldset class="border p-4 rounded-md">
-                    <legend class="font-medium px-2">Default Stat Ranges</legend>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="base-item-weight" class="block text-xs">Weight (min,max)</label>
-                            <input type="text" id="base-item-weight" class="w-full p-2 mt-1 border rounded-md" placeholder="5,10">
-                        </div>
-                        <div>
-                            <label for="base-item-price" class="block text-xs">Price (min,max)</label>
-                            <input type="text" id="base-item-price" class="w-full p-2 mt-1 border rounded-md" placeholder="0.5,1.5">
-                        </div>
-                         <div>
-                            <label for="base-item-aesthetic" class="block text-xs">Aesthetic (min,max)</label>
-                            <input type="text" id="base-item-aesthetic" class="w-full p-2 mt-1 border rounded-md" placeholder="40,70">
-                        </div>
-                    </div>
-                </fieldset>
-                <div class="flex justify-end gap-4 pt-4">
-                    <button type="button" id="cancel-base-item-modal-btn" class="bg-slate-200 py-2 px-4 rounded-md">Cancel</button>
-                    <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md">Save Base Item</button>
+                <div>
+                  <label for="item-model-aesthetic" class="block text-xs">Aesthetic (min,max)</label>
+                  <input type="text" id="item-model-aesthetic" class="w-full p-2 mt-1 border rounded-md"
+                    placeholder="45,60">
                 </div>
-            </form>
+              </div>
+            </fieldset>
+            <fieldset class="border p-4 rounded-md">
+              <legend class="font-medium px-2">Limited Edition</legend>
+              <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" id="item-model-limited-edition" class="h-4 w-4">
+                  <label for="item-model-limited-edition" class="text-sm">Is Limited Edition?</label>
+                </div>
+                <div>
+                  <label for="item-model-max-serial" class="block text-xs">Max Serial #</label>
+                  <input type="number" id="item-model-max-serial" class="w-full p-2 mt-1 border rounded-md"
+                    placeholder="500">
+                </div>
+              </div>
+            </fieldset>
+          </div>
+          <!-- Right Column: Image Upload -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700">Item Image</label>
+            <div
+              class="mt-1 flex justify-center items-center w-full h-48 border-2 border-dashed border-slate-300 rounded-md">
+              <img id="item-model-image-preview" src="" alt="Image Preview" class="max-h-full max-w-full hidden">
+              <div id="item-model-image-placeholder" class="text-center text-slate-500">
+                <p>No Image</p>
+              </div>
+            </div>
+            <div class="flex gap-4 mt-2">
+              <input type="file" id="item-model-image-input" class="hidden" accept="image/png, image/jpeg">
+              <button type="button" id="item-model-upload-btn"
+                class="flex-1 text-sm bg-slate-200 py-2 px-3 rounded-md">Select Image</button>
+              <button type="button" id="item-model-remove-image-btn"
+                class="flex-1 text-sm bg-red-100 text-red-700 py-2 px-3 rounded-md">Remove Image</button>
+            </div>
+            <p class="text-xs text-slate-500 mt-2">Image will be compressed to max 512x512 JPEG.</p>
+          </div>
         </div>
-    </div>
-    
-    <!-- Modal for Creating/Editing Item Models -->
-    <div id="item-model-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
-        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl">
-            <h3 id="item-model-modal-title" class="text-xl font-bold mb-6">Create Item Model</h3>
-            <form id="item-model-form" class="space-y-4">
-                <input type="hidden" id="editing-item-model-id">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label for="item-model-name" class="block text-sm font-medium text-slate-700">Name</label>
-                        <input type="text" id="item-model-name" class="w-full p-2 mt-1 border rounded-md" required>
-                    </div>
-                    <div>
-                        <label for="item-model-id" class="block text-sm font-medium text-slate-700">Model ID</label>
-                        <input type="text" id="item-model-id" class="w-full p-2 mt-1 border rounded-md" required>
-                    </div>
-                    <div>
-                        <label for="item-model-rarity" class="block text-sm font-medium text-slate-700">Rarity</label>
-                         <select id="item-model-rarity" class="w-full p-2 mt-1 border rounded-md" required>
-                            <option>common</option>
-                            <option>uncommon</option>
-                            <option>rare</option>
-                            <option>epic</option>
-                            <option>legendary</option>
-                            <option>mythic</option>
-                        </select>
-                    </div>
-                </div>
-                 <div>
-                    <label for="item-model-colors" class="block text-sm font-medium text-slate-700">Color Options (comma-separated)</label>
-                    <input type="text" id="item-model-colors" class="w-full p-2 mt-1 border rounded-md" placeholder="yellow,black,silver">
-                </div>
-                <fieldset class="border p-4 rounded-md">
-                    <legend class="font-medium px-2">Model-Specific Stat Ranges (optional)</legend>
-                    <div class="grid grid-cols-3 gap-4">
-                        <div>
-                            <label for="item-model-weight" class="block text-xs">Weight (min,max)</label>
-                            <input type="text" id="item-model-weight" class="w-full p-2 mt-1 border rounded-md" placeholder="6,8">
-                        </div>
-                        <div>
-                            <label for="item-model-price" class="block text-xs">Price (min,max)</label>
-                            <input type="text" id="item-model-price" class="w-full p-2 mt-1 border rounded-md" placeholder="0.5,0.7">
-                        </div>
-                         <div>
-                            <label for="item-model-aesthetic" class="block text-xs">Aesthetic (min,max)</label>
-                            <input type="text" id="item-model-aesthetic" class="w-full p-2 mt-1 border rounded-md" placeholder="45,60">
-                        </div>
-                    </div>
-                </fieldset>
-                 <fieldset class="border p-4 rounded-md">
-                    <legend class="font-medium px-2">Limited Edition</legend>
-                    <div class="flex items-center gap-4">
-                        <div class="flex items-center gap-2">
-                             <input type="checkbox" id="item-model-limited-edition" class="h-4 w-4">
-                             <label for="item-model-limited-edition" class="text-sm">Is Limited Edition?</label>
-                        </div>
-                        <div>
-                            <label for="item-model-max-serial" class="block text-xs">Max Serial #</label>
-                            <input type="number" id="item-model-max-serial" class="w-full p-2 mt-1 border rounded-md" placeholder="500">
-                        </div>
-                    </div>
-                </fieldset>
-                <div class="flex justify-end gap-4 pt-4">
-                    <button type="button" id="cancel-item-model-modal-btn" class="bg-slate-200 py-2 px-4 rounded-md">Cancel</button>
-                    <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md">Save Item Model</button>
-                </div>
-            </form>
+        <div class="flex justify-end gap-4 pt-4">
+          <button type="button" id="cancel-item-model-modal-btn"
+            class="bg-slate-200 py-2 px-4 rounded-md">Cancel</button>
+          <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md">Save Item Model</button>
         </div>
+      </form>
     </div>
-    
-    <script src="admin.js"></script>
+  </div>
+
+  <script src="admin.js"></script>
 </body>
+
 </html>

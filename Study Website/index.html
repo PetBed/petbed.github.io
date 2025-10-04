@@ -38,7 +38,7 @@
       <div>
         <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">Study Dashboard</h1>
         <p id="welcome-message" class="text-slate-500 mt-1 dark:text-slate-400"></p>
-        <div class="mt-4 flex items-center bg-slate-200 dark:bg-slate-800 rounded-lg p-1 max-w-lg">
+        <div class="mt-4 flex items-center bg-slate-200 dark:bg-slate-800 rounded-lg p-1 max-w-xl">
           <button id="nav-dashboard"
             class="nav-btn active w-1/4 text-center py-2 px-4 rounded-md font-semibold">Dashboard</button>
           <button id="nav-study"
@@ -48,6 +48,8 @@
             class="nav-btn w-1/4 text-center py-2 px-4 rounded-md font-semibold text-slate-600 dark:text-slate-300">Tasks</button>
           <button id="nav-flashcards"
             class="nav-btn w-1/4 text-center py-2 px-4 rounded-md font-semibold text-slate-600 dark:text-slate-300">Flashcards</button>
+          <button id="nav-binder"
+            class="nav-btn w-1/4 text-center py-2 px-4 rounded-md font-semibold text-slate-600 dark:text-slate-300">Binder</button>
         </div>
       </div>
       <div class="flex items-center space-x-2">
@@ -137,6 +139,27 @@
         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
           <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">Study Tracker</h3>
           <div class="space-y-4">
+            <div id="drop-progress-container" class="p-4 bg-slate-100 dark:bg-slate-700 rounded-lg">
+              <div class="flex justify-between items-center mb-1">
+                <p class="text-sm font-semibold text-slate-600 dark:text-slate-300">Next Card Drop</p>
+                <button id="claim-drop-btn"
+                  class="relative p-1.5 rounded-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M20 7h-5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h5m0-4-3 4 3 4" />
+                    <path d="M4 7h5a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H4m0-4 3 4-3 4" />
+                    <rect width="18" height="18" x="3" y="3" rx="2" />
+                  </svg>
+                  <span id="claim-notification"
+                    class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center hidden"></span>
+                </button>
+              </div>
+              <div class="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-3">
+                <div id="drop-progress-bar" class="bg-blue-600 h-3 rounded-full transition-all duration-500" style="width: 0%">
+                </div>
+              </div>
+              <p id="drop-progress-text" class="text-center text-xs text-slate-500 dark:text-slate-400 mt-1">0 / 30 mins</p>
+            </div>
             <div class="text-center p-4 bg-slate-100 dark:bg-slate-700 rounded-lg">
               <p id="mode-indicator" class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase">Focus
               </p>
@@ -322,6 +345,13 @@
           <p id="card-counter" class="text-lg font-semibold"></p>
           <button id="next-card-btn" class="p-3 rounded-full bg-slate-200 dark:bg-slate-700">Next</button>
         </div>
+      </div>
+    </main>
+
+    <main id="binder-page" class="hidden">
+      <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6">Your Collection</h2>
+      <div id="binder-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        <!-- Collected cards will be dynamically inserted here -->
       </div>
     </main>
 
@@ -532,7 +562,41 @@
     </div>
   </div>
 
+  <div id="claim-card-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl shadow-xl p-8 w-full max-w-4xl text-center">
+      <h3 class="text-2xl font-bold mb-2 dark:text-slate-100">Claim Your Reward!</h3>
+      <p class="text-slate-500 dark:text-slate-400 mb-6">You've earned a card drop! Choose one of the three cards below.
+      </p>
+  
+      <!-- Loading State -->
+      <div id="claim-loading" class="flex flex-col items-center justify-center h-72">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
+        <p class="mt-4 text-slate-500">Generating cards...</p>
+      </div>
+  
+      <!-- Card Choices -->
+      <div id="claim-card-choices" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Card choices will be rendered here by collectibles.js -->
+      </div>
+    </div>
+  </div>
+
+  <div id="card-detail-modal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50">
+    <div id="card-detail-content" class="relative w-full max-w-sm">
+      <!-- The detailed card will be rendered here by collectibles.js -->
+    </div>
+    <button id="close-card-detail-modal-btn" class="absolute top-4 right-4 text-white/70 hover:text-white transition">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="3">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
   <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+  <script src="collectibles.js" defer></script>
   <script src="script.js" defer></script>
 </body>
 

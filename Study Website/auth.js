@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	const forgotContinueBtn = document.getElementById("forgot-continue-btn");
 
 	// --- State ---
-	const API_URL = "https://wot-tau.vercel.app";
+	const API_URL = "https://wot-tau.vercel.app"; // local: http://localhost:3005
 	let resetUserId = null;
 
 	// --- Initial Check ---
@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	async function handleForgotPasswordStep2(e) {
 		e.preventDefault();
-		if (!resetUserId) return; // This function should only run for step 2
+		if (!resetUserId) return;
 
 		forgotErrorEl.textContent = "";
 		forgotSuccessEl.classList.add("hidden");
@@ -173,7 +173,6 @@ document.addEventListener("DOMContentLoaded", function () {
 				forgotSuccessEl.classList.remove("hidden");
 				step2Question.classList.add("hidden");
 				setTimeout(() => {
-					// Go back to login form
 					registerForm.classList.add("hidden");
 					forgotPasswordForm.classList.add("hidden");
 					loginForm.classList.remove("hidden");

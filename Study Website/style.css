@@ -290,3 +290,137 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     cursor: grabbing;
 }
 
+#claim-drop-btn {
+    position: relative;
+}
+
+#claim-notification {
+    pointer-events: none; /* Make sure it doesn't block clicks on the button */
+}
+
+/* Styles for the claim modal card choices */
+.claim-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.claim-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Styles for different rarity text/borders */
+.rarity-common { color: #64748b; border-color: #cbd5e1; }
+.rarity-uncommon { color: #16a34a; border-color: #86efac; }
+.rarity-rare { color: #2563eb; border-color: #93c5fd; }
+.rarity-epic { color: #7e22ce; border-color: #d8b4fe; }
+.rarity-legendary { color: #d97706; border-color: #fde68a; }
+.rarity-mythic { color: #dc2626; border-color: #fca5a5; }
+
+.claim-card-container {
+    position: relative;
+    z-index: 1;
+    transform-style: preserve-3d;
+    transform: perspective(1000px);
+}
+
+/* Shiny/Holo Effect */
+.card-version-shiny::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -80%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: skewX(-25deg);
+    animation: shiny-effect 3.5s infinite linear;
+    z-index: 2; /* Position it above the card content */
+}
+
+@keyframes shiny-effect {
+    from {
+        left: -80%;
+    }
+    to {
+        left: 130%;
+    }
+}
+
+/* Gold Effect */
+.card-version-gold {
+    background: linear-gradient(135deg, #fceabb 0%, #f8b500 25%, #f69d00 50%, #f08b00 75%, #e17700 100%);
+}
+/* Ensure text inside gold card is readable */
+.card-version-gold h3,
+.card-version-gold p,
+.card-version-gold div,
+.dark .card-version-gold h3,
+.dark .card-version-gold p,
+.dark .card-version-gold div {
+    color: #422800;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+.card-version-gold::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: -100%;
+    width: 40%;
+    height: 120%;
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.35) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: skewX(-20deg);
+    animation: gold-glint 4s infinite ease-in-out;
+    z-index: 2;
+}
+
+@keyframes gold-glint {
+    0% {
+        left: -100%;
+    }
+    40% {
+        left: 150%;
+    }
+    100% {
+        left: 150%;
+    }
+}
+
+/* Ensure the main card content (text, image, etc.) is not affected by the overlays */
+.claim-card-container > * {
+    position: relative;
+    z-index: 1;
+}
+
+.claim-card-container > div {
+    /* Apply a small 3D translation to child divs for a layered effect */
+    transform: translateZ(20px);
+}
+.claim-card-container .card-image-wrapper {
+    /* Make the image pop out more */
+    transform: translateZ(40px);
+}
+
+.binder-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.binder-card:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+#card-detail-modal {
+    transition: opacity 0.3s ease;
+}
+

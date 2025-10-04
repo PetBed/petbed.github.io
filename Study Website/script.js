@@ -11,9 +11,11 @@ document.addEventListener("DOMContentLoaded", function () {
 	const dashboardPage = document.getElementById("dashboard-page");
 	const studyPage = document.getElementById("study-page");
 	const tasksPage = document.getElementById("tasks-page");
+  const binderPage = document.getElementById("binder-page");
 	const navDashboard = document.getElementById("nav-dashboard");
 	const navStudy = document.getElementById("nav-study");
 	const navTasks = document.getElementById("nav-tasks");
+	const navBinder = document.getElementById("nav-binder");
 	const monthYearEl = document.getElementById("month-year");
 	const calendarDaysEl = document.getElementById("calendar-days");
 	const prevMonthBtn = document.getElementById("prev-month");
@@ -152,6 +154,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	let shuffledFlashcards = [];
 	let sortableInstance = null;
 	let textModalMode = "import"; // can be 'import' or 'edit
+  let sessionSecondsStudied = 0;
+
 
 	// --- Constants & Config ---
 	const API_URL = "https://wot-tau.vercel.app"; // local: http://localhost:3005
@@ -210,6 +214,11 @@ document.addEventListener("DOMContentLoaded", function () {
 			appContainer.classList.add("hidden");
 			welcomeMessage.textContent = `Welcome back, ${currentUser.username}!`;
 			await initializeApp();
+
+      if (window.initCollectibles) {
+				window.initCollectibles(currentUser.id, currentUser.accumulatedStudyTime, currentUser.unclaimedDrops);
+			}
+
 			loadingIndicator.style.display = "none";
 			appContainer.classList.remove("hidden");
 			appContainer.style.display = "flex";
@@ -261,6 +270,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	navStudy.addEventListener("click", () => showPage("study"));
 	navTasks.addEventListener("click", () => showPage("tasks"));
 	navFlashcards.addEventListener("click", () => showPage("flashcards"));
+  navBinder.addEventListener("click", () => showPage("binder"));
   importSetBtn.addEventListener("click", () => openImportExportModal("import"));
   exportEditSetBtn.addEventListener("click", () => openImportExportModal("edit", currentFlashcardSet));
 
@@ -323,6 +333,10 @@ document.addEventListener("DOMContentLoaded", function () {
 	skipBtn.addEventListener("click", () => {
 		if (currentMode === "focus") {
 			saveStudyLogs();
+			if (window.updateStudyProgress && sessionSecondsStudied > 0) {
+				window.updateStudyProgress(sessionSecondsStudied);
+				sessionSecondsStudied = 0;
+			}
 		}
 		if (ytPlayer && typeof ytPlayer.stopVideo === "function") {
 			ytPlayer.stopVideo();
@@ -492,15 +506,20 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	function showPage(page) {
-		const pages = {dashboard: dashboardPage, study: studyPage, tasks: tasksPage, flashcards: flashcardsPage};
-		const navs = {dashboard: navDashboard, study: navStudy, tasks: navTasks, flashcards: navFlashcards};
+		const pages = {dashboard: dashboardPage, study: studyPage, tasks: tasksPage, flashcards: flashcardsPage, binder: binderPage};
+		const navs = {dashboard: navDashboard, study: navStudy, tasks: navTasks, flashcards: navFlashcards, binder: navBinder};
 		Object.keys(pages).forEach((p) => {
-			pages[p].classList.add("hidden");
-			navs[p].classList.remove("active");
+			if (pages[p]) pages[p].classList.add("hidden");
+			if (navs[p]) navs[p].classList.remove("active");
 		});
-		pages[page].classList.remove("hidden");
-		navs[page].classList.add("active");
+		if (pages[page]) pages[page].classList.remove("hidden");
+		if (navs[page]) navs[page].classList.add("active");
+
 		if (page === "dashboard") renderDashboard();
+
+		if (page === "binder" && window.collectiblesModule && typeof window.collectiblesModule.renderInventory === "function") {
+			window.collectiblesModule.renderInventory();
+		}
 	}
 
 	function renderDashboard() {
@@ -1088,11 +1107,16 @@ document.addEventListener("DOMContentLoaded", function () {
 		if (isPaused) {
 			clearInterval(timerInterval);
 			saveStudyLogs();
+      if (window.updateStudyProgress && sessionSecondsStudied > 0) {
+				window.updateStudyProgress(sessionSecondsStudied);
+				sessionSecondsStudied = 0; // Reset after updating
+			}
 			closePiPTimer();
 			if (ytPlayer && typeof ytPlayer.pauseVideo === "function" && currentPlayingSoundId) {
 				ytPlayer.pauseVideo();
 			}
 		} else {
+      sessionSecondsStudied = 0;
 			if (document.visibilityState === "hidden") {
 				handleVisibilityChangeForPiP();
 			}
@@ -1104,6 +1128,7 @@ document.addEventListener("DOMContentLoaded", function () {
 				if (currentMode === "focus") {
 					const subject = pomodoroSubjectSelect.value;
 					studyLogs[subject] = (studyLogs[subject] || 0) + 1;
+          sessionSecondsStudied++;
 					renderStudyLogs();
 				}
 				updateTimerDisplay();
@@ -1111,6 +1136,10 @@ document.addEventListener("DOMContentLoaded", function () {
 					playNotificationSound();
 					if (currentMode === "focus") {
 						saveStudyLogs();
+            if (window.updateStudyProgress && sessionSecondsStudied > 0) {
+							window.updateStudyProgress(sessionSecondsStudied);
+							sessionSecondsStudied = 0;
+						}
 					}
 					switchMode(currentMode === "focus" ? "break" : "focus");
 				}

@@ -2,7 +2,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 	// --- CONFIGURATION ---
-	const API_URL = "http://localhost:3005"; // Ensure this matches your main script
+	const API_URL = "https://wot-tau.vercel.app"; // Ensure this matches your main script
 	const CARD_DROP_INTERVAL = 30 * 60; // 30 minutes in seconds
 
 	// Rarity styles - used for borders, text colors, etc.

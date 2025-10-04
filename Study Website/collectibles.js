@@ -3,7 +3,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 	// --- CONFIGURATION ---
 	const API_URL = "https://wot-tau.vercel.app"; // Ensure this matches your main script
-	const CARD_DROP_INTERVAL = 30 * 60; // 30 minutes in seconds
+	const CARD_DROP_INTERVAL = 20 * 60; // 20 minutes in seconds
 
 	// Rarity styles - used for borders, text colors, etc.
 	const RARITY_STYLES = {
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	let accumulatedTime = 0;
 	let unclaimedDrops = 0;
 	let cardChoices = [];
-  let inventory = [];
+	let inventory = [];
 
 	// --- DOM ELEMENTS ---
 	const dropProgressContainer = document.getElementById("drop-progress-container");
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	const claimModalContent = document.getElementById("claim-card-choices");
 	const claimModalLoading = document.getElementById("claim-loading");
 
-  const binderGrid = document.getElementById("binder-grid");
+	const binderGrid = document.getElementById("binder-grid");
 	const cardDetailModal = document.getElementById("card-detail-modal");
 	const cardDetailContent = document.getElementById("card-detail-content");
 	const closeCardDetailModalBtn = document.getElementById("close-card-detail-modal-btn");
@@ -44,11 +44,13 @@ document.addEventListener("DOMContentLoaded", () => {
 		accumulatedTime = initialTime || 0;
 		unclaimedDrops = initialDrops || 0;
 		renderDropProgress();
-    fetchInventory();
+		fetchInventory();
 	};
 
-  window.collectiblesModule = {
+	window.collectiblesModule = {
 		renderInventory,
+		tickProgress,
+		saveCollectibleState,
 	};
 
 	// --- EVENT LISTENERS ---
@@ -59,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 	});
 
-  binderGrid.addEventListener("click", handleBinderGridClick);
+	binderGrid.addEventListener("click", handleBinderGridClick);
 	closeCardDetailModalBtn.addEventListener("click", closeCardDetailModal);
 	cardDetailModal.addEventListener("click", (e) => {
 		if (e.target === cardDetailModal) {
@@ -68,6 +70,89 @@ document.addEventListener("DOMContentLoaded", () => {
 	});
 
 	// --- CORE LOGIC ---
+
+	function tickProgress() {
+		if (!userId) return;
+
+		accumulatedTime++;
+
+		// Check if a drop is earned
+		if (accumulatedTime >= CARD_DROP_INTERVAL) {
+			unclaimedDrops++;
+			accumulatedTime -= CARD_DROP_INTERVAL; // Reset with carry-over
+
+			// A drop was earned, so save the new state to the server immediately.
+			saveCollectibleState();
+		}
+
+		// Always update the UI for a smooth ticking effect.
+		renderDropProgress();
+	}
+
+  async function saveCollectibleState() {
+		if (!userId) return;
+
+		try {
+			const response = await fetch(`${API_URL}/api/study/user/collectible-state`, {
+				method: "PUT",
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify({userId, accumulatedStudyTime: accumulatedTime, unclaimedDrops}),
+			});
+			if (!response.ok) throw new Error("Failed to save progress.");
+
+			const data = await response.json();
+
+			// Re-sync with the server's response to be absolutely sure we are in sync
+			accumulatedTime = data.accumulatedStudyTime;
+			unclaimedDrops = data.unclaimedDrops;
+			renderDropProgress();
+
+			// Update localStorage to persist across full page reloads
+			const user = JSON.parse(localStorage.getItem("studyUser"));
+			if (user) {
+				user.accumulatedStudyTime = accumulatedTime;
+				user.unclaimedDrops = unclaimedDrops;
+				localStorage.setItem("studyUser", JSON.stringify(user));
+			}
+		} catch (error) {
+			console.error("Failed to save collectible state:", error);
+		}
+	}
+
+	async function syncStudyProgress(secondsToSync) {
+		if (!userId || secondsToSync <= 0) return;
+
+		try {
+			const response = await fetch(`${API_URL}/api/study/user/progress`, {
+				method: "PUT",
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify({userId, secondsStudied: secondsToSync}),
+			});
+			if (!response.ok) throw new Error("Failed to sync progress with server.");
+
+			const data = await response.json();
+
+			// IMPORTANT: Re-sync local state with the authoritative server response
+			// This corrects any minor frontend/backend drift.
+			accumulatedTime = data.accumulatedStudyTime;
+			unclaimedDrops = data.unclaimedDrops;
+			renderDropProgress();
+
+			// Update localStorage to persist across full page reloads
+			const user = JSON.parse(localStorage.getItem("studyUser"));
+			if (user) {
+				user.accumulatedStudyTime = accumulatedTime;
+				user.unclaimedDrops = unclaimedDrops;
+				localStorage.setItem("studyUser", JSON.stringify(user));
+			}
+		} catch (error) {
+			console.error("Failed to update study progress on server:", error);
+			// In a real app, you might want a more robust error handling/retry system
+		}
+	};
+
+  // window.tickProgress = tickProgress;
+  // window.syncStudyProgress = syncStudyProgress;
 
 	window.updateStudyProgress = async (secondsStudied) => {
 		if (!userId || secondsStudied <= 0) return;
@@ -173,7 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			}
 
 			cardEl.className = `claim-card-container bg-white dark:bg-slate-700 rounded-lg shadow-lg border-2 ${rarityStyle.border} flex flex-col overflow-hidden transition-transform hover:scale-105 hover:shadow-2xl${versionClass}`;
-      cardEl.setAttribute("data-tilt", "");
+			cardEl.setAttribute("data-tilt", "");
 
 			let versionHTML = "";
 			if (card.generatedStats.version === "shiny") {
@@ -223,7 +308,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			btn.addEventListener("click", handleSelectCard);
 		});
 
-    VanillaTilt.init(document.querySelectorAll(".claim-card-container"), {
+		VanillaTilt.init(document.querySelectorAll(".claim-card-container"), {
 			max: 15,
 			speed: 400,
 			glare: true,
@@ -264,10 +349,10 @@ document.addEventListener("DOMContentLoaded", () => {
 			event.target.textContent = "Choose";
 		}
 
-    await fetchInventory();
+		await fetchInventory();
 	}
 
-  async function fetchInventory() {
+	async function fetchInventory() {
 		if (!userId) return;
 		try {
 			const response = await fetch(`${API_URL}/api/collectibles/inventory?userId=${userId}`);
@@ -324,7 +409,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		cardDetailContent.innerHTML = ""; // Clear content
 	}
 
-  function renderCardDetail(item) {
+	function renderCardDetail(item) {
 		const rarityStyle = RARITY_STYLES[item.generatedStats.rarity] || RARITY_STYLES.common;
 
 		let versionClass = "";

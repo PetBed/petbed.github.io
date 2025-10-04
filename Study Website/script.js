@@ -153,7 +153,6 @@ document.addEventListener("DOMContentLoaded", function () {
 	let currentCardIndex = 0;
 	let shuffledFlashcards = [];
 	let sortableInstance = null;
-	let textModalMode = "import"; // can be 'import' or 'edit
   let sessionSecondsStudied = 0;
 
 
@@ -333,8 +332,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	skipBtn.addEventListener("click", () => {
 		if (currentMode === "focus") {
 			saveStudyLogs();
-			if (window.updateStudyProgress && sessionSecondsStudied > 0) {
-				window.updateStudyProgress(sessionSecondsStudied);
+			if (window.collectiblesModule && sessionSecondsStudied > 0) {
+				window.collectiblesModule.syncStudyProgress(sessionSecondsStudied);
 				sessionSecondsStudied = 0;
 			}
 		}
@@ -1107,16 +1106,15 @@ document.addEventListener("DOMContentLoaded", function () {
 		if (isPaused) {
 			clearInterval(timerInterval);
 			saveStudyLogs();
-      if (window.updateStudyProgress && sessionSecondsStudied > 0) {
-				window.updateStudyProgress(sessionSecondsStudied);
-				sessionSecondsStudied = 0; // Reset after updating
+			// Sync any leftover progress when pausing
+			if (window.collectiblesModule) {
+				window.collectiblesModule.saveCollectibleState();
 			}
 			closePiPTimer();
 			if (ytPlayer && typeof ytPlayer.pauseVideo === "function" && currentPlayingSoundId) {
 				ytPlayer.pauseVideo();
 			}
 		} else {
-      sessionSecondsStudied = 0;
 			if (document.visibilityState === "hidden") {
 				handleVisibilityChangeForPiP();
 			}
@@ -1128,7 +1126,11 @@ document.addEventListener("DOMContentLoaded", function () {
 				if (currentMode === "focus") {
 					const subject = pomodoroSubjectSelect.value;
 					studyLogs[subject] = (studyLogs[subject] || 0) + 1;
-          sessionSecondsStudied++;
+
+					// Call the collectibles module every second to update progress
+					if (window.collectiblesModule) {
+						window.collectiblesModule.tickProgress();
+					}
 					renderStudyLogs();
 				}
 				updateTimerDisplay();
@@ -1136,9 +1138,8 @@ document.addEventListener("DOMContentLoaded", function () {
 					playNotificationSound();
 					if (currentMode === "focus") {
 						saveStudyLogs();
-            if (window.updateStudyProgress && sessionSecondsStudied > 0) {
-							window.updateStudyProgress(sessionSecondsStudied);
-							sessionSecondsStudied = 0;
+						if (window.collectiblesModule) {
+							window.collectiblesModule.saveCollectibleState();
 						}
 					}
 					switchMode(currentMode === "focus" ? "break" : "focus");

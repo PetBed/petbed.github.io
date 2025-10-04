@@ -60,7 +60,14 @@
         </button>
         <h2 class="text-2xl font-semibold">Models for <span id="current-base-item-name" class="font-bold"></span></h2>
       </div>
-      <div class="flex justify-end mb-6">
+      <!-- EDITED: Updated button layout to include import/export -->
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <button id="import-models-btn" class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">Import
+            Models</button>
+          <button id="export-models-btn"
+            class="bg-yellow-500 text-white py-2 px-4 rounded-md hover:bg-yellow-600 ml-2">Export Models</button>
+        </div>
         <button id="show-create-item-model-modal-btn"
           class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Create New Model</button>
       </div>
@@ -206,6 +213,23 @@
           <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md">Save Item Model</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ADDED: New Modal for Importing/Exporting Item Models as text -->
+  <div id="item-model-text-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl flex flex-col" style="height: 90vh;">
+      <h3 id="item-model-text-modal-title" class="text-xl font-bold mb-4">Import Models</h3>
+      <p class="text-sm text-slate-500 mb-1">Use the format below. Separate models with "---". Keys are
+        case-insensitive.</p>
+      <p class="text-xs text-slate-400 mb-4">Required keys: name, modelId, rarity. Optional: colors, weight, price,
+        aesthetic, limited, maxSerial.</p>
+      <textarea id="item-model-text-area" class="w-full flex-grow p-3 border rounded-lg bg-slate-50 font-mono text-sm"
+        placeholder="name: BIC Pencil&#10;modelId: pencil_bic&#10;rarity: common&#10;colors: yellow&#10;weight: 6,8&#10;---&#10;name: Dixon Ticonderoga&#10;modelId: pencil_dixon&#10;rarity: common"></textarea>
+      <p id="item-model-text-error" class="text-red-500 text-xs text-center h-4 mt-2"></p>
+      <div id="item-model-text-modal-buttons" class="flex justify-end gap-3 mt-4">
+        <!-- Buttons will be dynamically inserted here -->
+      </div>
     </div>
   </div>
 

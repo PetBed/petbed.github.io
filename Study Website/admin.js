@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
 	// --- CONFIG & STATE ---
-	const API_URL = "https://wot-tau.vercel.app"; // Use the same API URL as your main app
+	const API_URL = "http://localhost:3005"; // Use the same API URL as your main app
 	const AUTHORIZED_EMAILS = ["test@test.com", "roti_canai_telur@outlook.com"]; // IMPORTANT: Change these to your actual admin emails
 
 	let currentBaseItems = [];
@@ -58,6 +58,14 @@ document.addEventListener("DOMContentLoaded", () => {
 	const itemModelImagePlaceholder = document.getElementById("item-model-image-placeholder");
 	const itemModelUploadBtn = document.getElementById("item-model-upload-btn");
 	const itemModelRemoveImageBtn = document.getElementById("item-model-remove-image-btn");
+
+  const importModelsBtn = document.getElementById("import-models-btn");
+	const exportModelsBtn = document.getElementById("export-models-btn");
+	const itemModelTextModal = document.getElementById("item-model-text-modal");
+	const itemModelTextModalTitle = document.getElementById("item-model-text-modal-title");
+	const itemModelTextArea = document.getElementById("item-model-text-area");
+	const itemModelTextError = document.getElementById("item-model-text-error");
+	const itemModelTextModalButtons = document.getElementById("item-model-text-modal-buttons");
 
 	// --- AUTHORIZATION ---
 	function checkAuth() {
@@ -146,6 +154,9 @@ document.addEventListener("DOMContentLoaded", () => {
 	itemModelUploadBtn.addEventListener("click", () => itemModelImageInput.click());
 	itemModelImageInput.addEventListener("change", handleImageSelection);
 	itemModelRemoveImageBtn.addEventListener("click", handleRemoveImage);
+
+  importModelsBtn.addEventListener("click", () => openItemModelTextModal("import"));
+	exportModelsBtn.addEventListener("click", () => openItemModelTextModal("export"));
 
 	// --- BASE ITEM LOGIC ---
 
@@ -307,6 +318,31 @@ document.addEventListener("DOMContentLoaded", () => {
 		currentItemModels.forEach((model) => {
 			const modelCard = document.createElement("div");
 			modelCard.className = "bg-white p-4 rounded-lg shadow-sm grid grid-cols-5 gap-4 items-center";
+
+			// --- Helper logic to find and display overridden stats ---
+			let statsDisplay = "";
+			const customStats = [];
+			const defaultStats = currentBaseItem.defaultStats;
+
+			if (model.modelStats?.weightRange?.length && model.modelStats.weightRange.join(",") !== defaultStats.weightRange.join(",")) {
+				customStats.push(`<span class="font-semibold">Weight:</span> ${model.modelStats.weightRange.join(", ")}`);
+			}
+			if (model.modelStats?.priceRange?.length && model.modelStats.priceRange.join(",") !== defaultStats.priceRange.join(",")) {
+				customStats.push(`<span class="font-semibold">Price:</span> ${model.modelStats.priceRange.join(", ")}`);
+			}
+			if (model.modelStats?.aestheticRange?.length && model.modelStats.aestheticRange.join(",") !== defaultStats.aestheticRange.join(",")) {
+				customStats.push(`<span class="font-semibold">Aesthetic:</span> ${model.modelStats.aestheticRange.join(", ")}`);
+			}
+
+			if (customStats.length > 0) {
+				statsDisplay = `
+                    <div class="text-xs mt-1 text-sky-600 dark:text-sky-400">
+                        <strong>Overrides:</strong> ${customStats.join(" | ")}
+                    </div>
+                `;
+			}
+			// --- End helper logic ---
+
 			modelCard.innerHTML = `
                 <div class="col-span-1">
                     <img src="${model.imageBase64 || "https://placehold.co/100x100/e2e8f0/94a3b8?text=No+Image"}" alt="${model.name}" class="w-20 h-20 object-cover rounded-md bg-slate-200">
@@ -318,6 +354,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <span class="font-semibold">Rarity:</span> ${model.rarity} | 
                         <span class="font-semibold">Colors:</span> ${model.colorOptions.join(", ") || "N/A"}
                     </div>
+                    ${statsDisplay}
                 </div>
                 <div class="col-span-1 flex flex-col items-end gap-2">
                     <button data-action="edit" data-id="${model._id}" class="text-sm bg-slate-200 py-1 px-3 rounded-md w-full text-center">Edit</button>
@@ -566,6 +603,196 @@ document.addEventListener("DOMContentLoaded", () => {
 			};
 			reader.onerror = (error) => reject(error);
 		});
+	}
+
+  function openItemModelTextModal(mode) {
+		itemModelTextError.textContent = "";
+		itemModelTextModalButtons.innerHTML = "";
+
+		if (mode === "import") {
+			itemModelTextModalTitle.textContent = `Import Models for ${currentBaseItem.name}`;
+			itemModelTextArea.value = "";
+			itemModelTextArea.readOnly = false;
+			itemModelTextModalButtons.innerHTML = `
+                <button type="button" class="cancel-text-modal-btn bg-slate-200 py-2 px-4 rounded-md">Cancel</button>
+                <button id="import-text-btn" class="bg-green-600 text-white py-2 px-4 rounded-md">Import</button>
+            `;
+			document.getElementById("import-text-btn").addEventListener("click", handleImportModels);
+		} else {
+			// 'export' mode is now 'export/edit'
+			itemModelTextModalTitle.textContent = `Export / Edit Models from ${currentBaseItem.name}`;
+			itemModelTextArea.value = generateModelsAsText();
+			itemModelTextArea.readOnly = false; // Make it editable
+			itemModelTextModalButtons.innerHTML = `
+                <button type="button" class="cancel-text-modal-btn bg-slate-200 py-2 px-4 rounded-md">Close</button>
+                <button id="copy-text-btn" class="bg-blue-600 text-white py-2 px-4 rounded-md">Copy to Clipboard</button>
+                <button id="save-text-edit-btn" class="bg-yellow-500 text-white py-2 px-4 rounded-md">Save Changes</button>
+            `;
+			document.getElementById("copy-text-btn").addEventListener("click", () => {
+				navigator.clipboard.writeText(itemModelTextArea.value).then(() => {
+					alert("Copied to clipboard!");
+				});
+			});
+			// Add listener for the new save button
+			document.getElementById("save-text-edit-btn").addEventListener("click", handleEditModelsAsText);
+		}
+
+		itemModelTextModal.querySelector(".cancel-text-modal-btn").addEventListener("click", closeItemModelTextModal);
+		itemModelTextModal.classList.remove("hidden");
+		itemModelTextModal.classList.add("flex");
+	}
+
+	function closeItemModelTextModal() {
+		itemModelTextModal.classList.add("hidden");
+		itemModelTextModal.classList.remove("flex");
+	}
+
+	function generateModelsAsText() {
+		return currentItemModels
+			.map((model) => {
+				let text = `name: ${model.name}\n`;
+				text += `modelId: ${model.modelId}\n`;
+				text += `rarity: ${model.rarity}\n`;
+				if (model.colorOptions && model.colorOptions.length > 0) {
+					text += `colors: ${model.colorOptions.join(",")}\n`;
+				}
+				if (model.modelStats?.weightRange?.length > 0) {
+					text += `weight: ${model.modelStats.weightRange.join(",")}\n`;
+				}
+				if (model.modelStats?.priceRange?.length > 0) {
+					text += `price: ${model.modelStats.priceRange.join(",")}\n`;
+				}
+				if (model.modelStats?.aestheticRange?.length > 0) {
+					text += `aesthetic: ${model.modelStats.aestheticRange.join(",")}\n`;
+				}
+				if (model.limitedEdition?.isLimited) {
+					text += `limited: true\n`;
+					text += `maxSerial: ${model.limitedEdition.maxSerial}\n`;
+				}
+				// Note: Image data (imageBase64) is not exported to keep the text clean and human-readable.
+				return text;
+			})
+			.join("---\n");
+	}
+
+	function parseTextToModels(text) {
+		const modelBlocks = text.split(/\n---\n/);
+		const models = [];
+		let error = null;
+
+		modelBlocks.forEach((block, index) => {
+			if (block.trim() === "") return;
+			const model = {};
+			const lines = block.trim().split("\n");
+
+			lines.forEach((line) => {
+				const parts = line.split(":");
+				const key = parts[0].trim().toLowerCase();
+				const value = parts.slice(1).join(":").trim();
+
+				switch (key) {
+					case "name":
+						model.name = value;
+						break;
+					case "modelid":
+						model.modelId = value;
+						break;
+					case "rarity":
+						model.rarity = value.toLowerCase();
+						break;
+					case "colors":
+						model.colorOptions = value
+							.split(",")
+							.map((c) => c.trim())
+							.filter(Boolean);
+						break;
+					case "weight":
+						(model.modelStats = model.modelStats || {}).weightRange = value.split(",").map(Number);
+						break;
+					case "price":
+						(model.modelStats = model.modelStats || {}).priceRange = value.split(",").map(Number);
+						break;
+					case "aesthetic":
+						(model.modelStats = model.modelStats || {}).aestheticRange = value.split(",").map(Number);
+						break;
+					case "limited":
+						(model.limitedEdition = model.limitedEdition || {}).isLimited = value === "true";
+						break;
+					case "maxserial":
+						(model.limitedEdition = model.limitedEdition || {}).maxSerial = Number(value);
+						break;
+				}
+			});
+
+			// Basic validation for required fields
+			if (!model.name || !model.modelId || !model.rarity) {
+				error = `Model #${index + 1} is missing required fields (name, modelId, rarity).`;
+			}
+
+			models.push(model);
+		});
+
+		if (error) {
+			throw new Error(error);
+		}
+
+		return models;
+	}
+
+	async function handleImportModels() {
+		const text = itemModelTextArea.value;
+		try {
+			const models = parseTextToModels(text);
+			if (models.length === 0) {
+				itemModelTextError.textContent = "No models found in the text.";
+				return;
+			}
+
+			const response = await fetch(`${API_URL}/api/admin/base-items/${currentBaseItem._id}/batch-models`, {
+				method: "POST",
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify({models}),
+			});
+
+			if (!response.ok) {
+				const errData = await response.json();
+				throw new Error(errData.error || "Server error during import.");
+			}
+
+			closeItemModelTextModal();
+			await fetchItemModels(currentBaseItem._id); // Refresh list from server to show new models
+		} catch (error) {
+			itemModelTextError.textContent = error.message;
+			console.error("Import error:", error);
+		}
+	}
+
+  async function handleEditModelsAsText() {
+		const text = itemModelTextArea.value;
+		try {
+			const models = parseTextToModels(text);
+
+			if (!confirm(`This will replace all existing models for "${currentBaseItem.name}" with the content from the text area. Are you sure you want to proceed?`)) {
+				return;
+			}
+
+			const response = await fetch(`${API_URL}/api/admin/base-items/${currentBaseItem._id}/batch-models`, {
+				method: "PUT", // Using PUT for replacement
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify({models}),
+			});
+
+			if (!response.ok) {
+				const errData = await response.json();
+				throw new Error(errData.error || "Server error during update.");
+			}
+
+			closeItemModelTextModal();
+			await fetchItemModels(currentBaseItem._id); // Refresh list
+		} catch (error) {
+			itemModelTextError.textContent = error.message;
+			console.error("Text edit error:", error);
+		}
 	}
 
 	// --- KICKSTART ---

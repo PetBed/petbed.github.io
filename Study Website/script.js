@@ -203,6 +203,30 @@ document.addEventListener("DOMContentLoaded", function () {
 		const user = localStorage.getItem("studyUser");
 		if (user) {
 			currentUser = JSON.parse(user);
+
+			// 1. Fetch the latest state from the server.
+			try {
+				console.log("Syncing collectible state with server...");
+				const response = await fetch(`${API_URL}/api/study/user/collectible-state?userId=${currentUser.id}`);
+				if (!response.ok) throw new Error("Server sync failed");
+				
+				const serverState = await response.json();
+				
+				// 2. Overwrite local data with the server's authoritative data.
+				currentUser.accumulatedStudyTime = serverState.accumulatedStudyTime;
+				currentUser.unclaimedDrops = serverState.unclaimedDrops;
+				
+				// 3. Save the synced data back to localStorage for the current session.
+				localStorage.setItem("studyUser", JSON.stringify(currentUser));
+				console.log("Sync complete. Local state updated:", currentUser);
+
+			} catch (error) {
+				console.error("Failed to sync collectible state with server:", error);
+				// If sync fails, the app will proceed with potentially stale local data,
+				// but this is better than crashing. A notification could be added here.
+        window.alert("Warning: Unable to sync data with server. Some features may not work correctly.");
+			}
+
 			if (currentUser.settings && currentUser.settings.darkMode) {
 				document.documentElement.classList.add("dark");
 			} else {
@@ -214,7 +238,8 @@ document.addEventListener("DOMContentLoaded", function () {
 			welcomeMessage.textContent = `Welcome back, ${currentUser.username}!`;
 			await initializeApp();
 
-      if (window.initCollectibles) {
+			// 4. Initialize the collectibles module with the fresh, synced data.
+			if (window.initCollectibles) {
 				window.initCollectibles(currentUser.id, currentUser.accumulatedStudyTime, currentUser.unclaimedDrops);
 			}
 
@@ -224,7 +249,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		} else {
 			window.location.href = "auth.html";
 		}
-	}
+  }
 
 	async function initializeApp() {
 		await loadDataFromDB();

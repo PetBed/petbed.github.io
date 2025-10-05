@@ -299,14 +299,19 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 }
 
 /* Styles for the claim modal card choices */
-.claim-card {
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+.claim-card-container {
+    position: relative;
+    z-index: 1;
+    transform-style: preserve-3d;
+    transform: perspective(1000px);
+    aspect-ratio: 5 / 7;
 }
 
-.claim-card:hover {
-    transform: translateY(-5px);
+.claim-card-container:hover {
+    transform: translateY(-5px) scale(1.03);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
+
 
 /* Styles for different rarity text/borders */
 .rarity-common { color: #64748b; border-color: #cbd5e1; }
@@ -316,12 +321,12 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 .rarity-legendary { color: #d97706; border-color: #fde68a; }
 .rarity-mythic { color: #dc2626; border-color: #fca5a5; }
 
-.claim-card-container {
+/* .claim-card-container {
     position: relative;
     z-index: 1;
     transform-style: preserve-3d;
     transform: perspective(1000px);
-}
+} */
 
 /* Shiny/Holo Effect */
 .card-version-shiny::before {
@@ -413,14 +418,14 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 
 .binder-card {
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    aspect-ratio: 5 / 7;
 }
 
 .binder-card:hover {
-    transform: translateY(-4px) scale(1.03);
+    transform: translateY(-4px) scale(1.05);
     box-shadow: 0 8px 20px rgba(0,0,0,0.15);
 }
 
 #card-detail-modal {
     transition: opacity 0.3s ease;
 }
-

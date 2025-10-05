@@ -357,17 +357,16 @@ document.addEventListener("DOMContentLoaded", function () {
 	skipBtn.addEventListener("click", () => {
 		if (currentMode === "focus") {
 			saveStudyLogs();
-			if (window.collectiblesModule && sessionSecondsStudied > 0) {
-				window.collectiblesModule.syncStudyProgress(sessionSecondsStudied);
-				sessionSecondsStudied = 0;
-			}
+			if (window.collectiblesModule) {
+				window.collectiblesModule.saveCollectibleState();
+			}      
 		}
-		if (ytPlayer && typeof ytPlayer.stopVideo === "function") {
-			ytPlayer.stopVideo();
-			youtubePlayerContainer.classList.add("hidden");
-			currentPlayingSoundId = null;
-			renderSoundLibrary();
-		}
+		// if (ytPlayer && typeof ytPlayer.stopVideo === "function") {
+		// 	ytPlayer.stopVideo();
+		// 	youtubePlayerContainer.classList.add("hidden");
+		// 	currentPlayingSoundId = null;
+		// 	renderSoundLibrary();
+		// }
 		switchMode(currentMode === "focus" ? "break" : "focus");
 	});
 	focusDurationInput.addEventListener("change", () => currentMode === "focus" && switchMode("focus"));
@@ -1117,12 +1116,12 @@ document.addEventListener("DOMContentLoaded", function () {
 		timeLeft = (mode === "focus" ? focusDurationInput.value : breakDurationInput.value) * 60;
 		updateTimerDisplay();
 		closePiPTimer();
-		if (ytPlayer && typeof ytPlayer.stopVideo === "function") {
-			ytPlayer.stopVideo();
-			youtubePlayerContainer.classList.add("hidden");
-			currentPlayingSoundId = null;
-			renderSoundLibrary();
-		}
+		// if (ytPlayer && typeof ytPlayer.stopVideo === "function") {
+		// 	ytPlayer.stopVideo();
+		// 	youtubePlayerContainer.classList.add("hidden");
+		// 	currentPlayingSoundId = null;
+		// 	renderSoundLibrary();
+		// }
 	}
 
 	function playPauseTimer() {

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flood Alert Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- LeafletJS for Embedded Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #1a202c;
+      /* Dark background */
+    }
+
+    .gauge-container {
+      position: relative;
+      width: 150px;
+      height: 75px;
+      overflow: hidden;
+    }
+
+    .gauge-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #2d3748;
+      /* Gray-700 */
+      border-radius: 150px 150px 0 0;
+    }
+
+    .gauge-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #48bb78, #f6e05e, #f56565);
+      /* Green -> Yellow -> Red */
+      border-radius: 150px 150px 0 0;
+      transform-origin: center bottom;
+      transition: transform 0.5s ease-in-out;
+    }
+
+    .gauge-cover {
+      position: absolute;
+      top: 5%;
+      left: 5%;
+      width: 90%;
+      height: 90%;
+      background: #1a202c;
+      /* Dark bg */
+      border-radius: 150px 150px 0 0;
+    }
+
+    .gauge-needle {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 2px;
+      height: 70px;
+      background: white;
+      transform-origin: bottom center;
+      transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      border-radius: 2px;
+    }
+
+    .card {
+      background-color: #2d3748;
+      /* Gray-700 */
+      border-radius: 1rem;
+      padding: 1.5rem;
+      color: #e2e8f0;
+      /* Gray-300 */
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .status-dot {
+      height: 1rem;
+      width: 1rem;
+      border-radius: 9999px;
+      display: inline-block;
+    }
+
+    .dot-green {
+      background-color: #48bb78;
+    }
+
+    .dot-red {
+      background-color: #f56565;
+    }
+
+    .dot-blue {
+      background-color: #4299e1;
+    }
+
+    /* Toggle Switch Styles */
+    .toggle-checkbox:checked {
+      right: 0;
+      border-color: #48bb78;
+    }
+
+    .toggle-checkbox:checked+.toggle-label {
+      background-color: #48bb78;
+    }
+
+    /* Custom Map Marker Style */
+    .map-marker-icon {
+      background-color: #4299e1;
+      /* blue-500 */
+      border-radius: 50%;
+      border: 3px solid #fff;
+      box-shadow: 0 0 10px rgba(66, 153, 225, 0.8);
+      animation: pulse 2s infinite;
+    }
+
+    /* UPDATED KEYFRAMES - The transform property has been removed to prevent conflicts with Leaflet */
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(66, 153, 225, 0.7);
+      }
+
+      70% {
+        box-shadow: 0 0 0 10px rgba(66, 153, 225, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(66, 153, 225, 0);
+      }
+    }
+
+    /* Ensure Leaflet popups fit the theme */
+    .leaflet-popup-content-wrapper,
+    .leaflet-popup-tip {
+      background: #2d3748;
+      color: #e2e8f0;
+    }
+  </style>
+</head>
+
+<body class="text-white p-4 sm:p-6 md:p-8">
+  <div class="max-w-6xl mx-auto">
+    <header class="flex flex-col sm:flex-row justify-between items-center mb-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-100 mb-4 sm:mb-0">
+        <i class="fas fa-water text-blue-400"></i> Flood Alert System
+      </h1>
+      <div id="connection-status" class="text-sm text-gray-400 flex items-center">
+        <span class="status-dot dot-red mr-2"></span> Disconnected
+      </div>
+    </header>
+
+    <!-- Main Grid Layout -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- Water Level Card -->
+      <div class="card lg:col-span-2">
+        <h2 class="text-xl font-semibold mb-4 text-gray-300">Water Level</h2>
+        <div class="flex flex-col sm:flex-row items-center justify-around text-center">
+          <div class="gauge-container mb-4 sm:mb-0">
+            <div class="gauge-bg"></div>
+            <div class="gauge-fill"></div>
+            <div class="gauge-cover"></div>
+            <div id="gauge-needle" class="gauge-needle"></div>
+          </div>
+          <div class="flex flex-col items-center justify-center">
+            <p class="text-5xl font-bold" id="water-level">--</p>
+            <p class="text-gray-400 mt-1">Analog Reading</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Status Card -->
+      <div class="card">
+        <h2 class="text-xl font-semibold mb-4 text-gray-300">System Status</h2>
+        <div class="space-y-4">
+          <div class="flex justify-between items-center">
+            <span class="font-medium">Flood Alarm</span>
+            <span id="alarm-status" class="font-bold text-gray-400">INACTIVE</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="font-medium">Rain Detected</span>
+            <span id="rain-status" class="font-bold text-gray-400">NO</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="font-medium">Flood Duration</span>
+            <span id="flood-duration" class="font-bold text-gray-400">0s</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="font-medium">Rain Duration</span>
+            <span id="rain-duration" class="font-bold text-gray-400">0s</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- GPS Location Card -->
+      <div class="card">
+        <h2 class="text-xl font-semibold mb-4 text-gray-300">GPS Location</h2>
+        <div id="map" class="h-64 w-full rounded-lg bg-gray-800 flex items-center justify-center">
+          <p id="map-placeholder" class="text-gray-500">Waiting for GPS signal...</p>
+        </div>
+        <div class="mt-2 text-center text-sm font-mono text-gray-400">
+          Lat: <span id="latitude">--</span>, Lng: <span id="longitude">--</span>
+        </div>
+      </div>
+
+      <!-- System Controls Card -->
+      <div class="card lg:col-span-2">
+        <h2 class="text-xl font-semibold mb-4 text-gray-300">System Controls</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+          <!-- Remote LED Toggle -->
+          <div class="flex items-center justify-between bg-gray-800 p-3 rounded-lg">
+            <label for="ledToggle" class="font-medium">Remote LED</label>
+            <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+              <input type="checkbox" name="ledToggle" id="ledToggle"
+                class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                onclick="sendCommand('led')" />
+              <label for="ledToggle"
+                class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+            </div>
+          </div>
+
+          <!-- Emergency Mode Toggle -->
+          <div class="flex items-center justify-between bg-gray-800 p-3 rounded-lg">
+            <label for="emergencyToggle" class="font-medium">Emergency Mode</label>
+            <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+              <input type="checkbox" name="emergencyToggle" id="emergencyToggle"
+                class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                onclick="sendCommand('emergency')" />
+              <label for="emergencyToggle"
+                class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+            </div>
+          </div>
+
+          <!-- Silence Alarm Button -->
+          <button onclick="sendCommand('silence')"
+            class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+            <i class="fas fa-volume-mute mr-2"></i> Silence Alarm
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'http://localhost:3005/api';
+
+    const waterLevelEl = document.getElementById('water-level');
+    const alarmStatusEl = document.getElementById('alarm-status');
+    const rainStatusEl = document.getElementById('rain-status');
+    const floodDurationEl = document.getElementById('flood-duration');
+    const rainDurationEl = document.getElementById('rain-duration');
+    const latitudeEl = document.getElementById('latitude');
+    const longitudeEl = document.getElementById('longitude');
+    const connectionStatusEl = document.getElementById('connection-status');
+    const gaugeNeedle = document.getElementById('gauge-needle');
+    const ledToggle = document.getElementById('ledToggle');
+    const emergencyToggle = document.getElementById('emergencyToggle');
+
+    // --- Map Variables ---
+    let map = null;
+    let marker = null;
+    const mapPlaceholder = document.getElementById('map-placeholder');
+
+    async function fetchData() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/flood-data/latest`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        updateDashboard(data);
+        updateConnectionStatus(true);
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+        updateConnectionStatus(false);
+      }
+    }
+
+    function updateDashboard(data) {
+      // Update other dashboard elements
+      waterLevelEl.textContent = data.waterLevel || '--';
+
+      if (data.isAlarmActive) {
+        alarmStatusEl.textContent = 'ACTIVE';
+        alarmStatusEl.classList.remove('text-gray-400');
+        alarmStatusEl.classList.add('text-red-500', 'animate-pulse');
+      } else {
+        alarmStatusEl.textContent = 'INACTIVE';
+        alarmStatusEl.classList.add('text-gray-400');
+        alarmStatusEl.classList.remove('text-red-500', 'animate-pulse');
+      }
+
+      if (data.rainStatus === 1) {
+        rainStatusEl.textContent = 'YES';
+        rainStatusEl.classList.remove('text-gray-400');
+        rainStatusEl.classList.add('text-blue-400');
+      } else {
+        rainStatusEl.textContent = 'NO';
+        rainStatusEl.classList.add('text-gray-400');
+        rainStatusEl.classList.remove('text-blue-400');
+      }
+
+      floodDurationEl.textContent = `${data.floodDuration || 0}s`;
+      rainDurationEl.textContent = `${data.rainDuration || 0}s`;
+
+      const waterValue = data.waterLevel || 0;
+      const angle = (Math.min(Math.max(waterValue, 0), 1023) / 1023) * 180 - 90;
+      gaugeNeedle.style.transform = `rotate(${angle}deg)`;
+
+      ledToggle.checked = data.remoteLedIsOn;
+      emergencyToggle.checked = data.emergencyIsActive;
+
+      // --- UPDATE MAP LOGIC ---
+      updateMap(data.latitude, data.longitude);
+    }
+
+    function updateMap(lat, lng) {
+      latitudeEl.textContent = lat ? lat.toFixed(6) : '--';
+      longitudeEl.textContent = lng ? lng.toFixed(6) : '--';
+
+      // Check for valid coordinates
+      if (lat && lng && lat !== 0.0 && lng !== 0.0) {
+
+        const position = [lat, lng];
+        mapPlaceholder.style.display = 'none'; // Hide placeholder text
+
+        // Initialize map if it doesn't exist
+        if (map === null) {
+          map = L.map('map').setView(position, 16);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          }).addTo(map);
+
+          // Create custom pulsing icon
+          const customIcon = L.divIcon({
+            className: 'map-marker-icon',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10] // This is the fix: centers the icon
+          });
+
+          marker = L.marker(position, { icon: customIcon }).addTo(map)
+            .bindPopup('<b>Device Location</b><br>Live position of the sensor.')
+            .openPopup();
+        } else {
+          // Just update view and marker position if map already exists
+          map.setView(position, map.getZoom());
+          marker.setLatLng(position);
+        }
+      } else {
+        mapPlaceholder.style.display = 'block'; // Show placeholder if coords are invalid
+      }
+    }
+
+    async function sendCommand(command) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/controls/${command}`, {
+          method: 'POST',
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log(`Command '${command}' sent. New state:`, data);
+        fetchData();
+      } catch (error) {
+        console.error(`Failed to send command '${command}':`, error);
+      }
+    }
+
+    function updateConnectionStatus(isConnected) {
+      if (isConnected) {
+        connectionStatusEl.innerHTML = '<span class="status-dot dot-green mr-2"></span> Connected';
+      } else {
+        connectionStatusEl.innerHTML = '<span class="status-dot dot-red mr-2"></span> Disconnected';
+      }
+    }
+
+    fetchData();
+    setInterval(fetchData, 1000);
+  </script>
+</body>
+
+</html>

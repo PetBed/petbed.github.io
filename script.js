@@ -39,6 +39,13 @@ const paths = {
 			"News Ticker": {
 				url: "https://petbed.github.io/Competition/News%20Ticker/",
 			},
+			"Flood App": {
+        contents: {
+          "Flood System Docs": {
+            url: "https://petbed.github.io/Misc/Flood%20System%20Docs/",
+          }
+        }
+			},
 		},
 	},
 	Games: {
@@ -71,19 +78,15 @@ const paths = {
 			WoT: {
 				url: "https://petbed.github.io/WoT/login/",
 			},
-      "Study Companion": {
-        url: "https://petbed.github.io/Study%20Website/",
-      },
+			"Study Companion": {
+				url: "https://petbed.github.io/Study%20Website/",
+			},
 			"Hamilton Ipsum": {
 				url: "https://petbed.github.io/Misc/Hamilton%20Ipsum/",
 			},
-			Misc: {
-				contents: {
-					"Flood System Docs": {
-						url: "https://petbed.github.io/Misc/Flood%20System%20Docs/",
-					},
-				},
-			},
+      "Timeline Logger": {
+        url: "https://petbed.github.io/Misc/Timeline%20Logger/dashboard.html",
+      }
 		},
 	},
 	Credits: {

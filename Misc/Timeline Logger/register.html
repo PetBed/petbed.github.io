@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Tracker - Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#4F46E5',
+                        'primary-dark': '#1F2937',
+                        'secondary-gray': '#E5E7EB',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+    </style>
+</head>
+<body class="bg-secondary-gray min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-lg bg-white rounded-xl shadow-2xl p-8 transition duration-300 hover:shadow-primary-blue/30">
+        <div class="text-center mb-8">
+            <svg class="mx-auto h-12 w-12 text-primary-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+            <h1 class="mt-4 text-3xl font-bold text-primary-dark">
+                Create Account
+            </h1>
+            <p class="text-gray-500">Start tracking your history study timelines today</p>
+        </div>
+
+        <form id="registerForm" class="space-y-6">
+            
+            <!-- Email -->
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="email" name="email" required 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary-blue focus:border-primary-blue transition duration-150 shadow-sm"
+                       placeholder="you@example.com">
+            </div>
+
+            <!-- Username -->
+            <div>
+                <label for="regUsername" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                <input type="text" id="regUsername" name="regUsername" required 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary-blue focus:border-primary-blue transition duration-150 shadow-sm"
+                       placeholder="Choose a username">
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label for="regPassword" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" id="regPassword" name="regPassword" required 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary-blue focus:border-primary-blue transition duration-150 shadow-sm"
+                       placeholder="••••••••">
+            </div>
+
+            <!-- Security Question -->
+            <div>
+                <label for="securityQuestion" class="block text-sm font-medium text-gray-700 mb-1">Security Question</label>
+                <select id="securityQuestion" name="securityQuestion" required
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary-blue focus:border-primary-blue transition duration-150 shadow-sm">
+                    <option value="" disabled selected>Select a question</option>
+                    <option value="What was your first pet's name?">What was your first pet's name?</option>
+                    <option value="What city were you born in?">What city were you born in?</option>
+                    <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                </select>
+            </div>
+
+            <!-- Security Answer -->
+            <div>
+                <label for="securityAnswer" class="block text-sm font-medium text-gray-700 mb-1">Security Answer</label>
+                <input type="text" id="securityAnswer" name="securityAnswer" required 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary-blue focus:border-primary-blue transition duration-150 shadow-sm"
+                       placeholder="Your secret answer">
+            </div>
+            
+            <div id="messageBox" class="hidden p-3 rounded-lg text-sm font-medium" role="alert"></div>
+
+            <button type="submit" id="registerButton"
+                    class="w-full py-3 px-4 text-white bg-primary-blue rounded-lg font-semibold shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-primary-blue focus:ring-offset-2 transition duration-200 ease-in-out disabled:opacity-50">
+                Register
+            </button>
+        </form>
+
+        <p class="mt-6 text-center text-sm text-gray-600">
+            Already have an account? 
+            <a href="login.html" class="font-medium text-primary-blue hover:text-indigo-700">
+                Sign in
+            </a>
+        </p>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://wot-tau.vercel.app'; // **Update with your actual backend URL**
+
+        // Helper function to show messages
+        function showMessage(text, type) {
+            const box = document.getElementById('messageBox');
+            box.textContent = text;
+            box.className = `p-3 rounded-lg text-sm font-medium ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
+            box.classList.remove('hidden');
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            const securityQuestion = document.getElementById('securityQuestion').value.trim();
+            const securityAnswer = document.getElementById('securityAnswer').value.trim();
+            const button = document.getElementById('registerButton');
+
+            if (!email || !username || !password || !securityQuestion || !securityAnswer) {
+                showMessage('All fields, including the security question, are required.', 'error');
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = 'Registering...';
+            document.getElementById('messageBox').classList.add('hidden');
+
+            try {
+                // Send all five required fields to the register endpoint
+                const response = await fetch(`${API_BASE_URL}/api/study/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, username, password, securityQuestion, securityAnswer })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Successful Registration
+                    showMessage('Registration successful! Redirecting to login...', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 1500);
+
+                } else {
+                    // Failed Registration
+                    showMessage(data.error || 'Registration failed. Username or email may already be taken.', 'error');
+                }
+
+            } catch (error) {
+                console.error('Network Error:', error);
+                showMessage('Network error. Could not connect to the server.', 'error');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Register';
+            }
+        });
+    </script>
+</body>
+</html>

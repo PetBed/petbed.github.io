@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Tracker - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#4F46E5',
+                        'primary-dark': '#1F2937',
+                        'secondary-gray': '#E5E7EB',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar style for better aesthetics */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+    </style>
+</head>
+<body class="bg-secondary-gray min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-md bg-white rounded-xl shadow-2xl p-8 transition duration-300 hover:shadow-primary-blue/30">
+        <div class="text-center mb-8">
+            <svg class="mx-auto h-12 w-12 text-primary-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h1 class="mt-4 text-3xl font-bold text-primary-dark">
+                Timeline Tracker
+            </h1>
+            <p class="text-gray-500">Sign in to your study account</p>
+        </div>
+
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                <input type="email" id="email" name="email" required 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary-blue focus:border-primary-blue transition duration-150 shadow-sm"
+                       placeholder="Enter your email address">
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" id="password" name="password" required 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary-blue focus:border-primary-blue transition duration-150 shadow-sm"
+                       placeholder="••••••••">
+            </div>
+
+            <div id="messageBox" class="hidden p-3 rounded-lg text-sm font-medium" role="alert"></div>
+
+            <button type="submit" id="loginButton"
+                    class="w-full py-3 px-4 text-white bg-primary-blue rounded-lg font-semibold shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-primary-blue focus:ring-offset-2 transition duration-200 ease-in-out disabled:opacity-50">
+                Log In
+            </button>
+        </form>
+
+        <p class="mt-6 text-center text-sm text-gray-600">
+            Don't have an account? 
+            <a href="register.html" class="font-medium text-primary-blue hover:text-indigo-700">
+                Register here
+            </a>
+        </p>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://wot-tau.vercel.app'; // **Update with your actual backend URL**
+
+        // Helper function to show messages
+        function showMessage(text, type) {
+            const box = document.getElementById('messageBox');
+            box.textContent = text;
+            box.className = `p-3 rounded-lg text-sm font-medium ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
+            box.classList.remove('hidden');
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const button = document.getElementById('loginButton');
+
+            if (!email || !password) {
+                showMessage('Please enter both email and password.', 'error');
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = 'Logging In...';
+            document.getElementById('messageBox').classList.add('hidden');
+
+            try {
+                // Send email and password for login
+                const response = await fetch(`${API_BASE_URL}/api/study/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Successful Login
+                    showMessage('Login successful! Redirecting...', 'success');
+                    console.log(data);
+                    // Store user data (e.g., userId and username) for dashboard
+                    localStorage.setItem('timeline_user_id', data.user.id);
+                    localStorage.setItem('timeline_username', data.user.username);
+                    
+                    // Redirect to the dashboard
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+
+                } else {
+                    // Failed Login
+                    showMessage(data.error || 'Login failed. Check your credentials.', 'error');
+                }
+
+            } catch (error) {
+                console.error('Network Error:', error);
+                showMessage('Network error. Could not connect to the server.', 'error');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Log In';
+            }
+        });
+    </script>
+</body>
+</html>

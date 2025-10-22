@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Loading Timeline...</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#4F46E5',
+                        'primary-dark': '#1F2937',
+                        'secondary-gray': '#F9FAFB',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
+    
+    <style>
+        /* Container for the TimelineJS visualization */
+        #timeline-embed {
+            width: 100%;
+            height: 600px; /* Set a fixed height for the timeline container */
+            margin-top: 2rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden; /* Ensure the timeline stays within bounds */
+        }
+        /* Style for the custom event details box (on hover/click if TimelineJS supports it, or for custom implementation) */
+        /* TimelineJS handles its own appearance, so we mostly style the surrounding elements. */
+        .tl-timenav-content-container {
+             /* Make the timeline navigation a bit taller for history events */
+            min-height: 100px; 
+        }
+    </style>
+</head>
+<body class="bg-secondary-gray min-h-screen font-sans">
+    
+    <header class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <a href="dashboard.html" class="flex items-center space-x-2 text-primary-blue hover:text-indigo-700 transition duration-150">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span class="text-xl font-bold">Back to Dashboard</span>
+            </a>
+            <span id="timelineNameHeader" class="text-xl font-bold text-primary-dark"></span>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+            <h1 class="text-3xl font-extrabold text-primary-dark" id="timelineTitle"></h1>
+            <button onclick="window.location.href='event_manager.html?id=' + getTimelineId()" class="mt-4 md:mt-0 px-4 py-2 bg-primary-blue text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition duration-200">
+                Manage Events
+            </button>
+        </div>
+
+        <div id="loadingIndicator" class="text-center text-text-gray p-10 hidden">
+            <svg class="animate-spin h-5 w-5 mr-3 text-primary-blue mx-auto" viewBox="0 0 24 24"></svg>
+            Loading timeline events...
+        </div>
+        
+        <div id="timeline-embed"></div>
+
+        <div id="errorMessage" class="hidden p-4 mt-8 rounded-lg text-sm bg-red-100 text-red-700" role="alert"></div>
+        
+    </main>
+    
+    <script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
+    
+    <script>
+        const API_BASE_URL = 'https://wot-tau.vercel.app'; // **Update with your actual backend URL**
+        const timelineEmbed = document.getElementById('timeline-embed');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Function to get the ID from the URL
+        function getTimelineId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        // --- Data Fetching and Formatting ---
+        async function fetchAndRenderTimeline() {
+            const timelineId = getTimelineId();
+            if (!timelineId) {
+                displayError("No timeline ID provided in the URL.");
+                return;
+            }
+
+            loadingIndicator.classList.remove('hidden');
+            document.getElementById('pageTitle').textContent = `Timeline: ${timelineId}`;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/study/timelines/${timelineId}`);
+                const data = await response.json();
+
+                if (response.ok && data.timeline) {
+                    const timeline = data.timeline;
+                    
+                    document.getElementById('timelineTitle').textContent = timeline.name;
+                    document.getElementById('timelineNameHeader').textContent = timeline.name;
+                    document.getElementById('pageTitle').textContent = timeline.name;
+
+                    if (timeline.events.length === 0) {
+                        displayError("This timeline has no events yet. Use the 'Manage Events' feature to add some!");
+                        timelineEmbed.style.height = '100px'; // Shrink embed if empty
+                        return;
+                    }
+
+                    // 2. Format the data for TimelineJS
+                    const timelineData = formatTimelineForTimelineJS(timeline);
+                    
+                    // 3. Render the timeline
+                    renderTimeline(timelineData);
+                    
+                } else {
+                    displayError(`Failed to load timeline: ${data.error || 'Server error.'}`);
+                }
+
+            } catch (error) {
+                console.error('Fetch Timeline Error:', error);
+                displayError('Network error. Could not connect to the server or retrieve data.');
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Converts the MongoDB timeline format into the TimelineJS JSON format.
+         * The details field is placed in the 'text' property, which is displayed 
+         * when an event is selected/hovered in TimelineJS.
+         * @param {Object} timeline The timeline object fetched from the backend.
+         * @returns {Object} The formatted TimelineJS JSON object.
+         */
+        function formatTimelineForTimelineJS(timeline) {
+            const events = timeline.events.map(event => {
+                const eventDate = new Date(event.date);
+                return {
+                    // Start date is required and split into year, month, day
+                    start_date: {
+                        year: eventDate.getFullYear(),
+                        month: eventDate.getMonth() + 1, // JS months are 0-indexed
+                        day: eventDate.getDate()
+                    },
+                    text: {
+                        headline: event.title,
+                        // This 'text' is the details/description shown when an event is clicked
+                        text: event.details || "No additional details provided." 
+                    },
+                    // Unique ID for the event
+                    unique_id: event._id 
+                    
+                    // Note: TimelineJS uses selection (click) rather than simple hover
+                    // for detailed content expansion.
+                };
+            });
+
+            return {
+                title: {
+                    text: {
+                        headline: timeline.name,
+                        text: timeline.description || "A historical timeline for study and organization."
+                    }
+                },
+                events: events
+            };
+        }
+
+        // --- TimelineJS Initialization ---
+        function renderTimeline(timelineData) {
+            window.timeline = new TL.Timeline('timeline-embed', timelineData, {
+                // Configuration options for TimelineJS
+                timenav_position: 'bottom', // Place the navigator at the bottom
+                scale_factor: 1, // Controls initial zoom (1 = default)
+                initial_slide: 0, // Start at the first event
+                duration: 500, // Animation duration
+                hash_bookmark: true // Allows deep linking to slides
+            });
+        }
+        
+        function displayError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('hidden');
+        }
+
+        // Initialize on load
+        fetchAndRenderTimeline();
+    </script>
+</body>
+</html>

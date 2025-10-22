@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Manage Timeline Events</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#4F46E5',
+                        'primary-dark': '#1F2937',
+                        'secondary-gray': '#F9FAFB',
+                        'text-gray': '#6B7280',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Table styles for a clean, professional look */
+        .event-table th, .event-table td {
+            padding: 12px 16px;
+            text-align: left;
+        }
+        .event-table th {
+            background-color: #F3F4F6;
+            color: #4B5563;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+        .event-table tbody tr:hover {
+            background-color: #F5F7FF; /* Light blue hover */
+        }
+        /* Custom scrollbar style */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #F3F4F6; }
+        ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+    </style>
+</head>
+<body class="bg-secondary-gray min-h-screen font-sans">
+    
+    <!-- Navbar -->
+    <header class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <a id="backToViewLink" href="dashboard.html" class="flex items-center space-x-2 text-primary-blue hover:text-indigo-700 transition duration-150">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span class="text-lg font-bold">Back to Timeline View</span>
+            </a>
+            <div class="flex items-center space-x-4">
+                <span id="timelineNameHeader" class="text-xl font-bold text-primary-dark"></span>
+                <button onclick="openTimelineModal()" class="flex items-center space-x-1 px-3 py-1 bg-gray-200 text-gray-700 font-medium text-sm rounded-lg shadow-sm hover:bg-gray-300 transition duration-150">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                    <span>Edit Details</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-extrabold text-primary-dark" id="managerTitle">Manage Events</h1>
+            <button onclick="openEventModal('add')" class="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-200 focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                <span>Add New Event</span>
+            </button>
+        </div>
+
+        <!-- Message Box -->
+        <div id="managerMessageBox" class="hidden p-4 mb-6 rounded-lg text-sm font-medium" role="alert"></div>
+
+        <!-- Events Table -->
+        <div class="bg-white shadow-xl rounded-xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full event-table divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="w-1/6">Date</th>
+                            <th class="w-3/6">Title</th>
+                            <th class="w-1/6">Details</th>
+                            <th class="w-1/6 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="eventsTableBody" class="divide-y divide-gray-100">
+                        <!-- Events will be dynamically injected here -->
+                        <tr>
+                            <td colspan="4" class="text-center text-text-gray p-8" id="emptyState">Loading events...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Event Add/Edit Modal (Existing Modal) -->
+    <div id="eventModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-10 mx-auto p-8 border w-full max-w-lg shadow-2xl rounded-xl bg-white transform transition-all duration-300">
+            
+            <div class="flex justify-between items-center border-b pb-4 mb-6">
+                <h3 class="text-2xl font-semibold text-primary-dark" id="modalTitle">Add New Event</h3>
+                <button onclick="closeEventModal()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <form id="eventForm" class="space-y-5">
+                <input type="hidden" id="eventId"> <!-- Hidden field for editing -->
+                
+                <div>
+                    <label for="eventDate" class="block text-sm font-medium text-gray-700">Date of Event</label>
+                    <!-- Using date input for easy date selection -->
+                    <input type="date" id="eventDate" required class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:ring-primary-blue focus:border-primary-blue shadow-sm">
+                </div>
+
+                <div>
+                    <label for="eventTitle" class="block text-sm font-medium text-gray-700">Event Title</label>
+                    <input type="text" id="eventTitle" required placeholder="e.g., Battle of Hastings" class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:ring-primary-blue focus:border-primary-blue shadow-sm">
+                </div>
+
+                <div>
+                    <label for="eventDetails" class="block text-sm font-medium text-gray-700">Detailed Information</label>
+                    <textarea id="eventDetails" rows="4" placeholder="Full historical context and details..." class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:ring-primary-blue focus:border-primary-blue shadow-sm"></textarea>
+                </div>
+
+                <div id="modalMessageBox" class="hidden p-3 rounded-lg text-sm font-medium"></div>
+                
+                <button type="submit" id="modalSubmitButton"
+                        class="w-full py-3 px-4 bg-primary-blue text-white font-semibold rounded-md hover:bg-indigo-700 disabled:opacity-50 transition duration-200 shadow-md">
+                    Save Event
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Timeline Edit Modal (NEW MODAL) -->
+    <div id="timelineModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-10 mx-auto p-8 border w-full max-w-lg shadow-2xl rounded-xl bg-white transform transition-all duration-300">
+            
+            <div class="flex justify-between items-center border-b pb-4 mb-6">
+                <h3 class="text-2xl font-semibold text-primary-dark">Edit Timeline Details</h3>
+                <button onclick="closeTimelineModal()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <form id="timelineForm" class="space-y-5">
+                
+                <div>
+                    <label for="timelineName" class="block text-sm font-medium text-gray-700">Timeline Name</label>
+                    <input type="text" id="timelineName" required class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:ring-primary-blue focus:border-primary-blue shadow-sm">
+                </div>
+
+                <div>
+                    <label for="timelineDescription" class="block text-sm font-medium text-gray-700">Description</label>
+                    <textarea id="timelineDescription" rows="3" placeholder="A brief summary of this timeline." class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:ring-primary-blue focus:border-primary-blue shadow-sm"></textarea>
+                </div>
+
+                <div id="timelineModalMessageBox" class="hidden p-3 rounded-lg text-sm font-medium"></div>
+                
+                <button type="submit" id="timelineSubmitButton"
+                        class="w-full py-3 px-4 bg-primary-blue text-white font-semibold rounded-md hover:bg-indigo-700 disabled:opacity-50 transition duration-200 shadow-md">
+                    Update Timeline
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        const API_BASE_URL = 'https://wot-tau.vercel.app'; // **Update with your actual backend URL**
+        const eventsTableBody = document.getElementById('eventsTableBody');
+        const emptyState = document.getElementById('emptyState');
+        const eventModal = document.getElementById('eventModal');
+        const timelineModal = document.getElementById('timelineModal'); // Get the new timeline modal
+        const modalTitle = document.getElementById('modalTitle');
+        const modalSubmitButton = document.getElementById('modalSubmitButton');
+
+        let timelineId = null;
+        let currentTimeline = {}; // Store current timeline data
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            timelineId = urlParams.get('id');
+
+            if (!timelineId) {
+                displayManagerMessage('Timeline ID is missing. Cannot manage events.', 'error');
+                return;
+            }
+
+            // Set the back button link
+            document.getElementById('backToViewLink').href = `timeline_view.html?id=${timelineId}`;
+            
+            fetchTimelineData();
+            
+            // Set up form submission listener for the new modal
+            document.getElementById('timelineForm').onsubmit = handleTimelineUpdate;
+        });
+
+        // --- API HELPERS ---
+        async function fetchTimelineData() {
+            emptyState.textContent = "Loading events...";
+            eventsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-text-gray p-8" id="emptyState">Loading events...</td></tr>`;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/study/timelines/${timelineId}`);
+                const data = await response.json();
+
+                if (response.ok && data.timeline) {
+                    currentTimeline = data.timeline; // Store the current data
+                    
+                    document.getElementById('timelineNameHeader').textContent = currentTimeline.name;
+                    document.getElementById('pageTitle').textContent = `Manage Events: ${currentTimeline.name}`;
+                    renderEvents(currentTimeline.events);
+                } else {
+                    displayManagerMessage(`Failed to load timeline: ${data.error || 'Server error.'}`, 'error');
+                }
+
+            } catch (error) {
+                console.error('Fetch Timeline Error:', error);
+                displayManagerMessage('Network error. Could not load timeline details.', 'error');
+            }
+        }
+        
+        // --- RENDERING ---
+        function renderEvents(events) {
+            eventsTableBody.innerHTML = ''; // Clear existing rows
+
+            if (events.length === 0) {
+                eventsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-text-gray p-8">No events added yet. Use the "Add New Event" button to get started!</td></tr>`;
+                return;
+            }
+
+            // Sort events by date before rendering
+            events.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            events.forEach(event => {
+                const row = eventsTableBody.insertRow();
+                row.className = 'hover:bg-gray-50 transition duration-150';
+
+                // Format the date to YYYY-MM-DD
+                const eventDate = new Date(event.date);
+                const formattedDate = eventDate.toISOString().substring(0, 10);
+                
+                // Escape quotes for injection into onclick handlers
+                const sanitizedTitle = event.title.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                const sanitizedDetails = (event.details || '').replace(/'/g, "\\'").replace(/"/g, '\\"');
+
+                row.innerHTML = `
+                    <td class="text-sm font-medium text-gray-900">${formattedDate}</td>
+                    <td class="text-sm text-gray-700 font-semibold">${event.title}</td>
+                    <td class="text-xs text-text-gray line-clamp-2">${event.details || '—'}</td>
+                    <td class="text-center space-x-2">
+                        <button onclick="openEventModal('edit', '${event._id}', '${formattedDate}', '${sanitizedTitle}', '${sanitizedDetails}')" 
+                                class="text-primary-blue hover:text-indigo-700 p-1 rounded-full hover:bg-indigo-50 transition duration-150">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        </button>
+                        <button onclick="deleteEvent('${event._id}')" 
+                                class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition duration-150">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                    </td>
+                `;
+                eventsTableBody.appendChild(row);
+            });
+        }
+        
+        // --- EVENT MODAL CONTROLS (Existing) ---
+        function openEventModal(mode, id = null, date = '', title = '', details = '') {
+            const form = document.getElementById('eventForm');
+            const dateInput = document.getElementById('eventDate');
+            const titleInput = document.getElementById('eventTitle');
+            const detailsInput = document.getElementById('eventDetails');
+            const eventIdInput = document.getElementById('eventId');
+            
+            form.reset();
+            document.getElementById('modalMessageBox').classList.add('hidden');
+            
+            if (mode === 'add') {
+                modalTitle.textContent = 'Add New Event';
+                modalSubmitButton.textContent = 'Add Event';
+                form.onsubmit = (e) => handleFormSubmit(e, 'add');
+            } else if (mode === 'edit') {
+                modalTitle.textContent = 'Edit Event';
+                modalSubmitButton.textContent = 'Update Event';
+                
+                // Populate fields for editing
+                eventIdInput.value = id;
+                dateInput.value = date;
+                // Reverse sanitization for input fields
+                titleInput.value = title.replace(/\\'/g, "'").replace(/\\"/g, '"');
+                detailsInput.value = details.replace(/\\'/g, "'").replace(/\\"/g, '"');
+                
+                form.onsubmit = (e) => handleFormSubmit(e, 'edit');
+            }
+            
+            eventModal.classList.remove('hidden');
+        }
+
+        function closeEventModal() {
+            document.getElementById('eventModal').classList.add('hidden');
+        }
+
+        // --- TIMELINE MODAL CONTROLS (NEW) ---
+        function openTimelineModal() {
+            document.getElementById('timelineName').value = currentTimeline.name;
+            document.getElementById('timelineDescription').value = currentTimeline.description || '';
+            document.getElementById('timelineModalMessageBox').classList.add('hidden');
+            timelineModal.classList.remove('hidden');
+        }
+
+        function closeTimelineModal() {
+            timelineModal.classList.add('hidden');
+        }
+        
+        // --- EVENT CRUD LOGIC (Existing) ---
+        async function handleFormSubmit(event, mode) {
+            event.preventDefault();
+            // ... (Your existing handleFormSubmit logic) ...
+            
+            const eventId = document.getElementById('eventId').value;
+            const date = document.getElementById('eventDate').value;
+            const title = document.getElementById('eventTitle').value;
+            const details = document.getElementById('eventDetails').value;
+            
+            const button = document.getElementById('modalSubmitButton');
+            
+            button.disabled = true;
+            button.textContent = mode === 'add' ? 'Adding...' : 'Updating...';
+            document.getElementById('modalMessageBox').classList.add('hidden');
+
+            const payload = { date, title, details };
+            let url = `${API_BASE_URL}/api/study/timelines/${timelineId}/events`;
+            let method = 'POST';
+
+            if (mode === 'edit') {
+                url = `${API_BASE_URL}/api/study/timelines/${timelineId}/events/${eventId}`;
+                method = 'PATCH';
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayManagerMessage(`Event ${mode === 'add' ? 'added' : 'updated'} successfully!`, 'success');
+                    closeEventModal();
+                    fetchTimelineData(); // Refresh list
+                } else {
+                    displayModalMessage(data.error || `Failed to ${mode} event.`, 'error', 'modal');
+                }
+
+            } catch (error) {
+                console.error('Event CRUD Error:', error);
+                displayModalMessage('Network error. Check server connection.', 'error', 'modal');
+            } finally {
+                button.disabled = false;
+                button.textContent = mode === 'add' ? 'Add Event' : 'Update Event';
+            }
+        }
+        
+        async function deleteEvent(eventId) {
+            if (!confirm("Are you sure you want to delete this event?")) {
+                return;
+            }
+            // ... (Your existing deleteEvent logic) ...
+            
+            try {
+                const url = `${API_BASE_URL}/api/study/timelines/${timelineId}/events/${eventId}`;
+                const response = await fetch(url, { method: 'DELETE' });
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayManagerMessage(data.message || 'Event deleted successfully.', 'success');
+                    fetchTimelineData(); // Refresh list
+                } else {
+                    displayManagerMessage(data.error || 'Failed to delete event.', 'error');
+                }
+            } catch (error) {
+                console.error('Delete Event Error:', error);
+                displayManagerMessage('Network error. Could not delete event.', 'error');
+            }
+        }
+
+        // --- TIMELINE UPDATE LOGIC (NEW) ---
+        async function handleTimelineUpdate(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('timelineName').value;
+            const description = document.getElementById('timelineDescription').value;
+            
+            const button = document.getElementById('timelineSubmitButton');
+            
+            button.disabled = true;
+            button.textContent = 'Updating...';
+            document.getElementById('timelineModalMessageBox').classList.add('hidden');
+
+            const payload = { name, description };
+            const url = `${API_BASE_URL}/api/study/timelines/${timelineId}`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayManagerMessage('Timeline details updated successfully!', 'success');
+                    closeTimelineModal();
+                    fetchTimelineData(); // Refresh timeline name in the header
+                } else {
+                    displayModalMessage(data.error || 'Failed to update timeline.', 'error', 'timeline');
+                }
+
+            } catch (error) {
+                console.error('Timeline Update Error:', error);
+                displayModalMessage('Network error. Check server connection.', 'error', 'timeline');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Update Timeline';
+            }
+        }
+
+        // --- MESSAGE FUNCTIONS (Updated to handle both modals) ---
+        function displayManagerMessage(text, type) {
+            const box = document.getElementById('managerMessageBox');
+            box.textContent = text;
+            box.className = `p-4 mb-6 rounded-lg text-sm font-medium ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
+            box.classList.remove('hidden');
+            setTimeout(() => { box.classList.add('hidden'); }, 5000);
+        }
+
+        function displayModalMessage(text, type, modalId) {
+            const box = document.getElementById(modalId === 'timeline' ? 'timelineModalMessageBox' : 'modalMessageBox');
+            box.textContent = text;
+            box.className = `p-3 rounded-lg text-sm font-medium ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
+            box.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

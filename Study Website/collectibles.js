@@ -2,7 +2,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 	// --- CONFIGURATION ---
-	const API_URL = "https://wot-tau.vercel.app"; // Ensure this matches your main script
+	const API_URL = "http://localhost:3005"; // Ensure this matches your main script
 	const CARD_DROP_INTERVAL = 20 * 60; // 20 minutes in seconds
 
 	// Rarity styles - used for borders, text colors, etc.
@@ -140,17 +140,21 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 
 		openClaimModal(true);
-
-		try {
-			const response = await fetch(`${API_URL}/api/collectibles/generate-drop`);
-			cardChoices = await response.json();
-			renderCardChoices();
-			openClaimModal(false);
-		} catch (error) {
-			console.error("Failed to generate card drop:", error);
-			closeClaimModal();
-			alert("Could not generate a card drop. Please try again.");
-		}
+    console.log("Generating card drop for user:", userId);
+    try {
+      const response = await fetch(`${API_URL}/api/collectibles/generate-drop`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      cardChoices = await response.json();
+      renderCardChoices();
+      openClaimModal(false);
+    } catch (error) {
+      console.error("Failed to generate card drop:", error);
+      closeClaimModal();
+      alert("Could not generate a card drop. Please try again.");
+    }
 	}
 
 	function openClaimModal(isLoading = false) {

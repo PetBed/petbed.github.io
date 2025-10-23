@@ -55,7 +55,9 @@
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                <span class="text-lg font-bold">Back to Timeline View</span>
+                <!-- START OF CHANGE -->
+                <span class="text-lg font-bold">Back to Dashboard</span>
+                <!-- END OF CHANGE -->
             </a>
             <div class="flex items-center space-x-4">
                 <span id="timelineNameHeader" class="text-xl font-bold text-primary-dark"></span>
@@ -86,7 +88,9 @@
                 <table class="min-w-full event-table divide-y divide-gray-200">
                     <thead>
                         <tr>
-                            <th class="w-1/6">Date</th>
+                            <!-- START OF CHANGE -->
+                            <th class="w-1/6">Date(s)</th>
+                            <!-- END OF CHANGE -->
                             <th class="w-3/6">Title</th>
                             <th class="w-1/6">Details</th>
                             <th class="w-1/6 text-center">Actions</th>
@@ -95,7 +99,7 @@
                     <tbody id="eventsTableBody" class="divide-y divide-gray-100">
                         <!-- Events will be dynamically injected here -->
                         <tr>
-                            <td colspan="4" class="text-center text-text-gray p-8" id="emptyState">Loading events...</td>
+                            <td colspan="4" class="text-center text-text-gray p-8" id="loadingState">Loading events...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -117,11 +121,23 @@
             <form id="eventForm" class="space-y-5">
                 <input type="hidden" id="eventId"> <!-- Hidden field for editing -->
                 
-                <div>
-                    <label for="eventDate" class="block text-sm font-medium text-gray-700">Date of Event</label>
-                    <!-- Using date input for easy date selection -->
-                    <input type="date" id="eventDate" required class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:ring-primary-blue focus:border-primary-blue shadow-sm">
+                <!-- START OF CHANGE -->
+                <div class="flex items-center">
+                    <input id="isPeriod" type="checkbox" class="h-4 w-4 text-primary-blue border-gray-300 rounded focus:ring-primary-blue">
+                    <label for="isPeriod" class="ml-2 block text-sm font-medium text-gray-700">Is this a time period?</label>
                 </div>
+                
+                <div>
+                    <label for="eventStartDate" class="block text-sm font-medium text-gray-700">Start Date</label>
+                    <!-- Using date input for easy date selection -->
+                    <input type="date" id="eventStartDate" required class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:ring-primary-blue focus:border-primary-blue shadow-sm">
+                </div>
+
+                <div id="endDateContainer" class="hidden">
+                    <label for="eventEndDate" class="block text-sm font-medium text-gray-700">End Date</label>
+                    <input type="date" id="eventEndDate" class="mt-1 w-full p-3 border border-gray-300 rounded-md focus:ring-primary-blue focus:border-primary-blue shadow-sm">
+                </div>
+                <!-- END OF CHANGE -->
 
                 <div>
                     <label for="eventTitle" class="block text-sm font-medium text-gray-700">Event Title</label>
@@ -180,11 +196,21 @@
     <script>
         const API_BASE_URL = 'https://wot-tau.vercel.app'; // **Update with your actual backend URL**
         const eventsTableBody = document.getElementById('eventsTableBody');
-        const emptyState = document.getElementById('emptyState');
+        // START OF CHANGE
+        const loadingState = document.getElementById('loadingState'); // Changed ID
+        // END OF CHANGE
         const eventModal = document.getElementById('eventModal');
         const timelineModal = document.getElementById('timelineModal'); // Get the new timeline modal
         const modalTitle = document.getElementById('modalTitle');
         const modalSubmitButton = document.getElementById('modalSubmitButton');
+
+        // START OF CHANGE
+        // Get new form elements
+        const isPeriodCheckbox = document.getElementById('isPeriod');
+        const endDateContainer = document.getElementById('endDateContainer');
+        const eventStartDateInput = document.getElementById('eventStartDate');
+        const eventEndDateInput = document.getElementById('eventEndDate');
+        // END OF CHANGE
 
         let timelineId = null;
         let currentTimeline = {}; // Store current timeline data
@@ -203,6 +229,16 @@
             document.getElementById('backToViewLink').href = `timeline_view.html?id=${timelineId}`;
             
             fetchTimelineData();
+
+            // START OF CHANGE
+            // Listen to checkbox changes
+            isPeriodCheckbox.addEventListener('change', () => {
+                endDateContainer.classList.toggle('hidden', !isPeriodCheckbox.checked);
+                if (!isPeriodCheckbox.checked) {
+                    eventEndDateInput.value = ''; // Clear value when hiding
+                }
+            });
+            // END OF CHANGE
             
             // Set up form submission listener for the new modal
             document.getElementById('timelineForm').onsubmit = handleTimelineUpdate;
@@ -210,8 +246,10 @@
 
         // --- API HELPERS ---
         async function fetchTimelineData() {
-            emptyState.textContent = "Loading events...";
-            eventsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-text-gray p-8" id="emptyState">Loading events...</td></tr>`;
+            // START OF CHANGE
+            loadingState.textContent = "Loading events...";
+            eventsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-text-gray p-8" id="loadingState">Loading events...</td></tr>`;
+            // END OF CHANGE
 
             try {
                 const response = await fetch(`${API_BASE_URL}/api/study/timelines/${timelineId}`);
@@ -242,16 +280,31 @@
                 return;
             }
 
+            // START OF CHANGE
             // Sort events by date before rendering
-            events.sort((a, b) => new Date(a.date) - new Date(b.date));
+            // MIGRATION CHECK: Sort by startDate or fall back to date
+            events.sort((a, b) => new Date(a.startDate || a.date) - new Date(b.startDate || b.date));
+            // END OF CHANGE
 
             events.forEach(event => {
                 const row = eventsTableBody.insertRow();
                 row.className = 'hover:bg-gray-50 transition duration-150';
 
-                // Format the date to YYYY-MM-DD
-                const eventDate = new Date(event.date);
-                const formattedDate = eventDate.toISOString().substring(0, 10);
+                // START OF CHANGE
+                // MIGRATION CHECK: Use event.startDate OR fall back to event.date
+                const sDate = event.startDate || event.date;
+                let formattedDate = "Invalid Date";
+                
+                if (sDate) {
+                     formattedDate = new Date(sDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
+                
+                    // Check for end date
+                    if (event.endDate) {
+                        const eDate = new Date(event.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
+                        formattedDate = `${formattedDate} – ${eDate}`;
+                    }
+                }
+                // END OF CHANGE
                 
                 // Escape quotes for injection into onclick handlers
                 const sanitizedTitle = event.title.replace(/'/g, "\\'").replace(/"/g, '\\"');
@@ -262,7 +315,7 @@
                     <td class="text-sm text-gray-700 font-semibold">${event.title}</td>
                     <td class="text-xs text-text-gray line-clamp-2">${event.details || '—'}</td>
                     <td class="text-center space-x-2">
-                        <button onclick="openEventModal('edit', '${event._id}', '${formattedDate}', '${sanitizedTitle}', '${sanitizedDetails}')" 
+                        <button onclick="openEventModal('edit', '${event._id}')" 
                                 class="text-primary-blue hover:text-indigo-700 p-1 rounded-full hover:bg-indigo-50 transition duration-150">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                         </button>
@@ -277,12 +330,17 @@
         }
         
         // --- EVENT MODAL CONTROLS (Existing) ---
-        function openEventModal(mode, id = null, date = '', title = '', details = '') {
+        // START OF CHANGE
+        function openEventModal(mode, id = null) {
             const form = document.getElementById('eventForm');
-            const dateInput = document.getElementById('eventDate');
             const titleInput = document.getElementById('eventTitle');
             const detailsInput = document.getElementById('eventDetails');
             const eventIdInput = document.getElementById('eventId');
+            
+            // Get new elements
+            const startDateInput = document.getElementById('eventStartDate');
+            const endDateInput = document.getElementById('eventEndDate');
+            const periodCheckbox = document.getElementById('isPeriod');
             
             form.reset();
             document.getElementById('modalMessageBox').classList.add('hidden');
@@ -290,20 +348,49 @@
             if (mode === 'add') {
                 modalTitle.textContent = 'Add New Event';
                 modalSubmitButton.textContent = 'Add Event';
+                
+                // Reset period fields
+                periodCheckbox.checked = false;
+                endDateContainer.classList.add('hidden');
+                endDateInput.value = '';
+
                 form.onsubmit = (e) => handleFormSubmit(e, 'add');
             } else if (mode === 'edit') {
                 modalTitle.textContent = 'Edit Event';
                 modalSubmitButton.textContent = 'Update Event';
                 
+                // Find the event from our local data
+                const event = currentTimeline.events.find(e => e._id === id);
+                if (!event) {
+                    console.error("Could not find event to edit");
+                    closeEventModal();
+                    return;
+                }
+
                 // Populate fields for editing
                 eventIdInput.value = id;
-                dateInput.value = date;
-                // Reverse sanitization for input fields
-                titleInput.value = title.replace(/\\'/g, "'").replace(/\\"/g, '"');
-                detailsInput.value = details.replace(/\\'/g, "'").replace(/\\"/g, '"');
+                
+                // MIGRATION CHECK: Use startDate or fall back to date
+                const sDate = event.startDate || event.date;
+                startDateInput.value = sDate ? new Date(sDate).toISOString().split('T')[0] : '';
+                
+                titleInput.value = event.title;
+                detailsInput.value = event.details || '';
+
+                // Populate period fields
+                if (event.endDate) {
+                    periodCheckbox.checked = true;
+                    endDateContainer.classList.remove('hidden');
+                    endDateInput.value = new Date(event.endDate).toISOString().split('T')[0];
+                } else {
+                    periodCheckbox.checked = false;
+                    endDateContainer.classList.add('hidden');
+                    endDateInput.value = '';
+                }
                 
                 form.onsubmit = (e) => handleFormSubmit(e, 'edit');
             }
+            // END OF CHANGE
             
             eventModal.classList.remove('hidden');
         }
@@ -330,7 +417,11 @@
             // ... (Your existing handleFormSubmit logic) ...
             
             const eventId = document.getElementById('eventId').value;
-            const date = document.getElementById('eventDate').value;
+            // START OF CHANGE
+            const startDate = document.getElementById('eventStartDate').value;
+            const endDate = document.getElementById('eventEndDate').value;
+            const isPeriod = document.getElementById('isPeriod').checked;
+            // END OF CHANGE
             const title = document.getElementById('eventTitle').value;
             const details = document.getElementById('eventDetails').value;
             
@@ -340,13 +431,37 @@
             button.textContent = mode === 'add' ? 'Adding...' : 'Updating...';
             document.getElementById('modalMessageBox').classList.add('hidden');
 
-            const payload = { date, title, details };
+            // START OF CHANGE
+            // Validation
+            if (isPeriod && !endDate) {
+                displayModalMessage('End Date is required for a time period.', 'error', 'modal');
+                button.disabled = false;
+                button.textContent = mode === 'add' ? 'Add Event' : 'Update Event';
+                return;
+            }
+            if (isPeriod && endDate && new Date(endDate) < new Date(startDate)) {
+                displayModalMessage('End Date cannot be before the Start Date.', 'error', 'modal');
+                button.disabled = false;
+                button.textContent = mode === 'add' ? 'Add Event' : 'Update Event';
+                return;
+            }
+
+            const payload = { 
+                title, 
+                details,
+                startDate,
+                // Send endDate only if it's a period, otherwise send null to remove it
+                endDate: (isPeriod && endDate) ? endDate : null
+            };
+            // END OF CHANGE
             let url = `${API_BASE_URL}/api/study/timelines/${timelineId}/events`;
             let method = 'POST';
 
             if (mode === 'edit') {
                 url = `${API_BASE_URL}/api/study/timelines/${timelineId}/events/${eventId}`;
-                method = 'PATCH';
+                // START OF CHANGE
+                method = 'PUT'; // Match the backend endpoint
+                // END OF CHANGE
             }
 
             try {
@@ -458,3 +573,4 @@
     </script>
 </body>
 </html>
+

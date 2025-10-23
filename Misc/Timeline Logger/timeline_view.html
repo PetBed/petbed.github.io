@@ -53,17 +53,24 @@
                 </svg>
                 <span class="text-xl font-bold">Back to Dashboard</span>
             </a>
-            <span id="timelineNameHeader" class="text-xl font-bold text-primary-dark"></span>
+            <!-- START OF CHANGE -->
+            <div class="flex items-center space-x-4">
+                <span id="timelineNameHeader" class="text-xl font-bold text-primary-dark"></span>
+                <button onclick="window.location.href='event_manager.html?id=' + getTimelineId()" class="px-4 py-2 bg-primary-blue text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition duration-200">
+                    Manage Events
+                </button>
+            </div>
+            <!-- END OF CHANGE -->
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <!-- START OF CHANGE -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
             <h1 class="text-3xl font-extrabold text-primary-dark" id="timelineTitle"></h1>
-            <button onclick="window.location.href='event_manager.html?id=' + getTimelineId()" class="mt-4 md:mt-0 px-4 py-2 bg-primary-blue text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition duration-200">
-                Manage Events
-            </button>
+            <!-- This button was moved up, so no change to the button itself -->
         </div>
+        <!-- END OF CHANGE -->
 
         <div id="loadingIndicator" class="text-center text-text-gray p-10 hidden">
             <svg class="animate-spin h-5 w-5 mr-3 text-primary-blue mx-auto" viewBox="0 0 24 24"></svg>
@@ -143,28 +150,47 @@
          * @param {Object} timeline The timeline object fetched from the backend.
          * @returns {Object} The formatted TimelineJS JSON object.
          */
+        // START OF CHANGE
+        // Helper function to parse date strings into TimelineJS objects
+        function parseEventDate(dateString) {
+            if (!dateString) return null;
+            const date = new Date(dateString);
+            return {
+                year: date.getUTCFullYear(),
+                month: date.getUTCMonth() + 1, // JS months are 0-11
+                day: date.getUTCDate()
+            };
+        }
+
         function formatTimelineForTimelineJS(timeline) {
-            const events = timeline.events.map(event => {
-                const eventDate = new Date(event.date);
-                return {
-                    // Start date is required and split into year, month, day
-                    start_date: {
-                        year: eventDate.getFullYear(),
-                        month: eventDate.getMonth() + 1, // JS months are 0-indexed
-                        day: eventDate.getDate()
-                    },
+            // Sort by start date, using migration check
+            const sortedEvents = timeline.events.sort((a, b) => {
+                const dateA = new Date(a.startDate || a.date);
+                const dateB = new Date(b.startDate || b.date);
+                return dateA - dateB;
+            });
+
+            const events = sortedEvents.map(event => {
+                // MIGRATION CHECK: Use event.startDate OR fall back to event.date
+                const sDate = event.startDate || event.date;
+                
+                const timelineEventObject = {
+                    start_date: parseEventDate(sDate),
                     text: {
                         headline: event.title,
-                        // This 'text' is the details/description shown when an event is clicked
-                        text: event.details || "No additional details provided." 
+                        text: event.details || "<i>No details provided.</i>" // Add fallback text
                     },
-                    // Unique ID for the event
                     unique_id: event._id 
-                    
-                    // Note: TimelineJS uses selection (click) rather than simple hover
-                    // for detailed content expansion.
                 };
+
+                // UPDATED: Add end_date only if it exists
+                if (event.endDate) {
+                    timelineEventObject.end_date = parseEventDate(event.endDate);
+                }
+                
+                return timelineEventObject;
             });
+        // END OF CHANGE
 
             return {
                 title: {

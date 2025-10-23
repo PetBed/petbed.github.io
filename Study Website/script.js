@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 	// --- Constants & Config ---
-	const API_URL = "https://wot-tau.vercel.app"; // local: http://localhost:3005
+	const API_URL = "http://localhost:3005"; // local: http://localhost:3005
 	const subjectColors = {Malay: "#8B0000", Chinese: "#E63946", English: "#1D3557", Moral: "#6A4C93", History: "#D2691E", Geography: "#606C38", RBT: "#6C757D", PJK: "#9EF01A", Science: "#2D6A4F", Mathematics: "#00B4D8", Art: "#E6399B", Other: "#64748b"};
 	const RBT_ACCENT = "#FFD60A";
 	const exams = [
@@ -204,38 +204,56 @@ document.addEventListener("DOMContentLoaded", function () {
 		if (user) {
 			currentUser = JSON.parse(user);
 
-			// 1. Fetch the latest state from the server.
-			try {
-				console.log("Syncing collectible state with server...");
-				const response = await fetch(`${API_URL}/api/study/user/collectible-state?userId=${currentUser.id}`);
-				if (!response.ok) throw new Error("Server sync failed");
-				
-				const serverState = await response.json();
-				
-				// 2. Overwrite local data with the server's authoritative data.
-				currentUser.accumulatedStudyTime = serverState.accumulatedStudyTime;
-				currentUser.unclaimedDrops = serverState.unclaimedDrops;
-				
-				// 3. Save the synced data back to localStorage for the current session.
-				localStorage.setItem("studyUser", JSON.stringify(currentUser));
-				console.log("Sync complete. Local state updated:", currentUser);
-
-			} catch (error) {
-				console.error("Failed to sync collectible state with server:", error);
-				// If sync fails, the app will proceed with potentially stale local data,
-				// but this is better than crashing. A notification could be added here.
-        window.alert("Warning: Unable to sync data with server. Some features may not work correctly.");
-			}
-
-			if (currentUser.settings && currentUser.settings.darkMode) {
+      if (currentUser.settings && currentUser.settings.darkMode) {
 				document.documentElement.classList.add("dark");
 			} else {
 				document.documentElement.classList.remove("dark");
 			}
 
-			loadingIndicator.style.display = "flex";
+      loadingIndicator.style.display = "flex";
 			appContainer.classList.add("hidden");
 			welcomeMessage.textContent = `Welcome back, ${currentUser.username}!`;
+
+			// 1. Fetch the latest state from the server.
+			try {
+				console.log("Syncing and migrating user data with server...");
+				const response = await fetch(`${API_URL}/api/study/user/collectible-state?userId=${currentUser.id}`);
+				if (!response.ok) throw new Error("Server sync failed");
+
+				const serverState = await response.json();
+
+				// 2. Overwrite local data with the server's authoritative data
+				// This includes both existing fields AND any newly added fields with defaults
+				currentUser.accumulatedStudyTime = serverState.accumulatedStudyTime;
+				currentUser.unclaimedDrops = serverState.unclaimedDrops;
+				currentUser.inventory = serverState.inventory;
+				currentUser.pendingDrops = serverState.pendingDrops;
+
+				// Update settings if they exist on server
+				if (serverState.settings) {
+					currentUser.settings = serverState.settings;
+					// Re-apply theme in case it was updated on server
+					if (currentUser.settings.darkMode) {
+						document.documentElement.classList.add("dark");
+					} else {
+						document.documentElement.classList.remove("dark");
+					}
+				}
+
+				// Update sound library if it exists
+				if (serverState.soundLibrary) {
+					currentUser.soundLibrary = serverState.soundLibrary;
+				}
+
+				// 3. Save the synced and migrated data back to localStorage
+				localStorage.setItem("studyUser", JSON.stringify(currentUser));
+				console.log("Sync and migration complete. Local state updated:", currentUser);
+			} catch (error) {
+				console.error("Failed to sync with server:", error);
+				// If sync fails, warn the user but continue with local data
+				console.warn("Continuing with local data. Some features may not work correctly.");
+			}
+
 			await initializeApp();
 
 			// 4. Initialize the collectibles module with the fresh, synced data.

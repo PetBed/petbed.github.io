@@ -253,7 +253,7 @@
   </div>
 
   <script>
-    const API_BASE_URL = 'http://localhost:3005/api';
+    const API_BASE_URL = 'http://192.168.89.253:3005/api';
 
     const waterLevelEl = document.getElementById('water-level');
     const alarmStatusEl = document.getElementById('alarm-status');
@@ -315,7 +315,7 @@
       rainDurationEl.textContent = `${data.rainDuration || 0}s`;
 
       const waterValue = data.waterLevel || 0;
-      const angle = (Math.min(Math.max(waterValue, 0), 1023) / 1023) * 180 - 90;
+      const angle = (Math.min(Math.max(waterValue, 0), 450) / 450) * 180 - 90;
       gaugeNeedle.style.transform = `rotate(${angle}deg)`;
 
       ledToggle.checked = data.remoteLedIsOn;
@@ -387,7 +387,7 @@
     }
 
     fetchData();
-    setInterval(fetchData, 1000);
+    setInterval(fetchData, 2000);
   </script>
 </body>
 

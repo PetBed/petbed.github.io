@@ -6,6 +6,10 @@
     <title id="pageTitle">Loading Timeline...</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- START OF CHANGE -->
+    <!-- Include marked.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- END OF CHANGE -->
     <script>
         tailwind.config = {
             theme: {
@@ -175,13 +179,16 @@
                 const sDate = event.startDate || event.date;
                 
                 const timelineEventObject = {
-                    start_date: parseEventDate(sDate),
-                    text: {
-                        headline: event.title,
-                        text: event.details || "<i>No details provided.</i>" // Add fallback text
-                    },
-                    unique_id: event._id 
-                };
+                start_date: parseEventDate(sDate),
+                text: {
+                    headline: event.title,
+                    // START OF CHANGE
+                    // Parse markdown content into HTML for TimelineJS
+                    text: marked.parse(event.details || "<i>No details provided.</i>")
+                    // END OF CHANGE
+                },
+                unique_id: event._id 
+            };
 
                 // UPDATED: Add end_date only if it exists
                 if (event.endDate) {
@@ -225,3 +232,4 @@
     </script>
 </body>
 </html>
+

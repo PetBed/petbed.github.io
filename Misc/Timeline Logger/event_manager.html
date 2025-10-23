@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="pageTitle">Manage Timeline Events</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- START OF CHANGE -->
+    <!-- Include marked.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- END OF CHANGE -->
     <script>
         tailwind.config = {
             theme: {
@@ -44,6 +48,57 @@
         ::-webkit-scrollbar-track { background: #F3F4F6; }
         ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+        /* START OF CHANGE */
+        /* Basic styling for rendered markdown content within the table */
+        .markdown-content ul {
+            list-style-type: disc; /* Set bullet point style */
+            list-style-position: outside; /* Bullets hang outside the text block */
+            padding-left: 1.25rem; /* Indentation for the list */
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .markdown-content ol {
+            list-style-type: decimal; /* Set numbered list style */
+            list-style-position: outside; /* Numbers hang outside the text block */
+            padding-left: 1.25rem; /* Indentation for the list */
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        /* END OF CHANGE */
+        .markdown-content p {
+            margin: 0;
+        }
+        .markdown-content a {
+            color: #4F46E5;
+            text-decoration: underline;
+        }
+        /* END OF CHANGE */
+
+        /* START OF CHANGE */
+        /* Style images inside the markdown content */
+        .markdown-content img {
+            max-width: 100%; /* Ensure images are responsive */
+            height: auto;
+            border-radius: 0.5rem; /* rounded-lg */
+            margin-top: 0.75rem; /* my-3 */
+            margin-bottom: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+        }
+        /* END OF CHANGE */
+
+        /* START OF CHANGE */
+        /* Styles for the new clickable title and dropdown */
+        .clickable-title {
+            cursor: pointer;
+        }
+        .clickable-title:hover span { /* Only color the text on hover, not the icon */
+            color: #4F46E5; /* primary-blue */
+        }
+        .details-chevron {
+            transition: transform 0.2s ease-in-out;
+        }
+        /* END OF CHANGE */
     </style>
 </head>
 <body class="bg-secondary-gray min-h-screen font-sans">
@@ -85,18 +140,21 @@
         <!-- Events Table -->
         <div class="bg-white shadow-xl rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="min-w-full event-table divide-y divide-gray-200">
+                <table class="min-w-full event-table"> <!-- Removed divide-y -->
                     <thead>
                         <tr>
                             <!-- START OF CHANGE -->
                             <th class="w-1/6">Date(s)</th>
-                            <!-- END OF CHANGE -->
-                            <th class="w-3/6">Title</th>
-                            <th class="w-1/6">Details</th>
+                            <th class="w-4/6">Title</th> <!-- Widened title column -->
+                            <!-- Details column removed -->
                             <th class="w-1/6 text-center">Actions</th>
+                            <!-- END OF CHANGE -->
                         </tr>
                     </thead>
-                    <tbody id="eventsTableBody" class="divide-y divide-gray-100">
+                    <!-- START OF CHANGE -->
+                    <!-- Removed divide-y class, we will manage borders manually -->
+                    <tbody id="eventsTableBody">
+                    <!-- END OF CHANGE -->
                         <!-- Events will be dynamically injected here -->
                         <tr>
                             <td colspan="4" class="text-center text-text-gray p-8" id="loadingState">Loading events...</td>
@@ -286,34 +344,41 @@
             events.sort((a, b) => new Date(a.startDate || a.date) - new Date(b.startDate || b.date));
             // END OF CHANGE
 
+            // START OF CHANGE
+            // The old `events.forEach` loop is replaced to build two rows per event
             events.forEach(event => {
-                const row = eventsTableBody.insertRow();
-                row.className = 'hover:bg-gray-50 transition duration-150';
-
-                // START OF CHANGE
-                // MIGRATION CHECK: Use event.startDate OR fall back to event.date
+                // --- 1. Prepare Data (same as before) ---
                 const sDate = event.startDate || event.date;
                 let formattedDate = "Invalid Date";
                 
                 if (sDate) {
                      formattedDate = new Date(sDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
                 
-                    // Check for end date
                     if (event.endDate) {
                         const eDate = new Date(event.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
                         formattedDate = `${formattedDate} – ${eDate}`;
                     }
                 }
-                // END OF CHANGE
                 
-                // Escape quotes for injection into onclick handlers
                 const sanitizedTitle = event.title.replace(/'/g, "\\'").replace(/"/g, '\\"');
                 const sanitizedDetails = (event.details || '').replace(/'/g, "\\'").replace(/"/g, '\\"');
+                const renderedDetails = marked.parse(event.details || '—');
 
-                row.innerHTML = `
+                // --- 2. Create the Main Event Row ---
+                const mainRow = eventsTableBody.insertRow();
+                // We add borders manually to control the dropdown appearance
+                mainRow.className = 'border-b border-gray-100'; 
+
+                mainRow.innerHTML = `
                     <td class="text-sm font-medium text-gray-900">${formattedDate}</td>
-                    <td class="text-sm text-gray-700 font-semibold">${event.title}</td>
-                    <td class="text-xs text-text-gray line-clamp-2">${event.details || '—'}</td>
+                    <td class="text-sm text-gray-700 font-semibold clickable-title" onclick="toggleDetails('details-row-${event._id}', 'chevron-${event._id}')">
+                        <div class="flex justify-between items-center py-1"> <!-- Added padding -->
+                            <span>${event.title}</span>
+                            <svg id="chevron-${event._id}" class="w-5 h-5 details-chevron text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </td>
                     <td class="text-center space-x-2">
                         <button onclick="openEventModal('edit', '${event._id}')" 
                                 class="text-primary-blue hover:text-indigo-700 p-1 rounded-full hover:bg-indigo-50 transition duration-150">
@@ -325,8 +390,21 @@
                         </button>
                     </td>
                 `;
-                eventsTableBody.appendChild(row);
+                
+                // --- 3. Create the Hidden Details Row ---
+                const detailsRow = eventsTableBody.insertRow();
+                detailsRow.id = `details-row-${event._id}`;
+                detailsRow.className = 'hidden'; // Hidden by default
+                
+                detailsRow.innerHTML = `
+                    <td colspan="3" class="p-4 bg-gray-50 border-b border-gray-200">
+                        <div class="markdown-content">
+                            ${renderedDetails}
+                        </div>
+                    </td>
+                `;
             });
+            // END OF CHANGE
         }
         
         // --- EVENT MODAL CONTROLS (Existing) ---
@@ -476,7 +554,25 @@
                 if (response.ok) {
                     displayManagerMessage(`Event ${mode === 'add' ? 'added' : 'updated'} successfully!`, 'success');
                     closeEventModal();
-                    fetchTimelineData(); // Refresh list
+                    
+                    // --- START OF CHANGE: Optimistic UI Update ---
+                    // Use the event returned from the API to update local state
+                    if (mode === 'add') {
+                        // Add the new event (returned from the server) to our local list
+                        currentTimeline.events.push(data.event);
+                    } else {
+                        // Find the index of the event we just edited
+                        const eventIndex = currentTimeline.events.findIndex(e => e._id === eventId);
+                        if (eventIndex !== -1) {
+                            // Replace the old event with the updated one from the server
+                            currentTimeline.events[eventIndex] = data.event;
+                        }
+                    }
+                    // Re-render the table with the updated local data, removing the need for a GET
+                    renderEvents(currentTimeline.events);
+                    // --- END OF CHANGE ---
+
+                    // fetchTimelineData(); // This is no longer needed
                 } else {
                     displayModalMessage(data.error || `Failed to ${mode} event.`, 'error', 'modal');
                 }
@@ -503,7 +599,15 @@
 
                 if (response.ok) {
                     displayManagerMessage(data.message || 'Event deleted successfully.', 'success');
-                    fetchTimelineData(); // Refresh list
+                    
+                    // --- START OF CHANGE: Optimistic UI Update ---
+                    // Remove the event from our local 'currentTimeline' state
+                    currentTimeline.events = currentTimeline.events.filter(e => e._id !== eventId);
+                    // Re-render the table with the updated local data
+                    renderEvents(currentTimeline.events);
+                    // --- END OF CHANGE ---
+                    
+                    // fetchTimelineData(); // This is no longer needed
                 } else {
                     displayManagerMessage(data.error || 'Failed to delete event.', 'error');
                 }
@@ -541,7 +645,18 @@
                 if (response.ok) {
                     displayManagerMessage('Timeline details updated successfully!', 'success');
                     closeTimelineModal();
-                    fetchTimelineData(); // Refresh timeline name in the header
+                    
+                    // --- START OF CHANGE: Optimistic UI Update ---
+                    // Use the timeline object returned from the API
+                    currentTimeline.name = data.timeline.name;
+                    currentTimeline.description = data.timeline.description;
+                    
+                    // Update header text and title directly
+                    document.getElementById('timelineNameHeader').textContent = currentTimeline.name;
+                    document.getElementById('pageTitle').textContent = `Manage Events: ${currentTimeline.name}`;
+                    // --- END OF CHANGE ---
+                    
+                    // fetchTimelineData(); // This is no longer needed
                 } else {
                     displayModalMessage(data.error || 'Failed to update timeline.', 'error', 'timeline');
                 }
@@ -570,7 +685,23 @@
             box.className = `p-3 rounded-lg text-sm font-medium ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
             box.classList.remove('hidden');
         }
+
+        // --- START OF CHANGE ---
+        // --- DROPDOWN TOGGLE FUNCTION ---
+        function toggleDetails(rowId, chevronId) {
+            const detailsRow = document.getElementById(rowId);
+            const chevron = document.getElementById(chevronId);
+            if (detailsRow) {
+                detailsRow.classList.toggle('hidden');
+            }
+            if (chevron) {
+                chevron.classList.toggle('rotate-180');
+            }
+        }
+        // --- END OF CHANGE ---
     </script>
 </body>
 </html>
+
+
 

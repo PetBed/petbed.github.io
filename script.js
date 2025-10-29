@@ -40,11 +40,11 @@ const paths = {
 				url: "https://petbed.github.io/Competition/News%20Ticker/",
 			},
 			"Flood App": {
-        contents: {
-          "Flood System Docs": {
-            url: "https://petbed.github.io/Misc/Flood%20System%20Docs/",
-          }
-        }
+				contents: {
+					"Flood System Docs": {
+						url: "https://petbed.github.io/Misc/Flood%20System%20Docs/",
+					},
+				},
 			},
 		},
 	},
@@ -84,9 +84,12 @@ const paths = {
 			"Hamilton Ipsum": {
 				url: "https://petbed.github.io/Misc/Hamilton%20Ipsum/",
 			},
-      "Timeline Logger": {
-        url: "https://petbed.github.io/Misc/Timeline%20Logger/dashboard.html",
-      }
+			"Timeline Logger": {
+				url: "https://petbed.github.io/Misc/Timeline%20Logger/dashboard.html",
+			},
+			"Etymology Learner": {
+				url: "https://petbed.github.io/Misc/Etymology/index.html",
+			},
 		},
 	},
 	Credits: {

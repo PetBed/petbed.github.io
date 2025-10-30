@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Etymology Study - IPA Learning</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1e40af;
+      --secondary: #64748b;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-secondary: #475569;
+      --accent: #8b5cf6;
+      --hover: #f1f5f9;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 2px solid var(--border);
+      padding: 1.5rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    main {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    .section {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 1.5rem;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    .chart-container {
+      overflow-x: auto;
+      margin-top: 1.5rem;
+    }
+
+    .ipa-chart {
+      display: grid;
+      gap: 1rem;
+      min-width: 800px;
+    }
+
+    .chart-category {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 1.25rem;
+      border: 1px solid var(--border);
+    }
+
+    .category-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .sounds-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .sound-btn {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      text-align: center;
+    }
+
+    .sound-btn:hover {
+      border-color: var(--primary);
+      background: var(--hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(37, 99, 235, 0.15);
+    }
+
+    .sound-btn:active {
+      transform: translateY(0);
+    }
+
+    .sound-symbol {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+
+    .sound-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tooltip {
+      position: fixed;
+      background: var(--text);
+      color: white;
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      max-width: 350px;
+      z-index: 1000;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .tooltip.show {
+      opacity: 1;
+    }
+
+    .tooltip-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--accent);
+    }
+
+    .tooltip-examples {
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.85rem;
+    }
+
+    .example {
+      margin: 0.25rem 0;
+    }
+
+    .playing {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(37, 99, 235, 0.1));
+      animation: pulse 0.5s ease-in-out;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    .audio-indicator {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      opacity: 0;
+    }
+
+    .playing .audio-indicator {
+      opacity: 1;
+      animation: blink 0.8s infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    @media (max-width: 768px) {
+      main {
+        padding: 0 1rem;
+      }
+
+      .section {
+        padding: 1.5rem;
+      }
+
+      .sounds-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <h1>Etymology Study Portal</h1>
+      <p class="subtitle">International Phonetic Alphabet Learning</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <h2 class="section-title">Interactive IPA Chart</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+        Click on any symbol to hear its pronunciation and see detailed articulation information.
+      </p>
+
+      <div class="chart-container">
+        <div class="ipa-chart" id="ipaChart"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="tooltip" id="tooltip">
+    <div class="tooltip-content"></div>
+  </div>
+
+  <script>
+    // ============================================
+    // IPA Data Module
+    // ============================================
+    const IPAData = (() => {
+      const data = {
+        vowels: [
+          {
+            symbol: 'iː',
+            label: 'Long E',
+            description: 'High front unrounded vowel. Tongue is positioned high and forward in the mouth, lips are spread. Keep the sound tense and elongated. (ee)',
+            examples: ['fleece /fliːs/', 'beat /biːt/', 'see /siː/', 'key /kiː/']
+          },
+          {
+            symbol: 'ɪ',
+            label: 'Short I',
+            description: 'Near-high front unrounded vowel. Tongue is slightly lower and more relaxed than /iː/. Short and lax, with slightly spread lips. (ih)',
+            examples: ['kit /kɪt/', 'bit /bɪt/', 'myth /mɪθ/', 'women /ˈwɪmɪn/']
+          },
+          {
+            symbol: 'ɛ',
+            label: 'Short E',
+            description: 'Open-mid front unrounded vowel. Tongue is in the middle height, front position. Lips slightly spread. (eh)',
+            examples: ['dress /dres/', 'bed /bed/', 'many /ˈmeni/', 'said /sed/']
+          },
+          {
+            symbol: 'æ',
+            label: 'Short A',
+            description: 'Near-low front unrounded vowel. Tongue is low and forward, jaw drops significantly. Distinctive in English; often between “a” and “e”. (a as in cat)',
+            examples: ['trap /træp/', 'cat /kæt/', 'bad /bæd/', 'plaid /plæd/']
+          },
+          {
+            symbol: 'ɑː',
+            label: 'Long AH',
+            description: 'Long open back unrounded vowel. Tongue is low and back, mouth wide open. Keep the sound extended and resonant. (ah)',
+            examples: ['palm /pɑːm/', 'father /ˈfɑːðə/', 'start /stɑːt/', 'heart /hɑːt/']
+          },
+          {
+            symbol: 'a',
+            label: 'Open A',
+            description: 'Open front unrounded vowel. Tongue is positioned low and at the front of the mouth, lips unrounded. It’s shorter and flatter than /ɑː/ and lacks the raised quality of /æ/. (ah) <br> Note: This sound is common in British English accents, as seen in the examples. American English often uses /æ/ in similar words. The example words reflect this usage, where æ can replace a in American pronunciation.',
+            examples: ['ban /ban/ or /bæn/', 'hat /hat/ or /hæt/', 'man /man/ or /mæn/', 'bad /bad/ or /bæd/']
+          },
+          {
+            symbol: 'ɒ',
+            label: 'Short O',
+            description: 'Open back rounded vowel. Tongue is low and back, lips slightly rounded. Short and crisp. (aw)',
+            examples: ['lot /lɒt/', 'hot /hɒt/', 'wasp /wɒsp/', 'what /wɒt/']
+          },
+          {
+            symbol: 'ɔː',
+            label: 'Long OW',
+            description: 'Long open-mid back rounded vowel. Tongue is mid-low and back, lips rounded. Maintain length and rounding throughout. (aw)',
+            examples: ['thought /θɔːt/', 'law /lɔː/', 'caught /kɔːt/', 'ward /wɔːd/']
+          },
+          {
+            symbol: 'ʌ',
+            label: 'Wedge',
+            description: 'Open-mid central unrounded vowel. Tongue is slightly back from center, lips relaxed. Common in stressed syllables. (uh)',
+            examples: ['strut /strʌt/', 'cup /kʌp/', 'love /lʌv/', 'blood /blʌd/']
+          },
+          {
+            symbol: 'uː',
+            label: 'Long U',
+            description: 'High back rounded vowel. Tongue is positioned high and back, lips firmly rounded and protruded. Long and tense. (oo)',
+            examples: ['goose /guːs/', 'food /fuːd/', 'blue /bluː/', 'through /θruː/']
+          },
+          {
+            symbol: 'ʊ',
+            label: 'Foot Vowel',
+            description: 'Near-high back rounded vowel. Tongue is high and back, lips rounded but relaxed. Short and lax. Slightly fronted for modern accents. (uh)',
+            examples: ['foot /fʊt/', 'good /gʊd/', 'put /pʊt/', 'could /kʊd/']
+          },
+          {
+            symbol: 'ɜː',
+            label: 'Nurse',
+            description: 'Long mid-central central unrounded vowel. Tongue in central position, lips relaxed. Always stressed. (er)',
+            examples: ['nurse /nɜːs/', 'bird /bɜːd/', 'fern /fɜːn/', 'work /wɜːk/']
+          },
+          {
+            symbol: 'ə',
+            label: 'Schwa',
+            description: 'Mid central vowel - the most common vowel in English. Tongue is completely relaxed in neutral position. Always unstressed. (uh)',
+            examples: ['about /əˈbaʊt/', 'sofa /ˈsəʊfə/', 'comma /ˈkɒmə/', 'taken /ˈteɪkən/']
+          }
+        ],
+        consonants: [
+          {
+            symbol: 'p',
+            label: 'P',
+            description: 'Voiceless bilabial plosive. Both lips close completely, then release with a burst of air. No vocal cord vibration.',
+            examples: ['pen /pen/', 'top /tɒp/', 'happy /ˈhæpi/', 'cup /kʌp/']
+          },
+          {
+            symbol: 'b',
+            label: 'B',
+            description: 'Voiced bilabial plosive. Like /p/ but with vocal cords vibrating. Lips close and release with voice.',
+            examples: ['bad /bæd/', 'job /dʒɒb/', 'baby /ˈbeɪbi/', 'rib /rɪb/']
+          },
+          {
+            symbol: 't',
+            label: 'T',
+            description: 'Voiceless alveolar plosive. Tongue tip touches alveolar ridge (behind upper teeth), then releases sharply. No voice.',
+            examples: ['tea /tiː/', 'cat /kæt/', 'butter /ˈbʌtə/', 'sit /sɪt/']
+          },
+          {
+            symbol: 'd',
+            label: 'D',
+            description: 'Voiced alveolar plosive. Like /t/ but vocal cords vibrate. Tongue tip at alveolar ridge.',
+            examples: ['dog /dɒg/', 'bad /bæd/', 'ladder /ˈlædə/', 'mud /mʌd/']
+          },
+          {
+            symbol: 'k',
+            label: 'K',
+            description: 'Voiceless velar plosive. Back of tongue touches soft palate (velum), then releases. Strong aspiration initially.',
+            examples: ['cat /kæt/', 'back /bæk/', 'chemical /ˈkemɪkəl/', 'queen /kwiːn/']
+          },
+          {
+            symbol: 'g',
+            label: 'G',
+            description: 'Voiced velar plosive. Like /k/ but with vocal cord vibration. Back of tongue at velum.',
+            examples: ['get /get/', 'dog /dɒg/', 'bigger /ˈbɪgə/', 'ghost /gəʊst/']
+          },
+          {
+            symbol: 'f',
+            label: 'F',
+            description: 'Voiceless labiodental fricative. Upper teeth touch lower lip, air flows through creating friction. No voice.',
+            examples: ['fan /fæn/', 'off /ɒf/', 'phone /fəʊn/', 'enough /ɪˈnʌf/']
+          },
+          {
+            symbol: 'v',
+            label: 'V',
+            description: 'Voiced labiodental fricative. Like /f/ but with vocal cord vibration. Upper teeth on lower lip.',
+            examples: ['van /væn/', 'love /lʌv/', 'have /hæv/', 'of /ɒv/ (pronounced /əv/ in connected speech)']
+          },
+          {
+            symbol: 'θ',
+            label: 'Theta',
+            description: 'Voiceless dental fricative. The unvoiced th sound. Tongue tip between or near teeth, air flows through. Distinctive English sound.',
+            examples: ['think /θɪŋk/', 'math /mæθ/', 'breath /breθ/', 'through /θruː/']
+          },
+          {
+            symbol: 'ð',
+            label: 'Eth',
+            description: 'Voiced dental fricative. Like /θ/ but with voice, the voiced th sound. Tongue between teeth, vocal cords vibrating.',
+            examples: ['this /ðɪs/', 'bathe /beɪð/', 'father /ˈfɑːðə/', 'breathe /briːð/']
+          },
+          {
+            symbol: 's',
+            label: 'S',
+            description: 'Voiceless alveolar fricative. Tongue near alveolar ridge, air creates hissing sound. No voice.',
+            examples: ['see /siː/', 'pass /pɑːs/', 'city /ˈsɪti/', 'house /haʊs/']
+          },
+          {
+            symbol: 'z',
+            label: 'Z',
+            description: 'Voiced alveolar fricative. Like /s/ but voiced. Tongue near alveolar ridge, vocal cords vibrate.',
+            examples: ['zoo /zuː/', 'buzz /bʌz/', 'is /ɪz/', 'wise /waɪz/']
+          },
+          {
+            symbol: 'ʃ',
+            label: 'Esh',
+            description: 'Voiceless postalveolar fricative. Tongue behind alveolar ridge, lips slightly rounded. "Sh" sound.',
+            examples: ['ship /ʃɪp/', 'wash /wɒʃ/', 'nation /ˈneɪʃən/', 'pressure /ˈpreʃə/']
+          },
+          {
+            symbol: 'ʒ',
+            label: 'Ezh',
+            description: 'Voiced postalveolar fricative. Like /ʃ/ but voiced. Common in the middle of words. "Zh" sound.',
+            examples: ['vision /ˈvɪʒən/', 'measure /ˈmeʒə/', 'leisure /ˈleʒə/', 'beige /beɪʒ/']
+          },
+          {
+            symbol: 'h',
+            label: 'H',
+            description: 'Voiceless glottal fricative. Air flows freely through open glottis (vocal cords). Articulation varies by following vowel.',
+            examples: ['hat /hæt/', 'who /huː/', 'ahead /əˈhed/', 'behave /bɪˈheɪv/']
+          },
+          {
+            symbol: 'm',
+            label: 'M',
+            description: 'Voiced bilabial nasal. Lips closed, air flows through nose. Vocal cords vibrate. Very resonant.',
+            examples: ['man /mæn/', 'come /kʌm/', 'summer /ˈsʌmə/', 'climb /klaɪm/']
+          },
+          {
+            symbol: 'n',
+            label: 'N',
+            description: 'Voiced alveolar nasal. Tongue tip at alveolar ridge, air through nose. Common nasal consonant.',
+            examples: ['no /nəʊ/', 'sun /sʌn/', 'winner /ˈwɪnə/', 'know /nəʊ/']
+          },
+          {
+            symbol: 'ŋ',
+            label: 'Ng',
+            description: 'Voiced velar nasal. Back of tongue at velum, air through nose. Never at start of English words.',
+            examples: ['sing /sɪŋ/', 'think /θɪŋk/', 'finger /ˈfɪŋgə/', 'long /lɒŋ/']
+          },
+          {
+            symbol: 'l',
+            label: 'L',
+            description: 'Voiced alveolar lateral approximant. Tongue tip at alveolar ridge, air flows around sides. Quality varies by position. In some accents, the /l/ sound becomes ‘dark’ [ɫ] at word ends.',
+            examples: ['left /left/', 'feel /fiːl/', 'follow /ˈfɒləʊ/', 'hill /hɪl/']
+          },
+          {
+            symbol: 'r',
+            label: 'R',
+            description: 'Voiced alveolar approximant. Tongue tip raised toward alveolar ridge but not touching. Very common consonant. In rhotic (US) accents, /r/ is pronounced wherever it appears.',
+            examples: ['red /red/', 'very /ˈveri/', 'three /θriː/', 'arrive /əˈraɪv/']
+          },
+          {
+            symbol: 'j',
+            label: 'Y',
+            description: 'Voiced palatal approximant. Tongue body raised to hard palate. The "y" sound in English. <br> Note: This sound is similar to a "long e" /i/ in both sound and formation. However, the tongue is held closer to the tooth ridge during the "y sound" /y/ than during the "long e" /i/ sound.', //Similar to a very short /i/ glide
+            examples: ['yes /jes/', 'you /juː/', 'beyond /bɪˈjɒnd/', 'few /fjuː/']
+          },
+          {
+            symbol: 'w',
+            label: 'W',
+            description: 'Voiced labial-velar approximant. Lips rounded, back of tongue raised. Combines lip and tongue action. <br> Note: The /w/ is very similar to the vowel "oo sound" /u/; the only difference is that the lips are slightly more closed when making the /w/. Also the /w/ is a consonant sound and cannot create a syllable as a vowel sound can.',
+            examples: ['wet /wet/', 'away /əˈweɪ/', 'twin /twɪn/', 'one /wʌn/']
+          },
+          {
+            symbol: 'tʃ',
+            label: 'CH',
+            description: 'Voiceless postalveolar affricate. Combination of /t/ and /ʃ/. Tongue tip at alveolar ridge, releases into /ʃ/.',
+            examples: ['church /tʃɜːtʃ/', 'watch /wɒtʃ/', 'nature /ˈneɪtʃə/', 'question /ˈkwestʃən/']
+          },
+          {
+            symbol: 'dʒ',
+            label: 'J',
+            description: 'Voiced postalveolar affricate. Combination of /d/ and /ʒ/. The "j" sound in judge.',
+            examples: ['judge /dʒʌdʒ/', 'age /eɪdʒ/', 'giant /ˈdʒaɪənt/', 'soldier /ˈsəʊldʒə/']
+          }
+        ]
+      };
+
+      return {
+        getVowels: () => data.vowels,
+        getConsonants: () => data.consonants,
+        getAllSounds: () => [...data.vowels, ...data.consonants]
+      };
+    })();
+
+    // ============================================
+    // Audio Player Module
+    // ============================================
+    const AudioPlayer = (() => {
+      // Audio files should be placed in an 'audio' folder with filenames matching the IPA symbols
+      // For symbols with special characters, use safe filenames:
+      // e.g., 'iː' -> 'i_long.mp3', 'æ' -> 'ae.mp3', etc.
+
+      const audioFileMap = {
+        // Vowels
+        'iː': 'e_long.mp3',
+        'ɪ': 'i_short.mp3',
+        'ɛ': 'e_short.mp3',
+        'æ': 'a_short.mp3',
+        'ɑː': 'a_long.mp3',
+        'a': 'a_open.mp3',
+        'ɒ': 'o_short.mp3',
+        'ɔː': 'o_long.mp3',
+        'ʊ': 'u_other.mp3',
+        'uː': 'u_long.mp3',
+        'ʌ': 'wedge.mp3',
+        'ɜː': 'nurse.mp3',
+        'ə': 'schwa.mp3',
+        // Consonants
+        'p': 'p.mp3',
+        'b': 'b.mp3',
+        't': 't.mp3',
+        'd': 'd.mp3',
+        'k': 'k.mp3',
+        'g': 'g.mp3',
+        'f': 'f.mp3',
+        'v': 'v.mp3',
+        'θ': 'theta.mp3',
+        'ð': 'eth.mp3',
+        's': 's.mp3',
+        'z': 'z.mp3',
+        'ʃ': 'esh.mp3',
+        'ʒ': 'ezh.mp3',
+        'h': 'h.mp3',
+        'm': 'm.mp3',
+        'n': 'n.mp3',
+        'ŋ': 'ng.mp3',
+        'l': 'l.mp3',
+        'r': 'r.mp3',
+        'j': 'j.mp3',
+        'w': 'w.mp3',
+        'tʃ': 'ch.mp3',
+        'dʒ': 'dj.mp3'
+      };
+
+      const audioCache = {};
+      const audioBasePath = './audio/'; // Change this to your audio folder path
+
+      const loadAudio = (symbol) => {
+        if (audioCache[symbol]) {
+          return audioCache[symbol];
+        }
+
+        const filename = audioFileMap[symbol];
+        if (!filename) {
+          console.warn(`No audio file mapped for symbol: ${symbol}`);
+          return null;
+        }
+
+        const audio = new Audio(audioBasePath + filename);
+        audio.preload = 'auto';
+        audioCache[symbol] = audio;
+        return audio;
+      };
+
+      const playSound = (symbol) => {
+        const audio = loadAudio(symbol);
+
+        if (!audio) {
+          console.error(`Could not load audio for symbol: ${symbol}`);
+          return 500; // Return default duration
+        }
+
+        // Clone the audio to allow overlapping plays
+        const audioClone = audio.cloneNode();
+
+        audioClone.play().catch(err => {
+          console.error(`Error playing audio for ${symbol}:`, err);
+        });
+
+        // Return estimated duration (or use actual duration once loaded)
+        return (audioClone.duration || 0.5) * 1000;
+      };
+
+      // Preload all audio files
+      const preloadAll = () => {
+        Object.keys(audioFileMap).forEach(symbol => {
+          loadAudio(symbol);
+        });
+      };
+
+      return {
+        playSound,
+        preloadAll
+      };
+    })();
+
+    // ============================================
+    // UI Module
+    // ============================================
+    const UI = (() => {
+      const tooltip = document.getElementById('tooltip');
+      let currentPlayingBtn = null;
+
+      const createSoundButton = (sound) => {
+        const btn = document.createElement('button');
+        btn.className = 'sound-btn';
+        btn.innerHTML = `
+                    <div class="sound-symbol">${sound.symbol}</div>
+                    <div class="sound-label">${sound.label}</div>
+                    <div class="audio-indicator"></div>
+                `;
+
+        btn.addEventListener('click', () => playSound(btn, sound));
+        btn.addEventListener('mouseenter', (e) => showTooltip(e, sound));
+        btn.addEventListener('mouseleave', hideTooltip);
+
+        return btn;
+      };
+
+      const playSound = (btn, sound) => {
+        if (currentPlayingBtn) {
+          currentPlayingBtn.classList.remove('playing');
+        }
+
+        btn.classList.add('playing');
+        currentPlayingBtn = btn;
+
+        const duration = AudioPlayer.playSound(sound.symbol);
+
+        setTimeout(() => {
+          btn.classList.remove('playing');
+          if (currentPlayingBtn === btn) {
+            currentPlayingBtn = null;
+          }
+        }, duration);
+      };
+
+      const showTooltip = (e, sound) => {
+        const content = `
+                    <div class="tooltip-title">${sound.symbol} - ${sound.label}</div>
+                    <div>${sound.description}</div>
+                    <div class="tooltip-examples">
+                        <strong>Examples:</strong><br>
+                        ${sound.examples.map(ex => `<div class="example">• ${ex}</div>`).join('')}
+                    </div>
+                `;
+
+        tooltip.querySelector('.tooltip-content').innerHTML = content;
+
+        const rect = e.target.closest('.sound-btn').getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+
+        let left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+        let top = rect.top - tooltipRect.height - 10;
+
+        if (top < 10) {
+          top = rect.bottom + 10;
+        }
+
+        if (left < 10) left = 10;
+        if (left + tooltipRect.width > window.innerWidth - 10) {
+          left = window.innerWidth - tooltipRect.width - 10;
+        }
+
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = top + 'px';
+        tooltip.classList.add('show');
+      };
+
+      const hideTooltip = () => {
+        tooltip.classList.remove('show');
+      };
+
+      const renderChart = () => {
+        const chart = document.getElementById('ipaChart');
+
+        const vowelSection = createSection('Vowels', IPAData.getVowels());
+        const consonantSection = createSection('Consonants', IPAData.getConsonants());
+
+        chart.appendChild(vowelSection);
+        chart.appendChild(consonantSection);
+      };
+
+      const createSection = (title, sounds) => {
+        const section = document.createElement('div');
+        section.className = 'chart-category';
+
+        const titleEl = document.createElement('div');
+        titleEl.className = 'category-title';
+        titleEl.textContent = title;
+
+        const grid = document.createElement('div');
+        grid.className = 'sounds-grid';
+
+        sounds.forEach(sound => {
+          grid.appendChild(createSoundButton(sound));
+        });
+
+        section.appendChild(titleEl);
+        section.appendChild(grid);
+
+        return section;
+      };
+
+      return { renderChart };
+    })();
+
+    // ============================================
+    // Initialize Application
+    // ============================================
+    document.addEventListener('DOMContentLoaded', () => {
+      UI.renderChart();
+      // Optionally preload all audio files for better performance
+      // AudioPlayer.preloadAll();
+    });
+  </script>
+</body>
+
+</html>

@@ -23,6 +23,8 @@
       --text-secondary: #475569;
       --accent: #8b5cf6;
       --hover: #f1f5f9;
+      --error: #ef4444;
+      --error-bg: #fee2e2;
     }
 
     body {
@@ -32,11 +34,63 @@
       line-height: 1.6;
     }
 
+    /* --- Base Button Styles --- */
+    .btn {
+      padding: 0.75rem 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+    .btn-primary:disabled {
+      background: var(--secondary);
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+    .btn-secondary:hover {
+      background: #ebf4ff; /* Light blue */
+    }
+    .btn-secondary:disabled {
+      border-color: var(--secondary);
+      color: var(--secondary);
+      background: var(--bg);
+      cursor: not-allowed;
+    }
+    
+    .btn-danger {
+        background: var(--error-bg);
+        color: var(--error);
+        border: 2px solid var(--error-bg);
+    }
+    .btn-danger:hover {
+        background: #fca5a5; /* Darker light red */
+        color: #b91c1c; /* Darker red text */
+    }
+
+
     /* --- Header & Navigation --- */
     header {
       background: var(--surface);
       border-bottom: 2px solid var(--border);
-      padding: 1.5rem 2rem;
+      padding: 0 2rem;
       position: sticky;
       top: 0;
       z-index: 100;
@@ -49,46 +103,121 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 1rem 0;
+    }
+    
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
     }
     
     .header-title h1 {
-      font-size: 1.75rem;
+      font-size: 1.5rem;
       color: var(--primary);
       font-weight: 700;
-      margin-bottom: 0.25rem; /* Adjusted margin */
     }
 
     .subtitle {
       color: var(--text-secondary);
-      font-size: 0.95rem;
-      margin-top: -0.25rem;
+      font-size: 0.85rem;
+      margin-top: -0.15rem;
     }
     
-    .nav-links {
+    .main-nav {
         display: flex;
-        gap: 1rem;
+        gap: 0.5rem;
     }
     
-    .nav-link {
-        font-size: 0.9rem;
+    .main-nav-link {
+        font-size: 1rem;
         font-weight: 600;
         color: var(--text-secondary);
-        padding: 0.5rem 0.75rem;
+        padding: 0.5rem 1rem;
         border-radius: 6px;
         transition: all 0.2s ease;
         text-decoration: none;
-        border: 2px solid transparent;
+        border-bottom: 3px solid transparent;
     }
     
-    .nav-link:hover {
+    .main-nav-link:hover {
         background: var(--hover);
         color: var(--text);
     }
     
-    .nav-link-active {
+    .main-nav-link-active {
         color: var(--primary);
+        border-bottom-color: var(--primary);
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    #username-display {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+    
+    #username-display strong {
+        color: var(--text);
+    }
+
+    #logout-btn {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--secondary);
+        padding: 0.4rem 0.75rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        border: 2px solid transparent;
+        background: none;
+        cursor: pointer;
+    }
+    
+    #logout-btn:hover {
+        color: var(--error);
+        background: var(--error-bg);
+    }
+    
+    /* --- Sub Navigation --- */
+    .sub-nav-container {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 0.75rem 2rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+    
+    .sub-nav {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .sub-nav-link {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    .sub-nav-link:hover {
+        background: var(--hover);
+        color: var(--text);
+    }
+    
+    .sub-nav-link-active {
         background: #ebf4ff; /* Light blue */
-        border-color: var(--primary);
+        color: var(--primary);
+        font-weight: 600;
     }
 
     /* --- Main Content --- */
@@ -97,12 +226,19 @@
       margin: 2rem auto;
       padding: 0 2rem;
     }
+    
+    /* Pages */
+    .main-page-content {
+        display: flex; /* Using flex for sub-page management */
+        flex-direction: column;
+        gap: 2rem;
+    }
 
     .section {
       background: var(--surface);
       border-radius: 12px;
       padding: 2rem;
-      margin-bottom: 2rem;
+      margin-bottom: 0; /* Handled by main-page-content gap */
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     }
     
@@ -133,250 +269,280 @@
       overflow-x: auto;
       margin-top: 1.5rem;
     }
-
-    .ipa-chart {
-      display: grid;
-      gap: 1rem;
-      min-width: 800px;
-    }
-
-    .chart-category {
-      background: var(--bg);
-      border-radius: 8px;
-      padding: 1.25rem;
-      border: 1px solid var(--border);
-    }
-
-    .category-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 1rem;
-    }
-
-    .sounds-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 0.75rem;
-    }
-
-    .sound-btn {
-      background: var(--surface);
-      border: 2px solid var(--border);
-      border-radius: 8px;
-      padding: 0.75rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      position: relative;
-      text-align: center;
-    }
-
-    .sound-btn:hover {
-      border-color: var(--primary);
-      background: var(--hover);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(37, 99, 235, 0.15);
-    }
-
-    .sound-btn:active {
-      transform: translateY(0);
-    }
-
-    .sound-symbol {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 0.25rem;
-    }
-
-    .sound-label {
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+    .ipa-chart { display: grid; gap: 1rem; min-width: 800px; }
+    .chart-category { background: var(--bg); border-radius: 8px; padding: 1.25rem; border: 1px solid var(--border); }
+    .category-title { font-size: 1.1rem; font-weight: 600; color: var(--primary); margin-bottom: 1rem; }
+    .sounds-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.75rem; }
+    .sound-btn { background: var(--surface); border: 2px solid var(--border); border-radius: 8px; padding: 0.75rem; cursor: pointer; transition: all 0.2s ease; position: relative; text-align: center; }
+    .sound-btn:hover { border-color: var(--primary); background: var(--hover); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(37, 99, 235, 0.15); }
+    .sound-btn:active { transform: translateY(0); }
+    .sound-symbol { font-size: 1.5rem; font-weight: 600; color: var(--text); margin-bottom: 0.25rem; }
+    .sound-label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
 
     /* --- Tooltip Styles --- */
-    .tooltip {
-      position: fixed;
-      background: var(--text);
-      color: white;
-      padding: 1rem 1.25rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      max-width: 350px;
-      z-index: 1000;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.2s ease;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    }
-
-    .tooltip.show {
-      opacity: 1;
-    }
-
-    .tooltip-title {
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: var(--accent);
-    }
-
-    .tooltip-articulation {
-      font-style: italic;
-      color: #cbd5e1;
-      margin-bottom: 0.75rem;
-      font-size: 0.85rem;
-    }
-
-    .tooltip-examples {
-      margin-top: 0.75rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.2);
-      font-size: 0.85rem;
-    }
-
-    .example {
-      margin: 0.25rem 0;
-    }
-
-    .playing {
-      border-color: var(--accent);
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(37, 99, 235, 0.1));
-      animation: pulse 0.5s ease-in-out;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-
-    .audio-indicator {
-      position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
-      width: 8px;
-      height: 8px;
-      background: var(--accent);
-      border-radius: 50%;
-      opacity: 0;
-    }
-
-    .playing .audio-indicator {
-      opacity: 1;
-      animation: blink 0.8s infinite;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
+    .tooltip { position: fixed; background: var(--text); color: white; padding: 1rem 1.25rem; border-radius: 8px; font-size: 0.9rem; max-width: 350px; z-index: 1000; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); }
+    .tooltip.show { opacity: 1; }
+    .tooltip-title { font-weight: 600; margin-bottom: 0.5rem; color: var(--accent); }
+    .tooltip-articulation { font-style: italic; color: #cbd5e1; margin-bottom: 0.75rem; font-size: 0.85rem; }
+    .tooltip-examples { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.2); font-size: 0.85rem; }
+    .example { margin: 0.25rem 0; }
+    .playing { border-color: var(--accent); background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(37, 99, 235, 0.1)); animation: pulse 0.5s ease-in-out; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    .audio-indicator { position: absolute; top: 0.5rem; right: 0.5rem; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; opacity: 0; }
+    .playing .audio-indicator { opacity: 1; animation: blink 0.8s infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     
     /* --- IPA Practice Section Styles --- */
-    #practice-container {
+    #practice-container { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; min-height: 250px; }
+    #ipa-display-area { font-size: 2.5rem; font-weight: 500; color: var(--text); background: var(--bg); border: 2px dashed var(--border); border-radius: 8px; padding: 1.5rem 2rem; min-height: 80px; display: flex; align-items: center; justify-content: center; }
+    #answer-area { display: flex; align-items: center; gap: 1.5rem; }
+    #word-display-area { font-size: 1.75rem; font-weight: 600; color: var(--primary); }
+    #practice-controls { display: flex; gap: 1rem; margin-top: 1rem; }
+    #play-audio-btn { background: var(--accent); color: white; display: flex; align-items: center; gap: 0.5rem; }
+    #play-audio-btn:hover { background: #7c3aed; /* Darker accent */ }
+    #practice-loader, #practice-error { font-size: 1rem; font-weight: 500; }
+    #practice-loader { color: var(--secondary); }
+    #practice-error { color: var(--error); background: var(--error-bg); padding: 0.75rem 1.25rem; border-radius: 8px; }
+
+    /* --- Etymology Log Styles --- */
+    .log-header {
         display: flex;
-        flex-direction: column;
+        justify-content: space-between;
         align-items: center;
-        gap: 1.5rem;
-        min-height: 250px;
+        margin-bottom: 1.5rem;
     }
     
-    #ipa-display-area {
-        font-size: 2.5rem;
-        font-weight: 500;
+    #word-list-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .word-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        transition: all 0.2s ease;
+    }
+    .word-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.1);
+    }
+    
+    .word-card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .word-card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+    .word-card-pos {
+        font-size: 0.85rem;
+        font-style: italic;
+        color: var(--text-secondary);
+    }
+    .word-card-ipa {
+        font-size: 1rem;
+        color: var(--secondary);
+    }
+    .word-card-body {
+        padding: 1.25rem 1.5rem;
+        flex-grow: 1;
+    }
+    .word-card-body p {
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    .word-card-body p strong {
         color: var(--text);
+        font-weight: 600;
+    }
+    .word-card-notes {
+        font-style: italic;
+        color: var(--text-secondary);
+        white-space: pre-wrap; /* Preserve line breaks */
+    }
+    .word-card-actions {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border);
         background: var(--bg);
-        border: 2px dashed var(--border);
-        border-radius: 8px;
-        padding: 1.5rem 2rem;
-        min-height: 80px;
+        display: flex;
+        gap: 0.75rem;
+        border-radius: 0 0 12px 12px;
+    }
+    .word-card-actions .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .empty-list-message, .loading-message, .error-message {
+        text-align: center;
+        padding: 3rem;
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        grid-column: 1 / -1; /* Span full grid */
+    }
+
+    /* --- Add/Edit Word Modal Styles --- */
+    #word-form-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
         display: flex;
         align-items: center;
         justify-content: center;
     }
+    #word-form-modal.hidden {
+        display: none;
+    }
     
-    #answer-area {
+    .modal-content {
+        background: var(--surface);
+        border-radius: 12px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
         display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
         align-items: center;
+        padding: 1.25rem 2rem;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    #word-form-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    #close-modal-btn {
+        background: none;
+        border: none;
+        font-size: 2rem;
+        font-weight: 300;
+        color: var(--secondary);
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+    }
+    
+    .modal-body {
+        padding: 2rem;
+        overflow-y: auto;
+    }
+    
+    #word-form {
+        display: grid;
         gap: 1.5rem;
     }
     
-    #word-display-area {
-        font-size: 1.75rem;
-        font-weight: 600;
-        color: var(--primary);
-    }
-    
-    #practice-controls {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-    
-    /* Base button style */
-    .btn {
-        padding: 0.75rem 1.5rem;
-        font-size: 0.9rem;
-        font-weight: 600;
+    .form-section {
+        border: 1px solid var(--border);
         border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: none;
+        padding: 1.5rem;
     }
     
-    /* Primary button style */
-    .btn-primary {
-        background: var(--primary);
-        color: white;
-    }
-    .btn-primary:hover {
-        background: var(--primary-dark);
-    }
-    .btn-primary:disabled {
-        background: var(--secondary);
-        cursor: not-allowed;
-    }
-    
-    /* Secondary button style */
-    .btn-secondary {
-        background: var(--surface);
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
         color: var(--primary);
-        border: 2px solid var(--primary);
-    }
-    .btn-secondary:hover {
-        background: #ebf4ff; /* Light blue */
-    }
-    .btn-secondary:disabled {
-        border-color: var(--secondary);
-        color: var(--secondary);
-        background: var(--bg);
-        cursor: not-allowed;
+        margin-bottom: 1rem;
     }
     
-    /* Audio button style */
-    #play-audio-btn {
-        background: var(--accent);
-        color: white;
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    
+    .form-group {
         display: flex;
-        align-items: center;
+        flex-direction: column;
         gap: 0.5rem;
     }
-    #play-audio-btn:hover {
-        background: #7c3aed; /* Darker accent */
+    
+    .form-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text);
     }
     
-    #practice-loader, #practice-error {
+    .form-input, .form-textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
         font-size: 1rem;
-        font-weight: 500;
+        font-family: inherit;
+        background: var(--bg);
     }
-    #practice-loader {
+    .form-input:focus, .form-textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+    }
+    
+    .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    .dynamic-input-group {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .dynamic-input-group input {
+        flex-grow: 1;
+    }
+    .btn-remove-dynamic {
+        background: var(--error-bg);
+        color: var(--error);
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0 0.75rem;
+    }
+    
+    .btn-add-dynamic {
+        background: none;
+        border: 1px dashed var(--secondary);
         color: var(--secondary);
+        font-weight: 600;
+        padding: 0.5rem;
+        border-radius: 6px;
+        cursor: pointer;
     }
-    #practice-error {
-        color: #ef4444; /* Red */
-        background: #fee2e2; /* Light red */
-        padding: 0.75rem 1.25rem;
-        border-radius: 8px;
+    .btn-add-dynamic:hover {
+        background: var(--hover);
+        color: var(--text);
+    }
+    
+    .modal-footer {
+        padding: 1.25rem 2rem;
+        border-top: 1px solid var(--border);
+        background: var(--bg);
+        display: flex;
+        justify-content: flex-end;
     }
 
     /* --- Responsive --- */
@@ -395,10 +561,25 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
+        padding: 1rem 0;
       }
-      .nav-links {
+      .header-left {
         width: 100%;
-        justify-content: space-around;
+        justify-content: space-between;
+      }
+      .header-right {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .main-nav {
+          width: 100%;
+          justify-content: space-around;
+      }
+      .sub-nav-container {
+          padding: 0.5rem 1rem;
+      }
+      .sub-nav {
+          justify-content: space-around;
       }
       #ipa-display-area {
         font-size: 1.75rem;
@@ -412,6 +593,22 @@
         width: 100%;
         text-align: center;
       }
+      .word-card-actions .btn {
+          width: auto; /* Fix button width in cards */
+      }
+      .modal-body {
+          padding: 1rem;
+      }
+      .modal-content {
+          width: 100%;
+          max-width: 100%;
+          height: 100%;
+          max-height: 100%;
+          border-radius: 0;
+      }
+      .form-grid {
+          grid-template-columns: 1fr; /* Stack form fields */
+      }
     }
   </style>
 </head>
@@ -419,72 +616,222 @@
 <body>
   <header>
     <div class="header-content">
-      <div class="header-title">
-        <h1>Etymology Study Portal</h1>
-        <p class="subtitle">International Phonetic Alphabet Learning</p>
+      <div class="header-left">
+          <div class="header-title">
+            <h1>Etymology Study</h1>
+            <p class="subtitle">Personal Learning Portal</p>
+          </div>
+          <nav class="main-nav">
+            <a href="#" class="main-nav-link" data-page="ipa-learning">IPA Learning</a>
+            <a href="#" class="main-nav-link" data-page="etymology-log">Etymology Log</a>
+          </nav>
       </div>
-      <nav class="nav-links">
-        <a href="#" class="nav-link" data-page="ipa-chart">IPA Chart</a>
-        <a href="#" class="nav-link" data-page="ipa-practice">IPA Practice</a>
-      </nav>
+      
+      <div class="header-right">
+        <span id="username-display">Welcome, <strong>User</strong>!</span>
+        <button id="logout-btn">Logout</button>
+      </div>
     </div>
   </header>
+  
+  <!-- Sub-Navigation -->
+  <div class="sub-nav-container">
+      <!-- IPA Sub-nav (Default) -->
+      <nav class="sub-nav" id="ipa-learning-subnav" data-subnav="ipa-learning">
+          <a href="#" class="sub-nav-link" data-page="ipa-chart">IPA Chart</a>
+          <a href="#" class="sub-nav-link" data-page="ipa-practice">IPA Practice</a>
+      </nav>
+      <!-- Etymology Sub-nav (Hidden) -->
+      <nav class="sub-nav hidden" id="etymology-log-subnav" data-subnav="etymology-log">
+          <a href="#" class="sub-nav-link" data-page="word-log">My Word Log</a>
+          <!-- Add more etymology sub-tabs here in the future -->
+      </nav>
+  </div>
+
 
   <main>
-    <!-- Page 1: IPA Chart (Visible by default) -->
-    <section class="section" id="ipa-chart-page" data-page="ipa-chart">
-      <h2 class="section-title">Interactive IPA Chart</h2>
-      <p style="color: var(--text-secondary); margin-bottom: 1rem;">
-        Click on any symbol to hear its pronunciation and see detailed articulation information.
-      </p>
-
-      <div class="chart-container">
-        <div class="ipa-chart" id="ipaChart"></div>
-      </div>
-    </section>
+    <!-- Page 1: IPA Learning -->
+    <div class="main-page-content" id="ipa-learning-page" data-main-page="ipa-learning">
+        <section class="section" id="ipa-chart-page" data-page="ipa-chart">
+          <h2 class="section-title">Interactive IPA Chart</h2>
+          <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+            Click on any symbol to hear its pronunciation and see detailed articulation information.
+          </p>
+          <div class="chart-container">
+            <div class="ipa-chart" id="ipaChart"></div>
+          </div>
+        </section>
+        
+        <section class="section hidden" id="ipa-practice-page" data-page="ipa-practice">
+          <h2 class="section-title">IPA Reading Practice</h2>
+          <p style="color: var(--text-secondary); margin-bottom: 1.5rem; text-align: center;">
+            Try to pronounce the IPA word below. Click "Get New Word" for a challenge!
+          </p>
+          
+          <div id="practice-container">
+            <div id="ipa-display-area">/lɔːdɪŋ.../</div>
+            <div id="practice-loader" class="hidden">Fetching a new word...</div>
+            <div id="practice-error" class="hidden"></div>
+            <div id="answer-area" class="hidden">
+                <h3 id="word-display-area">Word</h3>
+                <button id="play-audio-btn" class="btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                    <span>Play Audio</span>
+                </button>
+            </div>
+            <div id="practice-controls">
+                <button id="get-new-word-btn" class="btn btn-primary">Get New Word</button>
+                <button id="reveal-word-btn" class="btn btn-secondary" disabled>Reveal Answer</button>
+            </div>
+          </div>
+        </section>
+    </div>
     
-    <!-- Page 2: IPA Practice (Hidden by default) -->
-    <section class="section hidden" id="ipa-practice-page" data-page="ipa-practice">
-      <h2 class="section-title">IPA Reading Practice</h2>
-      <p style="color: var(--text-secondary); margin-bottom: 1.5rem; text-align: center;">
-        Try to pronounce the IPA word below. Click "Get New Word" for a challenge!
-      </p>
-      
-      <div id="practice-container">
-        <!-- IPA Display -->
-        <div id="ipa-display-area">/lɔːdɪŋ.../</div>
-        
-        <!-- Loading/Error Messages -->
-        <div id="practice-loader" class="hidden">Fetching a new word...</div>
-        <div id="practice-error" class="hidden"></div>
-        
-        <!-- Answer Area (Hidden initially) -->
-        <div id="answer-area" class="hidden">
-            <h3 id="word-display-area">Word</h3>
-            <button id="play-audio-btn" class="btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-                <span>Play Audio</span>
-            </button>
-        </div>
-        
-        <!-- Controls -->
-        <div id="practice-controls">
-            <button id="get-new-word-btn" class="btn btn-primary">Get New Word</button>
-            <button id="reveal-word-btn" class="btn btn-secondary" disabled>Reveal Answer</button>
-        </div>
-      </div>
-    </section>
+    <!-- Page 2: Etymology Log -->
+    <div class="main-page-content hidden" id="etymology-log-page" data-main-page="etymology-log">
+        <section class="section" id="word-log-page" data-page="word-log">
+            <div class="log-header">
+                <h2 class="section-title">My Etymology Word Log</h2>
+                <button id="add-word-btn" class="btn btn-primary">Add New Word</button>
+            </div>
+            <div id="word-list-container">
+                <!-- Word cards will be injected here by etymology.js -->
+            </div>
+        </section>
+    </div>
 
   </main>
 
+  <!-- Tooltip for IPA Chart -->
   <div class="tooltip" id="tooltip">
     <div class="tooltip-content"></div>
   </div>
   
-  <!-- Hidden audio player for the practice section -->
+  <!-- Audio player for IPA Practice -->
   <audio id="practice-audio-player" class="hidden"></audio>
+  
+  <!-- Add/Edit Word Modal (for Etymology Log) -->
+  <div id="word-form-modal" class="hidden">
+      <div class="modal-content">
+          <header class="modal-header">
+              <h2 id="word-form-title">Add New Word Entry</h2>
+              <button id="close-modal-btn" aria-label="Close modal">&times;</button>
+          </header>
+          <div class="modal-body">
+              <form id="word-form">
+                  <input type="hidden" id="word-id">
+                  
+                  <section class="form-section">
+                      <h3 class="form-section-title">Core Information</h3>
+                      <div class="form-grid">
+                          <div class="form-group" style="grid-column: 1 / -1;">
+                              <label for="word" class="form-label">Word *</label>
+                              <input type="text" id="word" class="form-input" required>
+                          </div>
+                          <div class="form-group">
+                              <label for="pronunciation" class="form-label">Pronunciation (IPA)</label>
+                              <input type="text" id="pronunciation" class="form-input" placeholder="/sɛrənˈdɪpɪti/">
+                          </div>
+                          <div class="form-group">
+                              <label for="partOfSpeech" class="form-label">Part of Speech</label>
+                              <input type="text" id="partOfSpeech" class="form-input" placeholder="e.g., noun">
+                          </div>
+                      </div>
+                  </section>
+                  
+                  <section class="form-section">
+                      <h3 class="form-section-title">Definitions</h3>
+                      <div id="definitions-container" class="form-group">
+                          <!-- Dynamic inputs go here -->
+                      </div>
+                      <button type="button" id="add-definition-btn" class="btn-add-dynamic">+ Add Definition</button>
+                  </section>
+                  
+                  <section class="form-section">
+                      <h3 class="form-section-title">Etymology Breakdown</h3>
+                      <div class="form-grid">
+                          <div class="form-group">
+                              <label for="origin" class="form-label">Origin</label>
+                              <input type="text" id="origin" class="form-input" placeholder="e.g., Coined 1754 by Horace Walpole">
+                          </div>
+                          <div class="form-group">
+                              <label for="morphology" class="form-label">Morphology</label>
+                              <input type="text" id="morphology" class="form-input" placeholder="e.g., serendip(ity)">
+                          </div>
+                          <div class="form-group">
+                              <label for="protoRoot" class="form-label">Proto-Root</label>
+                              <input type="text" id="protoRoot" class="form-input" placeholder="e.g., PIE *ser-">
+                          </div>
+                          <div class="form-group">
+                              <label for="semanticShift" class="form-label">Semantic Shift</label>
+                              <input type="text" id="semanticShift" class="form-input" placeholder="e.g., 'Hero' -> 'Villain'">
+                          </div>
+                          <div class="form-group" style="grid-column: 1 / -1;">
+                              <label for="etymologyNotes" class="form-label">Etymology Notes</label>
+                              <textarea id="etymologyNotes" class="form-textarea" placeholder="Detailed notes..."></textarea>
+                          </div>
+                      </div>
+                  </section>
 
-  <script>
+                  <section class="form-section">
+                      <h3 class="form-section-title">Related Words</h3>
+                      <div id="related-words-container" class="form-group">
+                          <!-- Dynamic inputs go here -->
+                      </div>
+                      <button type="button" id="add-related-word-btn" class="btn-add-dynamic">+ Add Related Word</button>
+                  </section>
+
+                  <section class="form-section">
+                      <h3 class="form-section-title">Personal Notes & Reflections</h3>
+                      <div class="form-group">
+                          <label for="personalNotes" class="form-label">Notes</label>
+                          <textarea id="personalNotes" class="form-textarea" placeholder="Your personal thoughts, connections, or mnemonics..."></textarea>
+</div>
+                  </section>
+                  
+                  <div class="modal-footer">
+                      <button type="submit" class="btn btn-primary">Save Word</button>
+                  </div>
+              </form>
+          </div>
+      </div>
+  </div>
+
+
+  <!-- Load config.js as a module -->
+  <script src="config.js" type="module"></script>
+  
+  <!-- Load etymology.js as a module -->
+  <script src="etymology.js" type="module"></script>
+  
+  <!-- Main application script -->
+  <script type="module">
+    // Import config (for consistency)
+    import config from './config.js';
+    // Import the new Etymology module
+    import EtymologyLog from './etymology.js';
+  
+    // ============================================
+    // AUTHENTICATION CHECK & LOGOUT
+    // ============================================
+    (() => {
+      const userId = sessionStorage.getItem('userId');
+      const username = sessionStorage.getItem('username');
+
+      if (!userId) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      document.addEventListener('DOMContentLoaded', () => {
+          const usernameDisplay = document.getElementById('username-display');
+          if (usernameDisplay && username) {
+              usernameDisplay.innerHTML = `Welcome, <strong>${username}</strong>!`;
+          }
+      });
+
+    })();
+
     // ============================================
     // IPA Data Module (for Chart)
     // ============================================
@@ -558,7 +905,7 @@
             symbol: 'uː',
             label: 'Long U',
             articulation: 'Close back rounded vowel (long)',
-            description: 'Tongue is positioned high and back, lips firmly rounded and protruded. Long and tense. (oo)',
+            description: 'TongTogue is positioned high and back, lips firmly rounded and protruded. Long and tense. (oo)',
             examples: ['goose /guːs/', 'food /fuːd/', 'blue /bluː/', 'through /θruː/']
           },
           {
@@ -722,7 +1069,7 @@
             label: 'R',
             articulation: 'Voiced alveolar approximant',
             description: 'Tongue tip raised toward alveolar ridge but not touching. Very common consonant. In rhotic (US) accents, /r/ is pronounced wherever it appears.',
-            examples: ['red /red/', 'very /ˈveri/', 'three /θriː/', 'arrive /əˈraɪv/']
+            examples: ['red /red/', 'very /ˈveri/', 'three /θriː/', 'arrive /əˈraİv/']
           },
           {
             symbol: 'j',
@@ -884,6 +1231,7 @@
 
       const renderChart = () => {
         const chart = document.getElementById('ipaChart');
+        if (!chart) return; // Don't run if chart element isn't on the page
         const vowelSection = createSection('Vowels', IPAData.getVowels());
         const consonantSection = createSection('Consonants', IPAData.getConsonants());
         chart.appendChild(vowelSection);
@@ -910,34 +1258,93 @@
     })();
     
     // ============================================
-    // SPA Navigation Module
+    // SPA Navigation Module (Upgraded)
     // ============================================
     const SPANav = (() => {
-        const navLinks = document.querySelectorAll('header .nav-link');
-        const pages = document.querySelectorAll('main > section[data-page]');
+        let mainNavLinks, subNavContainers, subNavLinks, mainPages;
+        let activeMainPage = 'ipa-learning';
+        let activeSubPage = 'ipa-chart';
 
-        const showPage = (pageId) => {
-            pages.forEach(page => {
-                page.classList.toggle('hidden', page.dataset.page !== pageId);
+        const cacheDOM = () => {
+            mainNavLinks = document.querySelectorAll('.main-nav-link');
+            subNavContainers = document.querySelectorAll('.sub-nav');
+            subNavLinks = document.querySelectorAll('.sub-nav-link');
+            mainPages = document.querySelectorAll('.main-page-content');
+        };
+
+        const showMainPage = (pageId) => {
+            activeMainPage = pageId;
+            
+            // Toggle main pages
+            mainPages.forEach(page => {
+                page.classList.toggle('hidden', page.dataset.mainPage !== pageId);
             });
             
-            navLinks.forEach(link => {
-                link.classList.toggle('nav-link-active', link.dataset.page === pageId);
+            // Toggle main nav links
+            mainNavLinks.forEach(link => {
+                link.classList.toggle('main-nav-link-active', link.dataset.page === pageId);
+            });
+            
+            // Toggle sub-nav containers
+            subNavContainers.forEach(nav => {
+                nav.classList.toggle('hidden', nav.dataset.subnav !== pageId);
+            });
+            
+            // Auto-select the first sub-page of the new main page
+            const firstSubPageLink = document.querySelector(`#${pageId}-subnav .sub-nav-link`);
+            if (firstSubPageLink) {
+                showSubPage(firstSubPageLink.dataset.page);
+            }
+            
+            // If the new main page is etymology, trigger a word load
+            if (pageId === 'etymology-log') {
+                EtymologyLog.loadWords();
+            }
+        };
+
+        const showSubPage = (pageId) => {
+            activeSubPage = pageId;
+            
+            // Find the active main page container
+            const activeMainPageContainer = document.getElementById(`${activeMainPage}-page`);
+            
+            // Toggle sub-pages *within* that main page
+            if (activeMainPageContainer) {
+                const subPages = activeMainPageContainer.querySelectorAll('section[data-page]');
+                subPages.forEach(page => {
+                    page.classList.toggle('hidden', page.dataset.page !== pageId);
+                });
+            }
+            
+            // Toggle sub-nav links
+            subNavLinks.forEach(link => {
+                link.classList.toggle('sub-nav-link-active', link.dataset.page === pageId);
             });
         };
 
         const init = () => {
-            navLinks.forEach(link => {
+            cacheDOM();
+            
+            mainNavLinks.forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
-                    const pageId = e.currentTarget.dataset.page;
-                    showPage(pageId);
+                    showMainPage(e.currentTarget.dataset.page);
                 });
             });
-            showPage('ipa-chart'); // Show IPA chart by default
+            
+            subNavLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showSubPage(e.currentTarget.dataset.page);
+                });
+            });
+            
+            // Set default startup page
+            showMainPage(activeMainPage);
+            showSubPage(activeSubPage);
         };
         
-        return { init, showPage };
+        return { init };
     })();
     
     // ============================================
@@ -947,19 +1354,17 @@
         const getWordBtn = document.getElementById('get-new-word-btn');
         const revealBtn = document.getElementById('reveal-word-btn');
         const playAudioBtn = document.getElementById('play-audio-btn');
-        
         const ipaDisplay = document.getElementById('ipa-display-area');
         const wordDisplay = document.getElementById('word-display-area');
         const answerArea = document.getElementById('answer-area');
-        
         const loader = document.getElementById('practice-loader');
         const errorDisplay = document.getElementById('practice-error');
-        
         const audioPlayer = document.getElementById('practice-audio-player');
 
         let currentWordData = null;
 
         const setPracticeLoading = (isLoading) => {
+            if (!loader || !getWordBtn || !revealBtn) return;
             loader.classList.toggle('hidden', !isLoading);
             getWordBtn.disabled = isLoading;
             if (isLoading) {
@@ -970,45 +1375,39 @@
         };
 
         const setPracticeError = (message) => {
+            if (!errorDisplay || !ipaDisplay) return;
             errorDisplay.textContent = message;
             errorDisplay.classList.remove('hidden');
             ipaDisplay.textContent = 'Error';
         };
-
-        // Note: findPhonetic function removed as logic is simplified in loadNewWord
 
         const loadNewWord = async () => {
             setPracticeLoading(true);
             currentWordData = null;
 
             try {
-                // 1. Get a random word
-                const randomWordResponse = await fetch('https://random-word-api.vercel.app/api?words=1'); // UPDATED API
+                const randomWordResponse = await fetch('https://random-word-api.vercel.app/api?words=1');
                 if (!randomWordResponse.ok) throw new Error('Could not fetch random word.');
                 const randomWordData = await randomWordResponse.json();
                 const word = randomWordData[0];
 
-                // 2. Get its dictionary entry
                 const dictResponse = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
                 if (!dictResponse.ok) throw new Error(`Could not find dictionary entry for "${word}".`);
                 const dictData = await dictResponse.json();
                 
-                // 3. Find the best phonetic info
                 const entry = dictData[0];
-                const ipaText = entry.phonetic; // UPDATED to use top-level phonetic key
+                const ipaText = entry.phonetic; 
 
-                if (!ipaText || ipaText.length === 0) { // UPDATED check
+                if (!ipaText || ipaText.length === 0) {
                     throw new Error(`No IPA data found for "${word}". Trying again...`);
                 }
 
-                // 3b. Find audio from the phonetics array
                 const phoneticWithAudio = entry.phonetics?.find(p => p.audio && p.audio.length > 0);
                 
-                // 4. Store and display the challenge
                 currentWordData = {
                     word: entry.word,
-                    ipa: ipaText, // UPDATED
-                    audioUrl: phoneticWithAudio ? phoneticWithAudio.audio : null // UPDATED
+                    ipa: ipaText,
+                    audioUrl: phoneticWithAudio ? phoneticWithAudio.audio : null
                 };
                 
                 ipaDisplay.textContent = currentWordData.ipa;
@@ -1018,9 +1417,8 @@
             } catch (err) {
                 console.error(err);
                 setPracticeLoading(false);
-                // If a word fails (e.g., no entry, no IPA), just try fetching another one automatically
                 if (err.message.includes("Trying again") || err.message.includes("Could not find dictionary entry")) {
-                    loadNewWord(); // Recursive call to try again
+                    loadNewWord();
                 } else {
                     setPracticeError(err.message);
                 }
@@ -1028,7 +1426,7 @@
         };
 
         const revealAnswer = () => {
-            if (!currentWordData) return;
+            if (!currentWordData || !wordDisplay || !answerArea || !playAudioBtn) return;
             
             wordDisplay.textContent = currentWordData.word;
             
@@ -1048,11 +1446,13 @@
         };
 
         const init = () => {
+            // Check if all elements exist (they might not if the page isn't visible)
+            if (!getWordBtn || !revealBtn || !playAudioBtn) return;
+            
             getWordBtn.addEventListener('click', loadNewWord);
             revealBtn.addEventListener('click', revealAnswer);
             playAudioBtn.addEventListener('click', playAudio);
             
-            // Load the first word on init
             loadNewWord();
         };
 
@@ -1063,9 +1463,22 @@
     // Initialize Application
     // ============================================
     document.addEventListener('DOMContentLoaded', () => {
+      // Init all modules
       UI.renderChart();
       SPANav.init();
       IPAPractice.init();
+      EtymologyLog.init(); // Initialize the new module
+      
+      // Add logout functionality
+      const logoutBtn = document.getElementById('logout-btn');
+      if (logoutBtn) {
+          logoutBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              sessionStorage.removeItem('userId');
+              sessionStorage.removeItem('username');
+              window.location.href = 'login.html'; 
+          });
+      }
       
       // Optionally preload all audio files for the chart
       // AudioPlayer.preloadAll();

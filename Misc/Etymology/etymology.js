@@ -6,10 +6,23 @@ import config from './config.js';
  * Handles all frontend logic for the Etymology Word Log.
  */
 const EtymologyLog = (() => {
-    // DOM Elements
+
+    // --- Constants ---
+    const POS_OPTIONS = [
+        'noun', 'verb', 'adjective', 'adverb', 'pronoun', 
+        'preposition', 'conjunction', 'interjection', 'other'
+    ];
+    
+    const ETYMOLOGY_OPTIONS = [
+        'Origin', 'Morphology', 'Proto-Root', 'Semantic Shift', 'Notes'
+    ];
+
+    // --- DOM Elements ---
     let addWordBtn, wordFormModal, wordForm, wordListContainer,
-        closeModalBtn, formTitle, wordIdField, definitionsContainer,
-        relatedWordsContainer, addDefinitionBtn, addRelatedWordBtn;
+        closeModalBtn, formTitle, wordIdField,
+        definitionsContainer, addPosGroupBtn,
+        etymologyFieldsContainer, addEtymologyFieldBtn,
+        relatedWordsContainer, addRelatedWordBtn;
 
     // State
     let currentUserId = null;
@@ -23,16 +36,24 @@ const EtymologyLog = (() => {
         closeModalBtn = document.getElementById('close-modal-btn');
         formTitle = document.getElementById('word-form-title');
         wordIdField = document.getElementById('word-id');
+        
+        // Definition elements
         definitionsContainer = document.getElementById('definitions-container');
+        addPosGroupBtn = document.getElementById('add-pos-group-btn');
+
+        // Etymology elements
+        etymologyFieldsContainer = document.getElementById('etymology-fields-container');
+        addEtymologyFieldBtn = document.getElementById('add-etymology-field-btn');
+        
+        // Related words elements
         relatedWordsContainer = document.getElementById('related-words-container');
-        addDefinitionBtn = document.getElementById('add-definition-btn');
         addRelatedWordBtn = document.getElementById('add-related-word-btn');
     };
 
-    // --- Dynamic Input List Functions ---
+    // --- Dynamic Form Creation ---
 
     /**
-     * Creates a new input field for multi-value fields (definitions, related words).
+     * Creates a simple dynamic input field (for definitions, related words).
      * @param {string} value - The pre-filled value for the input.
      * @param {string} placeholder - The placeholder text for the input.
      * @returns {HTMLElement} The created input group element.
@@ -51,16 +72,94 @@ const EtymologyLog = (() => {
     };
 
     /**
-     * Adds a new dynamic input to a container.
-     * @param {HTMLElement} container - The container element.
-     * @param {string} placeholder - The placeholder text for the new input.
+     * Creates a new Part of Speech (POS) group in the form.
+     * @param {object} data - Pre-fill data { partOfSpeech, definitions }
      */
-    const addDynamicInput = (container, placeholder) => {
-        container.appendChild(createDynamicInput('', placeholder));
+    const createPosGroup = (data = {}) => {
+        const group = document.createElement('div');
+        group.className = 'pos-group';
+        
+        const selectedPos = data.partOfSpeech || 'noun';
+        const definitions = data.definitions || [''];
+
+        // Create <select> options
+        const posOptionsHtml = POS_OPTIONS.map(opt => 
+            `<option value="${opt}" ${opt === selectedPos ? 'selected' : ''}>
+                ${opt.charAt(0).toUpperCase() + opt.slice(1)}
+            </option>`
+        ).join('');
+
+        group.innerHTML = `
+            <div class="pos-group-header">
+                <select class="form-select pos-select">
+                    ${posOptionsHtml}
+                </select>
+                <button type="button" class="btn-remove-pos-group btn-danger" aria-label="Remove Part of Speech group">Remove POS</button>
+            </div>
+            <div class="pos-definitions-container">
+                <!-- Definition inputs will go here -->
+            </div>
+            <button type="button" class="btn-add-dynamic btn-add-definition" style="margin-top: 0.5rem;">+ Add Definition</button>
+        `;
+
+        // *** FIX: Use a unique variable name ***
+        // Get the local container *inside* the group
+        const localDefsContainer = group.querySelector('.pos-definitions-container');
+        definitions.forEach(def => {
+            localDefsContainer.appendChild(
+                createDynamicInput(def, 'e.g., "A state of happy chance."')
+            );
+        });
+        
+        // Add event listeners
+        group.querySelector('.btn-remove-pos-group').addEventListener('click', () => {
+            group.remove();
+        });
+        
+        group.querySelector('.btn-add-definition').addEventListener('click', () => {
+            localDefsContainer.appendChild(
+                createDynamicInput('', 'e.g., "A state of happy chance."')
+            );
+        });
+
+        // *** FIX: This line now correctly refers to the module-scoped `definitionsContainer` ***
+        definitionsContainer.appendChild(group);
+    };
+    
+    /**
+     * Creates a new Etymology field group in the form.
+     * @param {object} data - Pre-fill data { type, value }
+     */
+    const createEtymologyField = (data = {}) => {
+        const group = document.createElement('div');
+        group.className = 'etymology-field-group';
+        
+        const selectedType = data.type || 'Origin';
+        const value = data.value || '';
+        
+        // Create <select> options
+        const etymologyOptionsHtml = ETYMOLOGY_OPTIONS.map(opt =>
+            `<option value="${opt}" ${opt === selectedType ? 'selected' : ''}>${opt}</option>`
+        ).join('');
+        
+        group.innerHTML = `
+            <select class="form-select etymology-type-select">
+                ${etymologyOptionsHtml}
+            </select>
+            <textarea class="form-textarea etymology-value-input" placeholder="Enter details...">${value}</textarea>
+            <button type="button" class="btn-remove-dynamic btn-remove-etymology-field" aria-label="Remove field">×</button>
+        `;
+        
+        // Add event listener
+        group.querySelector('.btn-remove-etymology-field').addEventListener('click', () => {
+            group.remove();
+        });
+        
+        etymologyFieldsContainer.appendChild(group);
     };
 
     /**
-     * Gets all values from a dynamic input container.
+     * Gets all values from a simple dynamic input container (like related words).
      * @param {HTMLElement} container - The container element.
      * @returns {string[]} An array of the input values.
      */
@@ -71,7 +170,7 @@ const EtymologyLog = (() => {
     };
 
     /**
-     * Sets values for a dynamic input container, clearing old ones.
+     * Sets values for a simple dynamic input container.
      * @param {HTMLElement} container - The container element.
      * @param {string[]} values - The array of values to set.
      * @param {string} placeholder - The placeholder text for the inputs.
@@ -100,28 +199,35 @@ const EtymologyLog = (() => {
         wordForm.reset();
         wordIdField.value = '';
         
+        // Clear dynamic containers
+        definitionsContainer.innerHTML = '';
+        etymologyFieldsContainer.innerHTML = '';
+        
         if (word) {
-            // Populate form for editing
+            // === Populate form for editing ===
             wordIdField.value = word._id;
             document.getElementById('word').value = word.word || '';
             document.getElementById('pronunciation').value = word.pronunciation || '';
-            document.getElementById('partOfSpeech').value = word.partOfSpeech || '';
             document.getElementById('personalNotes').value = word.personalNotes || '';
 
-            // Etymology sub-fields
-            document.getElementById('origin').value = word.etymology?.origin || '';
-            document.getElementById('morphology').value = word.etymology?.morphology || '';
-            document.getElementById('protoRoot').value = word.etymology?.protoRoot || '';
-            document.getElementById('semanticShift').value = word.etymology?.semanticShift || '';
-            document.getElementById('etymologyNotes').value = word.etymology?.notes || '';
+            // Populate definitions
+            if (word.definitions && word.definitions.length > 0) {
+                word.definitions.forEach(defGroup => createPosGroup(defGroup));
+            } else {
+                createPosGroup(); // Add one empty group
+            }
             
-            // Dynamic fields
-            setDynamicInputValues(definitionsContainer, word.definitions, 'e.g., "A state of happy chance."');
+            // Populate etymology
+            if (word.etymology && word.etymology.length > 0) {
+                word.etymology.forEach(etymGroup => createEtymologyField(etymGroup));
+            }
+            
+            // Populate related words
             setDynamicInputValues(relatedWordsContainer, word.relatedWords, 'e.g., "serene"');
 
         } else {
-            // Clear form for adding
-            setDynamicInputValues(definitionsContainer, [], 'e.g., "A state of happy chance."');
+            // === Clear form for adding ===
+            createPosGroup(); // Add one empty POS group
             setDynamicInputValues(relatedWordsContainer, [], 'e.g., "serene"');
         }
         
@@ -142,23 +248,47 @@ const EtymologyLog = (() => {
         submitButton.disabled = true;
         submitButton.textContent = 'Saving...';
         
+        // --- Gather Dynamic Data ---
+        
+        // 1. Gather Definitions
+        const definitionsData = [];
+        const posGroups = definitionsContainer.querySelectorAll('.pos-group');
+        posGroups.forEach(group => {
+            const partOfSpeech = group.querySelector('.pos-select').value;
+            const definitionInputs = group.querySelectorAll('.pos-definitions-container .dynamic-input-group input');
+            const definitions = Array.from(definitionInputs)
+                .map(input => input.value.trim())
+                .filter(val => val.length > 0);
+            
+            if (definitions.length > 0) {
+                definitionsData.push({ partOfSpeech, definitions });
+            }
+        });
+        
+        // 2. Gather Etymology
+        const etymologyData = [];
+        const etymologyGroups = etymologyFieldsContainer.querySelectorAll('.etymology-field-group');
+        etymologyGroups.forEach(group => {
+            const type = group.querySelector('.etymology-type-select').value;
+            const value = group.querySelector('.etymology-value-input').value.trim();
+            
+            if (value.length > 0) {
+                etymologyData.push({ type, value });
+            }
+        });
+        
+        // 3. Gather Related Words
+        const relatedWordsData = getDynamicInputValues(relatedWordsContainer);
+        
+        // --- Construct Final Form Data ---
         const formData = {
             userId: currentUserId,
             word: document.getElementById('word').value,
             pronunciation: document.getElementById('pronunciation').value,
-            partOfSpeech: document.getElementById('partOfSpeech').value,
             personalNotes: document.getElementById('personalNotes').value,
-            
-            definitions: getDynamicInputValues(definitionsContainer),
-            relatedWords: getDynamicInputValues(relatedWordsContainer),
-            
-            etymology: {
-                origin: document.getElementById('origin').value,
-                morphology: document.getElementById('morphology').value,
-                protoRoot: document.getElementById('protoRoot').value,
-                semanticShift: document.getElementById('semanticShift').value,
-                notes: document.getElementById('etymologyNotes').value
-            }
+            definitions: definitionsData,
+            etymology: etymologyData,
+            relatedWords: relatedWordsData
         };
 
         try {
@@ -232,15 +362,24 @@ const EtymologyLog = (() => {
         words.forEach(word => {
             const wordCard = document.createElement('div');
             wordCard.className = 'word-card';
+            
+            // Get first definition group for display
+            const firstDefGroup = word.definitions?.[0];
+            const partOfSpeech = firstDefGroup?.partOfSpeech || '';
+            const firstDefinition = firstDefGroup?.definitions?.[0] || 'No definition added.';
+            
+            // Get first 'Origin' field for display
+            const origin = word.etymology?.find(e => e.type === 'Origin')?.value || 'No origin added.';
+            
             wordCard.innerHTML = `
                 <div class="word-card-header">
                     <h3 class="word-card-title">${word.word}</h3>
-                    <span class="word-card-pos">${word.partOfSpeech || ''}</span>
+                    <span class="word-card-pos">${partOfSpeech}</span>
                     <span class="word-card-ipa">${word.pronunciation || ''}</span>
                 </div>
                 <div class="word-card-body">
-                    <p><strong>Definition:</strong> ${word.definitions?.[0] || 'No definition added.'}</p>
-                    <p><strong>Origin:</strong> ${word.etymology?.origin || 'No origin added.'}</p>
+                    <p><strong>Definition:</strong> ${firstDefinition}</p>
+                    <p><strong>Origin:</strong> ${origin}</p>
                     <p class="word-card-notes"><strong>Notes:</strong> ${word.personalNotes || '...'}</p>
                 </div>
                 <div class="word-card-actions">
@@ -311,15 +450,18 @@ const EtymologyLog = (() => {
             wordForm.addEventListener('submit', handleSubmit);
         }
         
-        // Add listeners for "add dynamic input" buttons
-        if (addDefinitionBtn) {
-            addDefinitionBtn.addEventListener('click', () => {
-                addDynamicInput(definitionsContainer, 'e.g., "A state of happy chance."');
-            });
+        // Add listeners for new dynamic group buttons
+        if (addPosGroupBtn) {
+            addPosGroupBtn.addEventListener('click', () => createPosGroup());
+        }
+        if (addEtymologyFieldBtn) {
+            addEtymologyFieldBtn.addEventListener('click', () => createEtymologyField());
         }
         if (addRelatedWordBtn) {
             addRelatedWordBtn.addEventListener('click', () => {
-                addDynamicInput(relatedWordsContainer, 'e.g., "serene"');
+                relatedWordsContainer.appendChild(
+                    createDynamicInput('', 'e.g., "serene"')
+                );
             });
         }
 
@@ -332,3 +474,4 @@ const EtymologyLog = (() => {
 
 // Export the module for use in index.html
 export default EtymologyLog;
+

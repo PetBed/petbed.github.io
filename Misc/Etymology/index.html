@@ -349,6 +349,9 @@
         font-size: 0.85rem;
         font-style: italic;
         color: var(--text-secondary);
+        background: var(--hover);
+        padding: 0.1rem 0.4rem;
+        border-radius: 4px;
     }
     .word-card-ipa {
         font-size: 1rem;
@@ -485,7 +488,7 @@
         color: var(--text);
     }
     
-    .form-input, .form-textarea {
+    .form-input, .form-textarea, .form-select {
         width: 100%;
         padding: 0.75rem;
         border: 1px solid var(--border);
@@ -494,7 +497,7 @@
         font-family: inherit;
         background: var(--bg);
     }
-    .form-input:focus, .form-textarea:focus {
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
         outline: none;
         border-color: var(--primary);
         box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
@@ -543,6 +546,56 @@
         background: var(--bg);
         display: flex;
         justify-content: flex-end;
+    }
+    
+    /* --- NEW Dynamic Form Styles --- */
+    .pos-group {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background: var(--bg);
+    }
+    .pos-group-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        gap: 1rem;
+    }
+    .pos-select {
+        flex-grow: 1;
+        background: var(--surface);
+    }
+    .btn-remove-pos-group {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .pos-definitions-container {
+        padding-left: 1rem;
+        border-left: 2px solid var(--primary);
+    }
+    .pos-definitions-container .dynamic-input-group {
+        margin-bottom: 0.5rem;
+    }
+    
+    .etymology-field-group {
+        display: grid;
+        grid-template-columns: 1fr 2fr auto;
+        gap: 0.75rem;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+    }
+    .etymology-type-select {
+        background: var(--surface);
+    }
+    .etymology-value-input {
+        min-height: 50px;
+        resize: vertical;
+    }
+    .btn-remove-etymology-field {
+        padding: 0.75rem; /* Make it squarer */
     }
 
     /* --- Responsive --- */
@@ -608,6 +661,12 @@
       }
       .form-grid {
           grid-template-columns: 1fr; /* Stack form fields */
+      }
+      .etymology-field-group {
+          grid-template-columns: 1fr; /* Stack etymology fields on mobile */
+      }
+      .etymology-field-group .btn-remove-etymology-field {
+          width: 100%; /* Full-width remove button on mobile */
       }
     }
   </style>
@@ -721,6 +780,7 @@
               <form id="word-form">
                   <input type="hidden" id="word-id">
                   
+                  <!-- === UPDATED Core Info === -->
                   <section class="form-section">
                       <h3 class="form-section-title">Core Information</h3>
                       <div class="form-grid">
@@ -728,51 +788,32 @@
                               <label for="word" class="form-label">Word *</label>
                               <input type="text" id="word" class="form-input" required>
                           </div>
-                          <div class="form-group">
+                          <div class="form-group" style="grid-column: 1 / -1;">
                               <label for="pronunciation" class="form-label">Pronunciation (IPA)</label>
                               <input type="text" id="pronunciation" class="form-input" placeholder="/sɛrənˈdɪpɪti/">
                           </div>
-                          <div class="form-group">
-                              <label for="partOfSpeech" class="form-label">Part of Speech</label>
-                              <input type="text" id="partOfSpeech" class="form-input" placeholder="e.g., noun">
-                          </div>
                       </div>
                   </section>
                   
+                  <!-- === UPDATED Definitions === -->
                   <section class="form-section">
                       <h3 class="form-section-title">Definitions</h3>
                       <div id="definitions-container" class="form-group">
-                          <!-- Dynamic inputs go here -->
+                          <!-- Dynamic POS groups go here -->
                       </div>
-                      <button type="button" id="add-definition-btn" class="btn-add-dynamic">+ Add Definition</button>
+                      <button type="button" id="add-pos-group-btn" class="btn-add-dynamic">+ Add Part of Speech</button>
                   </section>
                   
+                  <!-- === UPDATED Etymology === -->
                   <section class="form-section">
                       <h3 class="form-section-title">Etymology Breakdown</h3>
-                      <div class="form-grid">
-                          <div class="form-group">
-                              <label for="origin" class="form-label">Origin</label>
-                              <input type="text" id="origin" class="form-input" placeholder="e.g., Coined 1754 by Horace Walpole">
-                          </div>
-                          <div class="form-group">
-                              <label for="morphology" class="form-label">Morphology</label>
-                              <input type="text" id="morphology" class="form-input" placeholder="e.g., serendip(ity)">
-                          </div>
-                          <div class="form-group">
-                              <label for="protoRoot" class="form-label">Proto-Root</label>
-                              <input type="text" id="protoRoot" class="form-input" placeholder="e.g., PIE *ser-">
-                          </div>
-                          <div class="form-group">
-                              <label for="semanticShift" class="form-label">Semantic Shift</label>
-                              <input type="text" id="semanticShift" class="form-input" placeholder="e.g., 'Hero' -> 'Villain'">
-                          </div>
-                          <div class="form-group" style="grid-column: 1 / -1;">
-                              <label for="etymologyNotes" class="form-label">Etymology Notes</label>
-                              <textarea id="etymologyNotes" class="form-textarea" placeholder="Detailed notes..."></textarea>
-                          </div>
+                      <div id="etymology-fields-container" class="form-group">
+                          <!-- Dynamic etymology fields go here -->
                       </div>
+                      <button type="button" id="add-etymology-field-btn" class="btn-add-dynamic">+ Add Field</button>
                   </section>
 
+                  <!-- === Related Words (Unchanged) === -->
                   <section class="form-section">
                       <h3 class="form-section-title">Related Words</h3>
                       <div id="related-words-container" class="form-group">
@@ -781,12 +822,13 @@
                       <button type="button" id="add-related-word-btn" class="btn-add-dynamic">+ Add Related Word</button>
                   </section>
 
+                  <!-- === Personal Notes (Unchanged) === -->
                   <section class="form-section">
                       <h3 class="form-section-title">Personal Notes & Reflections</h3>
                       <div class="form-group">
                           <label for="personalNotes" class="form-label">Notes</label>
                           <textarea id="personalNotes" class="form-textarea" placeholder="Your personal thoughts, connections, or mnemonics..."></textarea>
-</div>
+                      </div>
                   </section>
                   
                   <div class="modal-footer">

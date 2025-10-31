@@ -294,9 +294,58 @@
     
     /* --- IPA Practice Section Styles --- */
     #practice-container { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; min-height: 250px; }
-    #ipa-display-area { font-size: 2.5rem; font-weight: 500; color: var(--text); background: var(--bg); border: 2px dashed var(--border); border-radius: 8px; padding: 1.5rem 2rem; min-height: 80px; display: flex; align-items: center; justify-content: center; }
+    #ipa-display-area { 
+        font-size: 2.5rem; 
+        font-weight: 500; 
+        color: var(--text); 
+        background: var(--bg); 
+        border: 2px dashed var(--border); 
+        border-radius: 8px; 
+        padding: 1.5rem 2rem; 
+        min-height: 80px;
+        width: 100%;
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        text-align: center;
+        word-break: break-word;
+    }
+    
+    /* NEW: Styles for Practice Mode Toggle */
+    #practice-mode-toggle {
+        display: flex;
+        gap: 0.5rem;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        padding: 0.5rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    #practice-mode-toggle label {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    #practice-mode-toggle input {
+        display: none;
+    }
+    #practice-mode-toggle input:checked + label {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 2px 5px rgba(37, 99, 235, 0.2);
+    }
+
     #answer-area { display: flex; align-items: center; gap: 1.5rem; }
-    #word-display-area { font-size: 1.75rem; font-weight: 600; color: var(--primary); }
+    #word-display-area { 
+        font-size: 1.75rem; 
+        font-weight: 600; 
+        color: var(--primary);
+        text-align: center;
+    }
     #practice-controls { display: flex; gap: 1rem; margin-top: 1rem; }
     #play-audio-btn { background: var(--accent); color: white; display: flex; align-items: center; gap: 0.5rem; }
     #play-audio-btn:hover { background: #7c3aed; /* Darker accent */ }
@@ -723,13 +772,23 @@
         
         <section class="section hidden" id="ipa-practice-page" data-page="ipa-practice">
           <h2 class="section-title">IPA Reading Practice</h2>
+          
+          <!-- NEW: Practice Mode Toggle -->
+          <div id="practice-mode-toggle">
+              <input type="radio" id="mode-word" name="practice-mode" value="word" checked>
+              <label for="mode-word">Word</label>
+              
+              <input type="radio" id="mode-sentence" name="practice-mode" value="sentence">
+              <label for="mode-sentence">Sentence</label>
+          </div>
+          
           <p style="color: var(--text-secondary); margin-bottom: 1.5rem; text-align: center;">
-            Try to pronounce the IPA word below. Click "Get New Word" for a challenge!
+            Try to pronounce the IPA transcription below.
           </p>
           
           <div id="practice-container">
             <div id="ipa-display-area">/lɔːdɪŋ.../</div>
-            <div id="practice-loader" class="hidden">Fetching a new word...</div>
+            <div id="practice-loader" class="hidden">Fetching a new challenge...</div>
             <div id="practice-error" class="hidden"></div>
             <div id="answer-area" class="hidden">
                 <h3 id="word-display-area">Word</h3>
@@ -739,7 +798,7 @@
                 </button>
             </div>
             <div id="practice-controls">
-                <button id="get-new-word-btn" class="btn btn-primary">Get New Word</button>
+                <button id="get-new-word-btn" class="btn btn-primary">Get New Challenge</button>
                 <button id="reveal-word-btn" class="btn btn-secondary" disabled>Reveal Answer</button>
             </div>
           </div>
@@ -1390,7 +1449,7 @@
     })();
     
     // ============================================
-    // IPA Practice Module
+    // IPA Practice Module (UPDATED)
     // ============================================
     const IPAPractice = (() => {
         const getWordBtn = document.getElementById('get-new-word-btn');
@@ -1402,6 +1461,7 @@
         const loader = document.getElementById('practice-loader');
         const errorDisplay = document.getElementById('practice-error');
         const audioPlayer = document.getElementById('practice-audio-player');
+        const modeToggle = document.getElementById('practice-mode-toggle');
 
         let currentWordData = null;
 
@@ -1421,6 +1481,17 @@
             errorDisplay.textContent = message;
             errorDisplay.classList.remove('hidden');
             ipaDisplay.textContent = 'Error';
+        };
+
+        const loadNewChallenge = () => {
+            const mode = modeToggle.querySelector('input[name="practice-mode"]:checked').value;
+            if (mode === 'word') {
+                ipaDisplay.style.fontSize = '2.5rem'; // Reset font size
+                loadNewWord();
+            } else {
+                ipaDisplay.style.fontSize = '1.5rem'; // Smaller font for sentences
+                loadNewSentence();
+            }
         };
 
         const loadNewWord = async () => {
@@ -1466,6 +1537,113 @@
                 }
             }
         };
+        
+        // --- NEW: Sentence Mode Logic ---
+        
+        /**
+         * Fetches a random word, finds an example sentence, and transcribes it.
+         */
+        const loadNewSentence = async () => {
+            setPracticeLoading(true);
+            currentWordData = null;
+            let attempt = 0;
+            const maxAttempts = 5; // Safety brake
+
+            try {
+                while (attempt < maxAttempts) {
+                    attempt++;
+                    const randomWordResponse = await fetch('https://random-word-api.vercel.app/api?words=1');
+                    if (!randomWordResponse.ok) continue; // Try again
+                    const randomWordData = await randomWordResponse.json();
+                    const word = randomWordData[0];
+
+                    const dictResponse = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                    if (!dictResponse.ok) continue; // Try again
+                    
+                    const dictData = await dictResponse.json();
+                    const entry = dictData[0];
+                    
+                    // Find an example sentence
+                    const exampleSentence = findExampleSentence(entry);
+                    
+                    if (exampleSentence) {
+                        const { transcript, sentence } = await transcribeSentence(exampleSentence);
+                        
+                        currentWordData = {
+                            word: sentence, // The full sentence
+                            ipa: transcript, // The full transcript
+                            audioUrl: null // No audio for sentences
+                        };
+                        
+                        ipaDisplay.textContent = currentWordData.ipa;
+                        revealBtn.disabled = false;
+                        setPracticeLoading(false);
+                        return; // Success!
+                    }
+                    // If no example found, the loop continues
+                }
+                throw new Error('Could not find a word with an example sentence. Please try again.');
+            } catch (err) {
+                console.error(err);
+                setPracticeLoading(false);
+                setPracticeError(err.message);
+            }
+        };
+
+        /**
+         * Recursively searches a dictionary entry for an example sentence.
+         */
+        const findExampleSentence = (entry) => {
+            if (!entry || !entry.meanings) return null;
+            for (const meaning of entry.meanings) {
+                if (!meaning.definitions) continue;
+                for (const def of meaning.definitions) {
+                    if (def.example && def.example.length > 10) { // arbitrary short-sentence filter
+                        return def.example;
+                    }
+                }
+            }
+            return null;
+        };
+
+        /**
+         * Takes a sentence string and returns its full IPA transcription.
+         */
+        const transcribeSentence = async (sentence) => {
+            // Basic sanitization: remove punctuation, lowercase
+            const cleanedSentence = sentence.replace(/[.,?"!]/g, '').toLowerCase();
+            const words = cleanedSentence.split(' ').filter(w => w.length > 0);
+            
+            // Create an array of promises, one for each word
+            const transcriptionPromises = words.map(word => getIpaForWord(word));
+            
+            // Run all API calls concurrently for speed
+            const ipaParts = await Promise.all(transcriptionPromises);
+            
+            return {
+                transcript: ipaParts.join(' '),
+                sentence: sentence // Return the original, un-cleaned sentence
+            };
+        };
+        
+        /**
+         * Helper: Fetches IPA for a single word, gracefully handles errors.
+         */
+        const getIpaForWord = async (word) => {
+            try {
+                const dictResponse = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                if (!dictResponse.ok) {
+                    return `[${word}]`; // Return word in brackets if not found
+                }
+                const dictData = await dictResponse.json();
+                const ipa = dictData[0]?.phonetic;
+                return ipa || `[${word}]`; // Return phonetic, or word if no phonetic data
+            } catch (e) {
+                return `[${word}]`; // Return word on any error
+            }
+        };
+        
+        // --- END: Sentence Mode Logic ---
 
         const revealAnswer = () => {
             if (!currentWordData || !wordDisplay || !answerArea || !playAudioBtn) return;
@@ -1488,14 +1666,22 @@
         };
 
         const init = () => {
-            // Check if all elements exist (they might not if the page isn't visible)
-            if (!getWordBtn || !revealBtn || !playAudioBtn) return;
+            // Check if all elements exist
+            if (!getWordBtn || !revealBtn || !playAudioBtn || !modeToggle) return;
             
-            getWordBtn.addEventListener('click', loadNewWord);
+            getWordBtn.addEventListener('click', loadNewChallenge);
             revealBtn.addEventListener('click', revealAnswer);
             playAudioBtn.addEventListener('click', playAudio);
             
-            loadNewWord();
+            // Add listeners to mode toggle
+            modeToggle.querySelectorAll('input[name="practice-mode"]').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    // When mode changes, load a new challenge for that mode
+                    loadNewChallenge();
+                });
+            });
+            
+            loadNewChallenge(); // Load initial word
         };
 
         return { init };

@@ -90,6 +90,9 @@ const paths = {
 			"Etymology Learner": {
 				url: "https://petbed.github.io/Misc/Etymology/index.html",
 			},
+      "Mood Tracker": {
+        url: "https://petbed.github.io/Misc/Mood%20Tracker/",
+      }
 		},
 	},
 	Credits: {

@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Micro-Moods Timeline</title>
+<style>
+  :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;line-height:1.4}
+  body{max-width:780px;margin:28px auto;padding:16px;color:#111}
+  header{display:flex;gap:12px;align-items:center;justify-content:space-between}
+  h1{font-size:20px;margin:0}
+  .card{border:1px solid #ddd;padding:12px;border-radius:8px;margin-top:12px}
+  form{display:flex;gap:8px;flex-wrap:wrap}
+  input[type="text"]{flex:1;min-width:180px;padding:8px;border-radius:6px;border:1px solid #ccc}
+  select,button{padding:8px;border-radius:6px;border:1px solid #bbb;background:#fafafa}
+  .timeline{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+  .entry{display:flex;gap:12px;align-items:flex-start;padding:8px;border-radius:6px;border:1px solid #eee}
+  .emoji{font-size:22px;line-height:1}
+  .meta{font-size:12px;color:#666}
+  .note{white-space:pre-wrap}
+  .controls{display:flex;gap:8px}
+  .small{font-size:13px;padding:6px}
+  .filters{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+  .btn-link{background:none;border:none;color:#06c;text-decoration:underline;cursor:pointer;padding:0}
+  textarea{width:100%;height:80px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>Micro-Moods Timeline</h1>
+  <div style="text-align:right;font-size:12px;color:#666">private • saved in your browser</div>
+</header>
+
+<section class="card">
+  <form id="entryForm">
+    <input id="emojiInput" type="text" maxlength="4" placeholder="emoji (e.g. 🙂)" style="width:80px" />
+    <input id="textInput" type="text" placeholder="One-line note or thought..." />
+    <input id="dateInput" type="date" />
+    <button id="addBtn" type="submit">Add</button>
+    <button id="exportBtn" type="button" class="small">Export</button>
+    <button id="importBtn" type="button" class="small">Import</button>
+    <input id="fileInput" type="file" accept="application/json" class="hidden" />
+  </form>
+
+  <div class="filters">
+    <label>Show: <select id="filterSelect"><option value="all">All</option></select></label>
+    <button id="clearBtn" class="small">Clear all</button>
+  </div>
+</section>
+
+<section class="timeline card" id="timeline"></section>
+
+<!-- edit modal (simple) -->
+<section id="editModal" class="card hidden">
+  <strong>Edit entry</strong>
+  <form id="editForm">
+    <input id="editEmoji" type="text" maxlength="4" style="width:80px" />
+    <input id="editText" type="text" />
+    <input id="editDate" type="date" />
+    <div style="margin-top:8px">
+      <button type="submit">Save</button>
+      <button id="cancelEdit" type="button" class="small">Cancel</button>
+    </div>
+  </form>
+</section>
+
+<script>
+const KEY = 'microMoods.v1'
+let entries = JSON.parse(localStorage.getItem(KEY) || '[]')
+
+const timeline = document.getElementById('timeline')
+const emojiInput = document.getElementById('emojiInput')
+const textInput = document.getElementById('textInput')
+const dateInput = document.getElementById('dateInput')
+const addBtn = document.getElementById('addBtn')
+const filterSelect = document.getElementById('filterSelect')
+const exportBtn = document.getElementById('exportBtn')
+const importBtn = document.getElementById('importBtn')
+const fileInput = document.getElementById('fileInput')
+const clearBtn = document.getElementById('clearBtn')
+
+const editModal = document.getElementById('editModal')
+const editForm = document.getElementById('editForm')
+const editEmoji = document.getElementById('editEmoji')
+const editText = document.getElementById('editText')
+const editDate = document.getElementById('editDate')
+const cancelEdit = document.getElementById('cancelEdit')
+
+function todayISO(){ return new Date().toISOString().slice(0,10) }
+dateInput.value = todayISO()
+
+function save(){ localStorage.setItem(KEY, JSON.stringify(entries)) }
+
+function renderFilterOptions(){
+  const set = new Set(entries.map(e => e.emoji?.trim()).filter(Boolean))
+  filterSelect.innerHTML = '<option value="all">All</option>'
+  Array.from(set).forEach(emo=>{
+    const o = document.createElement('option'); o.value = emo; o.textContent = emo
+    filterSelect.appendChild(o)
+  })
+}
+
+function render(){
+  timeline.innerHTML = ''
+  const f = filterSelect.value || 'all'
+  const list = entries.slice().sort((a,b)=> b.date.localeCompare(a.date) || b.created - a.created)
+    .filter(e => f==='all' ? true : e.emoji===f)
+  if(!list.length){ timeline.innerHTML = '<div style="color:#666">No entries yet.</div>'; renderFilterOptions(); return }
+  for(const e of list){
+    const el = document.createElement('div'); el.className='entry'
+    el.innerHTML = `
+      <div style="width:46px;text-align:center">
+        <div class="emoji">${e.emoji||'—'}</div>
+        <div class="meta">${e.date}</div>
+      </div>
+      <div style="flex:1">
+        <div class="note">${escapeHtml(e.text)}</div>
+        <div class="meta">added ${new Date(e.created).toLocaleString()}</div>
+      </div>
+      <div class="controls">
+        <button data-id="${e.id}" class="btn-edit btn-link">edit</button>
+        <button data-id="${e.id}" class="btn-del btn-link">delete</button>
+      </div>`
+    timeline.appendChild(el)
+  }
+  renderFilterOptions()
+}
+
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({ '&': '&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]) }
+
+document.getElementById('entryForm').addEventListener('submit', e=>{
+  e.preventDefault()
+  const emoji = emojiInput.value.trim()
+  const text = textInput.value.trim()
+  const date = dateInput.value || todayISO()
+  if(!text){ alert('Write a short note.'); return }
+  const entry = { id:cryptoRandomId(), emoji, text, date, created: Date.now() }
+  entries.push(entry); save(); render()
+  textInput.value=''; emojiInput.value=''
+})
+
+timeline.addEventListener('click', e=>{
+  const id = e.target.dataset.id
+  if(!id) return
+  if(e.target.classList.contains('btn-del')){
+    if(!confirm('Delete this entry?')) return
+    entries = entries.filter(x=>x.id!==id); save(); render()
+  } else if(e.target.classList.contains('btn-edit')){
+    const ent = entries.find(x=>x.id===id); if(!ent) return
+    editModal.classList.remove('hidden')
+    editEmoji.value = ent.emoji || ''
+    editText.value = ent.text || ''
+    editDate.value = ent.date || todayISO()
+    editForm.dataset.editingId = id
+    window.scrollTo({top:0,behavior:'smooth'})
+  }
+})
+
+editForm.addEventListener('submit', e=>{
+  e.preventDefault()
+  const id = editForm.dataset.editingId
+  const ent = entries.find(x=>x.id===id); if(!ent) return
+  ent.emoji = editEmoji.value.trim()
+  ent.text = editText.value.trim()
+  ent.date = editDate.value || todayISO()
+  save(); render(); editModal.classList.add('hidden')
+})
+
+cancelEdit.addEventListener('click',()=> editModal.classList.add('hidden'))
+
+filterSelect.addEventListener('change', render)
+
+exportBtn.addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(entries, null, 2)], {type:'application/json'})
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
+  a.download = 'micro-moods.json'; a.click(); URL.revokeObjectURL(a.href)
+})
+
+importBtn.addEventListener('click', ()=> fileInput.click())
+fileInput.addEventListener('change', async (ev)=>{
+  const f = ev.target.files[0]; if(!f) return
+  try{
+    const txt = await f.text()
+    const obj = JSON.parse(txt)
+    if(!Array.isArray(obj)) throw new Error('invalid file')
+    // merge carefully: add ids if missing
+    const cleaned = obj.map(o=>({ id:o.id||cryptoRandomId(), emoji:o.emoji||'', text:o.text||'', date:o.date||todayISO(), created:o.created||Date.now() }))
+    entries = entries.concat(cleaned)
+    save(); render(); fileInput.value=''
+    alert('Imported '+cleaned.length+' entries.')
+  }catch(err){ alert('Import failed: '+err.message) }
+})
+
+clearBtn.addEventListener('click', ()=>{
+  if(!confirm('Clear all entries? This cannot be undone.')) return
+  entries = []; save(); render()
+})
+
+function cryptoRandomId(){ // small safe id
+  return 'id'+Math.random().toString(36).slice(2,9)
+}
+
+// initial render
+render()
+</script>
+</body>
+</html>

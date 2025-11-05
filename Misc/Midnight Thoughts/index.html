@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Midnight Thoughts</title>
+  <style>
+    :root {
+      --bg: #000;
+      --fg: #fff;
+      --fade: 800ms;
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Courier New", monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--fade) ease;
+      overflow: hidden;
+    }
+
+    main {
+      text-align: center;
+      max-width: 600px;
+      padding: 2rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    h1 {
+      font-weight: normal;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      background: transparent;
+      border: 1px solid var(--fg);
+      color: var(--fg);
+      font-family: inherit;
+      font-size: 1rem;
+      padding: 0.75rem;
+      resize: none;
+      outline: none;
+    }
+
+    button {
+      margin-top: 1rem;
+      background: transparent;
+      color: var(--fg);
+      border: 1px solid var(--fg);
+      font-family: inherit;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--fg);
+      color: var(--bg);
+    }
+
+    .appear {
+      animation: appear var(--fade) ease both;
+    }
+
+    @keyframes appear {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    footer {
+      position: fixed;
+      bottom: 1rem;
+      width: 100%;
+      text-align: center;
+      color: #888;
+      font-size: 0.8rem;
+      z-index: 2;
+    }
+
+    .muted {
+      color: #777;
+    }
+
+    .quote {
+      color: #ccc;
+      font-size: 1rem;
+      white-space: pre-wrap;
+    }
+
+    /* Overlay that fades in near 1AM */
+    #dim-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 80%, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.9));
+      opacity: 0;
+      transition: opacity 30s linear;
+      z-index: 1;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="dim-overlay"></div>
+  <main id="app"></main>
+  <footer id="footer"></footer>
+
+  <script>
+    function msUntilNextHour(targetHour = 1) {
+      const now = new Date();
+      const next = new Date(now);
+      next.setHours(targetHour, 0, 0, 0);
+      if (next <= now) next.setDate(next.getDate() + 1);
+      return next - now;
+    }
+
+    function renderApp() {
+        const app = document.getElementById("app");
+        const footer = document.getElementById("footer");
+        app.innerHTML = "";
+        footer.innerHTML = "";
+
+        const now = new Date();
+        const hour = now.getHours();
+        const minutes = now.getMinutes();
+        const todayKey = now.toISOString().split("T")[0];
+        console.log(`Current time: ${hour}:${minutes.toString().padStart(2, "0")}`);
+        const savedThought = localStorage.getItem("todayThought");
+        const savedDate = localStorage.getItem("thoughtDate");
+        const lastThought = localStorage.getItem("lastThought");
+
+        // Midnight window (12:00 AM–1:00 AM)
+        if (hour === 0) {
+          if (savedDate === todayKey && savedThought) {
+            const wrapper = document.createElement("div");
+            wrapper.classList.add("appear");
+
+            const title = document.createElement("h1");
+            title.textContent = "Tonight’s whisper:";
+            const message = document.createElement("p");
+            message.className = "quote";
+            message.textContent = `"${savedThought}"`;
+
+            const note = document.createElement("p");
+            note.className = "muted";
+            note.style.marginTop = "1.5rem";
+            note.textContent = "You’ve already shared your thought for tonight.";
+
+            wrapper.append(title, message, note);
+            app.appendChild(wrapper);
+          } else {
+            const wrapper = document.createElement("div");
+            wrapper.classList.add("appear");
+
+            const title = document.createElement("h1");
+            title.textContent = "It is midnight. Speak your thought.";
+            const textarea = document.createElement("textarea");
+            textarea.placeholder = "Write what the night whispers...";
+            const button = document.createElement("button");
+            button.textContent = "Send";
+
+            button.addEventListener("click", () => {
+              const text = textarea.value.trim();
+              button.disabled = true;
+
+              const reveal = document.createElement("div");
+              reveal.classList.add("appear");
+
+              if (text) {
+                localStorage.setItem("todayThought", text);
+                localStorage.setItem("thoughtDate", todayKey);
+                localStorage.setItem("lastThought", text);
+
+                const outTitle = document.createElement("h1");
+                outTitle.textContent = "Tonight’s whisper:";
+                const outMsg = document.createElement("p");
+                outMsg.className = "quote";
+                outMsg.textContent = `"${text}"`;
+
+                reveal.append(outTitle, outMsg);
+              } else {
+                const outTitle = document.createElement("h1");
+                outTitle.textContent = "The night heard your silence.";
+                reveal.append(outTitle);
+              }
+
+              setTimeout(() => {
+                app.innerHTML = "";
+                app.appendChild(reveal);
+              }, 120);
+            });
+
+            wrapper.append(title, textarea, button);
+            app.appendChild(wrapper);
+
+            if (lastThought) {
+              const ghost = document.createElement("p");
+              ghost.className = "muted appear";
+              ghost.style.marginTop = "2rem";
+              ghost.textContent = `Last night's whisper: "${lastThought}"`;
+              app.appendChild(ghost);
+
+              const msTo1am = msUntilNextHour(1);
+              setTimeout(() => localStorage.removeItem("lastThought"), msTo1am);
+            }
+          }
+
+          // Between 1:00 AM and 5:30 AM → "The night is already asleep."
+        } else if (hour >= 1 && (hour < 5 || (hour === 5 && minutes < 30))) {
+          const wrapper = document.createElement("div");
+          wrapper.classList.add("appear");
+          const msg = document.createElement("h1");
+          msg.textContent = "The night is already asleep.";
+          wrapper.appendChild(msg);
+          app.appendChild(wrapper);
+
+          // After sunrise (5:30 AM onward) → "The night is still asleep."
+        } else {
+          const wrapper = document.createElement("div");
+          wrapper.classList.add("appear");
+          const msg = document.createElement("h1");
+          msg.textContent = "The night is still asleep.";
+          wrapper.appendChild(msg);
+
+          const info = document.createElement("p");
+          info.className = "muted";
+          info.textContent = `Come back between 12:00 AM and 1:00 AM.`;
+          wrapper.appendChild(info);
+
+          app.appendChild(wrapper);
+        }
+
+        // startDimAnimation();
+      }
+
+      renderApp();
+      setInterval(() => {
+        renderApp();
+        // startDimAnimation();
+      }, 15000);
+  </script>
+</body>
+
+</html>

@@ -92,6 +92,13 @@ const paths = {
 			},
       "Mood Tracker": {
         url: "https://petbed.github.io/Misc/Mood%20Tracker/",
+      },
+      "💭": {
+        contents: {
+          "Midnight Thoughts": {
+            url: "https://petbed.github.io/Misc/Midnight%20Thoughts/",
+          },
+        }
       }
 		},
 	},

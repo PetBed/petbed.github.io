@@ -235,6 +235,11 @@
           const msg = document.createElement("h1");
           msg.textContent = "The night is already asleep.";
           wrapper.appendChild(msg);
+
+          const info = document.createElement("p");
+          info.className = "muted";
+          info.textContent = `Come back between 12:00 AM and 1:00 AM.`;
+          wrapper.appendChild(info);
           app.appendChild(wrapper);
 
           // After sunrise (5:30 AM onward) → "The night is still asleep."

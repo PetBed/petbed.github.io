@@ -1,0 +1,3229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>French Cheat Sheet</title>
+  <!-- Load Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Simple focus style for tabs */
+    .tab-active {
+      border-bottom-color: #4f46e5;
+      color: #4f46e5;
+      font-weight: 600;
+    }
+
+    /* Hide content sections by default */
+    .tab-content {
+      display: none;
+    }
+
+    /* Show the active tab's content */
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 font-sans antialiased">
+
+  <div class="container mx-auto max-w-4xl p-4 sm:p-8">
+
+    <!-- Header -->
+    <header class="mb-8">
+      <h1 class="text-4xl font-bold text-gray-900 mb-2">Mon Aide-Mémoire Français</h1>
+      <p class="text-lg text-gray-600">Your Personal French Language Cheat Sheet</p>
+    </header>
+
+    <!-- Tab Navigation -->
+    <div class="mb-8">
+      <div class="border-b border-gray-300">
+        <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+          <!-- Adjectives Tab -->
+          <a href="#adjectives" id="tab-adjectives"
+            class="tab-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-lg">
+            Adjectives
+          </a>
+          <!-- Adverbs Tab -->
+          <a href="#adverbs" id="tab-adverbs"
+            class="tab-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-lg">
+            Adverbs
+          </a>
+          <!-- Articles Tab -->
+          <a href="#articles" id="tab-articles"
+            class="tab-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-lg">
+            Articles
+          </a>
+          <!-- Conjunctions Tab -->
+          <a href="#conjunctions" id="tab-conjunctions"
+            class="tab-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-lg">
+            Conjunctions
+          </a>
+          <!-- Nouns Tab -->
+          <a href="#nouns" id="tab-nouns"
+            class="tab-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-lg">
+            Nouns
+          </a>
+          <!-- Prepositions Tab -->
+          <a href="#prepositions" id="tab-prepositions"
+            class="tab-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-lg">
+            Prepositions
+          </a>
+          <!-- Pronouns Tab -->
+          <a href="#pronouns" id="tab-pronouns"
+            class="tab-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-lg">
+            Pronouns
+          </a>
+          <!-- Verbs Tab -->
+          <a href="#verbs" id="tab-verbs"
+            class="tab-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-lg tab-active"
+            aria-current="page">
+            Verbs
+          </a>
+          <!-- Future Tabs -->
+          <a href="#"
+            class="border-transparent text-gray-400 cursor-not-allowed whitespace-nowrap py-3 px-1 border-b-2 font-medium text-lg">
+            Vocabulary
+          </a>
+          <a href="#"
+            class="border-transparent text-gray-400 cursor-not-allowed whitespace-nowrap py-3 px-1 border-b-2 font-medium text-lg">
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+
+      <!-- Adjectives Section (Content) -->
+      <section id="adjectives-content" class="tab-content">
+        <h2 class="text-3xl font-semibold text-indigo-700 mb-6 border-b pb-3">L'adjectifs</h2>
+
+        <p class="text-gray-700 mb-6">
+          In French, adjectives are like clothes: they must "fit" the noun they describe. This means they can have up to
+          four forms depending on the noun's <strong>gender</strong> (masculine/feminine) and <strong>number</strong>
+          (singular/plural).
+        </p>
+
+        <!-- The Four Forms Table -->
+        <h3 class="text-2xl font-semibold text-gray-800 mb-4">The Four Forms: <em>petit</em> (small)</h3>
+        <div class="overflow-x-auto rounded-lg border border-gray-200 mb-6">
+          <table class="w-full min-w-[600px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Noun Type</th>
+                <th class="p-3 font-semibold text-gray-700">Adjective Form</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+                <th class="p-3 font-semibold text-gray-700">Meaning</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">Masculine singular</td>
+                <td class="p-3"><code>petit</code></td>
+                <td class="p-3">un <code>petit</code> chien</td>
+                <td class="p-3">a small dog</td>
+              </tr>
+              <tr>
+                <td class="p-3">Masculine plural</td>
+                <td class="p-3"><code>petits</code></td>
+                <td class="p-3">des <code>petits</code> chiens</td>
+                <td class="p-3">small dogs</td>
+              </tr>
+              <tr>
+                <td class="p-3">Feminine singular</td>
+                <td class="p-3"><code>petite</code></td>
+                <td class="p-3">une <code>petite</code> fille</td>
+                <td class="p-3">a small girl</td>
+              </tr>
+              <tr>
+                <td class="p-3">Feminine plural</td>
+                <td class="p-3"><code>petites</code></td>
+                <td class="p-3">des <code>petites</code> filles</td>
+                <td class="p-3">small girls</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Key Rules -->
+        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Key Adjective Rules</h3>
+        <div class="space-y-6 text-gray-700">
+
+          <!-- Rule 1 & 2: Agreement -->
+          <div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">Rule 1 & 2: Agreement (Gender & Number)</h3>
+            <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200 space-y-2">
+              <p><strong>Rule 1: Add <code>-e</code> for feminine.</strong> (<code>petit</code> → <code>petite</code>)
+              </p>
+              <p class="text-sm text-gray-600 pl-4">↳ If it already ends in <code>-e</code> (like <em>calme</em>), it
+                stays the same.</p>
+
+              <p><strong>Rule 2: Add <code>-s</code> for plural.</strong> (<code>petit</code> → <code>petits</code>)</p>
+              <p class="text-sm text-gray-600 pl-4">↳ If it already ends in <code>-s</code> or <code>-x</code> (like
+                <em>surpris</em>), the masculine plural is the same.
+              </p>
+            </div>
+          </div>
+
+          <!-- Rule 3: Irregular Agreement -->
+          <div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">Rule 3: Irregular Agreement (Special Cases)</h3>
+            <p class="text-gray-700 mb-4">
+              Many adjectives have irregular spelling changes for feminine or plural forms.
+            </p>
+            <!-- Special Cases: Feminine -->
+            <h4 class="text-lg font-semibold text-gray-700 mt-4 mb-2">Special Feminine Endings</h4>
+            <div class="overflow-x-auto rounded-lg border border-gray-200 mb-6">
+              <table class="w-full min-w-[600px] text-left">
+                <thead class="bg-gray-100">
+                  <tr>
+                    <th class="p-3 font-semibold text-gray-700">Masculine Ending</th>
+                    <th class="p-3 font-semibold text-gray-700">Feminine Change</th>
+                    <th class="p-3 font-semibold text-gray-700">Example (Masc → Fem)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr>
+                    <td class="p-3 align-top"><code>-c</code></td>
+                    <td class="p-3">
+                      <strong>-che</strong> / <strong>-que</strong>
+                      <div class="text-sm text-gray-600 mt-1 space-y-1">
+                        <p>→ <strong>-che</strong> (sounds like "sh"): <em>franc</em></p>
+                        <p>→ <strong>-que</strong> (sounds like "k"): <em>public</em></p>
+                      </div>
+                    </td>
+                    <td class="p-3 align-top"><code>franc</code> → <code>franche</code> / <code>public</code> →
+                      <code>publique</code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 align-top"><code>-er</code></td>
+                    <td class="p-3 align-top"><strong>-ère</strong></td>
+                    <td class="p-3 align-top"><code>cher</code> → <code>chère</code></td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 align-top"><code>-et</code></td>
+                    <td class="p-3 align-top"><strong>-ète</strong></td>
+                    <td class="p-3 align-top"><code>secret</code> → <code>secrète</code></td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 align-top"><code>-eur</code></td>
+                    <td class="p-3">
+                      <strong>-euse</strong> / <strong>-rice</strong>
+                      <div class="text-sm text-gray-600 mt-1 space-y-1">
+                        <p>→ <strong>-euse</strong> (from a verb): <em>chant<strong>er</strong> →
+                            chant<strong>euse</strong></em></p>
+                        <p>→ <strong>-rice</strong> (a profession): <em>act<strong>eur</strong> →
+                            act<strong>rice</strong></em></p>
+                      </div>
+                    </td>
+                    <td class="p-3 align-top"><code>travailleur</code> → <code>travailleuse</code> / <code>acteur</code>
+                      → <code>actrice</code></td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 align-top"><code>-eux</code></td>
+                    <td class="p-3 align-top"><strong>-euse</strong></td>
+                    <td class="p-3 align-top"><code>heureux</code> → <code>heureuse</code></td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 align-top"><code>-f</code></td>
+                    <td class="p-3 align-top"><strong>-ve</strong></td>
+                    <td class="p-3 align-top"><code>actif</code> → <code>active</code></td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 align-top"><code>-g</code></td>
+                    <td class="p-3 align-top"><strong>-gue</strong></td>
+                    <td class="p-3 align-top"><code>long</code> → <code>longue</code></td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 align-top"><code>-gu</code></td>
+                    <td class="p-3 align-top"><strong>-güe</strong> / <strong>-guë</strong></td>
+                    <td class="p-3 align-top"><code>aigu</code> → <code>aigüe</code></td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 align-top"><code>-l</code></td>
+                    <td class="p-3 align-top"><strong>-lle</strong></td>
+                    <td class="p-3 align-top"><code>gentil</code> → <code>gentille</code></td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 align-top"><code>-n</code></td>
+                    <td class="p-3 align-top"><strong>-nne</strong></td>
+                    <td class="p-3 align-top"><code>bon</code> → <code>bonne</code></td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 align-top"><code>-s</code></td>
+                    <td class="p-3 align-top"><strong>-sse</strong></td>
+                    <td class="p-3 align-top"><code>gros</code> → <code>grosse</code></td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 align-top"><code>-t</code></td>
+                    <td class="p-3 align-top"><strong>-tte</strong></td>
+                    <td class="p-3 align-top"><code>net</code> → <code>nette</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Irregular Plural Endings -->
+            <h4 class="text-lg font-semibold text-gray-700 mt-4 mb-2">Irregular Plural Endings (Adjectives & Nouns)</h4>
+            <p class="text-gray-700 mb-4">
+              These rules apply to both adjectives and nouns.
+            </p>
+            <div class="overflow-x-auto rounded-lg border border-gray-200 mb-4">
+              <table class="w-full min-w-[500px] text-left">
+                <thead class="bg-gray-100">
+                  <tr>
+                    <th class="p-3 font-semibold text-gray-700">Ending</th>
+                    <th class="p-3 font-semibold text-gray-700">Plural Change</th>
+                    <th class="p-3 font-semibold text-gray-700">Example (Singular → Plural)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr>
+                    <td class="p-3"><code>-al</code></td>
+                    <td class="p-3"><strong>-aux</strong></td>
+                    <td class="p-3"><code>animal</code> → <code>animaux</code></td>
+                  </tr>
+                  <tr>
+                    <td class="p-3"><code>-eau</code></td>
+                    <td class="p-3"><strong>-eaux</strong></td>
+                    <td class="p-3"><code>bateau</code> → <code>bateaux</code></td>
+                  </tr>
+                  <tr>
+                    <td class="p-3"><code>-au</code></td>
+                    <td class="p-3"><strong>-aux</strong></td>
+                    <td class="p-3"><code>château</code> → <code>châteaux</code></td>
+                  </tr>
+                  <tr>
+                    <td class="p-3"><code>-eu</code></td>
+                    <td class="p-3"><strong>-eux</strong></td>
+                    <td class="p-3"><code>jeu</code> → <code>jeux</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Plural Exceptions/Notes -->
+            <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200">
+              <strong class="text-indigo-800">Key Exceptions & Notes:</strong>
+              <ul class="list-disc pl-5 mt-2 space-y-1 text-sm text-gray-700">
+                <li><strong>-ou:</strong> Most add <strong>-s</strong> (<code>un fou</code> → <code>des fous</code>),
+                  but 7 exceptions add <strong>-x</strong>:
+                  <br><em>bijou, caillou, chou, genou, hibou, joujou, pou</em> (→ <code>bijoux, cailloux...</code>)
+                </li>
+                <li><strong>-al:</strong> Some exceptions just add <strong>-s</strong>:
+                  <br><em>bal, carnaval, festival, récital, régal</em> (→ <code>bals, carnavals...</code>)
+                </li>
+                <li><strong>-ail:</strong> Most just add <strong>-s</strong> (<code>un détail</code> →
+                  <code>des détails</code>), but a few change to <strong>-aux</strong>:
+                  <br><em>travail → travaux, vitrail → vitraux</em>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Rule 4: Adjective Placement -->
+          <div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">Rule 4: Adjective Placement</h3>
+            <p class="text-gray-700 mb-4">
+              In French, adjectives can go <strong>before</strong> or <strong>after</strong> the noun. The position
+              depends on the *type* of adjective.
+            </p>
+
+            <!-- Type 1: Descriptive -->
+            <h4 class="text-lg font-semibold text-gray-700 mt-4 mb-2">1. Descriptive Adjectives (Usually AFTER the noun)
+            </h4>
+            <p class="text-gray-700 mb-3">
+              These describe a quality (color, shape, mood, nationality, etc.). They answer the question, "What kind
+              of...?"
+            </p>
+            <ul class="list-none text-gray-700 space-y-1 mb-4">
+              <li>un livre <code>vert</code> (a green book)</li>
+              <li>la voiture <code>rouge</code> (the red car)</li>
+              <li>un chat <code>noir</code> (a black cat)</li>
+              <li>un étudiant <code>intelligent</code> (an intelligent student)</li>
+            </ul>
+
+            <!-- BAGS Exception -->
+            <h4 class="text-lg font-semibold text-gray-700 mt-4 mb-2">The 'BAGS' Exception (BEFORE the noun)</h4>
+            <p class="text-gray-700 mb-3">
+              A few common descriptive adjectives are special and go <strong>before</strong> the noun. You can remember
+              them with the acronym <strong>BAGS</strong>:
+            </p>
+            <ul class="list-disc list-inside text-gray-700 space-y-1">
+              <li><strong>B</strong>eauty: <code>beau</code> (beautiful), <code>joli</code> (pretty)</li>
+              <li><strong>A</strong>ge: <code>jeune</code> (young), <code>vieux</code> (old), <code>nouveau</code> (new)
+              </li>
+              <li><strong>G</strong>oodness: <code>bon</code> (good), <code>mauvais</code> (bad)</li>
+              <li><strong>S</strong>ize: Example: une <code>belle</code> fille (a beautiful girl), un <code>jeune</code>
+                homme (a young man)</li>
+            </ul>
+
+            <!-- Type 2: Limiting -->
+            <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">2. Limiting Adjectives (Always BEFORE the noun)
+            </h4>
+            <p class="text-gray-700 mb-3">
+              These adjectives don't describe a quality. They "limit" or specify *which* noun you're talking about
+              (e.g., "my", "this", "three"). They always go <strong>before</strong> the noun.
+            </p>
+
+            <!-- Limiting Adjectives Table -->
+            <div class="overflow-x-auto rounded-lg border border-gray-200 my-4">
+              <table class="w-full min-w-[500px] text-left">
+                <thead class="bg-gray-100">
+                  <tr>
+                    <th class="p-3 font-semibold text-gray-700">Type</th>
+                    <th class="p-3 font-semibold text-gray-700">Function</th>
+                    <th class="p-3 font-semibold text-gray-700">Example (French)</th>
+                    <th class="p-3 font-semibold text-gray-700">Translation</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr>
+                    <td class="p-3"><strong>Demonstrative</strong></td>
+                    <td class="p-3">Point to a noun</td>
+                    <td class="p-3"><code>ce</code> livre, <code>cette</code> table</td>
+                    <td class="p-3">this book, this table</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3"><strong>Possessive</strong></td>
+                    <td class="p-3">Show ownership</td>
+                    <td class="p-3"><code>mon</code> livre, <code>ma</code> maison</td>
+                    <td class="p-3">my book, my house</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3"><strong>Numerical</strong></td>
+                    <td class="p-3">Count nouns</td>
+                    <td class="p-3"><code>trois</code> chats</td>
+                    <td class="p-3">three cats</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3"><strong>Indefinite</strong></td>
+                    <td class="p-3">Unspecified amount</td>
+                    <td class="p-3"><code>plusieurs</code> personnes</td>
+                    <td class="p-3">several people</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3"><strong>Interrogative</strong></td>
+                    <td class="p-3">Ask "which?" or "what?"</td>
+                    <td class="p-3"><code>quel</code> jour ?</td>
+                    <td class="p-3">which day?</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3"><strong>Exclamative</strong></td>
+                    <td class="p-3">Exclaim "what a...!"</td>
+                    <td class="p-3"><code>quelle</code> surprise !</td>
+                    <td class="p-3">what a surprise!</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Memory Aid -->
+            <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md mt-6" role="alert">
+              <p class="font-semibold">Easy Memory Trick</p>
+              <ul class="list-disc list-inside mt-2">
+                <li>If it <strong>describes</strong> (color, size, shape, mood) → <strong>AFTER</strong> noun (e.g.,
+                  <code>le livre rouge</code>).
+                </li>
+                <li>If it's <strong>BAGS</strong> (Beauty, Age, Goodness, Size) → <strong>BEFORE</strong> noun (e.g.,
+                  <code>le grand livre</code>).
+                </li>
+                <li>If it <strong>limits/points/counts</strong> (my, this, three, which) → <strong>BEFORE</strong> noun
+                  (e.g., <code>mon livre</code>, <code>ce livre</code>, <code>deux livres</code>).</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Rule 5: Adjectives with Prepositions -->
+          <div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">Rule 5: Adjectives with Prepositions</h3>
+            <p class="text-gray-700 mb-4">
+              Some adjectives require a specific preposition (like <code>à</code> or <code>de</code>) to connect to the
+              next part of the sentence, especially after the verb <code>être</code> (to be).
+            </p>
+
+            <!-- Adjectives + à -->
+            <h4 class="text-lg font-semibold text-gray-700 mt-4 mb-2">1. Adjectives + <code>à</code> (to, at)</h4>
+            <p class="text-gray-700 mb-3">
+              Used for ability, readiness, determination, or being busy.
+            </p>
+            <div class="overflow-x-auto rounded-lg border border-gray-200 mb-4">
+              <table class="w-full min-w-[600px] text-left">
+                <thead class="bg-gray-100">
+                  <tr>
+                    <th class="p-3 font-semibold text-gray-700">French</th>
+                    <th class="p-3 font-semibold text-gray-700">Meaning</th>
+                    <th class="p-3 font-semibold text-gray-700">Example</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr>
+                    <td class="p-3">être prêt <strong>à</strong></td>
+                    <td class="p-3">to be ready to</td>
+                    <td class="p-3">Je suis prêt <strong>à</strong> partir. (I'm ready to leave.)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3">être habitué <strong>à</strong></td>
+                    <td class="p-3">to be used to</td>
+                    <td class="p-3">Je suis habitué <strong>à</strong> me lever tôt. (I'm used to waking up early.)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3">être décidé <strong>à</strong></td>
+                    <td class="p-3">to be determined to</td>
+                    <td class="p-3">Elle est décidée <strong>à</strong> réussir. (She's determined to succeed.)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md mt-3" role="alert">
+              <p class="font-semibold">Tip:</p>
+              <p>If it’s about what you can do, want to do, or are about to do → use <code>à</code>.</p>
+            </div>
+
+            <!-- Adjectives + de -->
+            <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">2. Adjectives + <code>de</code> (of, about)</h4>
+            <p class="text-gray-700 mb-3">
+              Used for emotions, feelings, opinions, or being forced/allowed.
+            </p>
+            <div class="overflow-x-auto rounded-lg border border-gray-200 mb-4">
+              <table class="w-full min-w-[600px] text-left">
+                <thead class="bg-gray-100">
+                  <tr>
+                    <th class="p-3 font-semibold text-gray-700">French</th>
+                    <th class="p-3 font-semibold text-gray-700">Meaning</th>
+                    <th class="p-3 font-semibold text-gray-700">Example</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr>
+                    <td class="p-3">être content <strong>de</strong></td>
+                    <td class="p-3">to be happy to</td>
+                    <td class="p-3">Je suis content <strong>de</strong> te voir. (I'm happy to see you.)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3">être fier <strong>de</strong></td>
+                    <td class="p-3">to be proud of</td>
+                    <td class="p-3">Elle est fière <strong>de</strong> son fils. (She's proud of her son.)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3">être fatigué <strong>de</strong></td>
+                    <td class="p-3">to be tired of</td>
+                    <td class="p-3">Il est fatigué <strong>de</strong> travailler. (He's tired of working.)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md mt-3" role="alert">
+              <p class="font-semibold">Tip:</p>
+              <p>If it’s about how you feel or an emotion, it usually takes <code>de</code>.</p>
+            </div>
+
+            <!-- Adjectives + pour -->
+            <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">3. Adjectives + <code>pour</code> (for, to)</h4>
+            <p class="text-gray-700 mb-3">
+              Used with <code>assez</code> (enough) or <code>trop</code> (too) to express "enough to..." or "too...
+              to...".
+            </p>
+            <div class="overflow-x-auto rounded-lg border border-gray-200 mb-4">
+              <table class="w-full min-w-[600px] text-left">
+                <thead class="bg-gray-100">
+                  <tr>
+                    <th class="p-3 font-semibold text-gray-700">French</th>
+                    <th class="p-3 font-semibold text-gray-700">Meaning</th>
+                    <th class="p-3 font-semibold text-gray-700">Example</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr>
+                    <td class="p-3">assez ... <strong>pour</strong></td>
+                    <td class="p-3">... enough to</td>
+                    <td class="p-3">Il est assez fort <strong>pour</strong> soulever ça. (He's strong enough to lift
+                      that.)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3">trop ... <strong>pour</strong></td>
+                    <td class="p-3">too ... to</td>
+                    <td class="p-3">Il est trop petit <strong>pour</strong> conduire. (He's too small to drive.)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Rule 6: Adverbs -->
+          <div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">Rule 6: Adverbs (Modifying Adjectives)</h3>
+            <p class="text-gray-700 mb-4">
+              Adverbs like <em>très</em> (very), <em>trop</em> (too), and <em>assez</em> (quite/fairly) go
+              <strong>before</strong> the adjective they modify.
+            </p>
+            <ul class="list-none bg-indigo-50 border border-indigo-200 rounded-lg p-4 space-y-1">
+              <li><code>très petit</code> (very small)</li>
+              <li><code>trop grand</code> (too big)</li>
+              <li><code>assez joli</code> (quite pretty)</li>
+            </ul>
+          </div>
+        </div>
+
+
+        <!-- Summary Table -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-12 mb-4">Adjective Rules: Quick Summary</h3>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[600px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Rule</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+                <th class="p-3 font-semibold text-gray-700">Meaning</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">Add <strong>-e</strong> for feminine</td>
+                <td class="p-3"><code>petit</code> → <code>petite</code></td>
+                <td class="p-3">small</td>
+              </tr>
+              <tr>
+                <td class="p-3">Add <strong>-s</strong> for plural</td>
+                <td class="p-3"><code>petit</code> → <code>petits</code></td>
+                <td class="p-3">small (plural)</td>
+              </tr>
+              <tr>
+                <td class="p-3">Irregular Agreement</td>
+                <td class="p-3"><code>-f</code> → <code>-ve</code>, <code>-al</code> → <code>-aux</code></td>
+                <td class="p-3"><code>actif</code> → <code>active</code>, <code>animal</code> → <code>animaux</code>
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3">Placement: Descriptive</td>
+                <td class="p-3">un chat <code>noir</code> (After)</td>
+                <td class="p-3">a black cat</td>
+              </tr>
+              <tr>
+                <td class="p-3">Placement: BAGS</td>
+                <td class="p-3">un <code>grand</code> homme (Before)</td>
+                <td class="p-3">a tall man</td>
+              </tr>
+              <tr>
+                <td class="p-3">Placement: Limiting</td>
+                <td class="p-3"><code>mon</code> livre / <code>ce</code> chien (Before)</td>
+                <td class="p-3">my book / this dog</td>
+              </tr>
+              <tr>
+                <td class="p-3">With Prepositions</td>
+                <td class="p-3">prêt <code>à</code> partir / content <code>de</code> voir</td>
+                <td class="p-3">ready to go / happy to see</td>
+              </tr>
+              <tr>
+                <td class="p-3">With Adverbs</td>
+                <td class="p-3"><code>très</code> petit / <code>assez</code> grand</td>
+                <td class="p-3">very small / quite big</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Adverbs Section (Content) -->
+      <section id="adverbs-content" class="tab-content">
+        <h2 class="text-3xl font-semibold text-indigo-700 mb-6 border-b pb-3">Les Adverbes</h2>
+
+        <!-- What is an Adverb? -->
+        <h3 class="text-2xl font-semibold text-gray-800 mb-4">What is an Adverb?</h3>
+        <p class="text-gray-700 mb-4">
+          An adverb describes or gives more detail about a verb (action), an adjective (description), or another adverb.
+          It answers questions like: <strong>How? When? Where? How much?</strong>
+        </p>
+        <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200">
+          <strong>The Golden Rule:</strong> Adverbs are <strong>invariable</strong>. They never change. Unlike
+          adjectives, they don't need to agree with a noun's gender or number.
+          <ul class="list-none text-gray-600 text-sm mt-2">
+            <li>Il court <code>vite</code>. (He runs fast.)</li>
+            <li>Elle court <code>vite</code>. (She runs fast.)</li>
+            <li>Ils courent <code>vite</code>. (They run fast.)</li>
+          </ul>
+        </div>
+
+        <!-- How to Form Adverbs -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">How to Form Adverbs</h3>
+        <p class="text-gray-700 mb-4">
+          Most adverbs are formed from adjectives, similar to adding "-ly" in English.
+        </p>
+
+        <div class="space-y-4">
+          <!-- Rule 1: Feminine + ment -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700">Rule 1: Feminine Adjective + <code>-ment</code></h4>
+            <p class="text-gray-700 mb-2">This is the most common rule. Take the masculine adjective, find its feminine
+              form, and add <code>-ment</code>.</p>
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+              <table class="w-full min-w-[500px] text-left">
+                <thead class="bg-gray-100">
+                  <tr>
+                    <th class="p-3 font-semibold text-gray-700">Adjective (Masc)</th>
+                    <th class="p-3 font-semibold text-gray-700">Feminine Form</th>
+                    <th class="p-3 font-semibold text-gray-700">Adverb</th>
+                    <th class="p-3 font-semibold text-gray-700">English</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr>
+                    <td class="p-3"><code>poli</code></td>
+                    <td class="p-3"><code>polie</code></td>
+                    <td class="p-3"><code>poliment</code></td>
+                    <td class="p-3">politely</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3"><code>lent</code></td>
+                    <td class="p-3"><code>lente</code></td>
+                    <td class="p-3"><code>lentement</code></td>
+                    <td class="p-3">slowly</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3"><code>heureux</code></td>
+                    <td class="p-3"><code>heureuse</code></td>
+                    <td class="p-3"><code>heureusement</code></td>
+                    <td class="p-3">happily, fortunately</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Rule 2: Special Endings -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700">Rule 2: Adjectives Ending in a Vowel, <code>-ant</code>, or
+              <code>-ent</code>
+            </h4>
+            <p class="text-gray-700 mb-2">These have shortcuts:</p>
+            <ul class="list-disc list-inside text-gray-700 space-y-2">
+              <li>If the masculine adjective ends in <strong><code>-e</code></strong> (like <code>calme</code>), just
+                add <code>-ment</code>.
+                <br><span class="pl-4">→ <code>calme</code> → <code>calmement</code> (calmly)</span>
+              </li>
+              <li>If the adjective ends in <strong><code>-ant</code></strong>, change it to
+                <strong><code>-amment</code></strong>.
+                <br><span class="pl-4">→ <code>constant</code> → <code>constamment</code> (constantly)</span>
+              </li>
+              <li>If the adjective ends in <strong><code>-ent</code></strong>, change it to
+                <strong><code>-emment</code></strong>.
+                <br><span class="pl-4">→ <code>récent</code> → <code>récemment</code> (recently)</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Irregular Adverbs -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">Common Irregular Adverbs</h3>
+        <p class="text-gray-700 mb-4">
+          Some of the most common adverbs don't follow the <code>-ment</code> rule and must be memorized.
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Adverb</th>
+                <th class="p-3 font-semibold text-gray-700">English</th>
+                <th class="p-3 font-semibold text-gray-700">(Related Adjective)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3"><code>bien</code></td>
+                <td class="p-3">well</td>
+                <td class="p-3">(<code>bon</code> - good)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>mal</code></td>
+                <td class="p-3">badly</td>
+                <td class="p-3">(<code>mauvais</code> - bad)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>vite</code></td>
+                <td class="p-3">fast, quickly</td>
+                <td class="p-3">(<code>rapide</code> - fast)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>beaucoup</code></td>
+                <td class="p-3">a lot, much, very</td>
+                <td class="p-3"></td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>trop</code></td>
+                <td class="p-3">too, too much</td>
+                <td class="p-3"></td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>peu</code></td>
+                <td class="p-3">little</td>
+                <td class="p-3"></td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>très</code></td>
+                <td class="p-3">very</td>
+                <td class="p-3"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Types of Adverbs -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">Types of Adverbs</h3>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[600px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Type</th>
+                <th class="p-3 font-semibold text-gray-700">Answers...</th>
+                <th class="p-3 font-semibold text-gray-700">Examples</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3"><strong>Manner</strong></td>
+                <td class="p-3">How?</td>
+                <td class="p-3"><code>bien</code> (well), <code>mal</code> (badly), <code>vite</code> (fast),
+                  <code>poliment</code> (politely)
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3"><strong>Frequency</strong></td>
+                <td class="p-3">How often?</td>
+                <td class="p-3"><code>toujours</code> (always), <code>souvent</code> (often), <code>parfois</code>
+                  (sometimes), <code>jamais</code> (never)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><strong>Place</strong></td>
+                <td class="p-3">Where?</td>
+                <td class="p-3"><code>ici</code> (here), <code>là</code> (there), <code>dehors</code> (outside),
+                  <code>partout</code> (everywhere)
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3"><strong>Time</strong></td>
+                <td class="p-3">When?</td>
+                <td class="p-3"><code>maintenant</code> (now), <code>hier</code> (yesterday), <code>bientôt</code>
+                  (soon), <code>déjà</code> (already)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><strong>Quantity</strong></td>
+                <td class="p-3">How much?</td>
+                <td class="p-3"><code>très</code> (very), <code>peu</code> (little), <code>trop</code> (too much),
+                  <code>beaucoup</code> (a lot)
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3"><strong>Evaluation</strong></td>
+                <td class="p-3">Opinion?</td>
+                <td class="p-3"><code>absolument</code> (absolutely), <code>peut-être</code> (maybe),
+                  <code>vraiment</code> (really)
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Word Order -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">Where to Put Adverbs (Word Order)</h3>
+        <div class="space-y-4">
+          <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200">
+            <strong>(a) Modifying a Verb:</strong> Place it <strong>after</strong> the verb.
+            <br><span class="pl-4 text-gray-600">→ Je travaille <code>beaucoup</code>. (I work a lot.)</span>
+            <br><span class="pl-4 text-gray-600">→ J’ai <code>bien</code> compris. (I understood well. *After the first
+              verb.*)</span>
+          </div>
+          <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200">
+            <strong>(b) Modifying an Adjective or Adverb:</strong> Place it <strong>before</strong> that word.
+            <br><span class="pl-4 text-gray-600">→ Je suis <code>très</code> fatigué. (I am very tired.)</span>
+            <br><span class="pl-4 text-gray-600">→ Il parle <code>assez</code> lentement. (He speaks quite
+              slowly.)</span>
+          </div>
+          <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200">
+            <strong>(c) Modifying a Whole Sentence:</strong> Place it at the <strong>beginning</strong> or
+            <strong>end</strong>.
+            <br><span class="pl-4 text-gray-600">→ <code>Heureusement</code>, il est venu. (Fortunately, he
+              came.)</span>
+          </div>
+        </div>
+
+        <!-- In Short -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md mt-10" role="alert">
+          <p class="font-semibold">In Short: Adverbs vs. Adjectives</p>
+          <ul class="list-disc list-inside mt-2">
+            <li><strong>Adjectives</strong> = CHANGE to match the noun's gender and number.</li>
+            <li><strong>Adverbs</strong> = NEVER CHANGE, often end in <code>-ment</code>, and describe *how*, *where*,
+              *when*, or *how much*.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Articles Section (Content) -->
+      <section id="articles-content" class="tab-content">
+        <h2 class="text-3xl font-semibold text-indigo-700 mb-6 border-b pb-3">L' Article</h2>
+
+        <!-- What are Articles? -->
+        <h3 class="text-2xl font-semibold text-gray-800 mb-4">What Are Articles?</h3>
+        <p class="text-gray-700 mb-4">
+          Articles are the small words before nouns (like "a," "an," or "the"). In French, they change depending on the
+          noun's:
+        </p>
+        <ul class="list-disc list-inside text-gray-700 mb-4 space-y-1">
+          <li><strong>Gender:</strong> Masculine or Feminine</li>
+          <li><strong>Number:</strong> Singular or Plural</li>
+          <li><strong>First Letter:</strong> Starts with a vowel or silent "h"</li>
+          <li><strong>Context:</strong> Specific (the), general (a/an), or partial (some)</li>
+        </ul>
+        <p class="text-gray-700 mb-6">
+          There are 3 main types: <strong>Definite</strong> (the), <strong>Indefinite</strong> (a/an), and
+          <strong>Partitive</strong> (some).
+        </p>
+
+        <!-- 1. Definite Articles -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">1. Definite Articles (The)</h3>
+        <p class="text-gray-700 mb-4">
+          Used for something specific or known. The English equivalent is "the".
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Type</th>
+                <th class="p-3 font-semibold text-gray-700">Singular</th>
+                <th class="p-3 font-semibold text-gray-700">Plural</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">Masculine</td>
+                <td class="p-3"><code>le</code></td>
+                <td class="p-3"><code>les</code></td>
+                <td class="p-3"><code>le livre</code> (the book)</td>
+              </tr>
+              <tr>
+                <td class="p-3">Feminine</td>
+                <td class="p-3"><code>la</code></td>
+                <td class="p-3"><code>les</code></td>
+                <td class="p-3"><code>la table</code> (the table)</td>
+              </tr>
+              <tr>
+                <td class="p-3">Vowel / Silent 'h'</td>
+                <td class="p-3"><code>l'</code></td>
+                <td class="p-3"><code>les</code></td>
+                <td class="p-3"><code>l'arbre</code> (the tree), <code>l'école</code> (the school)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200 mt-4">
+          <strong>In short:</strong> <code>le</code>, <code>la</code>, <code>l'</code>, and <code>les</code> all mean
+          "the".
+        </div>
+
+        <!-- 2. Indefinite Articles -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">2. Indefinite Articles (A / An / Some)</h3>
+        <p class="text-gray-700 mb-4">
+          Used for something non-specific or countable (e.g., "a book," "some books").
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Type</th>
+                <th class="p-3 font-semibold text-gray-700">Singular</th>
+                <th class="p-3 font-semibold text-gray-700">Plural</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">Masculine</td>
+                <td class="p-3"><code>un</code></td>
+                <td class="p-3"><code>des</code></td>
+                <td class="p-3"><code>un livre</code> (a book), <code>des livres</code> (some books)</td>
+              </tr>
+              <tr>
+                <td class="p-3">Feminine</td>
+                <td class="p-3"><code>une</code></td>
+                <td class="p-3"><code>des</code></td>
+                <td class="p-3"><code>une pomme</code> (an apple), <code>des pommes</code> (some apples)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200 mt-4">
+          <strong>In short:</strong> <code>un</code> / <code>une</code> mean "a/an". <code>des</code> means "some" (for
+          countable items).
+        </div>
+
+        <!-- 3. Partitive Articles -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">3. Partitive Articles (Some of...)</h3>
+        <p class="text-gray-700 mb-4">
+          Used for <strong>uncountable</strong> things, like food, liquids, or materials (e.g., "some water," "some
+          cheese").
+        </p>
+
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Type</th>
+                <th class="p-3 font-semibold text-gray-700">Singular</th>
+                <th class="p-3 font-semibold text-gray-700">Plural</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">Masculine</td>
+                <td class="p-3"><code>du</code></td>
+                <td class="p-3"><code>des</code></td>
+                <td class="p-3"><code>du pain</code> (some bread)</td>
+              </tr>
+              <tr>
+                <td class="p-3">Feminine</td>
+                <td class="p-3"><code>de la</code></td>
+                <td class="p-3"><code>des</code></td>
+                <td class="p-3"><code>de la soupe</code> (some soup)</td>
+              </tr>
+              <tr>
+                <td class="p-3">Vowel / Silent 'h' </td>
+                <td class="p-3"><code>de l'</code></td>
+                <td class="p-3"><code>des</code></td>
+                <td class="p-3"><code>de l'eau</code> (some water), <code>des épinards</code> (some spinach)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200 mt-4">
+          <strong>In short:</strong> <code>du</code>, <code>de la</code>, <code>de l'</code> mean "some" (for
+          uncountable items).
+        </div>
+
+        <!-- Bonus Rule: Negation -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">Bonus Rule: Negation with <code>de</code></h3>
+        <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md mt-6" role="alert">
+          <p class="font-semibold">In negative sentences (with <code>ne...pas</code>), all indefinite and partitive
+            articles (<code>un</code>, <code>une</code>, <code>des</code>, <code>du</code>, <code>de la</code>,
+            <code>de l'</code>) usually become just <strong><code>de</code></strong> (or
+            <strong><code>d'</code></strong> before a vowel).
+          </p>
+          <ul class="list-none mt-3 space-y-2">
+            <li>J’ai <code>un</code> chien. → Je n’ai pas <code>de</code> chien. (I don't have a dog.)</li>
+            <li>Je bois <code>du</code> café. → Je ne bois pas <code>de</code> café. (I don't drink coffee.)</li>
+            <li>Elle a <code>des</code> amis. → Elle n’a pas <code>d'</code>amis. (She doesn't have any friends.)</li>
+          </ul>
+        </div>
+
+        <!-- Final Summary Table -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">Summary of All Articles</h3>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[600px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Gender/Number</th>
+                <th class="p-3 font-semibold text-gray-700">Definite (the)</th>
+                <th class="p-3 font-semibold text-gray-700">Indefinite (a/an/some)</th>
+                <th class="p-3 font-semibold text-gray-700">Partitive (some of...)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">Masculine singular</td>
+                <td class="p-3"><code>le</code></td>
+                <td class="p-3"><code>un</code></td>
+                <td class="p-3"><code>du</code></td>
+              </tr>
+              <tr>
+                <td class="p-3">Feminine singular</td>
+                <td class="p-3"><code>la</code></td>
+                <td class="p-3"><code>une</code></td>
+                <td class="p-3"><code>de la</code></td>
+              </tr>
+              <tr>
+                <td class="p-3">Starts with vowel / 'h'</td>
+                <td class="p-3"><code>l'</code></td>
+                <td class="p-3">(uses <code>un</code> / <code>une</code>)</td>
+                <td class="p-3"><code>de l'</code></td>
+              </tr>
+              <tr>
+                <td class="p-3">Plural (any gender)</td>
+                <td class="p-3"><code>les</code></td>
+                <td class="p-3"><code>des</code></td>
+                <td class="p-3"><code>des</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- How to Think -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">How to Think About It</h3>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[600px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">English Thought</th>
+                <th class="p-3 font-semibold text-gray-700">French Article</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">"The" specific thing / Liking in general</td>
+                <td class="p-3"><code>le</code>, <code>la</code>, <code>l'</code>, <code>les</code></td>
+                <td class="p-3">J'aime <code>le</code> chocolat. (I like chocolate.)</td>
+              </tr>
+              <tr>
+                <td class="p-3">"A/An" one countable thing</td>
+                <td class="p-3"><code>un</code>, <code>une</code></td>
+                <td class="p-3">J’ai <code>une</code> voiture. (I have a car.)</td>
+              </tr>
+              <tr>
+                <td class="p-3">"Some" of an uncountable thing</td>
+                <td class="p-3"><code>du</code>, <code>de la</code>, <code>de l'</code></td>
+                <td class="p-3">Je veux <code>du</code> pain. (I want some bread.)</td>
+              </tr>
+              <tr>
+                <td class="p-3">"Some" plural countable things</td>
+                <td class="p-3"><code>des</code></td>
+                <td class="p-3">J’ai <code>des</code> amis. (I have some friends.)</td>
+              </tr>
+              <tr>
+                <td class="p-3">"Not any" / "No"</td>
+                <td class="p-3"><code>de</code> / <code>d'</code></td>
+                <td class="p-3">Je n'ai pas <code>de</code> chien. (I don't have a dog.)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Conjunctions Section (Content) -->
+      <section id="conjunctions-content" class="tab-content">
+        <h2 class="text-3xl font-semibold text-indigo-700 mb-6 border-b pb-3">Les Conjonctions</h2>
+
+        <!-- What are Conjunctions? -->
+        <h3 class="text-2xl font-semibold text-gray-800 mb-4">What Are Conjunctions?</h3>
+        <p class="text-gray-700 mb-4">
+          Conjunctions are words that connect parts of a sentence. They join words, phrases, or even whole sentences
+          together.
+        </p>
+        <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200 text-gray-700">
+          <strong>Example:</strong> "I like coffee <strong>and</strong> tea." (<em>J’aime le café <strong>et</strong>
+            le thé.</em>)
+          <br>
+          → "and" is joining "coffee" and "tea".
+        </div>
+
+        <!-- Two Types -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">Two Types of Conjunctions</h3>
+        <ul class="list-disc list-inside text-gray-700 mb-4 space-y-1">
+          <li><strong>Coordinating conjunctions:</strong> Join equal things (A + B).</li>
+          <li><strong>Subordinating conjunctions:</strong> Join unequal things (A depends on B).</li>
+        </ul>
+
+        <!-- 1. Coordinating Conjunctions -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">1. Coordinating Conjunctions (Equal Parts)</h4>
+        <p class="text-gray-700 mb-4">
+          These connect two words, phrases, or clauses that have the same function. You could swap them, and the
+          sentence still makes sense.
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[600px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">French</th>
+                <th class="p-3 font-semibold text-gray-700">Meaning</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3"><code>et</code></td>
+                <td class="p-3">and</td>
+                <td class="p-3">Il est jeune <strong>et</strong> beau. (He’s young and handsome.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>ou</code></td>
+                <td class="p-3">or</td>
+                <td class="p-3">Tu veux du café <strong>ou</strong> du thé ? (Do you want coffee or tea?)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>mais</code></td>
+                <td class="p-3">but</td>
+                <td class="p-3">J’aime le café, <strong>mais</strong> pas le thé. (I like coffee, but not tea.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>donc</code></td>
+                <td class="p-3">so / therefore</td>
+                <td class="p-3">Il pleut, <strong>donc</strong> je reste ici. (It’s raining, so I’m staying here.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>car</code></td>
+                <td class="p-3">because (formal)</td>
+                <td class="p-3">Je pars, <strong>car</strong> je suis fatigué. (I’m leaving because I’m tired.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>ni ... ni</code></td>
+                <td class="p-3">neither ... nor</td>
+                <td class="p-3">Je n’aime <strong>ni</strong> le café <strong>ni</strong> le thé. (I like neither coffee
+                  nor tea.)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md mt-4" role="alert">
+          <p class="font-semibold">Trick to remember:</p>
+          <p>The main coordinating conjunctions are: <strong>et, ou, mais, donc, car, ni</strong>.</p>
+        </div>
+
+        <!-- 2. Subordinating Conjunctions -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">2. Subordinating Conjunctions (Unequal Parts)</h4>
+        <p class="text-gray-700 mb-4">
+          These connect a main idea (main clause) with a dependent idea (subordinate clause). The dependent part can't
+          stand alone as a full sentence.
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[600px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">French</th>
+                <th class="p-3 font-semibold text-gray-700">Meaning</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3"><code>que</code></td>
+                <td class="p-3">that</td>
+                <td class="p-3">Elle sait <strong>que</strong> tu l’as fait. (She knows that you did it.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>quand</code></td>
+                <td class="p-3">when</td>
+                <td class="p-3">Dis-moi <strong>quand</strong> tu es prêt. (Tell me when you’re ready.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>si</code></td>
+                <td class="p-3">if / whether</td>
+                <td class="p-3">Je viendrai <strong>si</strong> tu veux. (I’ll come if you want.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>parce que</code></td>
+                <td class="p-3">because</td>
+                <td class="p-3">Je pleure <strong>parce que</strong> je suis triste. (I cry because I’m sad.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>lorsque</code></td>
+                <td class="p-3">when (formal)</td>
+                <td class="p-3"><strong>Lorsque</strong> j’étais enfant... (When I was a child...)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>puisque</code></td>
+                <td class="p-3">since / as</td>
+                <td class="p-3"><strong>Puisque</strong> tu es ici, aide-moi. (Since you’re here, help me.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>pendant que</code></td>
+                <td class="p-3">while</td>
+                <td class="p-3">Il lit <strong>pendant que</strong> je cuisine. (He reads while I cook.)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 3. Conjunctive Phrases -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">3. Conjunctive Phrases (Multi-word)</h4>
+        <p class="text-gray-700 mb-4">
+          Sometimes, a conjunction is a phrase of two or more words.
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[600px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">French</th>
+                <th class="p-3 font-semibold text-gray-700">Meaning</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3"><code>afin que</code></td>
+                <td class="p-3">so that / in order to</td>
+                <td class="p-3">Je pars tôt <strong>afin que</strong> je puisse dormir. (I’m leaving early so that I can
+                  sleep.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>bien que</code></td>
+                <td class="p-3">although</td>
+                <td class="p-3"><strong>Bien que</strong> fatigué, il travaille. (Although tired, he works.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>à condition que</code></td>
+                <td class="p-3">provided that</td>
+                <td class="p-3">Tu peux venir <strong>à condition que</strong> tu sois calme. (You can come provided you
+                  stay calm.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>de peur que</code></td>
+                <td class="p-3">for fear that</td>
+                <td class="p-3">Elle chuchote <strong>de peur que</strong>... (She whispers for fear that...)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- How to Tell the Difference -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">How to Tell the Difference</h3>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[600px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Type</th>
+                <th class="p-3 font-semibold text-gray-700">Relationship</th>
+                <th class="p-3 font-semibold text-gray-700">Can You Swap the Clauses?</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">Coordinating</strong></td>
+                <td class="p-3">Equal Ideas (A + B)</td>
+                <td class="p-3">✅ Yes</td>
+                <td class="p-3">Il est beau <strong>et</strong> jeune.</td>
+              </tr>
+              <tr>
+                <td class="p-3">Subordinating</strong></td>
+                <td class="p-3">Dependent Idea (A → B)</td>
+                <td class="p-3">❌ No</td>
+                <td class="p-3">Elle sait <strong>que</strong> tu l’as fait.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- In Short -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md mt-10" role="alert">
+          <p class="font-semibold">Easy Way to Remember</p>
+          <ul class="list-disc list-inside mt-2">
+            <li><strong>Coordinating</strong> = "and, or, but" → They balance two equal ideas.</li>
+            <li><strong>Subordinating</strong> = "because, when, if" → One idea depends on the other.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Nouns Section (Content) -->
+      <section id="nouns-content" class="tab-content">
+        <h2 class="text-3xl font-semibold text-indigo-700 mb-6 border-b pb-3">Les Noms (Nouns)</h2>
+
+        <!-- What are Nouns? -->
+        <h3 class="text-2xl font-semibold text-gray-800 mb-4">What Are Nouns?</h3>
+        <p class="text-gray-700 mb-4">
+          A noun (<em>un nom</em>) is a word that names a person, place, thing, or idea.
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200 mb-6">
+          <table class="w-full min-w-[400px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">English</th>
+                <th class="p-3 font-semibold text-gray-700">French</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">a book</td>
+                <td class="p-3"><code>un livre</code></td>
+              </tr>
+              <tr>
+                <td class="p-3">a cat</td>
+                <td class="p-3"><code>un chat</code></td>
+              </tr>
+              <tr>
+                <td class="p-3">a chair</td>
+                <td class="p-3"><code>une chaise</code></td>
+              </tr>
+              <tr>
+                <td class="p-3">an idea</td>
+                <td class="p-3"><code>une idée</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Rule 1: Gender -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">Rule 1: Every French Noun Has a Gender</h3>
+        <p class="text-gray-700 mb-4">
+          This is the big difference from English. Every single noun is either <strong>masculine</strong> (like "he")
+          or <strong>feminine</strong> (like "she"). This is purely grammatical.
+        </p>
+        <ul class="list-disc list-inside text-gray-700 mb-4 space-y-1">
+          <li><code>le livre</code> (the book) → <strong>masculine</strong></li>
+          <li><code>la table</code> (the table) → <strong>feminine</strong></li>
+        </ul>
+        <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md mt-6" role="alert">
+          <p class="font-semibold">The Golden Rule: How to Remember Gender</p>
+          <p class="mt-2">Always learn a noun <strong>together with its article</strong> (like <code>un</code> or
+            <code>une</code>).
+          </p>
+          <div class="grid grid-cols-2 gap-4 mt-2 text-center">
+            <div class="bg-red-100 p-2 rounded">
+              <strong>❌ Wrong</strong>
+              <p>livre = book</p>
+            </div>
+            <div class="bg-green-100 p-2 rounded">
+              <strong>✅ Correct</strong>
+              <p><code>un livre</code> = a book</p>
+            </div>
+          </div>
+          <p class="mt-2 text-sm">This helps your brain store them as one unit (like "un-livre") so you automatically
+            know the gender.</p>
+        </div>
+
+        <!-- Gender Patterns -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">Common Gender Patterns</h4>
+        <p class="text-gray-700 mb-4">There's no perfect logic, but some patterns can help you guess.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Masculine Categories -->
+          <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200">
+            <h5 class="font-semibold text-indigo-800 mb-2">💙 Commonly Masculine Categories</h5>
+            <ul class="list-disc list-inside text-gray-700 space-y-1 text-sm">
+              <li><strong>Days, months, seasons:</strong> <code>le lundi</code>, <code>le mars</code>,
+                <code>l'hiver</code>
+              </li>
+              <li><strong>Languages:</strong> <code>le français</code>, <code>l'anglais</code></li>
+              <li><strong>Trees, metals, measurements:</strong> <code>le chêne</code> (oak), <code>le fer</code> (iron),
+                <code>le kilomètre</code>
+              </li>
+            </ul>
+          </div>
+          <!-- Feminine Categories -->
+          <div class="p-4 rounded-lg bg-pink-50 border border-pink-200">
+            <h5 class="font-semibold text-pink-800 mb-2">💗 Commonly Feminine Categories</h5>
+            <ul class="list-disc list-inside text-gray-700 space-y-1 text-sm">
+              <li><strong>Sciences & subjects:</strong> <code>la chimie</code>, <code>la biologie</code>,
+                <code>la musique</code>
+              </li>
+              <li><strong>Nouns ending in -e</strong> (often, not always!): <code>la table</code>,
+                <code>la chaise</code>
+              </li>
+              <li><strong>Countries ending in -e:</strong> <code>la France</code>, <code>la Chine</code>,
+                <code>l'Italie</code>
+              </li>
+              <li><strong>Abstract ideas:</strong> <code>la liberté</code>, <code>la justice</code></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Gender Endings Table -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">Common Endings That Hint at Gender</h4>
+        <div class="overflow-x-auto rounded-lg border border-gray-200 mb-4">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Usually Masculine</th>
+                <th class="p-3 font-semibold text-gray-700">Usually Feminine</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">-age</strong> → <code>le fromage</code> (cheese)</td>
+                <td class="p-3">-tion</strong> → <code>la nation</code> (nation)</td>
+              </tr>
+              <tr>
+                <td class="p-3">-ment</strong> → <code>le moment</code> (moment)</td>
+                <td class="p-3">-sion</strong> → <code>la décision</code> (decision)</td>
+              </tr>
+              <tr>
+                <td class="p-3">-eau</strong> → <code>le bateau</code> (boat)</td>
+                <td class="p-3">-té</strong> → <code>la beauté</code> (beauty)</td>
+              </tr>
+              <tr>
+                <td class="p-3">-isme</strong> → <code>le tourisme</code> (tourism)</td>
+                <td class="p-3">-ette</strong> → <code>la baguette</code> (baguette)</td>
+              </tr>
+              <tr>
+                <td class="p-3">-oir</strong> → <code>le miroir</code> (mirror)</td>
+                <td class="p-3">-ure</strong> → <code>la voiture</code> (car)</td>
+              </tr>
+              <tr>
+                <td class="p-3">-in</strong> → <code>le jardin</code> (garden)</td>
+                <td class="p-3">-ade</strong> → <code>la salade</code> (salad)</td>
+              </tr>
+              <tr>
+                <td class="p-3">-on</strong> → <code>le poisson</code> (fish)</td>
+                <td class="p-3">-ance / -ence</strong> → <code>la chance</code> / <code>la différence</code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-sm text-gray-600">⚠️ <strong>Exceptions exist!</strong> E.g., <code>la plage</code> (the beach)
+          ends in -age but is feminine.</p>
+
+        <!-- Rule 2: People/Animals -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">Rule 2: Nouns for People & Animals</h3>
+        <p class="text-gray-700 mb-4">
+          When a noun refers to a person or animal, it can have different masculine and feminine forms.
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">English</th>
+                <th class="p-3 font-semibold text-gray-700">Masculine</th>
+                <th class="p-3 font-semibold text-gray-700">Feminine</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">friend</td>
+                <td class="p-3"><code>un ami</code></td>
+                <td class="p-3"><code>une amie</code></td>
+              </tr>
+              <tr>
+                <td class="p-3">student</td>
+                <td class="p-3"><code>un étudiant</code></td>
+                <td class="p-3"><code>une étudiante</code></td>
+              </tr>
+              <tr>
+                <td class="p-3">cat</td>
+                <td class="p-3"><code>un chat</code></td>
+                <td class="p-3"><code>une chatte</code></td>
+              </tr>
+              <tr>
+                <td class="p-3">waiter / waitress</td>
+                <td class="p-3"><code>un serveur</code></td>
+                <td class="p-3"><code>une serveuse</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Rule 3: Plurals -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">Rule 3: Singular & Plural Forms</h3>
+        <p class="text-gray-700 mb-4">
+          Like English, nouns can be singular (one thing) or plural (more than one). The default rule is to add an
+          <strong>-s</strong>.
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Singular</th>
+                <th class="p-3 font-semibold text-gray-700">Plural</th>
+                <th class="p-3 font-semibold text-gray-700">English</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3"><code>un livre</code></td>
+                <td class="p-3"><code>des livres</code></td>
+                <td class="p-3">(some) books</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>une pomme</code></td>
+                <td class="p-3"><code>des pommes</code></td>
+                <td class="p-3">(some) apples</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200 mt-4 text-sm text-gray-700">
+          ⚠️ <strong>Exception:</strong> If a word already ends in <strong>-s</strong>, <strong>-x</strong>, or
+          <strong>-z</strong>, you don’t add another -s for the plural.
+          <br>
+          (e.g., <code>un choix</code> → <code>des choix</code>, <code>un nez</code> → <code>des nez</code>)
+        </div>
+
+        <!-- Rule 4: Articles Match -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">Rule 4: Articles Must Match the Noun</h3>
+        <p class="text-gray-700 mb-4">
+          You must always use an article, and it must match the noun's gender and number.
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[600px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Meaning</th>
+                <th class="p-3 font-semibold text-gray-700">Masculine</th>
+                <th class="p-3 font-semibold text-gray-700">Feminine</th>
+                <th class="p-3 font-semibold text-gray-700">Plural</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">the</strong></td>
+                <td class="p-3"><code>le</code> / <code>l'</code></td>
+                <td class="p-3"><code>la</code> / <code>l'</code></td>
+                <td class="p-3"><code>les</code></td>
+              </tr>
+              <tr>
+                <td class="p-3">a / an</strong></td>
+                <td class="p-3"><code>un</code></td>
+                <td class="p-3"><code>une</code></td>
+                <td class="p-3"><code>des</code></td>
+              </tr>
+              <tr>
+                <td class="p-3">some (of)</strong></td>
+                <td class="p-3"><code>du</code> / <code>de l'</code></td>
+                <td class="p-3"><code>de la</code> / <code>de l'</code></td>
+                <td class="p-3"><code>des</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Rule 5: Contractions -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">Rule 5: Contractions with <code>à</code> &
+          <code>de</code>
+        </h3>
+        <p class="text-gray-700 mb-4">
+          When the prepositions <code>à</code> (to/at) or <code>de</code> (of/from) come before <code>le</code> or
+          <code>les</code>, they are forced to combine.
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[600px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Combination</th>
+                <th class="p-3 font-semibold text-gray-700">Result</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3"><code>à</code> + <code>le</code></td>
+                <td class="p-3"><code>au</code></td>
+                <td class="p-3">Je vais <strong>au</strong> parc. (I'm going to the park.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>à</code> + <code>les</code></td>
+                <td class="p-3"><code>aux</code></td>
+                <td class="p-3">Je parle <strong>aux</strong> enfants. (I talk to the children.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>de</code> + <code>le</code></td>
+                <td class="p-3"><code>du</code></td>
+                <td class="p-3">Je viens <strong>du</strong> cinéma. (I come from the cinema.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>de</code> + <code>les</code></td>
+                <td class="p-3"><code>des</code></td>
+                <td class="p-3">Le livre <strong>des</strong> enfants. (The children's book.)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Summary Table -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-12 mb-4">Nouns: Quick Summary</h3>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[600px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Concept</th>
+                <th class="p-3 font-semibold text-gray-700">Rule</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">Gender</strong></td>
+                <td class="p-3">All nouns are masculine or feminine</td>
+                <td class="p-3"><code>le livre</code> (m), <code>la table</code> (f)</td>
+              </tr>
+              <tr>
+                <td class="p-3">Article</strong></td>
+                <td class="p-3">Always learn noun with its article</td>
+                <td class="p-3">Learn "un livre", not just "livre"</td>
+              </tr>
+              <tr>
+                <td class="p-3">Plural</strong></td>
+                <td class="p-3">Usually add <strong>-s</strong></td>
+                <td class="p-3"><code>un livre</code> → <code>des livres</code></td>
+              </tr>
+              <tr>
+                <td class="p-3">People/Animals</strong></td>
+                <td class="p-3">Gender of noun can change</td>
+                <td class="p-3"><code>un ami</code> (m) / <code>une amie</code> (f)</td>
+              </tr>
+              <tr>
+                <td class="p-3">Guessing Gender</strong></td>
+                <td class="p-3">Based on ending or category</td>
+                <td class="p-3"><strong>-tion</strong> is usually fem, <strong>-ment</strong> is usually masc</td>
+              </tr>
+              <tr>
+                <td class="p-3">Contractions</strong></td>
+                <td class="p-3"><code>à</code>/<code>de</code> + <code>le</code>/<code>les</code> combine</td>
+                <td class="p-3"><code>à + le</code> → <code>au</code>, <code>de + le</code> → <code>du</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </section>
+
+      <!-- Prepositions Section (Content) -->
+      <section id="prepositions-content" class="tab-content">
+        <h2 class="text-3xl font-semibold text-indigo-700 mb-6 border-b pb-3">Les Prépositions</h2>
+
+        <!-- What are Prepositions? -->
+        <h3 class="text-2xl font-semibold text-gray-800 mb-4">What Are Prepositions?</h3>
+        <p class="text-gray-700 mb-4">
+          Prepositions are small link words that show relationships between things—usually in place, time, or
+          connection. They act as bridges between two parts of a sentence.
+        </p>
+        <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200 text-gray-700 space-y-2">
+          <p><strong>Example 1:</strong> Je vais <strong>à</strong> Paris. (I’m going <strong>to</strong> Paris.)</p>
+          <p><strong>Example 2:</strong> une tasse <strong>de</strong> café. (a cup <strong>of</strong> coffee.)</p>
+        </div>
+        <p class="text-gray-700 my-4">
+          They don’t mean much by themselves, but connect meanings. The two most important are <code>à</code>
+          (to/at/in) and <code>de</code> (from/of/about).
+        </p>
+
+        <!-- 1. The Two Most Important: à and de -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">1. The Two Most Important: <code>à</code> and
+          <code>de</code>
+        </h3>
+
+        <!-- à -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">➤ <code>à</code> (usually "to", "at", or "in")</h4>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Meaning</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">Going to a place</td>
+                <td class="p-3">Je vais <strong>à</strong> Paris. (I’m going to Paris.)</td>
+              </tr>
+              <tr>
+                <td class="p-3">Being at a place</td>
+                <td class="p-3">Je suis <strong>à</strong> l’école. (I’m at school.)</td>
+              </tr>
+              <tr>
+                <td class="p-3">Talking to someone</td>
+                <td class="p-3">Je parle <strong>à</strong> Marie. (I’m talking to Marie.)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md mt-4" role="alert">
+          <p class="font-semibold">Contraction Tip:</p>
+          <p><code>à + le</code> → <code>au</code> (Je vais <strong>au</strong> cinéma.)</p>
+          <p><code>à + les</code> → <code>aux</code> (Je parle <strong>aux</strong> enfants.)</p>
+        </div>
+
+        <!-- de -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">➤ <code>de</code> (usually "from", "of", or "about")
+        </h4>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Meaning</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">Coming from</td>
+                <td class="p-3">Je viens <strong>de</strong> Paris. (I come from Paris.)</td>
+              </tr>
+              <tr>
+                <td class="p-3">Showing possession</td>
+                <td class="p-3">Le livre <strong>de</strong> Marie. (Marie’s book.)</td>
+              </tr>
+              <tr>
+                <td class="p-3">Describing content</td>
+                <td class="p-3">une tasse <strong>de</strong> café. (a cup of coffee.)</td>
+              </tr>
+              <tr>
+                <td class="p-3">Talking about</td>
+                <td class="p-3">parler <strong>de</strong> musique. (to talk about music.)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md mt-4" role="alert">
+          <p class="font-semibold">Contraction Tip:</p>
+          <p><code>de + le</code> → <code>du</code> (le livre <strong>du</strong> garçon.)</p>
+          <p><code>de + les</code> → <code>des</code> (la maison <strong>des</strong> voisins.)</p>
+        </div>
+
+        <!-- 2. Prepositions of Time -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">2. Prepositions of Time</h3>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">French</th>
+                <th class="p-3 font-semibold text-gray-700">English</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3"><code>avant</code></td>
+                <td class="p-3">before</td>
+                <td class="p-3"><strong>avant</strong> le dîner (before dinner)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>après</code></td>
+                <td class="p-3">after</td>
+                <td class="p-3"><strong>après</strong> l’école (after school)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>pendant</code></td>
+                <td class="p-3">during</td>
+                <td class="p-3"><strong>pendant</strong> la nuit (during the night)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>depuis</code></td>
+                <td class="p-3">since / for</td>
+                <td class="p-3">...<strong>depuis</strong> 5 ans (for 5 years)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>jusque</code></td>
+                <td class="p-3">until / up to</td>
+                <td class="p-3"><strong>jusqu’à</strong> demain (until tomorrow)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 3. Prepositions of Place -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">3. Prepositions of Place</h3>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">French</th>
+                <th class="p-3 font-semibold text-gray-700">English</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3"><code>dans</code></td>
+                <td class="p-3">in</td>
+                <td class="p-3"><strong>dans</strong> la boîte (in the box)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>sur</code></td>
+                <td class="p-3">on</td>
+                <td class="p-3"><strong>sur</strong> la table (on the table)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>sous</code></td>
+                <td class="p-3">under</td>
+                <td class="p-3"><strong>sous</strong> la chaise (under the chair)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>devant</code></td>
+                <td class="p-3">in front of</td>
+                <td class="p-3"><strong>devant</strong> la maison (in front of the house)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>derrière</code></td>
+                <td class="p-3">behind</td>
+                <td class="p-3"><strong>derrière</strong> la porte (behind the door)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>entre</code></td>
+                <td class="p-3">between</td>
+                <td class="p-3"><strong>entre</strong> les deux (between the two)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>vers</code></td>
+                <td class="p-3">toward</td>
+                <td class="p-3"><strong>vers</strong> la sortie (toward the exit)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>chez</code></td>
+                <td class="p-3">at someone’s place</td>
+                <td class="p-3"><strong>chez</strong> moi (at my house)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>contre</code></td>
+                <td class="p-3">against</td>
+                <td class="p-3"><strong>contre</strong> le mur (against the wall)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 4. Prepositions of Purpose -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">4. Prepositions of Purpose or Relationship</h3>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">French</th>
+                <th class="p-3 font-semibold text-gray-700">English</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3"><code>pour</code></td>
+                <td class="p-3">for</td>
+                <td class="p-3">un cadeau <strong>pour</strong> toi (a gift for you)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>sans</code></td>
+                <td class="p-3">without</td>
+                <td class="p-3"><strong>sans</strong> sucre (without sugar)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>selon</code></td>
+                <td class="p-3">according to</td>
+                <td class="p-3"><strong>selon</strong> moi (according to me)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>avec</code></td>
+                <td class="p-3">with</td>
+                <td class="p-3"><strong>avec</strong> mes amis (with my friends)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>par</code></td>
+                <td class="p-3">by / through</td>
+                <td class="p-3">fait <strong>par</strong> ma mère (made by my mother)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>malgré</code></td>
+                <td class="p-3">despite</td>
+                <td class="p-3"><strong>malgré</strong> la pluie (despite the rain)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>sauf</code></td>
+                <td class="p-3">except</td>
+                <td class="p-3"><strong>sauf</strong> toi (except you)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 5. Prepositional Phrases -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">5. Prepositional Phrases</h3>
+        <p class="text-gray-700 mb-4">
+          Sometimes French combines words (especially with <code>de</code>) to make one "preposition-like" idea.
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">French</th>
+                <th class="p-3 font-semibold text-gray-700">English</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td classs="p-3"><code>près de</code></td>
+                <td class="p-3">near</td>
+                <td class="p-3">J’habite <strong>près de</strong> la gare. (I live near the station.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>loin de</code></td>
+                <td class="p-3">far from</td>
+                <td class="p-3">Il est <strong>loin de</strong> moi. (He is far from me.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>à côté de</code></td>
+                <td class="p-3">next to</td>
+                <td class="p-3">...<strong>à côté de</strong> la poste. (next to the post office)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>en face de</code></td>
+                <td class="p-3">opposite / facing</td>
+                <td class="p-3">...<strong>en face de</strong> moi. (opposite me)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>au lieu de</code></td>
+                <td class="p-3">instead of</td>
+                <td class="p-3">...<strong>au lieu de</strong> partir. (instead of leaving)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 6. Key Difference -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">6. Key Difference (English vs. French)</h3>
+        <div class="p-4 rounded-lg bg-red-50 border border-red-200 text-red-800">
+          <p class="font-semibold">⚠️ Warning: You can’t always translate prepositions 1-to-1.</p>
+          <p class="mt-2">French often uses a different preposition than English, or uses one when English doesn't.
+            This must be learned through practice.</p>
+          <ul class="list-disc list-inside mt-2 text-sm">
+            <li>"I’m good <strong>at</strong> math." → Je suis bon <strong>en</strong> maths.</li>
+            <li>"I’m interested <strong>in</strong> music." → Je m’intéresse <strong>à</strong> la musique.</li>
+            <li>"Think <strong>about</strong> it." → Pense <strong>à</strong> ça.</li>
+          </ul>
+        </div>
+
+        <!-- 7. Pronouns After Prepositions -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">7. Pronouns After Prepositions</h3>
+        <p class="text-gray-700 mb-4">
+          When you use a pronoun after a preposition, you must use the "disjunctive" (or stress) pronouns.
+          </f>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">English</th>
+                <th class="p-3 font-semibold text-gray-700">Pronoun</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">me</td>
+                <td class="p-3"><code>moi</code></td>
+                <td class="p-3">avec <strong>moi</strong> (with me)</td>
+              </tr>
+              <tr>
+                <td class="p-3">you (sing.)</td>
+                <td class="p-3"><code>toi</code></td>
+                <td class="p-3">pour <strong>toi</strong> (for you)</td>
+              </tr>
+              <tr>
+                <td class="p-3">him</td>
+                <td class="p-3"><code>lui</code></td>
+                <td class="p-3">sans <strong>lui</strong> (without him)</td>
+              </tr>
+              <tr>
+                <td class="p-3">her</td>
+                <td class="p-3"><code>elle</code></td>
+                <td class="p-3">chez <strong>elle</strong> (at her place)</td>
+              </tr>
+              <tr>
+                <td class="p-3">us</td>
+                <td class="p-3"><code>nous</code></td>
+                <td class="p-3">avec <strong>nous</strong> (with us)</td>
+              </tr>
+              <tr>
+                <td class="p-3">you (pl.)</td>
+                <td class="p-3"><code>vous</code></td>
+                <td class="p-3">pour <strong>vous</strong> (for you)</td>
+              </tr>
+              <tr>
+                <td class="p-3">them (m.)</td>
+                <td class="p-3"><code>eux</code></td>
+                <td class="p-3">devant <strong>eux</strong> (in front of them)</td>
+              </tr>
+              <tr>
+                <td class="p-3">them (f.)</td>
+                <td class="p-3"><code>elles</code></td>
+                <td class="p-3">derrière <strong>elles</strong> (behind them)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Summary Table -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-12 mb-4">Prepositions: Quick Summary</h3>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[600px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Category</th>
+                <th class="p-3 font-semibold text-gray-700">Common Words</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">Direction / Place</strong></td>
+                <td class="p-3"><code>à</code>, <code>dans</code>, <code>sur</code>, <code>sous</code>,
+                  <code>chez</code>,
+                  <code>entre</code>, <code>vers</code>
+                </td>
+                <td class="p-3">Je vais <strong>à</strong> Paris. / Il est <strong>sous</strong> la table.</td>
+              </tr>
+              <tr>
+                <td class="p-3">Origin / Possession</strong></td>
+                <td class="p-3"><code>de</code>, <code>du</code>, <code>des</code></td>
+                <td class="p-3">Le livre <strong>du</strong> garçon. / Je viens <strong>de</strong> France.</td>
+              </tr>
+              <tr>
+                <td class="p-3">Time</strong></td>
+                <td class="p-3"><code>avant</code>, <code>après</code>, <code>pendant</code>, <code>depuis</code>,
+                  <code>jusque</code>
+                </td>
+                <td class="p-3"><strong>Après</strong> le dîner, je dors.</td>
+              </tr>
+              <tr>
+                <td class="p-3">Purpose / Relation</strong></td>
+                <td class="p-3"><code>pour</code>, <code>sans</code>, <code>avec</code>, <code>selon</code>,
+                  <code>par</code>, <code>contre</code>
+                </td>
+                <td class="p-3">Un cadeau <strong>pour</strong> toi. / Fait <strong>par</strong> moi.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </section>
+
+      <!-- Pronouns Section (Content) -->
+      <section id="pronouns-content" class="tab-content active">
+        <h2 class="text-3xl font-semibold text-indigo-700 mb-6 border-b pb-3">Les Pronoms (Pronouns)</h2>
+      
+        <!-- What are Pronouns? -->
+        <h3 class="text-2xl font-semibold text-gray-800 mb-4">What Are Pronouns?</h3>
+        <p class="text-gray-700 mb-4">
+          A pronoun is a word that replaces a noun (a person, place, or thing) to avoid repetition.
+        </p>
+        <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200 text-gray-700 space-y-2">
+          <p><strong>Example:</strong> <em>Marie est gentille. Marie aide Paul.</em></p>
+          <p class="font-semibold">→ <em><strong>Elle</strong> est gentille. <strong>Elle</strong> aide Paul.</em>
+          </p>
+          <p class="text-sm">("Marie is kind. <strong>She</strong> helps Paul.") Here, <code>elle</code> (she) replaces
+            "Marie".</p>
+        </div>
+      
+        <!-- Two Big Groups -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">Two Big Groups of Pronouns</h3>
+        <ul class="list-disc list-inside text-gray-700 mb-4 space-y-1">
+          <li><strong>Personal Pronouns:</strong> Change depending on their role (I, you, he, me, him, etc.).</li>
+          <li><strong>Impersonal Pronouns:</strong> Have special jobs and don't refer to a specific person (it, this,
+            that, who, what, etc.).</li>
+        </ul>
+      
+        <!-- 1. Personal Pronouns -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4 border-t pt-6">1. Personal Pronouns</h3>
+        <p class="text-gray-700 mb-6">
+          These refer to people (or things) and change based on their job in the sentence. There are five main types.
+        </p>
+      
+        <!-- A. Subject Pronouns -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">A. Subject Pronouns (Who does the action)</h4>
+        <p class="text-gray-700 mb-4">Used <strong>before the verb</strong> to show who is doing the action.</p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">English</th>
+                <th class="p-3 font-semibold text-gray-700">French</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">I</td>
+                <td class="p-3"><code>je</code></td>
+                <td class="p-3"><strong>Je</strong> mange. (I eat.)</td>
+              </tr>
+              <tr>
+                <td class="p-3">you (informal)</td>
+                <td class="p-3"><code>tu</code></td>
+                <td class="p-3"><strong>Tu</strong> parles. (You speak.)</td>
+              </tr>
+              <tr>
+                <td class="p-3">he / she / one</td>
+                <td class="p-3"><code>il</code> / <code>elle</code> / <code>on</code></td>
+                <td class="p-3"><strong>Il</strong> dort. (He sleeps.)</td>
+              </tr>
+              <tr>
+                <td class="p-3">we</td>
+                <td class="p-3"><code>nous</code></td>
+                <td class="p-3"><strong>Nous</strong> sortons. (We go out.)</td>
+              </tr>
+              <tr>
+                <td class="p-3">you (formal/plural)</td>
+                <td class="p-3"><code>vous</code></td>
+                <td class="p-3"><strong>Vous</strong> lisez. (You read.)</td>
+              </tr>
+              <tr>
+                <td class="p-3">they (m. / f.)</td>
+                <td class="p-3"><code>ils</code> / <code>elles</code></td>
+                <td class="p-3"><strong>Elles</strong> étudient. (They study.)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      
+        <!-- B. Reflexive Pronouns -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">B. Reflexive Pronouns (Do something to yourself)</h4>
+        <p class="text-gray-700 mb-4">Used with reflexive verbs, where the action "reflects back" on the subject.</p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Pronoun</th>
+                <th class="p-3 font-semibold text-gray-700">Meaning</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3"><code>me</code> / <code>m'</code></td>
+                <td class="p-3">myself</td>
+                <td class="p-3">Je <strong>me</strong> lave. (I wash myself.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>te</code> / <code>t'</code></td>
+                <td class="p-3">yourself</td>
+                <td class="p-3">Tu <strong>te</strong> lèves. (You get up.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>se</code> / <code>s'</code></td>
+                <td class="p-3">himself / herself / itself / themselves</td>
+                <td class="p-3">Il <strong>se</strong> rase. (He shaves.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>nous</code></td>
+                <td class="p-3">ourselves</td>
+                <td class="p-3">Nous <strong>nous</strong> habillons. (We get dressed.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>vous</code></td>
+                <td class="p-3">yourselves</td>
+                <td class="p-3">Vous <strong>vous</strong> reposez. (You rest.)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      
+        <!-- C. Direct Object Pronouns -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">C. Direct Object Pronouns (Receive the action)</h4>
+        <p class="text-gray-700 mb-4">Replaces the noun that *directly* receives the verb's action (answers "who?" or
+          "what?").</p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Pronoun</th>
+                <th class="p-3 font-semibold text-gray-700">English</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3"><code>me</code> / <code>m'</code></td>
+                <td class="p-3">me</td>
+                <td class="p-3">Tu <strong>me</strong> vois. (You see me.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>te</code> / <code>t'</code></td>
+                <td class="p-3">you</td>
+                <td class="p-3">Je <strong>te</strong> vois. (I see you.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>le</code> / <code>l'</code></td>
+                <td class="p-3">him / it (masc.)</td>
+                <td class="p-3">Je <strong>le</strong> vois. (I see him/it.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>la</code> / <code>l'</code></td>
+                <td class="p-3">her / it (fem.)</td>
+                <td class="p-3">Je <strong>la</strong> vois. (I see her/it.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>nous</code></td>
+                <td class="p-3">us</td>
+                <td class="p-3">Il <strong>nous</strong> voit. (He sees us.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>vous</code></td>
+                <td class="p-3">you</td>
+                <td class="p-3">Je <strong>vous</strong> vois. (I see you.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>les</code></td>
+                <td class="p-3">them</td>
+                <td class="p-3">Je <strong>les</strong> vois. (I see them.)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200 text-gray-700 mt-4 space-y-1 text-sm">
+          <p><strong>Example:</strong> "Il mange <strong>la pomme</strong>." (He eats the apple.)</p>
+          <p class="font-semibold">→ "Il <strong>la</strong> mange." (He eats <strong>it</strong>.)</p>
+        </div>
+      
+        <!-- D. Indirect Object Pronouns -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">D. Indirect Object Pronouns (To/For someone)</h4>
+        <p class="text-gray-700 mb-4">Replaces a noun that receives the action *indirectly*. Always answers "to whom?"
+          or
+          "for whom?".</p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Pronoun</th>
+                <th class="p-3 font-semibold text-gray-700">English</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3"><code>me</code> / <code>m'</code></td>
+                <td class="p-3">to me</td>
+                <td class="p-3">Tu <strong>me</strong> parles. (You talk to me.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>te</code> / <code>t'</code></td>
+                <td class="p-3">to you</td>
+                <td class="p-3">Je <strong>te</strong> parle. (I talk to you.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>lui</code></td>
+                <td class="p-3">to him / to her</td>
+                <td class="p-3">Je <strong>lui</strong> parle. (I talk to him/her.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>nous</code></td>
+                <td class="p-3">to us</td>
+                <td class="p-3">Il <strong>nous</strong> parle. (He talks to us.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>vous</code></td>
+                <td class="p-3">to you</td>
+                <td class="p-3">Je <strong>vous</strong> parle. (I talk to you.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>leur</code></td>
+                <td class="p-3">to them</td>
+                <td class="p-3">Je <strong>leur</strong> parle. (I talk to them.)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200 text-gray-700 mt-4 space-y-1 text-sm">
+          <p><strong>Example:</strong> "Je parle <strong>à Marie</strong>." (I am talking <strong>to Marie</strong>.)
+          </p>
+          <p class="font-semibold">→ "Je <strong>lui</strong> parle." (I am talking <strong>to her</strong>.)</p>
+        </div>
+      
+        <!-- E. Stressed (Disjunctive) Pronouns -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">E. Stressed (Disjunctive) Pronouns</h4>
+        <p class="text-gray-700 mb-4">Used for emphasis, after prepositions (like <code>avec</code>, <code>pour</code>,
+          <code>de</code>), or by themselves.
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Pronoun</th>
+                <th class="p-3 font-semibold text-gray-700">English</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3"><code>moi</code></td>
+                <td class="p-3">me</td>
+                <td class="p-3">C’est <strong>moi</strong>! (It's me!) / avec <strong>moi</strong> (with me)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>toi</code></td>
+                <td class="p-3">you</td>
+                <td class="p-3">C'est <strong>toi</strong>? (Is that you?) / pour <strong>toi</strong> (for you)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>lui</code></td>
+                <td class="p-3">him</td>
+                <td class="p-3">Je parle de <strong>lui</strong>. (I'm talking about him.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>elle</code></td>
+                <td class="p-3">her</td>
+                <td class="p-3">Je pense à <strong>elle</strong>. (I'm thinking of her.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>nous</code></td>
+                <td class="p-3">us</td>
+                <td class="p-3">Ils viennent avec <strong>nous</strong>. (They're coming with us.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>vous</code></td>
+                <td class="p-3">you</td>
+                <td class="p-3">C'est pour <strong>vous</strong>. (It's for you.)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>eux</code></td>
+                <td class="p-3">them (masc.)</td>
+                <td class="p-3">sans <strong>eux</strong> (without them)</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>elles</code></td>
+                <td class="p-3">them (fem.)</td>
+                <td class="p-3">chez <strong>elles</strong> (at their place)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      
+        <!-- Personal Pronouns Summary -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">Personal Pronouns: Quick Summary</h3>
+        <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md mt-6" role="alert">
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[600px] text-left text-sm">
+              <thead class="border-b border-blue-300">
+                <tr>
+                  <th class="p-2 font-semibold">Function</th>
+                  <th class="p-2 font-semibold">Example Use</th>
+                  <th class="p-2 font-semibold">Pronouns</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-blue-200">
+                <tr>
+                  <td class="p-2"><strong>Subject</strong></td>
+                  <td class="p-2">Before the verb</td>
+                  <td class="p-2"><code>je, tu, il/elle/on, nous, vous, ils/elles</code></td>
+                </tr>
+                <tr>
+                  <td class="p-2"><strong>Reflexive</strong></td>
+                  <td class="p-2">With reflexive verbs</td>
+                  <td class="p-2"><code>me, te, se, nous, vous, se</code></td>
+                </tr>
+                <tr>
+                  <td class="p-2"><strong>Direct Object</strong></td>
+                  <td class="p-2">Replaces direct receiver (sees *what*?)</td>
+                  <td class="p-2"><code>me, te, le/la, nous, vous, les</code></td>
+                </tr>
+                <tr>
+                  <td class="p-2"><strong>Indirect Object</strong></td>
+                  <td class="p-2">Replaces "to/for" receiver (talks *to whom*?)</td>
+                  <td class="p-2"><code>me, te, lui, nous, vous, leur</code></td>
+                </tr>
+                <tr>
+                  <td class="p-2"><strong>Stressed</strong></td>
+                  <td class="p-2">After prepositions / for emphasis</td>
+                  <td class="p-2"><code>moi, toi, lui/elle, nous, vous, eux/elles</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      
+      
+        <!-- 2. Impersonal Pronouns -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4 border-t pt-6">2. Impersonal Pronouns</h3>
+        <p class="text-gray-700 mb-6">
+          These pronouns have special grammar jobs and don't replace a specific person.
+        </p>
+      
+        <div class="space-y-6">
+          <!-- A. Adverbial Pronouns -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-2">A. Adverbial Pronouns: <code>y</code> and
+              <code>en</code>
+            </h4>
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+              <table class="w-full min-w-[500px] text-left">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="p-3 font-semibold text-gray-700">Pronoun</th>
+              <th class="p-3 font-semibold text-gray-700">Replaces / Meaning</th>
+              <th class="p-3 font-semibold text-gray-700">Example</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr>
+              <td class="p-3"><code>y</code></td>
+              <td class="p-3">"there" (a place) / "about it" (à + thing)</td>
+              <td class="p-3">Je vais à Paris. → J'<strong>y</strong> vais. (I'm going there.)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>en</code></td>
+              <td class="p-3">"some" / "of it" (de + thing / quantity)</td>
+              <td class="p-3">J'ai des pommes. → J'<strong>en</strong> ai. (I have some.)</td>
+            </tr>
+          </tbody>
+              </table>
+            </div>
+          </div>
+            
+          <!-- B. Demonstrative Pronouns -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-2">B. Demonstrative Pronouns (this one / that one)</h4>
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+              <table class="w-full min-w-[500px] text-left">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="p-3 font-semibold text-gray-700">Pronoun</th>
+              <th class="p-3 font-semibold text-gray-700">Meaning</th>
+              <th class="p-3 font-semibold text-gray-700">Example</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr>
+              <td class="p-3"><code>celui</code> / <code>celle</code></td>
+              <td class="p-3">this one / that one (sing.)</td>
+              <td class="p-3"><strong>Celui-là</strong> est beau. (That one is beautiful.)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>ceux</code> / <code>celles</code></td>
+              <td class="p-3">these / those (pl.)</td>
+              <td class="p-3"><strong>Celles-ci</strong> sont grandes. (These are tall.)</td>
+            </tr>
+          </tbody>
+              </table>
+            </div>
+          </div>
+            
+          <!-- C. Impersonal Subjects -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-2">C. Impersonal Subjects: <code>ce</code> and
+              <code>il</code>
+            </h4>
+            <p class="text-gray-700 mb-3">Used for expressions without a clear "person" doing the action.</p>
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+              <table class="w-full min-w-[500px] text-left">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="p-3 font-semibold text-gray-700">Expression</th>
+              <th class="p-3 font-semibold text-gray-700">Meaning / Use</th>
+              <th class="p-3 font-semibold text-gray-700">Example</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr>
+              <td class="p-3"><code>Il pleut.</code></td>
+              <td class="p-3">Impersonal subject for weather</td>
+              <td class="p-3">It's raining.</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>C'est difficile.</code></td>
+              <td class="p-3">General "it/that is" expression</td>
+              <td class="p-3">It's hard. / That's hard.</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>Ce sont mes amis.</code></td>
+              <td class="p-3">Plural demonstrative with identifying info</td>
+              <td class="p-3">They are my friends.</td>
+            </tr>
+          </tbody>
+              </table>
+            </div>
+          </div>
+            
+          <!-- D. Indefinite Demonstrative -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-2">D. Indefinite Demonstrative:
+              <code>ce, ceci, cela, ça</code>
+            </h4>
+            <p class="text-gray-700 mb-3">Used for general, non-specific things or ideas ("this," "that").</p>
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+              <table class="w-full min-w-[500px] text-left">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="p-3 font-semibold text-gray-700">Pronoun</th>
+              <th class="p-3 font-semibold text-gray-700">Meaning</th>
+              <th class="p-3 font-semibold text-gray-700">Example</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr>
+              <td class="p-3"><code>ce</code></td>
+              <td class="p-3">that / it (formal/general)</td>
+              <td class="p-3"><code>C'est vrai.</code> (That's true.)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>ça</code></td>
+              <td class="p-3">that / this (colloquial)</td>
+              <td class="p-3"><code>J'aime ça.</code> (I like that.)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>ceci</code></td>
+              <td class="p-3">this (formal, often written)</td>
+              <td class="p-3"><code>Ceci est important.</code> (This is important.)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>cela</code></td>
+              <td class="p-3">that (formal)</td>
+              <td class="p-3"><code>Cela</code> peut aider. (That can help.)</td>
+            </tr>
+          </tbody>
+              </table>
+            </div>
+          </div>
+            
+          <!-- E. Indefinite Pronouns -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-2">E. Indefinite Pronouns</h4>
+            <p class="text-gray-700 mb-3">Used for unknown or general quantities/people.</p>
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+              <table class="w-full min-w-[500px] text-left">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="p-3 font-semibold text-gray-700">Pronoun</th>
+              <th class="p-3 font-semibold text-gray-700">Meaning</th>
+              <th class="p-3 font-semibold text-gray-700">Example</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr>
+              <td class="p-3"><code>plusieurs</code></td>
+              <td class="p-3">several</td>
+              <td class="p-3"><code>Plusieurs</code> sont venus. (Several came.)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>quelqu'un</code></td>
+              <td class="p-3">someone</td>
+              <td class="p-3"><code>Quelqu'un</code> a appelé. (Someone called.)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>personne</code></td>
+              <td class="p-3">no one</td>
+              <td class="p-3"><code>Personne</code> n'est venu. (No one came.)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>tout</code></td>
+              <td class="p-3">everything</td>
+              <td class="p-3"><code>Tout</code> va bien. (Everything is fine.)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>rien</code></td>
+              <td class="p-3">nothing</td>
+              <td class="p-3"><code>Rien</code> ne marche. (Nothing works.)</td>
+            </tr>
+          </tbody>
+              </table>
+            </div>
+          </div>
+            
+          <!-- F. Possessive Pronouns -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-2">F. Possessive Pronouns (mine, yours, his...)</h4>
+            <p class="text-gray-700 mb-3">Replaces a noun that belongs to someone (e.g., "my book" → "mine").</p>
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+              <table class="w-full min-w-[500px] text-left">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="p-3 font-semibold text-gray-700">Pronoun</th>
+              <th class="p-3 font-semibold text-gray-700">Meaning</th>
+              <th class="p-3 font-semibold text-gray-700">Example</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr>
+              <td class="p-3"><code>le mien</code> / <code>la mienne</code></td>
+              <td class="p-3">mine</td>
+              <td class="p-3">C'est <strong>le mien</strong>. (It's mine.)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>le tien</code> / <code>la tienne</code></td>
+              <td class="p-3">yours</td>
+              <td class="p-3">C'est <strong>la tienne</strong>. (It's yours.)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>le sien</code> / <code>la sienne</code></td>
+              <td class="p-3">his / hers</td>
+              <td class="p-3">C'est <strong>le sien</strong>. (It's his/hers.)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>le nôtre</code> / <code>la nôtre</code></td>
+              <td class="p-3">ours</td>
+              <td class="p-3">C'est <strong>le nôtre</strong>. (It's ours.)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>le vôtre</code> / <code>la vôtre</code></td>
+              <td class="p-3">yours (formal/plural)</td>
+              <td class="p-3">C'est <strong>le vôtre</strong>. (It's yours.)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>le leur</code> / <code>la leur</code></td>
+              <td class="p-3">theirs</td>
+              <td class="p-3">C'est <strong>le leur</strong>. (It's theirs.)</td>
+            </tr>
+          </tbody>
+              </table>
+            </div>
+          </div>
+            
+          <!-- G. Relative Pronouns -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-2">G. Relative Pronouns (who, which, that, where)</h4>
+            <p class="text-gray-700 mb-3">Used to connect two sentences or clauses.</p>
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+              <table class="w-full min-w-[500px] text-left">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="p-3 font-semibold text-gray-700">Pronoun</th>
+              <th class="p-3 font-semibold text-gray-700">Use</th>
+              <th class="p-3 font-semibold text-gray-700">Example</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr>
+              <td class="p-3"><code>qui</code></td>
+              <td class="p-3">subject (who)</td>
+              <td class="p-3">La fille <strong>qui</strong> parle est ma sœur. (The girl who is speaking...)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>que</code></td>
+              <td class="p-3">object (that/which)</td>
+              <td class="p-3">Le livre <strong>que</strong> je lis... (The book that I'm reading...)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>où</code></td>
+              <td class="p-3">place (where)</td>
+              <td class="p-3">La ville <strong>où</strong> je vis... (The city where I live...)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>dont</code></td>
+              <td class="p-3">of which/whose</td>
+              <td class="p-3">Le livre <strong>dont</strong> je parle... (The book about which I'm speaking...)</td>
+            </tr>
+          </tbody>
+              </table>
+            </div>
+          </div>
+            
+          <!-- H. Indefinite Relative Pronouns -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-2">H. Indefinite Relative Pronouns (what)</h4>
+            <p class="text-gray-700 mb-3">Used to mean "what" or "that which" when there's no noun before it.</p>
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+              <table class="w-full min-w-[500px] text-left">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="p-3 font-semibold text-gray-700">Pronoun</th>
+              <th class="p-3 font-semibold text-gray-700">Use</th>
+              <th class="p-3 font-semibold text-gray-700">Example</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr>
+              <td class="p-3"><code>ce qui</code></td>
+              <td class="p-3">subject (what)</td>
+              <td class="p-3"><strong>Ce qui</strong> m'intéresse... (What interests me...)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>ce que</code></td>
+              <td class="p-3">object (what)</td>
+              <td class="p-3"><strong>Ce que</strong> tu dis... (What you are saying...)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code>ce dont</code></td>
+              <td class="p-3">of what</td>
+              <td class="p-3"><strong>Ce dont</strong> j'ai besoin... (What I need...)</td>
+            </tr>
+          </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Verbs Section (Content) -->
+      <section id="verbs-content" class="tab-content active">
+        <h2 class="text-3xl font-semibold text-indigo-700 mb-6 border-b pb-3">Les Verbes (Verbs)</h2>
+
+        <!-- 1. What Is a Verb? -->
+        <h3 class="text-2xl font-semibold text-gray-800 mb-4">1. What Is a Verb?</h3>
+        <p class="text-gray-700 mb-4">
+          A verb is an action word or a state word — something happening or being.
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+          <th class="p-3 font-semibold text-gray-700">English</th>
+          <th class="p-3 font-semibold text-gray-700">French</th>
+          <th class="p-3 font-semibold text-gray-700">Type</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+          <td class="p-3">I eat.</td>
+          <td class="p-3"><code>Je mange.</code></td>
+          <td class="p-3">Action</td>
+              </tr>
+              <tr>
+          <td class="p-3">She speaks.</td>
+          <td class="p-3"><code>Elle parle.</code></td>
+          <td class="p-3">Action</td>
+              </tr>
+              <tr>
+          <td class="p-3">We are happy.</td>
+          <td class="p-3"><code>Nous sommes heureux.</code></td>
+          <td class="p-3">State</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 2. What Does "Conjugate" Mean? -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">2. What Does "Conjugate" Mean?</h3>
+        <p class="text-gray-700 mb-4">
+          In French, verbs change form (their "costume") depending on <strong>who</strong> is doing the action and
+          <strong>when</strong> it's happening. This change is called <strong>conjugation</strong>.
+        </p>
+        <p class="text-gray-700 mb-4">
+          A verb's form is determined by 5 elements. For now, the most important are Person, Number, and Tense.
+        </p>
+
+        <!-- 3. The 5 Elements of Conjugation -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">3. The 5 Elements of Conjugation</h3>
+
+        <!-- Person & Number -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">A. Person & Number (Who does the action)</h4>
+        <p class="text-gray-700 mb-4">
+          This shows who is doing the action (the subject). There are 6 "slots" for any verb.
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+          <th class="p-3 font-semibold text-gray-700">Person</th>
+          <th class="p-3 font-semibold text-gray-700">Singular (One)</th>
+          <th class="p-3 font-semibold text-gray-700">Plural (Many)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+          <td class="p-3">1st (the speaker)</td>
+          <td class="p-3"><code>je</code> (I)</td>
+          <td class="p-3"><code>nous</code> (we)</td>
+              </tr>
+              <tr>
+          <td class="p-3">2nd</strong> (person spoken to)</td>
+          <td class="p-3"><code>tu</code> (you, informal)</td>
+          <td class="p-3"><code>vous</code> (you, plural/formal)</td>
+              </tr>
+              <tr>
+          <td class="p-3">3rd</strong> (person spoken about)</td>
+          <td class="p-3"><code>il / elle</code> (he / she)</td>
+          <td class="p-3"><code>ils / elles</code> (they)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tense -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">B. Tense (When it happens)</h4>
+        <p class="text-gray-700 mb-4">
+          This controls the time of the action.
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+          <th class="p-3 font-semibold text-gray-700">Time</th>
+          <th class="p-3 font-semibold text-gray-700">English</th>
+          <th class="p-3 font-semibold text-gray-700">French</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+          <td class="p-3">Present</strong></td>
+          <td class="p-3">I eat</td>
+          <td class="p-3"><code>je mange</code></td>
+              </tr>
+              <tr>
+          <td class="p-3">Past</strong></td>
+          <td class="p-3">I ate / I have eaten</td>
+          <td class="p-3"><code>j'ai mangé</code></td>
+              </tr>
+              <tr>
+          <td class="p-3">Future</strong></td>
+          <td class="p-3">I will eat</td>
+          <td class="p-3"><code>je mangerai</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mood -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">C. Mood (How the action is expressed)</h4>
+        <p class="text-gray-700 mb-4">
+          This shows the speaker's attitude (e.g., stating a fact, giving a command, expressing doubt).
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+          <th class="p-3 font-semibold text-gray-700">Mood</th>
+          <th class="p-3 font-semibold text-gray-700">Use</th>
+          <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+          <td class="p-3">Indicative</strong></td>
+          <td class="p-3">Stating facts (most common)</td>
+          <td class="p-3">I eat apples.</td>
+              </tr>
+              <tr>
+          <td class="p-3">Imperative</strong></td>
+          <td class="p-3">Giving commands</td>
+          <td class="p-3">Eat apples!</td>
+              </tr>
+              <tr>
+          <td class="p-3">Subjunctive</strong></td>
+          <td class="p-3">Expressing doubt/emotion</td>
+          <td class="p-3">I want you to eat apples.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Voice -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">D. Voice (Who receives the action)</h4>
+        <p class="text-gray-700 mb-4">
+          Shows if the subject is *doing* the action or *receiving* it.
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+          <th class="p-3 font-semibold text-gray-700">Voice</th>
+          <th class="p-3 font-semibold text-gray-700">English</th>
+          <th class="p-3 font-semibold text-gray-700">French</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+          <td class="p-3">Active</strong></td>
+          <td class="p-3">I eat the apple.</td>
+          <td class="p-3"><code>Je mange la pomme.</code></td>
+              </tr>
+              <tr>
+          <td class="p-3">Passive</strong></td>
+          <td class="p-3">The apple is eaten by me.</td>
+          <td class="p-3"><code>La pomme est mangée par moi.</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 4. How It Works: Root + Ending -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">4. How It Works: Root + Ending</h3>
+        <p class="text-gray-700 mb-4">
+          Think of a conjugated verb as two parts: the <strong>root</strong> (which carries the meaning) and the
+          <strong>ending</strong> (which tells you WHO and WHEN).
+        </p>
+        <p class="text-gray-700 mb-4">
+          Let's use <code>manger</code> (to eat). The root is <strong><code>mang-</code></strong>.
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[600px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Meaning</th>
+                <th class="p-3 font-semibold text-gray-700">French</th>
+                <th class="p-3 font-semibold text-gray-700">Root</th>
+                <th class="p-3 font-semibold text-gray-700">Ending (tells you...)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">I eat</td>
+                <td class="p-3">je <strong>mange</strong></td>
+                <td class="p-3"><code>mang-</code></td>
+                <td class="p-3"><code>-e</code> (...who: I)</td>
+              </tr>
+              <tr>
+                <td class="p-3">you eat</td>
+                <td class="p-3">tu <strong>manges</strong></td>
+                <td class="p-3"><code>mang-</code></td>
+                <td class="p-3"><code>-es</code> (...who: you)</td>
+              </tr>
+              <tr>
+                <td class="p-3">he/she eats</td>
+                <td class="p-3">il <strong>mange</strong></td>
+                <td class="p-3"><code>mang-</code></td>
+                <td class="p-3"><code>-e</code> (...who: he/she)</td>
+              </tr>
+              <tr>
+                <td class="p-3">we eat</td>
+                <td class="p-3">nous <strong>mangeons</strong></td>
+                <td class="p-3"><code>mang-</code></td>
+                <td class="p-3"><code>-eons</code> (...who: we)</td>
+              </tr>
+              <tr>
+                <td class="p-3">you (pl.) eat</td>
+                <td class="p-3">vous <strong>mangez</strong></td>
+                <td class="p-3"><code>mang-</code></td>
+                <td class="p-3"><code>-ez</code> (...who: you pl.)</td>
+              </tr>
+              <tr>
+                <td class="p-3">they eat</td>
+                <td class="p-3">ils <strong>mangent</strong></td>
+                <td class="p-3"><code>mang-</code></td>
+                <td class="p-3"><code>-ent</code> (...who: they)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 5. Regular Conjugation Patterns (The 3 Families) -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">5. Regular Conjugation Patterns (The 3 Families)
+        </h3>
+        <p class="text-gray-700 mb-4">
+          Every French verb, in its basic form (called the infinitive), ends in <code>-er</code>, <code>-ir</code>, or
+          <code>-re</code>.
+        </p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Ending</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+                <th class="p-3 font-semibold text-gray-700">Meaning</th>
+                <th class="p-3 font-semibold text-gray-700">Regular?</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3"><code>-er</code></td>
+                <td class="p-3">parler / manger</td>
+                <td class="p-3">to speak / to eat</td>
+                <td class="p-3">✅ Regular</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>-ir</code></td>
+                <td class="p-3">finir</td>
+                <td class="p-3">to finish</td>
+                <td class="p-3">✅ Regular</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>-re</code></td>
+                <td class="p-3">vendre</td>
+                <td class="p-3">to sell</td>
+                <td class="p-3">✅ Regular</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 mt-4">
+          <p class="font-semibold">⚠️ Some verbs are <strong>irregular</strong> and don't follow the pattern, like:</p>
+          <ul class="list-disc list-inside text-sm mt-2">
+            <li><code>être</code> (to be)</li>
+            <li><code>avoir</code> (to have)</li>
+            <li><code>aller</code> (to go)</li>
+            <li><code>faire</code> (to do/make)</li>
+          </ul>
+        </div>
+        <p class="text-gray-700 my-4">For regular verbs, just find the <strong>stem</strong> (cut off the ending) and
+          add the right ending for that family.</p>
+
+        <!-- -ir verbs -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">Regular <code>-ir</code> verb (e.g., <em>finir</em>)
+        </h4>
+        <p class="text-gray-700 mb-3"><strong>Stem:</strong> <code>fin-</code></p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Person</th>
+                <th class="p-3 font-semibold text-gray-700">Ending</th>
+                <th class="p-3 font-semibold text-gray-700">Result</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3"><code>je</code></td>
+                <td class="p-3"><code>-is</code></td>
+                <td class="p-3">je finis</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>tu</code></td>
+                <td class="p-3"><code>-is</code></td>
+                <td class="p-3">tu finis</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>il/elle</code></td>
+                <td class="p-3"><code>-it</code></td>
+                <td class="p-3">il/elle finit</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>nous</code></td>
+                <td class="p-3"><code>-issons</code></td>
+                <td class="p-3">nous finissons</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>vous</code></td>
+                <td class="p-3"><code>-issez</code></td>
+                <td class="p-3">vous finissez</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>ils/elles</code></td>
+                <td class="p-3"><code>-issent</code></td>
+                <td class="p-3">ils/elles finissent</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- -re verbs -->
+        <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-2">Regular <code>-re</code> verb (e.g.,
+          <em>vendre</em>)
+        </h4>
+        <p class="text-gray-700 mb-3"><strong>Stem:</strong> <code>vend-</code></p>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[500px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Person</th>
+                <th class="p-3 font-semibold text-gray-700">Ending</th>
+                <th class="p-3 font-semibold text-gray-700">Result</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3"><code>je</code></td>
+                <td class="p-3"><code>-s</code></td>
+                <td class="p-3">je vends</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>tu</code></td>
+                <td class="p-3"><code>-s</code></td>
+                <td class="p-3">tu vends</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>il/elle</code></td>
+                <td class="p-3">(nothing)</td>
+                <td class="p-3">il/elle vend</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>nous</code></td>
+                <td class="p-3"><code>-ons</code></td>
+                <td class="p-3">nous vendons</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>vous</code></td>
+                <td class="p-3"><code>-ez</code></td>
+                <td class="p-3">vous vendez</td>
+              </tr>
+              <tr>
+                <td class="p-3"><code>ils/elles</code></td>
+                <td class="p-3"><code>-ent</code></td>
+                <td class="p-3">ils/elles vendent</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 6. Why French Does This -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">6. Why French Does This</h3>
+        <p class="text-gray-700 mb-4">
+          In English, we use "helping words" to show who and when:
+        </p>
+        <p class="text-gray-700 mb-4">
+          → I <strong>eat</strong>, he <strong>eats</strong>, I <strong>will eat</strong>, I <strong>am
+            eating</strong>.
+        </p>
+        <p class="text-gray-700 mb-4">
+          In French, instead of using lots of extra words, they change the <strong>ending</strong> of the main verb to
+          show that same information.
+        </p>
+        <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md mt-6" role="alert">
+          <p>The verb ending itself contains the meaning of "who" and "when". That's why one French verb can have so
+            many
+            different forms.</p>
+        </div>
+
+
+        <!-- 7. Quick Recap -->
+        <h3 class="text-2xl font-semibold text-gray-800 mt-10 mb-4">7. Quick Recap</h3>
+        <div class="overflow-x-auto rounded-lg border border-gray-200">
+          <table class="w-full min-w-[600px] text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="p-3 font-semibold text-gray-700">Concept</th>
+                <th class="p-3 font-semibold text-gray-700">Meaning</th>
+                <th class="p-3 font-semibold text-gray-700">Example</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="p-3">Person</strong></td>
+                <td class="p-3">who's doing it</td>
+                <td class="p-3"><code>je, tu, il, nous, vous, ils</code></td>
+              </tr>
+              <tr>
+                <td class="p-3">Number</strong></td>
+                <td class="p-3">singular/plural</td>
+                <td class="p-3"><code>je mange</code> (one) / <code>nous mangeons</code> (many)</td>
+              </tr>
+              <tr>
+                <td class="p-3">Tense</strong></td>
+                <td class="p-3">when it happens</td>
+                <td class="p-3"><code>je mange</code> (now) / ax<code>j'ai mangé</code> (before)</td>
+              </tr>
+              <tr>
+                <td class="p-3">Mood</strong></td>
+                <td class="p-3">how it's said (fact, command, doubt)</td>
+                <td class="p-3"><code>je mange</code> (fact) / <code>Mange!</code> (command)</td>
+              </tr>
+              <tr>
+                <td class="p-3">Voice</strong></td>
+                <td class="p-3">who receives the action</td>
+                <td class="p-3"><code>Je mange</code> (active) / <code>La pomme est mangée</code> (passive)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </section>
+
+
+    </main>
+  </div>
+
+  <!-- Tabbing JavaScript -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const tabs = document.querySelectorAll('.tab-link');
+      const contents = document.querySelectorAll('.tab-content');
+
+      // Function to switch tabs
+      function switchTab(tabLink) {
+        // Get the target content ID from href (e.g., "#adverbs")
+        const targetId = tabLink.getAttribute('href').substring(1) + '-content'; // e.g., "adverbs-content"
+
+        // Remove 'active' from all tabs and content
+        tabs.forEach(tab => tab.classList.remove('tab-active'));
+        contents.forEach(content => content.classList.remove('active'));
+
+        // Add 'active' to the clicked tab
+        tabLink.classList.add('tab-active');
+
+        // Show the corresponding content
+        const targetContent = document.getElementById(targetId);
+        if (targetContent) {
+          targetContent.classList.add('active');
+        }
+      }
+
+      // Add click event listeners
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function (e) {
+          // Prevent default anchor click behavior
+          e.preventDefault();
+
+          // Only switch if it's not a disabled tab
+          if (!tab.classList.contains('cursor-not-allowed')) {
+            switchTab(tab);
+          }
+        });
+      });
+
+      // Activate the default tab (the one with 'tab-active' class)
+      const defaultActiveTab = document.querySelector('.tab-link.tab-active');
+      if (defaultActiveTab) {
+        switchTab(defaultActiveTab);
+      } else if (tabs.length > 0) {
+        // Fallback: activate the first tab if none is marked active
+        switchTab(tabs[0]);
+      }
+    });
+  </script>
+
+</body>
+
+</html>

@@ -93,6 +93,9 @@ const paths = {
       "Mood Tracker": {
         url: "https://petbed.github.io/Misc/Mood%20Tracker/",
       },
+      "French Cheat Sheet": {
+        url: "https://petbed.github.io/Misc/French%20Cheat%20Sheet/",
+      },
       "💭": {
         contents: {
           "Midnight Thoughts": {

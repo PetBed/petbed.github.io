@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Spotify Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Import Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>My Spotify Listening Stats</h1>
+    </header>
+
+    <main>
+        <section id="summary">
+            <h2>Quick Stats</h2>
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <h3>Total Tracks</h3>
+                    <p id="totalTracks">Loading...</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Listening Time</h3>
+                    <p id="listeningTime">Loading...</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Top Artist</h3>
+                    <p id="topArtist">Loading...</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Top Album</h3>
+                    <p id="topAlbum">Loading...</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="genreBreakdown">
+            <h2>Genre Breakdown</h2>
+            <div class="chart-container">
+                <canvas id="genreChart"></canvas>
+            </div>
+        </section>
+
+        <section id="topArtists">
+            <h2>Top Artists</h2>
+            <ul id="artistList"></ul>
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

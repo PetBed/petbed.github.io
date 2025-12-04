@@ -81,15 +81,18 @@ const paths = {
 			"Study Companion": {
 				url: "https://petbed.github.io/Study%20Website/",
 			},
-			"Hamilton Ipsum": {
-				url: "https://petbed.github.io/Misc/Hamilton%20Ipsum/",
-			},
+      "Spotify Tracker": {
+        url: "https://petbed.github.io/Misc/Spotify%20Tracker/",
+      },
 			"Timeline Logger": {
-				url: "https://petbed.github.io/Misc/Timeline%20Logger/dashboard.html",
+        url: "https://petbed.github.io/Misc/Timeline%20Logger/dashboard.html",
 			},
 			"Etymology Learner": {
-				url: "https://petbed.github.io/Misc/Etymology/index.html",
+        url: "https://petbed.github.io/Misc/Etymology/index.html",
 			},
+      "Hamilton Ipsum": {
+        url: "https://petbed.github.io/Misc/Hamilton%20Ipsum/",
+      },
       "Mood Tracker": {
         url: "https://petbed.github.io/Misc/Mood%20Tracker/",
       },

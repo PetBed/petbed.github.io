@@ -1,0 +1,96 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: #0f0f0f;
+    color: #fff;
+}
+
+header {
+    text-align: center;
+    padding: 40px 0;
+    background: linear-gradient(180deg, #181818 0%, #0f0f0f 100%);
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 5px;
+}
+
+main {
+    width: 90%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding-bottom: 50px;
+}
+
+section {
+    margin: 40px 0;
+}
+
+h2 {
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    color: #b3b3b3;
+}
+
+/* Stats Grid */
+.stat-grid {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap; 
+}
+
+.stat-box {
+    flex: 1;
+    min-width: 150px;
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.stat-box:hover {
+    transform: translateY(-5px);
+    background: #242424;
+}
+
+.stat-box h3 {
+    margin: 0 0 10px 0;
+    font-size: 0.9rem;
+    color: #b3b3b3;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Chart Container */
+.chart-container {
+    position: relative;
+    height: 350px; /* Fixed height is crucial for Chart.js */
+    width: 100%;
+    background: #1a1a1a;
+    padding: 20px;
+    box-sizing: border-box;
+    border-radius: 10px;
+}
+
+/* List Styles */
+#topArtists ul {
+    list-style: none;
+    padding: 0;
+}
+
+#topArtists li {
+    background: #1a1a1a;
+    margin: 8px 0;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#topArtists li:hover {
+    background: #242424;
+}

@@ -87,6 +87,7 @@ async function loadData() {
 
         // --- Render Genre Chart ---
         renderGenreChart(topGenres);
+        renderHeatmap(data);
 
     } catch (error) {
         console.error("Error loading data:", error);
@@ -145,5 +146,87 @@ function renderGenreChart(genresData) {
         }
     });
 }
+
+function renderHeatmap(data) {
+  const heatmap = document.getElementById("heatmapGrid");
+  heatmap.innerHTML = "";
+
+  // Track both play counts AND total stream time
+  const hourData = Array.from({ length: 24 }, () => ({
+    plays: 0,
+    minutes: 0
+  }));
+  console.log(data);  
+
+  data.forEach(item => {
+    const ts = item["Timestamp"] || item["End Time"] || "";
+    if (!ts) return;
+
+    const date = new Date(ts);
+    if (isNaN(date)) return;
+
+    const hour = date.getHours();
+    hourData[hour].plays++;
+
+    const duration = Number(item["Duration"]) || 0;
+    hourData[hour].minutes += (duration) / (1000 * 60); // convert ms to minutes
+  });
+
+  const maxCount = Math.max(...hourData.map(h => h.plays));
+
+  hourData.forEach((entry, hour) => {
+    const cellContainer = document.createElement("div");
+    cellContainer.className = "cell-container";
+
+    const cell = document.createElement("div");
+    cell.className = "heat-cell";
+
+    const intensity = maxCount === 0 ? 0 : entry.plays / maxCount;
+    const green = Math.floor(50 + intensity * 150);
+    cell.style.backgroundColor = `rgb(0, ${green}, 0)`;
+
+        // Store data for tooltip and attach custom mouse handlers
+        cell.dataset.hour = hour;
+        cell.dataset.plays = entry.plays;
+        cell.dataset.minutes = entry.minutes;
+
+        const tooltip = document.getElementById('tooltip');
+
+        function formatMinutes(mins) {
+            const h = Math.floor(mins / 60);
+            const m = Math.round(mins % 60);
+            return h > 0 ? `${h}h ${m}m` : `${m} min`;
+        }
+
+        cell.addEventListener('mouseenter', (e) => {
+            const plays = e.currentTarget.dataset.plays || 0;
+            const minutes = Number(e.currentTarget.dataset.minutes) || 0;
+            // tooltip.textContent = `${hour}:00 — Plays: ${plays}, Stream time: ${formatMinutes(minutes)}`;
+            tooltip.textContent = `Plays: ${plays}, Stream time: ${formatMinutes(minutes)}`;
+            tooltip.style.opacity = '1';
+        });
+
+        cell.addEventListener('mousemove', (e) => {
+            const offset = 12;
+            tooltip.style.left = (e.clientX + offset) + 'px';
+            tooltip.style.top = (e.clientY + offset) + 'px';
+        });
+
+        cell.addEventListener('mouseleave', () => {
+            tooltip.style.opacity = '0';
+        });
+
+    // Hour label
+    const label = document.createElement("div");
+    label.className = "hour-label";
+    label.textContent = `${hour}:00`;
+
+    cellContainer.appendChild(cell);
+    cellContainer.appendChild(label);
+
+    heatmap.appendChild(cellContainer);
+  });
+}
+
 
 loadData();

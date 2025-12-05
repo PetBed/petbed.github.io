@@ -94,3 +94,78 @@ h2 {
 #topArtists li:hover {
     background: #242424;
 }
+
+#heatmapGrid {
+    display: grid;
+    grid-template-columns: repeat(24, 1fr);
+    gap: 4px;
+    background: #1a1a1a;
+    padding: 15px;
+    border-radius: 10px;
+}
+.heat-cell {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 4px;
+    background-color: #222;
+    transition: 0.2s;
+}
+.heat-cell:hover { transform: scale(1.1); }
+
+.cell-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hour-label {
+  font-size: 10px;
+  color: #ccc;
+  margin-top: 3px;
+}
+
+.tooltip {
+  position: fixed;
+  padding: 6px 10px;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  font-size: 12px;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  z-index: 9999;
+}
+
+/* Responsive heatmap: wrap into fewer columns on smaller screens
+     - Desktop: 24 columns (default)
+     - Tablet: 12 columns -> 2 rows (24 / 12 = 2)
+     - Mobile: 6 columns  -> 4 rows (24 / 6  = 4)
+*/
+@media (max-width: 900px) {
+    #heatmapGrid {
+        grid-template-columns: repeat(12, 1fr);
+    }
+    .hour-label {
+        font-size: 10px;
+    }
+    .heat-cell:hover {
+        transform: scale(1.05);
+    }
+}
+
+@media (max-width: 480px) {
+    #heatmapGrid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+    .hour-label {
+        font-size: 9px;
+    }
+    .heat-cell {
+        border-radius: 6px;
+    }
+    /* Reduce hover scale on small screens to avoid overlap */
+    .heat-cell:hover {
+        transform: scale(1.03);
+    }
+}

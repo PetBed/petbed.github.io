@@ -15,47 +15,172 @@
     </header>
 
     <main>
-        <section id="summary">
-            <h2>Quick Stats</h2>
-            <div class="stat-grid">
-                <div class="stat-box">
-                    <h3>Total Tracks</h3>
-                    <p id="totalTracks">Loading...</p>
-                </div>
-                <div class="stat-box">
-                    <h3>Listening Time</h3>
-                    <p id="listeningTime">Loading...</p>
-                </div>
-                <div class="stat-box">
-                    <h3>Top Artist</h3>
-                    <p id="topArtist">Loading...</p>
-                </div>
-                <div class="stat-box">
-                    <h3>Top Album</h3>
-                    <p id="topAlbum">Loading...</p>
-                </div>
-            </div>
-        </section>
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <button class="tab-button active" data-tab="alltime">All Time</button>
+            <button class="tab-button" data-tab="today">Listening Breakdown</button>
+        </div>
 
-        <section id="genreBreakdown">
-            <h2>Genre Breakdown</h2>
+        <!-- All Time Tab Content -->
+        <div id="alltime-tab" class="tab-content active">
+            <section id="summary">
+                <h2>Quick Stats</h2>
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <h3>Total Tracks</h3>
+                        <p id="totalTracks">Loading...</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3>Listening Time</h3>
+                        <p id="listeningTime">Loading...</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3>Top Artist</h3>
+                        <p id="topArtist">Loading...</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3>Top Album</h3>
+                        <p id="topAlbum">Loading...</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="searchSection">
+                <h2>Search Stats</h2>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search for artist, song, or album...">
+                    <div class="search-results" id="searchResults" style="display: none;">
+                        <div class="search-stat-box">
+                            <h3>Total Plays</h3>
+                            <p id="searchPlays">0</p>
+                        </div>
+                        <div class="search-stat-box">
+                            <h3>Total Time</h3>
+                            <p id="searchTime">0h 0m</p>
+                        </div>
+                        <div class="search-stat-box">
+                            <h3>Avg Plays/Day</h3>
+                            <p id="searchAvgPerDay">0</p>
+                        </div>
+                    </div>
+                    <div id="searchMatchResults" class="search-match-results"></div>
+                </div>
+            </section>
+
+            <section id="genreBreakdown">
+            <h2>Genre Breakdown (All Time)</h2>
             <div class="chart-container">
                 <canvas id="genreChart"></canvas>
             </div>
         </section>
 
-        <section id="topArtists">
-            <h2>Top Artists</h2>
-            <ul id="artistList"></ul>
+            <section id="artistCardsSection">
+                <h2>Top Artists (All Time)</h2>
+                <div id="artistCardsGrid" class="artist-grid"></div>
+            </section>
+
+        <section id="artistCollaborations">
+            <h2>Artist Collaborations</h2>
+            <div class="collab-search-container">
+                <input type="text" id="collabSearchInput" placeholder="Search for an artist to see their collaborations...">
+                <div id="collabDropdown" class="collab-dropdown" style="display: none;"></div>
+                <div id="collaborationResults" class="collaborations-list"></div>
+            </div>
+        </section>
+
+        <section id="genreTrends">
+            <h2>Genre Trends (Last 30 Days)</h2>
+            <div class="chart-container">
+                <canvas id="genreTrendsChart"></canvas>
+            </div>
+        </section>
+
+        <section id="listeningStreak">
+            <h2>Listening Streak</h2>
+            <div class="stat-grid">
+                <div class="stat-box streak-box">
+                    <h3>Current Streak</h3>
+                    <p id="currentStreak" class="streak-number">0</p>
+                    <p id="currentStreakDate" class="streak-date">N/A</p>
+                </div>
+                <div class="stat-box streak-box">
+                    <h3>Longest Streak</h3>
+                    <p id="longestStreak" class="streak-number">0</p>
+                    <p id="longestStreakDate" class="streak-date">N/A</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="calendarHeatmap">
+            <h2>Listening Activity (By Day)</h2>
+            <div class="calendar-controls">
+                <button id="prevYear" class="calendar-nav-btn">← Previous Month</button>
+                <h3 id="calendarYear">2025</h3>
+                <button id="nextYear" class="calendar-nav-btn">Next Month →</button>
+            </div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+            <div class="calendar-legend">
+                <span>Less</span>
+                <div class="legend-scale"></div>
+                <span>More</span>
+            </div>
         </section>
 
         <section id="hourHeatmap">
           <h2>Listening Heatmap (By Hour)</h2>
           <div id="heatmapGrid"></div>
         </section>
+        </div>
+
+        <!-- Period Stats Tab Content -->
+        <div id="today-tab" class="tab-content">
+            <!-- Period Toggle Buttons -->
+            <div class="period-navigation">
+                <button class="period-button active" data-period="today">Today</button>
+                <button class="period-button" data-period="weekly">Weekly</button>
+                <button class="period-button" data-period="monthly">Monthly</button>
+            </div>
+
+            <section id="period-summary">
+                <h2 id="period-summary-title">Today's Stats</h2>
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <h3>Total Tracks</h3>
+                        <p id="periodTotalTracks">Loading...</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3>Listening Time</h3>
+                        <p id="periodListeningTime">Loading...</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="periodSongs">
+                <h2 id="periodSongs-title">Songs</h2>
+                <ul id="periodSongsList"></ul>
+            </section>
+
+            <section id="periodArtists">
+                <h2 id="periodArtists-title">Artists</h2>
+                <ul id="periodArtistsList"></ul>
+            </section>
+
+            <section id="periodAlbums">
+                <h2 id="periodAlbums-title">Albums</h2>
+                <ul id="periodAlbumsList"></ul>
+            </section>
+        </div>
 
     </main>
     <div id="tooltip" class="tooltip"></div>
+
+    <!-- Artist Details Modal -->
+    <div id="artistModal" class="modal-overlay" aria-hidden="true" style="display:none;">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <button id="modalClose" class="modal-close" aria-label="Close details">×</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
 
 
     <script src="script.js"></script>

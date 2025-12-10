@@ -119,6 +119,72 @@ main {
     color: #666;
 }
 
+.search-filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #1f1f1f;
+    border: 1px solid #2a2a2a;
+    border-radius: 20px;
+    color: #e5e5e5;
+    font-size: 0.9rem;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+.filter-chip.active {
+    background: #1db954;
+    color: #000;
+    border-color: #1db954;
+}
+
+.search-filter-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-top: 10px;
+}
+
+.filter-toggle {
+    background: #1f1f1f;
+    color: #e5e5e5;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.filter-toggle:hover {
+    border-color: #1db954;
+    color: #fff;
+}
+
+.filter-dropdown {
+    display: none;
+    position: absolute;
+    z-index: 10;
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 6px;
+    min-width: 240px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+}
+
+.search-filter-wrapper.open .filter-dropdown {
+    display: block;
+}
+
 .search-results {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -711,12 +777,18 @@ h2 {
 
 .modal-title { font-size: 1.2rem; margin: 0; }
 .modal-meta { color: #b3b3b3; font-size: 0.95rem; }
-.modal-body-list { margin-top: 12px; }
-.modal-body-list ul { list-style: none; padding: 0; margin: 0; }
-.modal-body-list li { padding: 6px 0; border-bottom: 1px solid #161616; color: #ddd; }
-.modal-body-list li:last-child { border-bottom: none; }
 
-/* Make modal song list match period song list style */
+/* Shared modal list styling (artist modal) */
+.modal-body-list {
+    margin-top: 12px;
+}
+
+.modal-body-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
 .modal-body-list li {
     background: #1a1a1a;
     margin: 8px 0;
@@ -725,10 +797,155 @@ h2 {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border: 1px solid #161616;
 }
 
 .modal-body-list .song-name { color: #fff; }
 .modal-body-list .song-count { color: #aaa; font-size: 0.9rem; }
+
+/* Song modal chips layout */
+.modal-body-chips {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-section-inline {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.modal-chip-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #888;
+    margin-top: 3px;
+    flex: 0 0 auto;
+}
+
+.modal-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    flex: 1 1 auto;
+}
+
+.chip-row-inline {
+    margin-top: 4px;
+}
+
+.modal-chip {
+    background: #151515;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    color: #e8e8e8;
+    border: 1px solid #222;
+    white-space: nowrap;
+}
+
+.chip-artist {
+    border-color: #1a7f46;
+    background: linear-gradient(135deg, #0f2a1c, #123524);
+    color: #cfe7d8;
+}
+
+.chip-album {
+    border-color: #7b5fb0;
+    background: linear-gradient(135deg, #1a1426, #211a30);
+    color: #e3dcf5;
+}
+
+.chip-featured {
+    border-color: #2aa497;
+    background: linear-gradient(135deg, #0e2422, #10302d);
+    color: #cdeeed;
+}
+
+.chip-genre {
+    border-color: #3a6fa3;
+    background: linear-gradient(135deg, #0f1c2b, #12263a);
+    color: #d7e5f5;
+}
+
+.modal-chip-empty {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.preview-card {
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 10px;
+    background: #121212;
+    border: 1px solid #1f1f1f;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.preview-status {
+    color: #d2d2d2;
+    font-size: 0.95rem;
+    flex: 1 1 auto;
+    min-width: 200px;
+}
+
+.preview-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.preview-btn {
+    background: #1db954;
+    color: #000;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.preview-btn:hover:enabled {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+
+.preview-btn-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.preview-link {
+    color: #1db954;
+    border: 1px solid #1db954;
+    padding: 9px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.preview-link:hover {
+    background: #1db954;
+    color: #000;
+}
+
+.clickable-song {
+    cursor: pointer;
+}
+
+.clickable-song:hover {
+    background: #1b1b1b;
+}
 
 .modal-show-more {
     display: inline-block;
@@ -787,3 +1004,47 @@ h2 {
     .artist-card { padding: 10px; }
     .artist-cover { width: 56px; height: 56px; }
 }
+
+/* D3 Collaboration Network Graph */
+#collabNetworkContainer {
+    position: relative;
+    overflow: hidden;
+}
+
+.collab-node {
+    stroke: #1db954;
+    stroke-width: 2px;
+    cursor: pointer;
+}
+
+.collab-node:hover {
+    stroke-width: 3px;
+    filter: brightness(1.2);
+}
+
+.collab-link {
+    stroke: #444;
+    stroke-opacity: 0.6;
+    pointer-events: none;
+}
+
+.node-label {
+    font-size: 11px;
+    fill: #fff;
+    text-anchor: middle;
+    pointer-events: none;
+    font-weight: 500;
+    text-shadow: 0 0 3px rgba(0,0,0,0.8);
+}
+
+/* Collab network controls */
+.collab-controls { display: flex; gap: 8px; }
+.small-btn {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #b3b3b3;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.small-btn:hover { border-color: #1db954; color: #1db954; }

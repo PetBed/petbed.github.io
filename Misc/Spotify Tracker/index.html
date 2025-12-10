@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="style.css">
     <!-- Import Chart.js library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Import D3.js library for network graph -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
 
@@ -19,6 +21,7 @@
         <div class="tab-navigation">
             <button class="tab-button active" data-tab="alltime">All Time</button>
             <button class="tab-button" data-tab="today">Listening Breakdown</button>
+            <!-- <button class="tab-button" data-tab="collab-network">Collab Network</button> -->
         </div>
 
         <!-- All Time Tab Content -->
@@ -49,6 +52,17 @@
                 <h2>Search Stats</h2>
                 <div class="search-container">
                     <input type="text" id="searchInput" placeholder="Search for artist, song, or album...">
+                    <div class="search-filter-wrapper">
+                        <button class="filter-toggle" id="filterToggle" aria-expanded="false">Filters ▾</button>
+                        <div class="filter-dropdown" id="filterDropdown">
+                            <div class="search-filter-group" id="searchFilterGroup">
+                                <button class="filter-chip active" data-type="Artist">Artists</button>
+                                <button class="filter-chip active" data-type="Song">Songs</button>
+                                <button class="filter-chip active" data-type="Album">Albums</button>
+                                <button class="filter-chip active" data-type="Genre">Genres</button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="search-results" id="searchResults" style="display: none;">
                         <div class="search-stat-box">
                             <h3>Total Plays</h3>
@@ -171,8 +185,29 @@
             </section>
         </div>
 
+        <!-- Collab Network Tab Content -->
+        <div id="collab-network-tab" class="tab-content">
+            <section id="collabNetworkSection">
+                <h2>Artist Collaboration Network</h2>
+                <p style="color: #b3b3b3; margin-bottom: 20px;">Interactive network graph showing collaborations between artists. Node size = artist popularity, connections = shared songs.</p>
+                <div class="collab-controls" style="margin-bottom:12px;">
+                    <button id="collabFitBtn" class="small-btn">Fit to view</button>
+                    <button id="collabResetBtn" class="small-btn">Reset view</button>
+                </div>
+                <div id="collabNetworkContainer" style="width: 100%; height: 600px; background: #1a1a1a; border-radius: 10px; border: 1px solid #333;"></div>
+            </section>
+        </div>
+
     </main>
     <div id="tooltip" class="tooltip"></div>
+
+    <!-- Song Details Modal -->
+    <div id="songModal" class="modal-overlay" aria-hidden="true" style="display:none;">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="songModalTitle">
+            <button id="songModalClose" class="modal-close" aria-label="Close song details">×</button>
+            <div id="songModalBody"></div>
+        </div>
+    </div>
 
     <!-- Artist Details Modal -->
     <div id="artistModal" class="modal-overlay" aria-hidden="true" style="display:none;">

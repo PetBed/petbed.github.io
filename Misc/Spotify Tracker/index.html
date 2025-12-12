@@ -153,6 +153,18 @@
                 <button class="period-button active" data-period="today">Today</button>
                 <button class="period-button" data-period="weekly">Weekly</button>
                 <button class="period-button" data-period="monthly">Monthly</button>
+                <button class="period-button" data-period="custom">Custom Range</button>
+            </div>
+
+            <!-- Custom Date Range Section -->
+            <div id="customRangeSection" class="custom-range-section" style="display: none;">
+                <div class="custom-range-controls">
+                    <label for="rangeStartDate">Start Date:</label>
+                    <input type="date" id="rangeStartDate" class="date-input">
+                    <label for="rangeEndDate">End Date:</label>
+                    <input type="date" id="rangeEndDate" class="date-input">
+                    <button id="applyRangeBtn" class="apply-range-btn">Apply</button>
+                </div>
             </div>
 
             <section id="period-summary">
@@ -166,6 +178,54 @@
                         <h3>Listening Time</h3>
                         <p id="periodListeningTime">Loading...</p>
                     </div>
+                    <div class="stat-box period-top-artist">
+                        <h3>Top Artist</h3>
+                        <p id="periodTopArtist">Loading...</p>
+                    </div>
+                    <div class="stat-box period-top-album" id="periodTopAlbumBox">
+                        <h3>Top Album</h3>
+                        <p id="periodTopAlbum">Loading...</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="periodSearchSection">
+                <h2>Search Stats</h2>
+                <div class="search-container">
+                    <input type="text" id="periodSearchInput" placeholder="Search for artist, song, or album...">
+                    <div class="search-filter-wrapper">
+                        <button class="filter-toggle" id="periodFilterToggle" aria-expanded="false">Filters ▾</button>
+                        <div class="filter-dropdown" id="periodFilterDropdown">
+                            <div class="search-filter-group" id="periodSearchFilterGroup">
+                                <button class="filter-chip active" data-type="Artist">Artists</button>
+                                <button class="filter-chip active" data-type="Song">Songs</button>
+                                <button class="filter-chip active" data-type="Album">Albums</button>
+                                <button class="filter-chip active" data-type="Genre">Genres</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="search-results" id="periodSearchResults" style="display: none;">
+                        <div class="search-stat-box">
+                            <h3>Total Plays</h3>
+                            <p id="periodSearchPlays">0</p>
+                        </div>
+                        <div class="search-stat-box">
+                            <h3>Total Time</h3>
+                            <p id="periodSearchTime">0h 0m</p>
+                        </div>
+                        <div class="search-stat-box">
+                            <h3>Avg Plays/Day</h3>
+                            <p id="periodSearchAvgPerDay">0</p>
+                        </div>
+                    </div>
+                    <div id="periodSearchMatchResults" class="search-match-results"></div>
+                </div>
+            </section>
+            
+            <section id="periodGenreBreakdown">
+                <h2 id="periodGenre-title">Genre Breakdown</h2>
+                <div class="chart-container">
+                    <canvas id="periodGenreChart"></canvas>
                 </div>
             </section>
 

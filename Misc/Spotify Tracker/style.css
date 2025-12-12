@@ -93,6 +93,56 @@ main {
     border-color: #1db954;
 }
 
+/* Custom Date Range */
+.custom-range-section {
+    background: #1a1a1a;
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.custom-range-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.custom-range-controls label {
+    color: #b3b3b3;
+    font-size: 0.95rem;
+    margin-right: 4px;
+}
+
+.date-input {
+    background: #242424;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: #1db954;
+}
+
+.apply-range-btn {
+    background: #1db954;
+    border: none;
+    color: #000;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: filter 0.2s ease;
+}
+
+.apply-range-btn:hover {
+    filter: brightness(1.1);
+}
+
 /* Search Section */
 .search-container {
     margin-bottom: 20px;
@@ -255,6 +305,175 @@ main {
 }
 
 .search-match-item .match-detail strong {
+    color: #1db954;
+    margin-bottom: 2px;
+}
+
+/* Period Search Section (Listening Breakdown Tab) */
+#periodSearchInput {
+    width: 100%;
+    padding: 12px 16px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+#periodSearchInput:focus {
+    outline: none;
+    border-color: #1db954;
+}
+
+#periodSearchInput::placeholder {
+    color: #666;
+}
+
+#periodSearchSection .search-filter-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-top: 10px;
+}
+
+#periodSearchSection .filter-toggle {
+    background: #1f1f1f;
+    color: #e5e5e5;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+#periodSearchSection .filter-toggle:hover {
+    border-color: #1db954;
+    color: #fff;
+}
+
+#periodSearchSection .filter-dropdown {
+    display: none;
+    position: absolute;
+    z-index: 10;
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 6px;
+    min-width: 240px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+}
+
+#periodSearchSection .search-filter-wrapper.open .filter-dropdown {
+    display: block;
+}
+
+#periodSearchSection .search-filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+#periodSearchSection .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #1f1f1f;
+    border: 1px solid #2a2a2a;
+    border-radius: 20px;
+    color: #e5e5e5;
+    font-size: 0.9rem;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+#periodSearchSection .filter-chip.active {
+    background: #1db954;
+    color: #000;
+    border-color: #1db954;
+}
+
+#periodSearchSection .search-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+#periodSearchSection .search-stat-box {
+    background: #1a1a1a;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #333;
+}
+
+#periodSearchSection .search-stat-box h3 {
+    margin: 0 0 10px 0;
+    font-size: 0.85rem;
+    color: #b3b3b3;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#periodSearchSection .search-stat-box p {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #1db954;
+    font-weight: bold;
+}
+
+#periodSearchSection .search-match-results {
+    margin-top: 20px;
+}
+
+#periodSearchSection .search-match-item {
+    background: #1a1a1a;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 3px solid #1db954;
+    transition: all 0.2s ease;
+}
+
+#periodSearchSection .search-match-item:hover {
+    background: #222;
+    border-left-color: #1ed760;
+    transform: translateX(4px);
+}
+
+#periodSearchSection .search-match-item .match-type {
+    font-size: 0.85rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+#periodSearchSection .search-match-item .match-name {
+    font-size: 1.1rem;
+    color: #fff;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+#periodSearchSection .search-match-item .match-details {
+    display: flex;
+    gap: 20px;
+    font-size: 0.9rem;
+    color: #b3b3b3;
+}
+
+#periodSearchSection .search-match-item .match-detail {
+    display: flex;
+    flex-direction: column;
+}
+
+#periodSearchSection .search-match-item .match-detail strong {
     color: #1db954;
     margin-bottom: 2px;
 }
@@ -958,6 +1177,85 @@ h2 {
     cursor: pointer;
 }
 .modal-show-more:hover { border-color: #1db954; color: #1db954; }
+
+/* Song Heatmap in Modal */
+.modal-heatmap-section {
+    margin-top: 20px;
+    padding: 16px;
+    background: #1a1a1a;
+    border-radius: 10px;
+    border: 1px solid #2a2a2a;
+}
+
+.modal-heatmap-section h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.song-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-top: 12px;
+}
+
+.song-calendar-day-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: #888;
+    font-weight: 500;
+    height: 24px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.song-calendar-day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.song-calendar-day:not(.song-calendar-day-empty):hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(29, 185, 84, 0.3);
+}
+
+.song-calendar-day-empty {
+    background: transparent !important;
+}
+
+.show-more-btn {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px 16px;
+    background: #1f1f1f;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #1db954;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.show-more-btn:hover {
+    background: #252525;
+    border-color: #1db954;
+    color: #1ed760;
+}
 
 .artist-cover {
     width: 64px;

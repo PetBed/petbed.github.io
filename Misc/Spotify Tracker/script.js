@@ -991,6 +991,24 @@ function openSongModal(songName) {
 
     body.appendChild(listWrap);
 
+    // Add daily heatmap section
+    const songHeatmapSection = document.createElement('div');
+    songHeatmapSection.className = 'modal-heatmap-section';
+    const heatmapTitle = document.createElement('h4');
+    heatmapTitle.textContent = 'Listening Activity (By Day)';
+    heatmapTitle.style.marginBottom = '12px';
+    songHeatmapSection.appendChild(heatmapTitle);
+    
+    const heatmapContainer = document.createElement('div');
+    heatmapContainer.id = `song-heatmap-${songName.replace(/[^a-zA-Z0-9]/g, '-')}`;
+    heatmapContainer.className = 'song-calendar-grid';
+    songHeatmapSection.appendChild(heatmapContainer);
+    
+    body.appendChild(songHeatmapSection);
+    
+    // Render the song-specific heatmap
+    renderSongDailyHeatmap(window.allData, songName, heatmapContainer);
+
     // Load preview in the background
     (async () => {
         const previewData = await fetchTrackPreview(song.name, primaryArtist);
@@ -1168,6 +1186,24 @@ function openArtistModal(artist) {
 
     body.appendChild(listWrap);
 
+    // Add daily heatmap section
+    const artistHeatmapSection = document.createElement('div');
+    artistHeatmapSection.className = 'modal-heatmap-section';
+    const heatmapTitle = document.createElement('h4');
+    heatmapTitle.textContent = 'Listening Activity (By Day)';
+    heatmapTitle.style.marginBottom = '12px';
+    artistHeatmapSection.appendChild(heatmapTitle);
+    
+    const heatmapContainer = document.createElement('div');
+    heatmapContainer.id = `artist-heatmap-${artist.name.replace(/[^a-zA-Z0-9]/g, '-')}`;
+    heatmapContainer.className = 'song-calendar-grid';
+    artistHeatmapSection.appendChild(heatmapContainer);
+    
+    body.appendChild(artistHeatmapSection);
+    
+    // Render the artist-specific heatmap
+    renderArtistDailyHeatmap(window.allData, artist.name, heatmapContainer);
+
     // Show overlay with animation: ensure display then add class
     overlay.style.display = 'flex';
     // allow next frame to pick up display change
@@ -1284,6 +1320,24 @@ function openAlbumModal(album) {
     }
 
     body.appendChild(listWrap);
+
+    // Add daily heatmap section
+    const albumHeatmapSection = document.createElement('div');
+    albumHeatmapSection.className = 'modal-heatmap-section';
+    const heatmapTitle = document.createElement('h4');
+    heatmapTitle.textContent = 'Listening Activity (By Day)';
+    heatmapTitle.style.marginBottom = '12px';
+    albumHeatmapSection.appendChild(heatmapTitle);
+    
+    const heatmapContainer = document.createElement('div');
+    heatmapContainer.id = `album-heatmap-${album.name.replace(/[^a-zA-Z0-9]/g, '-')}`;
+    heatmapContainer.className = 'song-calendar-grid';
+    albumHeatmapSection.appendChild(heatmapContainer);
+    
+    body.appendChild(albumHeatmapSection);
+    
+    // Render the album-specific heatmap
+    renderAlbumDailyHeatmap(window.allData, album.name, heatmapContainer);
 
     overlay.style.display = 'flex';
     requestAnimationFrame(() => overlay.classList.add('open'));
@@ -1532,6 +1586,228 @@ function renderCalendarHeatmap(data, year = new Date().getFullYear(), month = ne
         step.style.backgroundColor = `rgb(0, ${green}, 0)`;
         legendScale.appendChild(step);
     }
+}
+
+// Helper: Render daily heatmap for a specific song
+function renderSongDailyHeatmap(data, songName, containerEl) {
+    if (!containerEl) return;
+    
+    // Filter data for this song
+    const songData = data.filter(item => item["Name"] === songName);
+    if (songData.length === 0) {
+        containerEl.innerHTML = '<p style="color: #888; text-align: center;">No listening data for this song.</p>';
+        return;
+    }
+    
+    // Build date-based play count map
+    const datePlayCount = {};
+    songData.forEach(item => {
+        const timestamp = item["Timestamp"] || item["End Time"] || "";
+        if (!timestamp) return;
+        const date = new Date(timestamp);
+        if (isNaN(date)) return;
+        const dateStr = date.toLocaleDateString('en-US');
+        datePlayCount[dateStr] = (datePlayCount[dateStr] || 0) + 1;
+    });
+    
+    const maxPlays = Math.max(...Object.values(datePlayCount), 1);
+    
+    containerEl.innerHTML = '';
+    
+    // Add day labels (Sun-Sat)
+    const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    dayLabels.forEach(label => {
+        const labelEl = document.createElement('div');
+        labelEl.className = 'song-calendar-day-label';
+        labelEl.textContent = label;
+        containerEl.appendChild(labelEl);
+    });
+    
+    // Get date range from song data
+    const dates = songData
+        .map(item => new Date(item["Timestamp"] || item["End Time"] || ""))
+        .filter(d => !isNaN(d))
+        .sort((a, b) => a - b);
+    
+    if (dates.length === 0) {
+        containerEl.innerHTML = '<p style="color: #888; text-align: center;">No valid dates found.</p>';
+        return;
+    }
+    
+    const firstDate = new Date(dates[0]);
+    const lastDate = new Date(dates[dates.length - 1]);
+    
+    // Generate all dates in range
+    const allDates = [];
+    const current = new Date(firstDate);
+    while (current <= lastDate) {
+        allDates.push(new Date(current));
+        current.setDate(current.getDate() + 1);
+    }
+    
+    // Get first day of week for alignment
+    const firstDayOfWeek = firstDate.getDay();
+    
+    // Add empty cells before first date
+    for (let i = 0; i < firstDayOfWeek; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'song-calendar-day song-calendar-day-empty';
+        containerEl.appendChild(emptyCell);
+    }
+    
+    // Add day cells
+    allDates.forEach(date => {
+        const dateStr = date.toLocaleDateString('en-US');
+        const plays = datePlayCount[dateStr] || 0;
+        
+        const dayCell = document.createElement('div');
+        dayCell.className = 'song-calendar-day';
+        dayCell.dataset.date = dateStr;
+        dayCell.dataset.plays = plays;
+        dayCell.textContent = date.getDate();
+        
+        if (plays > 0) {
+            const intensity = plays / maxPlays;
+            const green = Math.floor(50 + intensity * 150);
+            dayCell.style.backgroundColor = `rgb(0, ${green}, 0)`;
+        } else {
+            dayCell.style.backgroundColor = '#222';
+        }
+        
+        // Add tooltip
+        dayCell.addEventListener('mouseenter', (e) => {
+            const tooltip = document.getElementById('tooltip');
+            const dateStr = e.currentTarget.dataset.date;
+            const plays = parseInt(e.currentTarget.dataset.plays);
+            tooltip.textContent = `${dateStr}: ${plays} ${plays === 1 ? 'play' : 'plays'}`;
+            tooltip.style.opacity = '1';
+        });
+        
+        dayCell.addEventListener('mousemove', (e) => {
+            const tooltip = document.getElementById('tooltip');
+            const offset = 12;
+            tooltip.style.left = (e.clientX + offset) + 'px';
+            tooltip.style.top = (e.clientY + offset) + 'px';
+        });
+        
+        dayCell.addEventListener('mouseleave', () => {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.opacity = '0';
+        });
+        
+        containerEl.appendChild(dayCell);
+    });
+}
+
+// Helper: Render daily heatmap for a specific artist
+function renderArtistDailyHeatmap(data, artistName, containerEl) {
+    if (!containerEl) return;
+    
+    // Filter data for this artist
+    const artistData = data.filter(item => item["Artist"] === artistName);
+    if (artistData.length === 0) {
+        containerEl.innerHTML = '<p style="color: #888; text-align: center;">No listening data for this artist.</p>';
+        return;
+    }
+    
+    // Build date-based play count map
+    const datePlayCount = {};
+    artistData.forEach(item => {
+        const timestamp = item["Timestamp"] || item["End Time"] || "";
+        if (!timestamp) return;
+        const date = new Date(timestamp);
+        if (isNaN(date)) return;
+        const dateStr = date.toLocaleDateString('en-US');
+        datePlayCount[dateStr] = (datePlayCount[dateStr] || 0) + 1;
+    });
+    
+    const maxPlays = Math.max(...Object.values(datePlayCount), 1);
+    
+    containerEl.innerHTML = '';
+    
+    // Add day labels (Sun-Sat)
+    const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    dayLabels.forEach(label => {
+        const labelEl = document.createElement('div');
+        labelEl.className = 'song-calendar-day-label';
+        labelEl.textContent = label;
+        containerEl.appendChild(labelEl);
+    });
+    
+    // Get date range from artist data
+    const dates = artistData
+        .map(item => new Date(item["Timestamp"] || item["End Time"] || ""))
+        .filter(d => !isNaN(d))
+        .sort((a, b) => a - b);
+    
+    if (dates.length === 0) {
+        containerEl.innerHTML = '<p style="color: #888; text-align: center;">No valid dates found.</p>';
+        return;
+    }
+    
+    const firstDate = new Date(dates[0]);
+    const lastDate = new Date(dates[dates.length - 1]);
+    
+    // Generate all dates in range
+    const allDates = [];
+    const current = new Date(firstDate);
+    while (current <= lastDate) {
+        allDates.push(new Date(current));
+        current.setDate(current.getDate() + 1);
+    }
+    
+    // Get first day of week for alignment
+    const firstDayOfWeek = firstDate.getDay();
+    
+    // Add empty cells before first date
+    for (let i = 0; i < firstDayOfWeek; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'song-calendar-day song-calendar-day-empty';
+        containerEl.appendChild(emptyCell);
+    }
+    
+    // Add day cells
+    allDates.forEach(date => {
+        const dateStr = date.toLocaleDateString('en-US');
+        const plays = datePlayCount[dateStr] || 0;
+        
+        const dayCell = document.createElement('div');
+        dayCell.className = 'song-calendar-day';
+        dayCell.dataset.date = dateStr;
+        dayCell.dataset.plays = plays;
+        dayCell.textContent = date.getDate();
+        
+        if (plays > 0) {
+            const intensity = plays / maxPlays;
+            const green = Math.floor(50 + intensity * 150);
+            dayCell.style.backgroundColor = `rgb(0, ${green}, 0)`;
+        } else {
+            dayCell.style.backgroundColor = '#222';
+        }
+        
+        // Add tooltip
+        dayCell.addEventListener('mouseenter', (e) => {
+            const tooltip = document.getElementById('tooltip');
+            const dateStr = e.currentTarget.dataset.date;
+            const plays = parseInt(e.currentTarget.dataset.plays);
+            tooltip.textContent = `${dateStr}: ${plays} ${plays === 1 ? 'play' : 'plays'}`;
+            tooltip.style.opacity = '1';
+        });
+        
+        dayCell.addEventListener('mousemove', (e) => {
+            const tooltip = document.getElementById('tooltip');
+            const offset = 12;
+            tooltip.style.left = (e.clientX + offset) + 'px';
+            tooltip.style.top = (e.clientY + offset) + 'px';
+        });
+        
+        dayCell.addEventListener('mouseleave', () => {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.opacity = '0';
+        });
+        
+        containerEl.appendChild(dayCell);
+    });
 }
 
 // Helper: Search for artist, song, or album
@@ -1906,7 +2182,7 @@ function getMonthlyData(data) {
 }
 
 // Helper: Render period statistics
-function renderPeriodStats(periodData, period) {
+function renderPeriodStats(periodData, period, customLabel = null) {
     // Calculate period totals
     const periodTracks = periodData.length;
     const periodMs = periodData.reduce((acc, item) => {
@@ -1920,7 +2196,12 @@ function renderPeriodStats(periodData, period) {
     document.getElementById("periodListeningTime").textContent = `${periodHours}h ${periodMinutes}m`;
 
     // Update section titles
-    const periodLabel = period === 'today' ? "Today's" : period === 'weekly' ? "This Week's" : "This Month's";
+    let periodLabel;
+    if (customLabel) {
+        periodLabel = customLabel;
+    } else {
+        periodLabel = period === 'today' ? "Today's" : period === 'weekly' ? "This Week's" : "This Month's";
+    }
     document.getElementById("period-summary-title").textContent = `${periodLabel} Stats`;
     document.getElementById("periodSongs-title").textContent = `${periodLabel} Songs`;
     document.getElementById("periodArtists-title").textContent = `${periodLabel} Artists`;
@@ -1931,34 +2212,147 @@ function renderPeriodStats(periodData, period) {
     const periodArtists = countFrequency(periodData, "Artist");
     const periodAlbums = countFrequency(periodData, "Album");
 
+    // Get top artist and album
+    const topArtist = periodArtists.length > 0 ? periodArtists[0][0] : "N/A";
+    const topAlbum = periodAlbums.length > 0 ? periodAlbums[0][0] : "N/A";
+
+    // Update top artist and album
+    document.getElementById("periodTopArtist").textContent = topArtist;
+    document.getElementById("periodTopAlbum").textContent = topAlbum;
+
+    // Set album cover as background for top album box if available
+    if (topAlbum !== "N/A") {
+        const albumRecord = periodData.find(item => item["Album"] === topAlbum);
+        if (albumRecord && albumRecord["Cover Image"]) {
+            const albumBox = document.getElementById("periodTopAlbumBox");
+            albumBox.style.backgroundImage = `url('${albumRecord["Cover Image"]}')`;
+            albumBox.style.backgroundSize = "cover";
+            albumBox.style.backgroundPosition = "center";
+            // Add overlay to ensure text is readable
+            albumBox.style.position = "relative";
+            // Dark overlay effect - add a semi-transparent dark overlay
+            if (!albumBox.querySelector(".album-overlay")) {
+                const overlay = document.createElement("div");
+                overlay.className = "album-overlay";
+                overlay.style.position = "absolute";
+                overlay.style.top = "0";
+                overlay.style.left = "0";
+                overlay.style.right = "0";
+                overlay.style.bottom = "0";
+                overlay.style.backgroundColor = "rgba(0, 0, 0, 0.6)";
+                overlay.style.borderRadius = "10px";
+                overlay.style.zIndex = "0";
+                albumBox.insertBefore(overlay, albumBox.firstChild);
+                // Ensure text is above overlay
+                Array.from(albumBox.children).slice(1).forEach(child => {
+                    if (child !== overlay) child.style.position = "relative";
+                    if (child !== overlay) child.style.zIndex = "1";
+                });
+            }
+        }
+    }
+
     // Render songs list
     const songsList = document.getElementById("periodSongsList");
     songsList.innerHTML = "";
-    periodSongs.forEach(([name, count]) => {
+    const visibleSongs = periodSongs.slice(0, 10);
+    const hiddenSongs = periodSongs.slice(10);
+    
+    visibleSongs.forEach(([name, count]) => {
         const li = document.createElement("li");
         li.classList.add("clickable-song");
         li.innerHTML = `<span>${name}</span> <span style="color:#aaa; font-size: 0.9em;">${count} plays</span>`;
         li.addEventListener("click", () => openSongModal(name));
         songsList.appendChild(li);
     });
+    
+    if (hiddenSongs.length > 0) {
+        const showMoreBtn = document.createElement("button");
+        showMoreBtn.className = "show-more-btn";
+        showMoreBtn.textContent = `Show ${hiddenSongs.length} more songs`;
+        showMoreBtn.addEventListener("click", () => {
+            showMoreBtn.style.display = "none";
+            hiddenSongs.forEach(([name, count]) => {
+                const li = document.createElement("li");
+                li.classList.add("clickable-song");
+                li.innerHTML = `<span>${name}</span> <span style="color:#aaa; font-size: 0.9em;">${count} plays</span>`;
+                li.addEventListener("click", () => openSongModal(name));
+                songsList.appendChild(li);
+            });
+        });
+        songsList.appendChild(showMoreBtn);
+    }
 
     // Render artists list
     const artistsList = document.getElementById("periodArtistsList");
     artistsList.innerHTML = "";
-    periodArtists.forEach(([name, count]) => {
+    const visibleArtists = periodArtists.slice(0, 10);
+    const hiddenArtists = periodArtists.slice(10);
+    
+    visibleArtists.forEach(([name, count]) => {
         const li = document.createElement("li");
         li.innerHTML = `<span>${name}</span> <span style="color:#aaa; font-size: 0.9em;">${count} plays</span>`;
         artistsList.appendChild(li);
     });
+    
+    if (hiddenArtists.length > 0) {
+        const showMoreBtn = document.createElement("button");
+        showMoreBtn.className = "show-more-btn";
+        showMoreBtn.textContent = `Show ${hiddenArtists.length} more artists`;
+        showMoreBtn.addEventListener("click", () => {
+            showMoreBtn.style.display = "none";
+            hiddenArtists.forEach(([name, count]) => {
+                const li = document.createElement("li");
+                li.innerHTML = `<span>${name}</span> <span style="color:#aaa; font-size: 0.9em;">${count} plays</span>`;
+                artistsList.appendChild(li);
+            });
+        });
+        artistsList.appendChild(showMoreBtn);
+    }
 
     // Render albums list
     const albumsList = document.getElementById("periodAlbumsList");
     albumsList.innerHTML = "";
-    periodAlbums.forEach(([name, count]) => {
+    const visibleAlbums = periodAlbums.slice(0, 10);
+    const hiddenAlbums = periodAlbums.slice(10);
+    
+    visibleAlbums.forEach(([name, count]) => {
         const li = document.createElement("li");
         li.innerHTML = `<span>${name}</span> <span style="color:#aaa; font-size: 0.9em;">${count} plays</span>`;
         albumsList.appendChild(li);
     });
+    
+    if (hiddenAlbums.length > 0) {
+        const showMoreBtn = document.createElement("button");
+        showMoreBtn.className = "show-more-btn";
+        showMoreBtn.textContent = `Show ${hiddenAlbums.length} more albums`;
+        showMoreBtn.addEventListener("click", () => {
+            showMoreBtn.style.display = "none";
+            hiddenAlbums.forEach(([name, count]) => {
+                const li = document.createElement("li");
+                li.innerHTML = `<span>${name}</span> <span style="color:#aaa; font-size: 0.9em;">${count} plays</span>`;
+                albumsList.appendChild(li);
+            });
+        });
+        albumsList.appendChild(showMoreBtn);
+    }
+
+    // Calculate and render genre breakdown for period
+    const periodGenres = countFrequency(periodData, "Genres");
+    // Expand genres since they're comma-separated
+    const expandedGenres = {};
+    periodData.forEach(item => {
+        const genreString = item["Genres"] || "";
+        const genres = genreString.split(",").map(g => g.trim()).filter(g => g);
+        genres.forEach(genre => {
+            expandedGenres[genre] = (expandedGenres[genre] || 0) + 1;
+        });
+    });
+    const genreArray = Object.entries(expandedGenres)
+        .map(([genre, count]) => [genre, count])
+        .sort((a, b) => b[1] - a[1]);
+    
+    renderPeriodGenreChart(genreArray);
 }
 
 async function loadData() {
@@ -2094,6 +2488,67 @@ function renderGenreChart(genresData) {
     }
 
     new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: dataPoints,
+                backgroundColor: [
+                    '#1db954', // Spotify Green
+                    '#1ed760',
+                    '#2ac769',
+                    '#36b772',
+                    '#42a77b',
+                    '#4e9784',
+                    '#5a878d',
+                    '#667796',
+                    '#333333'  // Dark Grey for others
+                ],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#fff',
+                        padding: 20,
+                        font: { size: 12 }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderPeriodGenreChart(genresData) {
+    const ctx = document.getElementById('periodGenreChart');
+    if (!ctx) return; // Chart element doesn't exist
+    
+    const canvasCtx = ctx.getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (window.periodGenreChartInstance) {
+        window.periodGenreChartInstance.destroy();
+    }
+    
+    // Take top 8 genres, group rest as "Other"
+    const top8 = genresData.slice(0, 8);
+    const othersCount = genresData.slice(8).reduce((sum, item) => sum + item[1], 0);
+
+    const labels = top8.map(g => g[0]);
+    const dataPoints = top8.map(g => g[1]);
+
+    if (othersCount > 0) {
+        labels.push("Other");
+        dataPoints.push(othersCount);
+    }
+
+    window.periodGenreChartInstance = new Chart(canvasCtx, {
         type: 'doughnut',
         data: {
             labels: labels,
@@ -2482,11 +2937,147 @@ document.querySelectorAll('.tab-button').forEach(button => {
     });
 });
 
-// Period switching functionality (for Today/Weekly/Monthly stats)
+// Helper: Filter data for a custom date range
+function getCustomRangeData(data, startDate, endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    // include the entire end day
+    end.setHours(23,59,59,999);
+
+    return data.filter(item => {
+        const ts = item["Timestamp"] || item["End Time"] || "";
+        if (!ts) return false;
+        const d = new Date(ts);
+        if (isNaN(d)) return false;
+        return d >= start && d <= end;
+    });
+}
+
+// Helper: Render daily heatmap for a specific album
+function renderAlbumDailyHeatmap(data, albumName, containerEl) {
+    if (!containerEl) return;
+    
+    // Filter data for this album
+    const albumData = data.filter(item => item["Album"] === albumName);
+    if (albumData.length === 0) {
+        containerEl.innerHTML = '<p style="color: #888; text-align: center;">No listening data for this album.</p>';
+        return;
+    }
+    
+    // Build date-based play count map
+    const datePlayCount = {};
+    albumData.forEach(item => {
+        const timestamp = item["Timestamp"] || item["End Time"] || "";
+        if (!timestamp) return;
+        const date = new Date(timestamp);
+        if (isNaN(date)) return;
+        const dateStr = date.toLocaleDateString('en-US');
+        datePlayCount[dateStr] = (datePlayCount[dateStr] || 0) + 1;
+    });
+    
+    const maxPlays = Math.max(...Object.values(datePlayCount), 1);
+    
+    containerEl.innerHTML = '';
+    
+    // Add day labels (Sun-Sat)
+    const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    dayLabels.forEach(label => {
+        const labelEl = document.createElement('div');
+        labelEl.className = 'song-calendar-day-label';
+        labelEl.textContent = label;
+        containerEl.appendChild(labelEl);
+    });
+    
+    // Get date range from album data
+    const dates = albumData
+        .map(item => new Date(item["Timestamp"] || item["End Time"] || ""))
+        .filter(d => !isNaN(d))
+        .sort((a, b) => a - b);
+    
+    if (dates.length === 0) {
+        containerEl.innerHTML = '<p style="color: #888; text-align: center;">No valid dates found.</p>';
+        return;
+    }
+    
+    const firstDate = new Date(dates[0]);
+    const lastDate = new Date(dates[dates.length - 1]);
+    
+    // Generate all dates in range
+    const allDates = [];
+    const current = new Date(firstDate);
+    while (current <= lastDate) {
+        allDates.push(new Date(current));
+        current.setDate(current.getDate() + 1);
+    }
+    
+    // Get first day of week for alignment
+    const firstDayOfWeek = firstDate.getDay();
+    
+    // Add empty cells before first date
+    for (let i = 0; i < firstDayOfWeek; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'song-calendar-day song-calendar-day-empty';
+        containerEl.appendChild(emptyCell);
+    }
+    
+    // Add day cells
+    allDates.forEach(date => {
+        const dateStr = date.toLocaleDateString('en-US');
+        const plays = datePlayCount[dateStr] || 0;
+        
+        const dayCell = document.createElement('div');
+        dayCell.className = 'song-calendar-day';
+        dayCell.dataset.date = dateStr;
+        dayCell.dataset.plays = plays;
+        dayCell.textContent = date.getDate();
+        
+        if (plays > 0) {
+            const intensity = plays / maxPlays;
+            const green = Math.floor(50 + intensity * 150);
+            dayCell.style.backgroundColor = `rgb(0, ${green}, 0)`;
+        } else {
+            dayCell.style.backgroundColor = '#222';
+        }
+        
+        // Add tooltip
+        dayCell.addEventListener('mouseenter', (e) => {
+            const tooltip = document.getElementById('tooltip');
+            const dateStr = e.currentTarget.dataset.date;
+            const plays = parseInt(e.currentTarget.dataset.plays);
+            tooltip.textContent = `${dateStr}: ${plays} ${plays === 1 ? 'play' : 'plays'}`;
+            tooltip.style.opacity = '1';
+        });
+        
+        dayCell.addEventListener('mousemove', (e) => {
+            const tooltip = document.getElementById('tooltip');
+            const offset = 12;
+            tooltip.style.left = (e.clientX + offset) + 'px';
+            tooltip.style.top = (e.clientY + offset) + 'px';
+        });
+        
+        dayCell.addEventListener('mouseleave', () => {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.opacity = '0';
+        });
+        
+        containerEl.appendChild(dayCell);
+        });
+    }
+
+    // Period switching functionality (for Today/Weekly/Monthly stats)
 document.querySelectorAll('.period-button').forEach(button => {
     button.addEventListener('click', (e) => {
         const period = e.target.dataset.period;
         let filteredData;
+        
+        // Show/hide custom range section
+        const customSection = document.getElementById('customRangeSection');
+        if (period === 'custom') {
+            customSection.style.display = 'block';
+            return; // Don't render yet, wait for user to apply dates
+        } else {
+            customSection.style.display = 'none';
+        }
         
         // Filter data based on selected period
         if (period === 'today') {
@@ -2508,6 +3099,42 @@ document.querySelectorAll('.period-button').forEach(button => {
         // Render stats for selected period
         renderPeriodStats(filteredData, period);
     });
+});
+
+// Custom date range handler
+document.getElementById('applyRangeBtn').addEventListener('click', () => {
+    const startDateInput = document.getElementById('rangeStartDate').value;
+    const endDateInput = document.getElementById('rangeEndDate').value;
+    
+    if (!startDateInput || !endDateInput) {
+        alert('Please select both start and end dates.');
+        return;
+    }
+    
+    const start = new Date(startDateInput);
+    const end = new Date(endDateInput);
+    
+    if (start > end) {
+        alert('Start date must be before end date.');
+        return;
+    }
+    
+    // Filter data by custom range
+    const filteredData = getCustomRangeData(window.allData, startDateInput, endDateInput);
+    
+    // Update active button
+    document.querySelectorAll('.period-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector('[data-period="custom"]').classList.add('active');
+    
+    // Format period label
+    const startStr = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const endStr = end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const customLabel = `${startStr} to ${endStr}`;
+    
+    // Render with custom label
+    renderPeriodStats(filteredData, 'custom', customLabel);
 });
 
 // Search functionality
@@ -2634,3 +3261,252 @@ document.addEventListener('click', (e) => {
         document.getElementById('collabDropdown').style.display = 'none';
     }
 });
+
+// Period Search functionality (for Listening Breakdown tab)
+const periodSearchInput = document.getElementById('periodSearchInput');
+if (periodSearchInput) {
+    periodSearchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        
+        window.lastPeriodSearchQuery = query;
+        
+        if (query.length === 0) {
+            document.getElementById('periodSearchResults').style.display = 'none';
+            document.getElementById('periodSearchMatchResults').innerHTML = '';
+            window.lastPeriodSearchResults = null;
+        } else {
+            // Get current period data
+            let periodData = window.allData;
+            const activeButton = document.querySelector('.period-button.active');
+            if (activeButton) {
+                const period = activeButton.dataset.period;
+                if (period === 'today') {
+                    periodData = getTodayData(window.allData);
+                } else if (period === 'weekly') {
+                    periodData = getWeeklyData(window.allData);
+                } else if (period === 'monthly') {
+                    periodData = getMonthlyData(window.allData);
+                } else if (period === 'custom') {
+                    const startDate = document.getElementById('rangeStartDate').value;
+                    const endDate = document.getElementById('rangeEndDate').value;
+                    if (startDate && endDate) {
+                        periodData = getCustomRangeData(window.allData, startDate, endDate);
+                    }
+                }
+            }
+            
+            const results = searchData(periodData, query);
+            window.lastPeriodSearchResults = results;
+            renderPeriodSearchResults(results, query, window.periodSearchTypeFilters);
+        }
+    });
+}
+
+// Period Search filters
+window.periodSearchTypeFilters = { Artist: true, Song: true, Album: true, Genre: true };
+window.lastPeriodSearchResults = null;
+window.lastPeriodSearchQuery = '';
+
+const periodFilterChips = document.querySelectorAll('#periodSearchFilterGroup .filter-chip');
+periodFilterChips.forEach(chip => {
+    const type = chip.dataset.type;
+    if (!type) return;
+
+    chip.addEventListener('click', () => {
+        const nowActive = !chip.classList.contains('active');
+        chip.classList.toggle('active', nowActive);
+        window.periodSearchTypeFilters[type] = nowActive;
+
+        if (window.lastPeriodSearchResults && window.lastPeriodSearchQuery.length > 0) {
+            renderPeriodSearchResults(window.lastPeriodSearchResults, window.lastPeriodSearchQuery, window.periodSearchTypeFilters);
+        }
+    });
+});
+
+// Toggle dropdown for period filters
+const periodFilterToggle = document.getElementById('periodFilterToggle');
+const periodFilterWrapper = document.querySelector('#periodSearchSection .search-filter-wrapper');
+if (periodFilterToggle && periodFilterWrapper) {
+    periodFilterToggle.addEventListener('click', () => {
+        const isOpen = periodFilterWrapper.classList.toggle('open');
+        periodFilterToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!periodFilterWrapper.contains(e.target)) {
+            periodFilterWrapper.classList.remove('open');
+            periodFilterToggle.setAttribute('aria-expanded', 'false');
+        }
+    });
+}
+
+// Render period search results with same style as main search
+function renderPeriodSearchResults(results, query, activeFilters = null) {
+    const filters = activeFilters || window.periodSearchTypeFilters || { Artist: true, Song: true, Album: true, Genre: true };
+    
+    const totalPlays = 
+        (filters.Artist ? results.artists.reduce((a, b) => a + b.plays, 0) : 0) +
+        (filters.Song ? results.songs.reduce((a, b) => a + b.plays, 0) : 0) +
+        (filters.Album ? results.albums.reduce((a, b) => a + b.plays, 0) : 0) +
+        (filters.Genre ? results.genres.reduce((a, b) => a + b.plays, 0) : 0);
+    
+    const totalMs = 
+        (filters.Artist ? results.artists.reduce((a, b) => a + b.totalTime, 0) : 0) +
+        (filters.Song ? results.songs.reduce((a, b) => a + b.totalTime, 0) : 0) +
+        (filters.Album ? results.albums.reduce((a, b) => a + b.totalTime, 0) : 0) +
+        (filters.Genre ? results.genres.reduce((a, b) => a + b.totalTime, 0) : 0);
+    
+    const hours = Math.floor(totalMs / (1000 * 60 * 60));
+    const minutes = Math.floor((totalMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    // Get days in current period for avg calculation
+    let periodData = window.allData;
+    const activeButton = document.querySelector('.period-button.active');
+    if (activeButton) {
+        const period = activeButton.dataset.period;
+        if (period === 'today') {
+            periodData = getTodayData(window.allData);
+        } else if (period === 'weekly') {
+            periodData = getWeeklyData(window.allData);
+        } else if (period === 'monthly') {
+            periodData = getMonthlyData(window.allData);
+        } else if (period === 'custom') {
+            const startDate = document.getElementById('rangeStartDate').value;
+            const endDate = document.getElementById('rangeEndDate').value;
+            if (startDate && endDate) {
+                periodData = getCustomRangeData(window.allData, startDate, endDate);
+            }
+        }
+    }
+    
+    const daysSinceFirst = getDaysSinceFirstListen(periodData);
+    const avgPerDay = daysSinceFirst > 0 ? (totalPlays / daysSinceFirst).toFixed(1) : totalPlays;
+    
+    document.getElementById("periodSearchPlays").textContent = totalPlays;
+    document.getElementById("periodSearchTime").textContent = `${hours}h ${minutes}m`;
+    document.getElementById("periodSearchAvgPerDay").textContent = avgPerDay;
+    
+    const searchResults = document.getElementById("periodSearchResults");
+    searchResults.style.display = totalPlays > 0 ? "grid" : "none";
+    
+    // Render match results
+    const matchResults = document.getElementById("periodSearchMatchResults");
+    matchResults.innerHTML = "";
+    
+    const allMatches = [];
+    
+    if (filters.Artist) {
+        results.artists.forEach(artist => {
+            allMatches.push({
+                type: "Artist",
+                name: artist.name,
+                plays: artist.plays,
+                time: artist.totalTime
+            });
+        });
+    }
+    
+    if (filters.Song) {
+        results.songs.forEach(song => {
+            allMatches.push({
+                type: "Song",
+                name: song.name,
+                plays: song.plays,
+                time: song.totalTime
+            });
+        });
+    }
+    
+    if (filters.Album) {
+        results.albums.forEach(album => {
+            allMatches.push({
+                type: "Album",
+                name: album.name,
+                plays: album.plays,
+                time: album.totalTime
+            });
+        });
+    }
+
+    if (filters.Genre) {
+        results.genres.forEach(genre => {
+            allMatches.push({
+                type: "Genre",
+                name: genre.name,
+                plays: genre.plays,
+                time: genre.totalTime
+            });
+        });
+    }
+    
+    allMatches.sort((a, b) => b.plays - a.plays);
+    
+    if (allMatches.length === 0) {
+        matchResults.innerHTML = "<p style='color: #888; text-align: center;'>No results found for \"" + query + "\"</p>";
+    } else {
+        allMatches.forEach(match => {
+            const timeHours = Math.floor(match.time / (1000 * 60 * 60));
+            const timeMinutes = Math.floor((match.time % (1000 * 60 * 60)) / (1000 * 60));
+            const timeStr = timeHours > 0 ? `${timeHours}h ${timeMinutes}m` : `${timeMinutes}m`;
+            
+            const matchEl = document.createElement("div");
+            matchEl.className = "search-match-item";
+            matchEl.innerHTML = `
+                <div class="match-type">${match.type}</div>
+                <div class="match-name">${match.name}</div>
+                <div class="match-details">
+                    <div class="match-detail">
+                        <strong>${match.plays}</strong>
+                        Plays
+                    </div>
+                    <div class="match-detail">
+                        <strong>${timeStr}</strong>
+                        Time
+                    </div>
+                </div>
+            `;
+            
+            // Allow clicking songs, artists, albums, or genres to see detailed stats
+            if (match.type === "Song" || match.type === "Artist" || match.type === "Album" || match.type === "Genre") {
+                matchEl.style.cursor = "pointer";
+                matchEl.setAttribute("role", "button");
+                matchEl.setAttribute("tabindex", "0");
+                const open = () => {
+                    if (match.type === "Song") {
+                        openSongModal(match.name);
+                    } else if (match.type === "Artist") {
+                        const artistData = getArtistDataByName(match.name);
+                        if (artistData) {
+                            openArtistModal(artistData);
+                        } else {
+                            console.warn('Artist data unavailable for', match.name);
+                        }
+                    } else if (match.type === "Album") {
+                        const albumData = getAlbumDataByName(match.name);
+                        if (albumData) {
+                            openAlbumModal(albumData);
+                        } else {
+                            console.warn('Album data unavailable for', match.name);
+                        }
+                    } else {
+                        const genreData = getGenreDataByName(match.name);
+                        if (genreData) {
+                            openGenreModal(genreData);
+                        } else {
+                            console.warn('Genre data unavailable for', match.name);
+                        }
+                    }
+                };
+                matchEl.addEventListener("click", open);
+                matchEl.addEventListener("keypress", (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        open();
+                    }
+                });
+            }
+            
+            matchResults.appendChild(matchEl);
+        });
+    }
+}

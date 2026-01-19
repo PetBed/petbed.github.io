@@ -1,0 +1,169 @@
+:root {
+    /* Era Colors */
+    --era-pre-ww1: #8d99ae;
+    --era-ww1: #ef233c;
+    --era-interwar: #ffb703;
+    --era-ww2: #2b2d42;
+    
+    /* UI Colors */
+    --bg-color: #f8f9fa;
+    --text-main: #2b2d42;
+    --text-muted: #6c757d;
+    --border-color: #e9ecef;
+    --card-bg: #ffffff;
+    
+    /* Typography */
+    --font-ui: 'Inter', sans-serif;
+    --font-reading: 'Merriweather', serif;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-ui);
+    background: var(--bg-color);
+    color: var(--text-main);
+    line-height: 1.6;
+}
+
+/* Navigation */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: white;
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.nav-links a {
+    margin-left: 1.5rem;
+    text-decoration: none;
+    color: var(--text-main);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* Layouts */
+#app {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.split-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 3rem;
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .split-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Event Page Styling */
+.event-header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 2rem;
+}
+
+.event-header h1 {
+    font-size: 2.5rem;
+    margin: 0.5rem 0;
+    font-family: var(--font-reading);
+}
+
+.era-tag {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: white;
+    background: var(--text-muted); /* Default */
+    border-radius: 4px;
+}
+
+/* Era Specifics */
+[data-era="pre-ww1"] .era-tag { background: var(--era-pre-ww1); }
+[data-era="ww1"] .era-tag { background: var(--era-ww1); }
+[data-era="interwar"] .era-tag { background: var(--era-interwar); }
+[data-era="ww2"] .era-tag { background: var(--era-ww2); }
+
+/* Reading Typography */
+.narrative-column {
+    font-family: var(--font-reading);
+    font-size: 1.1rem;
+}
+
+.summary-box {
+    background: #f1f3f5;
+    padding: 1.5rem;
+    border-left: 4px solid var(--text-main);
+    margin-bottom: 2rem;
+    font-style: italic;
+}
+
+.content-body p {
+    margin-bottom: 1.5rem;
+}
+
+/* Right Column Cards */
+.takeaway-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}
+
+.takeaway-card h4 {
+    margin-top: 0;
+    color: var(--era-ww1);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+.takeaway-card p {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.link-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.link-card {
+    display: block;
+    padding: 0.75rem;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--text-main);
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: transform 0.2s;
+}
+
+.link-card:hover {
+    transform: translateX(5px);
+    border-color: var(--text-main);
+}

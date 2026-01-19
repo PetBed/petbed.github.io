@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Archive</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Google Fonts: Merriweather for text, Inter for UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- ADDED: Marked.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        /* Basic Form Styling for Login */
+        .login-container { max-width: 400px; margin: 4rem auto; padding: 2rem; background: white; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+        .form-group input { width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-family: var(--font-ui); box-sizing: border-box; }
+        .btn-primary { width: 100%; padding: 0.75rem; background: var(--era-ww1); color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        .btn-primary:hover { opacity: 0.9; }
+        .error-msg { color: var(--era-ww1); font-size: 0.9rem; margin-top: 1rem; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <div class="logo">THE ARCHIVE</div>
+        <div class="nav-links">
+            <a href="#/" class="nav-item">Timeline</a>
+            <a href="#/map" class="nav-item">Map</a>
+            <a href="#/themes" class="nav-item">Themes</a>
+            <a href="#/search" class="nav-item">Search</a>
+        </div>
+        <div class="user-controls" id="userControls">
+            <a href="#/login" id="loginLink">Login</a>
+            <span id="userDisplay" style="display: none; margin-right: 1rem; font-size: 0.85rem; font-weight: 600;"></span>
+            <a href="#" id="logoutLink" style="display: none; color: var(--era-ww1);">Logout</a>
+        </div>
+    </nav>
+
+    <!-- Main Application Container -->
+    <main id="app">
+        <div class="loading">Loading History...</div>
+    </main>
+
+    <!-- EVENT PAGE TEMPLATE -->
+    <template id="event-page-template">
+        <article class="event-page">
+            <header class="event-header">
+                <div class="era-tag" id="t-era"></div>
+                <h1 id="t-title"></h1>
+                <div class="meta-bar">
+                    <span id="t-date"></span> · <span id="t-location"></span>
+                </div>
+            </header>
+            
+            <div class="split-layout">
+                <div class="narrative-column">
+                    <section class="summary-box">
+                        <h3>Summary</h3>
+                        <p id="t-summary"></p>
+                    </section>
+                    <div class="content-body markdown-body" id="t-content"></div>
+                </div>
+
+                <aside class="context-column">
+                    <div class="takeaway-card">
+                        <h4>The Takeaway</h4>
+                        <p id="t-takeaway"></p>
+                    </div>
+
+                    <div class="connections-panel">
+                        <h4>Caused By</h4>
+                        <div id="t-caused-by" class="link-list"></div>
+
+                        <h4>Leads To</h4>
+                        <div id="t-leads-to" class="link-list"></div>
+                    </div>
+                </aside>
+            </div>
+        </article>
+    </template>
+
+    <!-- LOGIN PAGE TEMPLATE -->
+    <template id="login-page-template">
+        <div class="login-container">
+            <h2 style="text-align: center; margin-bottom: 2rem;">Researcher Access</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter password">
+                </div>
+                <button type="submit" class="btn-primary">Access Archives</button>
+                <div id="login-error" class="error-msg"></div>
+            </form>
+        </div>
+    </template>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

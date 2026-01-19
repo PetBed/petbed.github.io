@@ -84,6 +84,9 @@ const paths = {
       "Spotify Tracker": {
         url: "https://petbed.github.io/Misc/Spotify%20Tracker/",
       },
+      "World War Archive": {
+        url: "https://petbed.github.io/Misc/World%20Wars/",
+      },
 			"Timeline Logger": {
         url: "https://petbed.github.io/Misc/Timeline%20Logger/dashboard.html",
 			},

@@ -1,8 +1,7 @@
 // api.js - Handles fetching and caching
-// https://wot-tau.vercel.app
-// http://localhost:3005/api/history
-const API_BASE = 'https://wot-tau.vercel.app/api/history';
-const USER_API_BASE = 'https://wot-tau.vercel.app/api/study'; // Updated to new base
+// https://wot-tau.vercel.app/
+const API_BASE = 'http://192.168.1.6:3005/api/history';
+const USER_API_BASE = 'http://192.168.1.6:3005/api/study'; // Updated to new base
 
 export const API = {
     // 1. The Atlas Strategy
@@ -48,7 +47,7 @@ export const API = {
         }
     },
 
-    // 3. Save/Update Entity (New Feature)
+    // 3. Save/Update Entity
     saveEntity: async (entityData) => {
         try {
             const res = await fetch(`${API_BASE}/entity`, {
@@ -76,8 +75,7 @@ export const API = {
         }
     },
 
-    // 4. User Login (Updated to new Secure API)
-    // Now accepts email, uses POST, and sends JSON
+    // 4. User Login
     login: async (email, password) => {
         try {
             const res = await fetch(`${USER_API_BASE}/login`, {
@@ -90,7 +88,6 @@ export const API = {
                 const err = await res.json();
                 throw new Error(err.error || 'Login failed');
             }
-            // New structure returns { message: "...", user: { id: ..., ... } }
             const data = await res.json();
             return { userId: data.user.id, username: data.user.username }; 
         } catch (e) {
@@ -98,6 +95,7 @@ export const API = {
         }
     },
 
+    // 5. Delete Entity
     deleteEntity: async (slug) => {
         try {
             const res = await fetch(`${API_BASE}/entity/${slug}`, {
@@ -120,7 +118,31 @@ export const API = {
         }
     },
 
-    // 5. Helper: Check if a title exists in our local Atlas
+    // 6. Force Sync (New)
+    sync: async () => {
+        // Clear all history related cache
+        sessionStorage.removeItem('history_atlas');
+        
+        // Clear entity caches specifically
+        Object.keys(sessionStorage).forEach(key => {
+            if (key.startsWith('history_entity_')) {
+                sessionStorage.removeItem(key);
+            }
+        });
+
+        // Fetch fresh Atlas
+        try {
+            const res = await fetch(`${API_BASE}/atlas`);
+            const data = await res.json();
+            sessionStorage.setItem('history_atlas', JSON.stringify(data));
+            return data;
+        } catch (e) {
+            console.error('Sync failed', e);
+            throw e;
+        }
+    },
+
+    // 7. Helper
     lookupTitle: (title, atlas) => {
         const normalized = title.toLowerCase().trim();
         return atlas.find(item => item.title.toLowerCase() === normalized);

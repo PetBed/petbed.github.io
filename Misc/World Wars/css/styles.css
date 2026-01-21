@@ -5,16 +5,34 @@
     --era-interwar: #ffb703;
     --era-ww2: #2b2d42;
     
-    /* UI Colors */
+    /* UI Colors (Light Default) */
     --bg-color: #f8f9fa;
     --text-main: #2b2d42;
     --text-muted: #6c757d;
     --border-color: #e9ecef;
     --card-bg: #ffffff;
+    --input-bg: #ffffff;
+    --hover-bg: #f1f3f5;
+    --shadow-color: rgba(0,0,0,0.05);
     
     /* Typography */
     --font-ui: 'Inter', sans-serif;
     --font-reading: 'Merriweather', serif;
+}
+
+[data-theme="dark"] {
+    /* UI Colors (Dark Mode) */
+    --bg-color: #121212;
+    --text-main: #e0e0e0;
+    --text-muted: #a0a0a0;
+    --border-color: #333333;
+    --card-bg: #1e1e1e;
+    --input-bg: #2d2d2d;
+    --hover-bg: #333333;
+    --shadow-color: rgba(0,0,0,0.5);
+    
+    /* Adjust Era Colors for visibility on dark bg */
+    --era-ww2: #a5a7bb; 
 }
 
 body {
@@ -23,32 +41,299 @@ body {
     background: var(--bg-color);
     color: var(--text-main);
     line-height: 1.6;
+    transition: background 0.2s, color 0.2s;
+    overflow-x: hidden;
 }
 
-/* Navigation */
+/* Inputs & Forms */
+input, textarea, select {
+    background-color: var(--input-bg) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border-color) !important;
+    box-sizing: border-box; /* NEW: Ensures padding doesn't increase width */
+    max-width: 100%; /* NEW: Prevents overflow on small screens */
+}
+
+input::placeholder, textarea::placeholder {
+    color: var(--text-muted);
+}
+
+/* --- NAVIGATION --- */
 .top-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 2rem;
-    background: white;
+    background: var(--card-bg);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 100;
 }
 
+.nav-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    position: relative;
+    z-index: 102; /* Ensure logo/hamburger stay on top */
+    background: var(--card-bg);
+}
+
 .logo {
     font-weight: 800;
     letter-spacing: -0.5px;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
+/* Desktop: Flex Row Layout */
+.nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding-right: 2rem;
+}
+
+/* Left side links */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-left: 2rem;
 }
 
 .nav-links a {
-    margin-left: 1.5rem;
     text-decoration: none;
     color: var(--text-main);
     font-weight: 600;
     font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+/* Right side utilities + user */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-right: 2rem;
+}
+
+.nav-utilities {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.separator {
+    width: 1px;
+    height: 24px;
+    background-color: var(--border-color);
+    margin: 0 0.5rem;
+}
+
+.user-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    white-space: nowrap;
+}
+
+/* Hamburger Button (Hidden on Desktop) */
+#mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#mobile-menu-btn span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background-color: var(--text-main);
+    transition: 0.3s;
+}
+
+/* --- TOGGLE SWITCH & SYNC ICON --- */
+
+/* Sync Icon Button */
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover {
+    color: var(--text-main);
+    background: var(--hover-bg);
+}
+
+/* Theme Toggle Switch */
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 26px;
+}
+
+.theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    transition: .4s;
+    border-radius: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6px;
+    box-sizing: border-box;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--text-muted);
+    transition: .4s;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+    background-color: var(--era-ww1);
+}
+
+.toggle-icon {
+    font-size: 12px;
+    line-height: 1;
+    z-index: 1;
+    user-select: none;
+}
+
+/* --- MOBILE STYLES (< 768px) --- */
+@media (max-width: 768px) {
+    .nav-header {
+        padding: 1rem;
+    }
+
+    #mobile-menu-btn {
+        display: flex;
+    }
+
+    /* Side Drawer */
+    .nav-content {
+        position: fixed;
+        top: 0;
+        right: -100%; /* Fully hidden */
+        width: 280px;
+        height: 100vh;
+        background: var(--card-bg);
+        box-shadow: -4px 0 12px var(--shadow-color);
+        padding: 5rem 1.5rem 2rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        gap: 2rem;
+        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 101;
+        overflow-y: auto;
+        overflow-x: hidden; /* Fix horizontal scroll */
+        box-sizing: border-box; /* Fix height calculation */
+    }
+
+    .nav-content.open {
+        right: 0;
+    }
+
+    /* Stack everything in drawer */
+    .nav-links {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        margin-left: 0;
+        gap: 1rem;
+    }
+
+    .nav-right {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        gap: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        padding-top: 1.5rem;
+        margin-top: auto; /* Push to bottom or just below links */
+    }
+
+    .nav-utilities {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .separator { display: none; }
+
+    .user-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        gap: 1rem;
+    }
+
+    .nav-links a {
+        font-size: 1.1rem;
+        padding: 0.5rem 0;
+        width: 100%;
+        border-bottom: 1px solid transparent;
+    }
+    
+    .nav-links a:hover {
+        border-color: var(--border-color);
+        background: none;
+    }
+
+    /* Overlay */
+    .mobile-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        opacity: 0;
+        visibility: hidden;
+        transition: 0.3s;
+        z-index: 100;
+        backdrop-filter: blur(2px);
+    }
+
+    .mobile-overlay.open {
+        opacity: 1;
+        visibility: visible;
+    }
 }
 
 /* Layouts */
@@ -56,6 +341,10 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
+}
+
+@media (max-width: 480px) {
+    #app { padding: 1rem; }
 }
 
 .split-layout {
@@ -82,6 +371,12 @@ body {
     font-size: 2.5rem;
     margin: 0.5rem 0;
     font-family: var(--font-reading);
+    color: var(--text-main);
+    line-height: 1.2;
+}
+
+@media (max-width: 480px) {
+    .event-header h1 { font-size: 1.8rem; }
 }
 
 .era-tag {
@@ -91,41 +386,40 @@ body {
     font-weight: 800;
     text-transform: uppercase;
     color: white;
-    background: var(--text-muted); /* Default */
+    background: var(--text-muted);
     border-radius: 4px;
 }
 
-/* Era Specifics */
 [data-era="pre-ww1"] .era-tag { background: var(--era-pre-ww1); }
 [data-era="ww1"] .era-tag { background: var(--era-ww1); }
 [data-era="interwar"] .era-tag { background: var(--era-interwar); }
 [data-era="ww2"] .era-tag { background: var(--era-ww2); }
 
-/* Reading Typography */
 .narrative-column {
     font-family: var(--font-reading);
     font-size: 1.1rem;
+    color: var(--text-main);
 }
 
 .summary-box {
-    background: #f1f3f5;
+    background: var(--hover-bg);
     padding: 1.5rem;
     border-left: 4px solid var(--text-main);
     margin-bottom: 2rem;
     font-style: italic;
+    color: var(--text-main);
 }
 
 .content-body p {
     margin-bottom: 1.5rem;
 }
 
-/* Right Column Cards */
 .takeaway-card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     padding: 1.5rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px var(--shadow-color);
     margin-bottom: 2rem;
 }
 
@@ -153,17 +447,153 @@ body {
 .link-card {
     display: block;
     padding: 0.75rem;
-    background: white;
+    background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 4px;
     text-decoration: none;
     color: var(--text-main);
     font-weight: 600;
     font-size: 0.9rem;
-    transition: transform 0.2s;
+    transition: transform 0.2s, border-color 0.2s;
 }
 
 .link-card:hover {
     transform: translateX(5px);
     border-color: var(--text-main);
+}
+
+/* --- HOME VIEW CONTROLS --- */
+.controls-bar {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    margin-bottom: 3rem;
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    align-items: end;
+}
+
+@media (min-width: 768px) {
+    .controls-grid { grid-template-columns: 2fr 1fr 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+    .controls-bar { padding: 1rem; }
+}
+
+.control-group label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+}
+
+.control-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-main);
+    font-family: var(--font-ui);
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    box-sizing: border-box;
+    height: 46px; 
+}
+
+.control-input:focus {
+    border-color: var(--era-ww1);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(239, 35, 60, 0.1);
+}
+
+.home-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.home-header h1 {
+    font-family: var(--font-reading);
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+}
+
+@media (max-width: 480px) {
+    .home-header h1 { font-size: 2rem; }
+}
+
+.home-header p {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+/* --- MARKDOWN TOOLBAR --- */
+.markdown-toolbar {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    flex-wrap: wrap;
+}
+
+.toolbar-btn {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 30px;
+}
+
+.toolbar-btn:hover {
+    background: var(--bg-color);
+    border-color: var(--era-ww1);
+    color: var(--era-ww1);
+}
+
+.content-body textarea {
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    margin-top: 0 !important;
+    border-top: 1px solid var(--border-color) !important;
+}
+
+/* Autocomplete Dropdowns */
+.wiki-autocomplete, .tag-dropdown {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main);
+}
+
+.wiki-suggestion {
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.wiki-suggestion:hover, .wiki-suggestion.active {
+    background: var(--hover-bg) !important;
+    color: var(--era-ww1) !important;
+}
+
+.tag-container {
+    background: var(--input-bg) !important;
+    border-color: var(--border-color) !important;
 }

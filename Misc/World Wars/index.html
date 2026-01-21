@@ -10,13 +10,14 @@
     
     <!-- ADDED: Marked.js Library -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="icon" href="favicon.png">
 
     <style>
-        /* Basic Form Styling for Login */
-        .login-container { max-width: 400px; margin: 4rem auto; padding: 2rem; background: white; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        /* Basic Form Styling for Login (Fallback/Override) */
+        .login-container { max-width: 400px; margin: 4rem auto; padding: 2rem; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px var(--shadow-color); }
         .form-group { margin-bottom: 1.5rem; }
         .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
-        .form-group input { width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-family: var(--font-ui); box-sizing: border-box; }
+        .form-group input { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 4px; font-family: var(--font-ui); box-sizing: border-box; background: var(--input-bg); color: var(--text-main); }
         .btn-primary { width: 100%; padding: 0.75rem; background: var(--era-ww1); color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; }
         .btn-primary:hover { opacity: 0.9; }
         .error-msg { color: var(--era-ww1); font-size: 0.9rem; margin-top: 1rem; text-align: center; }
@@ -25,18 +26,44 @@
 <body>
 
     <nav class="top-nav">
-        <div class="logo">THE ARCHIVE</div>
-        <div class="nav-links">
-            <a href="#/" class="nav-item">Timeline</a>
-            <a href="#/map" class="nav-item">Map</a>
-            <a href="#/themes" class="nav-item">Themes</a>
-            <a href="#/search" class="nav-item">Search</a>
+        <!-- Header (Always Visible) -->
+        <div class="nav-header">
+            <div class="logo">THE ARCHIVE</div>
+            <button id="mobile-menu-btn" aria-label="Toggle Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
-        <div class="user-controls" id="userControls">
-            <a href="#/login" id="loginLink">Login</a>
-            <span id="userDisplay" style="display: none; margin-right: 1rem; font-size: 0.85rem; font-weight: 600;"></span>
-            <a href="#" id="logoutLink" style="display: none; color: var(--era-ww1);">Logout</a>
+
+        <!-- Collapsible Content -->
+        <div class="nav-content" id="navContent">
+            <!-- Left: Main Navigation -->
+            <div class="nav-links">
+                <a href="#/" class="nav-item">Timeline</a>
+                <a href="#/map" class="nav-item">Map</a>
+                <a href="#/themes" class="nav-item">Themes</a>
+                <a href="#/search" class="nav-item">Search</a>
+            </div>
+
+            <!-- Right: Utilities & User -->
+            <div class="nav-right">
+                <!-- Utilities injected by JS (Sync, Theme) -->
+                <div class="nav-utilities" id="navUtilities"></div>
+                
+                <div class="separator"></div>
+
+                <!-- User Controls -->
+                <div class="user-controls" id="userControls">
+                    <a href="#/login" id="loginLink">Login</a>
+                    <span id="userDisplay" style="display: none; margin-right: 1rem; font-size: 0.85rem; font-weight: 600;"></span>
+                    <a href="#" id="logoutLink" style="display: none; color: var(--era-ww1);">Logout</a>
+                </div>
+            </div>
         </div>
+        
+        <!-- Dark Overlay -->
+        <div class="mobile-overlay" id="mobileOverlay"></div>
     </nav>
 
     <!-- Main Application Container -->

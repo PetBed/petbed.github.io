@@ -1,8 +1,8 @@
 // api.js - Handles fetching and caching
 // https://wot-tau.vercel.app/
 // http://192.168.1.6:3005/
-const API_BASE = 'https://wot-tau.vercel.app/api/history';
-const USER_API_BASE = 'https://wot-tau.vercel.app/api/study'; // Updated to new base
+const API_BASE = 'http://192.168.1.6:3005/api/history';
+const USER_API_BASE = 'http://192.168.1.6:3005/api/study'; // Updated to new base
 
 export const API = {
     // 1. The Atlas Strategy

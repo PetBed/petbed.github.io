@@ -4,6 +4,7 @@ import { renderHome } from './views/home.js';
 import { renderEntityPage } from './views/entity.js';
 import { renderEditor, renderNewEntrySelector } from './views/editor.js';
 import { renderLogin } from './views/login.js';
+import { renderMap } from './views/map.js'; // NEW
 
 // Init
 async function init() {
@@ -84,6 +85,10 @@ function setupThemeToggle() {
     input.addEventListener('change', (e) => {
         const newTheme = e.target.checked ? 'dark' : 'light';
         State.setTheme(newTheme);
+        // Reload map if on map page to update colors
+        if (window.location.hash === '#/map') {
+            renderMap(document.getElementById('app'));
+        }
     });
 
     container.appendChild(label);
@@ -185,6 +190,9 @@ async function router() {
     } 
     else if (hash === '#/login') {
         renderLogin(app, () => { updateAuthUI(); window.location.hash = '#/'; });
+    }
+    else if (hash === '#/map') { // NEW
+        renderMap(app);
     }
     else if (hash === '#/new') {
         if (!State.currentUser) { window.location.hash = '#/login'; return; }

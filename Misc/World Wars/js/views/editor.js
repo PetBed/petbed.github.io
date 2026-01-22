@@ -27,56 +27,144 @@ export function renderNewEntrySelector(container, onSelect) {
 function setupToolbar(textarea, toolbar) {
     if (!textarea || !toolbar) return;
 
+    // Helper: Handle Indentation Logic (Undo-compatible)
+    const handleIndentation = (isIndent) => {
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const value = textarea.value;
+
+        // 1. Identify start/end of lines involved
+        const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+        const lineEnd = value.indexOf('\n', end);
+        const endPos = lineEnd === -1 ? value.length : lineEnd;
+
+        // 2. Extract Text
+        const linesText = value.substring(lineStart, endPos);
+        const lines = linesText.split('\n');
+        
+        // 3. Transform Lines
+        let newLines;
+        if (isIndent) {
+            newLines = lines.map(l => '    ' + l);
+        } else {
+            // Unindent: remove up to 4 spaces
+            newLines = lines.map(l => l.replace(/^ {1,4}/, ''));
+        }
+        const newText = newLines.join('\n');
+
+        // 4. Apply via execCommand to preserve Undo History
+        textarea.focus();
+        textarea.setSelectionRange(lineStart, endPos);
+        
+        // This replaces the selection with the new indented text and pushes to undo stack
+        if (!document.execCommand('insertText', false, newText)) {
+            // Fallback for edge cases (though insertText is widely supported)
+            textarea.setRangeText(newText, lineStart, endPos, 'select');
+        }
+
+        // 5. Smart Cursor Restoration
+        // If we just had a single caret, we try to keep it in a logical position
+        if (start === end) { 
+            if (lines.length === 1) {
+                // Calculate how much the line shifted
+                let shift = 0;
+                if (isIndent) {
+                    shift = 4;
+                } else {
+                    const originalLine = lines[0];
+                    const removed = originalLine.match(/^ {0,4}/)[0].length;
+                    // If cursor was in the whitespace that got removed, snap to 0
+                    const offsetInLine = start - lineStart;
+                    shift = -Math.min(offsetInLine, removed);
+                }
+                
+                const newCursor = Math.max(lineStart, start + shift);
+                textarea.setSelectionRange(newCursor, newCursor);
+            }
+        } else {
+            // If block selection, keep the modified block selected
+            textarea.setSelectionRange(lineStart, lineStart + newText.length);
+        }
+    };
+
+    // Button Click Handler
     toolbar.addEventListener('click', (e) => {
         if (!e.target.classList.contains('toolbar-btn')) return;
-        e.preventDefault(); // Prevent form submission if button is inside form
+        e.preventDefault(); 
 
         const action = e.target.dataset.action;
+        
+        // Handle Indent Actions
+        if (action === 'indent') { handleIndentation(true); return; }
+        if (action === 'unindent') { handleIndentation(false); return; }
+
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
         const text = textarea.value;
         const selected = text.substring(start, end);
         
-        let insertion = '';
-        let cursorOffset = 0;
+        let newText = '';
+        let cursorOffset = 0; // Where to put cursor relative to end of inserted text
 
+        // Handle Formatting Actions (No placeholders)
         switch(action) {
             case 'bold':
-                insertion = `**${selected}**`;
-                cursorOffset = selected ? 0 : -2; // if no selection, put cursor inside
+                newText = `**${selected}**`;
+                if (!selected) cursorOffset = -2; 
                 break;
             case 'italic':
-                insertion = `*${selected}*`;
-                cursorOffset = selected ? 0 : -1;
+                newText = `*${selected}*`;
+                if (!selected) cursorOffset = -1;
                 break;
             case 'h2':
-                insertion = `\n## ${selected}`;
+                newText = `\n## ${selected}`;
                 break;
             case 'h3':
-                insertion = `\n### ${selected}`;
+                newText = `\n### ${selected}`;
                 break;
             case 'list':
-                insertion = `\n- ${selected}`;
+                newText = `\n- ${selected}`;
                 break;
             case 'link':
-                insertion = `[[${selected}]]`;
-                cursorOffset = selected ? 0 : -2;
+                newText = `[[${selected}]]`;
+                if (!selected) cursorOffset = -2;
                 break;
         }
 
-        // Apply change
-        const before = text.substring(0, start);
-        const after = text.substring(end);
-        textarea.value = before + insertion + after;
-
-        // Restore focus and trigger input for autosave
+        // Apply via execCommand for Undo support
         textarea.focus();
+        document.execCommand('insertText', false, newText);
+
+        // Adjust cursor if we inserted empty wrappers (like ****)
+        if (cursorOffset !== 0) {
+            const newPos = textarea.selectionEnd + cursorOffset;
+            textarea.setSelectionRange(newPos, newPos);
+        }
+    });
+
+    // Keyboard Handler
+    textarea.addEventListener('keydown', (e) => {
+        // If autocomplete is open, let it handle Tab
+        const ac = document.querySelector('.wiki-autocomplete');
+        if (ac && ac.style.display === 'block') return;
+
+        // Handle Tab / Shift+Tab for Indent
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            handleIndentation(!e.shiftKey);
+        }
         
-        // Adjust cursor position based on action
-        const newCursorPos = start + insertion.length + cursorOffset;
-        textarea.setSelectionRange(newCursorPos, newCursorPos);
-        
-        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        // Smart Backspace for 4-space Indents
+        // If cursor is preceded by 4 spaces, delete all 4 at once
+        if (e.key === 'Backspace' && textarea.selectionStart === textarea.selectionEnd) {
+            const cursor = textarea.selectionStart;
+            const value = textarea.value;
+            if (cursor >= 4 && value.substring(cursor - 4, cursor) === '    ') {
+                e.preventDefault();
+                textarea.setSelectionRange(cursor - 4, cursor);
+                document.execCommand('delete');
+            }
+        }
     });
 }
 
@@ -161,6 +249,8 @@ export function renderEditor(container, type = 'event', existingData = null) {
                                 <button type="button" class="toolbar-btn" data-action="h3" title="Heading 3">H3</button>
                                 <button type="button" class="toolbar-btn" data-action="list" title="List">• List</button>
                                 <button type="button" class="toolbar-btn" data-action="link" title="Wiki Link">[[ Link ]]</button>
+                                <button type="button" class="toolbar-btn" data-action="indent" title="Indent" style="margin-left:auto;">⇥</button>
+                                <button type="button" class="toolbar-btn" data-action="unindent" title="Unindent">⇤</button>
                             </div>
 
                             <textarea name="content" required rows="25" style="width: 100%; padding: 1rem; border-radius: 4px; font-family: monospace; font-size: 1rem; line-height: 1.6; resize: vertical; min-height: 60vh;">${editorContent}</textarea>

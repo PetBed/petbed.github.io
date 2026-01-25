@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcana Log</title>
+    
+    <!-- Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <!-- CSS Links -->
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+
+    <!-- AUTH OVERLAY -->
+    <section id="view-auth" class="auth-container">
+        <div class="auth-box">
+            <div class="auth-header">
+                <i class="ph ph-sparkle"></i>
+                <h1>Arcana Log</h1>
+                <p>Begin your journey.</p>
+            </div>
+            
+            <form id="form-login" class="auth-form">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" class="modern-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" class="modern-input" required>
+                </div>
+                <button type="submit" class="btn-primary full-width">Enter</button>
+                <p class="auth-switch">New here? <a href="#" id="link-to-register">Register</a></p>
+                <div id="login-error" class="error-msg"></div>
+            </form>
+
+            <form id="form-register" class="auth-form hidden">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" class="modern-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" class="modern-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" class="modern-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Security Question</label>
+                    <select name="securityQuestion" class="modern-input">
+                        <option value="pet">First Pet's Name?</option>
+                        <option value="city">City you were born?</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Answer</label>
+                    <input type="text" name="securityAnswer" class="modern-input" required>
+                </div>
+                <button type="submit" class="btn-primary full-width">Create Account</button>
+                <p class="auth-switch">Already have a journal? <a href="#" id="link-to-login">Login</a></p>
+                <div id="register-error" class="error-msg"></div>
+            </form>
+        </div>
+    </section>
+
+    <!-- MAIN APP -->
+    <div id="app-wrapper" class="app-layout hidden">
+        
+        <!-- Mobile Header -->
+        <header class="mobile-header">
+            <div class="brand">
+                <i class="ph ph-sparkle"></i>
+                <span>Arcana Log</span>
+            </div>
+            <button id="mobile-menu-toggle" class="btn-text">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Sidebar Overlay -->
+        <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+        <aside class="sidebar">
+            <div class="brand desktop-only">
+                <i class="ph ph-sparkle"></i>
+                <span>Arcana Log</span>
+            </div>
+            
+            <nav class="nav-links">
+                <button data-view="dashboard" class="nav-btn active">
+                    <i class="ph ph-squares-four"></i> Dashboard
+                </button>
+                <button data-view="readings" class="nav-btn">
+                    <i class="ph ph-cards"></i> Readings
+                </button>
+                <button data-view="deck" class="nav-btn">
+                    <i class="ph ph-books"></i> Card Library
+                </button>
+                <button data-view="builder" class="nav-btn">
+                    <i class="ph ph-pencil-ruler"></i> Spread Builder
+                </button>
+                <button data-view="stats" class="nav-btn">
+                    <i class="ph ph-chart-pie-slice"></i> Statistics
+                </button>
+            </nav>
+
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="ph ph-user"></i>
+                </div>
+                <div class="user-info">
+                    <span id="user-display">Guest User</span>
+                    <button id="btn-logout" class="btn-text-small">Logout</button>
+                </div>
+            </div>
+        </aside>
+
+        <main id="app-content">
+            
+            <!-- VIEW 1: DASHBOARD -->
+            <section id="view-dashboard" class="view active fade-in">
+                <header class="view-header">
+                    <h1 id="welcome-msg">Welcome Back</h1>
+                    <p class="subtitle">Your journey continues.</p>
+                </header>
+                <div class="dashboard-grid">
+                    <div class="card action-card">
+                        <div class="card-content">
+                            <h3>New Reading</h3>
+                            <p>Start a fresh entry in your journal.</p>
+                            <button id="btn-quick-reading" class="btn-primary">
+                                <i class="ph ph-plus"></i> Begin
+                            </button>
+                        </div>
+                        <div class="card-bg-icon"><i class="ph ph-cards"></i></div>
+                    </div>
+                    <div class="card action-card secondary">
+                        <div class="card-content">
+                            <h3>Create Spread</h3>
+                            <p>Design a new custom layout.</p>
+                            <button id="btn-quick-builder" class="btn-secondary">Design</button>
+                        </div>
+                        <div class="card-bg-icon"><i class="ph ph-pencil-simple"></i></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 2: READINGS -->
+            <section id="view-readings" class="view fade-in">
+                <header class="view-header flex-between">
+                    <div>
+                        <h1>Journal Entries</h1>
+                        <p class="subtitle">History of your pulls</p>
+                    </div>
+                    <div class="controls">
+                        <button id="btn-new-reading" class="btn-primary">+ New Entry</button>
+                    </div>
+                </header>
+                <div id="readings-list" class="readings-grid">
+                    <div class="loading-state"><i class="ph ph-spinner animate-spin"></i> Loading...</div>
+                </div>
+            </section>
+
+            <!-- VIEW 3: DECK LIBRARY -->
+            <section id="view-deck" class="view fade-in">
+                <header class="view-header">
+                    <h1>Card Library</h1>
+                    <p class="subtitle">Study the 78 keys of the Tarot.</p>
+                </header>
+                <div id="deck-grid" class="dashboard-grid">
+                    <!-- JS populates cards here -->
+                </div>
+            </section>
+
+            <!-- VIEW 4: BUILDER -->
+            <section id="view-builder" class="view fade-in">
+                <div id="builder-mode-select">
+                    <header class="view-header">
+                        <h1>Spread Layouts</h1>
+                        <p class="subtitle">Select a spread to edit or create a new design.</p>
+                    </header>
+                    <div id="spread-selection-grid" class="dashboard-grid"></div>
+                </div>
+                <div id="builder-mode-edit" class="hidden">
+                    <header class="view-header flex-between wrap-mobile">
+                        <div>
+                            <button id="btn-builder-back" class="btn-text" style="margin-bottom: 5px;">
+                                <i class="ph ph-arrow-left"></i> Back
+                            </button>
+                            <h2 style="font-size: 1.5rem; font-family: var(--font-serif);">Editor</h2>
+                        </div>
+                        <div class="controls flex-col-mobile">
+                            <input type="text" id="builder-name" class="modern-input" placeholder="Spread Name" style="width: 200px;">
+                            <button id="btn-save-spread" class="btn-primary">Save</button>
+                        </div>
+                    </header>
+                    <div class="builder-layout">
+                        <div id="builder-canvas" class="tarot-table builder-mode"></div>
+                        <div class="builder-sidebar">
+                            <button id="btn-add-slot" class="btn-secondary full-width">
+                                <i class="ph ph-plus-square"></i> Add Card Slot
+                            </button>
+                            <div class="help-box">
+                                <h4>Instructions</h4>
+                                <p>1. Add a slot.</p>
+                                <p>2. Drag to position.</p>
+                                <p>3. Click the top dot to rotate.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 5: STATS -->
+            <section id="view-stats" class="view fade-in">
+                <header class="view-header">
+                    <h1>Insights</h1>
+                </header>
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Suit Distribution</h3>
+                        <div class="chart-wrapper"><canvas id="chart-suits"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Orientation Balance</h3>
+                        <div class="chart-wrapper"><canvas id="chart-orientation"></canvas></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- OVERLAY: READING EDITOR -->
+            <section id="view-reading-editor" class="view overlay-view hidden">
+                <header class="editor-header">
+                    <button id="btn-back-journal" class="btn-text"><i class="ph ph-arrow-left"></i> Back</button>
+                    <h2>New Entry</h2>
+                    <button id="btn-save-reading" class="btn-primary">Save</button>
+                </header>
+                <div class="editor-layout">
+                    <div class="canvas-area">
+                        <div class="toolbar">
+                            <select id="reading-spread-select" class="modern-select">
+                                <option value="" disabled selected>Select Layout...</option>
+                            </select>
+                        </div>
+                        <div id="reading-table" class="tarot-table">
+                            <div class="empty-state">Select a spread above to start</div>
+                        </div>
+                    </div>
+                    <div class="journal-sidebar">
+                        <div class="form-group">
+                            <label>Question</label>
+                            <input type="text" id="reading-question" placeholder="What is on your mind?">
+                        </div>
+                        <div class="form-group">
+                            <label>Tags</label>
+                            <input type="text" id="reading-tags" placeholder="Love, Career, Monthly...">
+                        </div>
+                        <div class="form-group grow">
+                            <label>Interpretation</label>
+                            <textarea id="reading-notes" placeholder="Record your thoughts..."></textarea>
+                        </div>
+                        <div id="selected-card-details" class="card-details-panel">
+                            <span class="hint">Click a card on the table to select it</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- OVERLAY: CARD NOTE EDITOR -->
+            <section id="view-card-editor" class="view overlay-view hidden">
+                <header class="editor-header">
+                    <button id="btn-close-card-editor" class="btn-text"><i class="ph ph-arrow-left"></i> Back to Library</button>
+                    <h2 id="editor-card-name">The Fool</h2>
+                    <button id="btn-save-card-note" class="btn-primary">Save Notes</button>
+                </header>
+                
+                <div class="editor-layout">
+                    <!-- Left Sidebar (Preview) -->
+                    <div class="journal-sidebar" style="border-right: 1px solid var(--border-subtle); border-left: none;">
+                        <h3 id="editor-card-suit" style="color: var(--primary); margin-bottom: 1rem;">Major Arcana</h3>
+                        
+                        <!-- Image Preview Container -->
+                        <div id="editor-card-image-preview" class="card-slot filled" style="position: relative; margin: 0 auto 1rem auto; overflow: hidden;">
+                            <i class="ph ph-sparkle" style="font-size: 2rem;"></i>
+                        </div>
+                        
+                        <p class="subtitle" style="text-align: center;">Personalize your understanding of this card.</p>
+                    </div>
+
+                    <!-- Right Content (Inputs) -->
+                    <div class="canvas-area" style="background: var(--bg-app); padding: 2rem; overflow-y: auto;">
+                        
+                        <!-- [NEW] Image Upload & URL Input -->
+                        <div class="form-group">
+                            <label>Custom Card Image</label>
+                            
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                <input type="file" id="note-image-file" accept="image/*" class="hidden">
+                                <button id="btn-trigger-upload" class="btn-secondary" style="flex: 1;">
+                                    <i class="ph ph-upload-simple"></i> Upload File
+                                </button>
+                            </div>
+
+                            <input type="text" id="note-image-url" class="modern-input" placeholder="Or paste image URL...">
+                            <small style="color: var(--text-muted); display: block; margin-top: 5px;">Upload a file or paste a link to override the default.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Keywords (Upright)</label>
+                            <input type="text" id="note-keywords-up" class="modern-input" placeholder="e.g., Beginnings, Innocence">
+                        </div>
+                        <div class="form-group">
+                            <label>Keywords (Reversed)</label>
+                            <input type="text" id="note-keywords-rev" class="modern-input" placeholder="e.g., Recklessness, Risk">
+                        </div>
+                        <div class="form-group">
+                            <label>Meaning</label>
+                            <textarea id="note-meaning" class="modern-input" style="min-height: 100px;"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Symbolisms</label>
+                            <textarea id="note-symbolism" class="modern-input" style="min-height: 100px;"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Personal Interpretation</label>
+                            <textarea id="note-interpretation" class="modern-input" style="min-height: 150px;"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL -->
+    <div id="card-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Select Arcana</h3>
+                <button class="close-modal"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-toolbar">
+                <input type="text" id="card-search" placeholder="Filter cards..." class="modern-input">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="card-reversed">
+                    <span class="slider"></span>
+                    <span class="label-text">Reversed</span>
+                </label>
+            </div>
+            <div id="card-grid-select" class="card-grid"></div>
+        </div>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

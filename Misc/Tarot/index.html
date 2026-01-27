@@ -10,9 +10,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     
-    <!-- CSS Links -->
+    <!-- CSS Links (Modular) -->
     <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/builder.css">
+    <link rel="stylesheet" href="css/editor.css">
     <link rel="stylesheet" href="css/mobile.css">
     
     <!-- Libraries -->
@@ -20,7 +23,7 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
-
+<!-- ... (Rest of body remains exactly the same as previous step, preserved here for completeness) ... -->
     <!-- AUTH OVERLAY -->
     <section id="view-auth" class="auth-container">
         <div class="auth-box">
@@ -244,12 +247,17 @@
                 </div>
             </section>
 
-            <!-- OVERLAY: READING EDITOR -->
+            <!-- OVERLAY: READING EDITOR (Regular Journal) -->
             <section id="view-reading-editor" class="view overlay-view hidden">
                 <header class="editor-header">
                     <button id="btn-back-journal" class="btn-text"><i class="ph ph-arrow-left"></i> Back</button>
-                    <h2>New Entry</h2>
-                    <button id="btn-save-reading" class="btn-primary">Save</button>
+                    <!-- [NEW] Action Buttons Group -->
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button id="btn-delete-reading" class="btn-text hidden" style="color: #ff6b6b; margin-right: 5px;" title="Delete Entry">
+                            <i class="ph ph-trash" style="font-size: 1.2rem;"></i>
+                        </button>
+                        <button id="btn-save-reading" class="btn-primary">Save</button>
+                    </div>
                 </header>
                 <div class="editor-layout">
                     <div class="canvas-area">
@@ -282,65 +290,78 @@
                 </div>
             </section>
 
-            <!-- OVERLAY: CARD NOTE EDITOR -->
+            <!-- [REDESIGNED] OVERLAY: CARD NOTE EDITOR -->
             <section id="view-card-editor" class="view overlay-view hidden">
                 <header class="editor-header">
-                    <button id="btn-close-card-editor" class="btn-text"><i class="ph ph-arrow-left"></i> Back to Library</button>
-                    <h2 id="editor-card-name">The Fool</h2>
-                    <button id="btn-save-card-note" class="btn-primary">Save Notes</button>
+                    <button id="btn-close-card-editor" class="btn-text"><i class="ph ph-arrow-left"></i> Back</button>
+                    <div class="header-center-title">Study Notes</div>
+                    <button id="btn-save-card-note" class="btn-primary">Save Changes</button>
                 </header>
                 
-                <div class="editor-layout">
-                    <!-- Left Sidebar (Preview) -->
-                    <div class="journal-sidebar" style="border-right: 1px solid var(--border-subtle); border-left: none;">
-                        <h3 id="editor-card-suit" style="color: var(--primary); margin-bottom: 1rem;">Major Arcana</h3>
-                        
-                        <!-- Image Preview Container -->
-                        <div id="editor-card-image-preview" class="card-slot filled" style="position: relative; margin: 0 auto 1rem auto; overflow: hidden;">
-                            <i class="ph ph-sparkle" style="font-size: 2rem;"></i>
+                <div class="card-study-layout">
+                    <!-- LEFT COLUMN: VISUAL -->
+                    <aside class="card-study-visual" id="study-panel-visual">
+                        <div class="card-identity-block">
+                            <h2 id="editor-card-name">The Fool</h2>
+                            <span id="editor-card-suit">Major Arcana</span>
                         </div>
-                        
-                        <p class="subtitle" style="text-align: center;">Personalize your understanding of this card.</p>
-                    </div>
 
-                    <!-- Right Content (Inputs) -->
-                    <div class="canvas-area" style="background: var(--bg-app); padding: 2rem; overflow-y: auto;">
-                        
-                        <!-- [NEW] Image Upload & URL Input -->
-                        <div class="form-group">
-                            <label>Custom Card Image</label>
-                            
-                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                                <input type="file" id="note-image-file" accept="image/*" class="hidden">
-                                <button id="btn-trigger-upload" class="btn-secondary" style="flex: 1;">
-                                    <i class="ph ph-upload-simple"></i> Upload File
-                                </button>
+                        <div class="card-preview-wrapper">
+                            <div id="editor-card-image-preview" class="card-preview-image">
+                                <!-- Image injected here -->
                             </div>
-
-                            <input type="text" id="note-image-url" class="modern-input" placeholder="Or paste image URL...">
-                            <small style="color: var(--text-muted); display: block; margin-top: 5px;">Upload a file or paste a link to override the default.</small>
+                            <!-- Floating Action Button for Upload -->
+                            <button id="btn-trigger-upload" class="btn-fab-upload" title="Change Image">
+                                <i class="ph ph-camera"></i>
+                            </button>
+                            <input type="file" id="note-image-file" accept="image/*" class="hidden">
+                        </div>
+                        
+                        <div class="url-input-wrapper">
+                            <i class="ph ph-link"></i>
+                            <input type="text" id="note-image-url" class="transparent-input" placeholder="Or paste image URL...">
+                        </div>
+                    </aside>
+                    
+                    <!-- RESIZER HANDLE -->
+                    <div id="study-panel-resizer" class="layout-resizer"></div>
+                    
+                    <!-- RIGHT COLUMN: NOTEBOOK -->
+                    <div class="card-study-notebook">
+                        
+                        <!-- Section: Keywords -->
+                        <div class="notebook-section">
+                            <label class="notebook-label"><i class="ph ph-key"></i> Keywords</label>
+                            <div class="keywords-grid">
+                                <div class="keyword-box upright">
+                                    <span class="kw-label">Upright</span>
+                                    <input type="text" id="note-keywords-up" placeholder="Light, Beginnings..." class="notebook-input">
+                                </div>
+                                <div class="keyword-box reversed">
+                                    <span class="kw-label">Reversed</span>
+                                    <input type="text" id="note-keywords-rev" placeholder="Risk, Hesitation..." class="notebook-input">
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label>Keywords (Upright)</label>
-                            <input type="text" id="note-keywords-up" class="modern-input" placeholder="e.g., Beginnings, Innocence">
+                        <!-- Section: Core Meaning -->
+                        <div class="notebook-section">
+                            <label class="notebook-label"><i class="ph ph-book-open-text"></i> Core Meaning</label>
+                            <textarea id="note-meaning" class="notebook-textarea medium" placeholder="The traditional meaning of the card..."></textarea>
                         </div>
-                        <div class="form-group">
-                            <label>Keywords (Reversed)</label>
-                            <input type="text" id="note-keywords-rev" class="modern-input" placeholder="e.g., Recklessness, Risk">
+
+                        <!-- Section: Deep Dive Grid -->
+                        <div class="notebook-split-grid">
+                            <div class="notebook-section">
+                                <label class="notebook-label"><i class="ph ph-eye"></i> Symbolism</label>
+                                <textarea id="note-symbolism" class="notebook-textarea" placeholder="What symbols stand out? colors? figures?"></textarea>
+                            </div>
+                            <div class="notebook-section">
+                                <label class="notebook-label"><i class="ph ph-sparkle"></i> Interpretation</label>
+                                <textarea id="note-interpretation" class="notebook-textarea" placeholder="Your personal connection and intuition..."></textarea>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Meaning</label>
-                            <textarea id="note-meaning" class="modern-input" style="min-height: 100px;"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Symbolisms</label>
-                            <textarea id="note-symbolism" class="modern-input" style="min-height: 100px;"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Personal Interpretation</label>
-                            <textarea id="note-interpretation" class="modern-input" style="min-height: 150px;"></textarea>
-                        </div>
+
                     </div>
                 </div>
             </section>

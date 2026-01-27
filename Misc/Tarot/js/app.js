@@ -38,7 +38,7 @@ function updateAuthUI() {
             const btnSaveSpread = document.getElementById('btn-save-spread');
             if(btnSaveSpread) btnSaveSpread.onclick = async () => {
                 await builder.save();
-                populateBuilderSpreads();
+                populateBuilderSpreads(); // Refreshes grid logic in builder
             };
             
             const backBtn = document.getElementById('btn-builder-back');
@@ -121,6 +121,7 @@ function renderSpreadGrid() {
     api.spreads.forEach(s => {
          const card = document.createElement('div');
          card.className = 'reading-item'; 
+         card.style.position = 'relative'; // For absolute positioning of delete button
          card.innerHTML = `
              <h3>${s.name}</h3>
              <p style="color: var(--text-muted);">${s.positions.length} Cards</p>
@@ -128,6 +129,22 @@ function renderSpreadGrid() {
                 <i class="ph ph-pencil-simple"></i> Edit Layout
              </div>
          `;
+         
+         // [NEW] Delete Button for Spread
+         const deleteBtn = document.createElement('button');
+         deleteBtn.className = 'btn-text';
+         deleteBtn.innerHTML = '<i class="ph ph-trash"></i>';
+         deleteBtn.style.cssText = 'position: absolute; top: 10px; right: 10px; color: #ff6b6b;';
+         deleteBtn.title = 'Delete Spread';
+         deleteBtn.onclick = async (e) => {
+             e.stopPropagation(); // Prevent opening editor
+             if (confirm(`Delete spread "${s.name}"? This cannot be undone.`)) {
+                 await api.deleteSpread(s._id);
+                 renderSpreadGrid(); // Refresh
+             }
+         };
+         card.appendChild(deleteBtn);
+
          card.onclick = () => showBuilderEditor(s);
          grid.appendChild(card);
     });
@@ -188,9 +205,46 @@ function toggleSidebar() {
     if(overlay) overlay.classList.toggle('active');
 }
 
+// --- RESIZER LOGIC ---
+function setupResizer() {
+    const resizer = document.getElementById('study-panel-resizer');
+    const leftPanel = document.getElementById('study-panel-visual');
+    
+    if (!resizer || !leftPanel) return;
+
+    let isResizing = false;
+
+    resizer.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        resizer.classList.add('resizing');
+        document.body.style.cursor = 'col-resize';
+        e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        
+        // Calculate new width
+        let newWidth = e.clientX;
+        
+        // Clamp (Min 250px, Max 600px)
+        if (newWidth < 250) newWidth = 250;
+        if (newWidth > 600) newWidth = 600;
+        
+        leftPanel.style.width = `${newWidth}px`;
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (isResizing) {
+            isResizing = false;
+            resizer.classList.remove('resizing');
+            document.body.style.cursor = '';
+        }
+    });
+}
+
 // --- SETUP LISTENERS ---
 function setupAuthListeners() {
-    // Helper to safely bind
     const bind = (id, event, fn) => {
         const el = document.getElementById(id);
         if (el) el[event] = fn;
@@ -291,6 +345,11 @@ function setupAppListeners() {
             showView('readings');
         }
     });
+
+    // [NEW] Bind Delete Button
+    bindClick('btn-delete-reading', () => {
+        if(journal) journal.deleteCurrentEntry();
+    });
 }
 
 // --- INIT ---
@@ -298,5 +357,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await api.init();
     setupAuthListeners();
     setupAppListeners();
+    setupResizer(); 
     updateAuthUI();
 });

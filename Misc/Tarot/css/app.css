@@ -1,3 +1,196 @@
+/* ... existing styles ... */
+
+/* --- REDESIGNED CARD EDITOR (Study Desk) --- */
+.card-study-layout {
+    display: flex;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg-app);
+}
+
+/* LEFT COLUMN: Visuals */
+.card-study-visual {
+    width: 320px; /* Default width */
+    min-width: 250px; /* Minimum constraint */
+    max-width: 50vw; /* Maximum constraint */
+    padding: 2rem;
+    background: var(--bg-sidebar);
+    /* border-right moved to resizer */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    overflow-y: auto;
+}
+
+/* [NEW] Resizer Handle Styles */
+.layout-resizer {
+    width: 8px;
+    background: var(--bg-sidebar);
+    cursor: col-resize;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border-subtle);
+    border-left: 1px solid var(--bg-app); /* Visual separator */
+    transition: background 0.2s;
+    z-index: 10;
+}
+.layout-resizer:hover, .layout-resizer.resizing {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.card-identity-block {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+.card-identity-block h2 {
+    font-family: var(--font-serif);
+    font-size: 1.8rem;
+    color: var(--primary);
+    margin-bottom: 0.25rem;
+}
+.card-identity-block span {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.card-preview-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 240px;
+    aspect-ratio: 2/3;
+    margin-bottom: 1rem;
+}
+
+.card-preview-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+    border: 1px solid var(--border-active);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted);
+}
+
+.btn-fab-upload {
+    position: absolute;
+    bottom: -10px;
+    right: -10px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #000;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+}
+.btn-fab-upload:hover { transform: scale(1.1); }
+
+.url-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 240px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 20px;
+    color: var(--text-muted);
+}
+.transparent-input {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-size: 0.85rem;
+    width: 100%;
+}
+.transparent-input:focus { outline: none; }
+
+/* RIGHT COLUMN: Notebook */
+.card-study-notebook {
+    flex: 1;
+    padding: 2rem 3rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    min-width: 320px; /* Ensure content doesn't get squished too small */
+}
+
+.notebook-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.notebook-label {
+    color: var(--primary);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex; align-items: center; gap: 8px;
+}
+
+/* Keyword Styling */
+.keywords-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+.keyword-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex; flex-direction: column;
+    gap: 0.5rem;
+}
+.keyword-box.upright { border-left: 3px solid #2ecc71; }
+.keyword-box.reversed { border-left: 3px solid #e74c3c; }
+
+.kw-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+
+.notebook-input {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-size: 1rem;
+    width: 100%;
+    border-bottom: 1px dashed var(--border-subtle);
+    padding-bottom: 4px;
+}
+.notebook-input:focus { outline: none; border-bottom-color: var(--primary); }
+
+/* Textarea Styling */
+.notebook-textarea {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1.25rem;
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    resize: none;
+    min-height: 150px;
+    transition: border-color 0.2s;
+}
+.notebook-textarea:focus { outline: none; border-color: var(--primary); }
+.notebook-textarea.medium { min-height: 120px; }
+
+.notebook-split-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+/* ... existing styles ... */
 /* --- AUTH SCREENS --- */
 .auth-container {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -231,15 +424,18 @@
 .editor-header {
     padding: 1rem 2rem; border-bottom: 1px solid var(--border-subtle);
     display: flex; justify-content: space-between; align-items: center; background: var(--bg-sidebar);
+    flex-shrink: 0; /* Ensure header never shrinks */
 }
 .editor-header h2 { font-family: var(--font-serif); font-size: 1.5rem; }
+
 .editor-layout { 
     display: flex; 
     flex-grow: 1; 
     overflow: hidden; 
     min-height: 0; /* Critical for Firefox/Flex scrolling */
 }
-/* [UPDATED] Enabled vertical scrolling */
+
+/* [UPDATED] Fixed Desktop Scrolling */
 .canvas-area { 
     flex: 1; 
     background: #0a0b0e; 
@@ -261,19 +457,12 @@
 .tarot-table {
     flex-grow: 1; position: relative; overflow: hidden;
     background-image: radial-gradient(#1f2129 1px, transparent 1px); background-size: 20px 20px;
-    touch-action: none; /* Prevents scrolling while dragging items on mobile */
+    touch-action: none; 
 }
 .builder-surface {
-    position: absolute;
-    top: 0; left: 0;
-    /* Default to full size of viewport (Desktop behavior) */
-    width: 100%; 
-    height: 100%;
-    /* The grid pattern moves with the surface */
-    background-image: radial-gradient(#1f2129 1px, transparent 1px); 
-    background-size: 20px 20px;
-    transform-origin: 0 0;
-    touch-action: none;
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background-image: radial-gradient(#1f2129 1px, transparent 1px); background-size: 20px 20px;
+    transform-origin: 0 0; touch-action: none;
 }
 .empty-state {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -285,51 +474,29 @@
     display: flex; align-items: center; justify-content: center;
     color: var(--text-muted); font-size: 0.8rem; cursor: pointer;
     transition: border-color 0.2s; user-select: none; text-align: center; padding: 5px;
-    touch-action: none; /* Critical for drag support */
-    z-index: 5; /* Ensure cards sit above surface */
+    touch-action: none; z-index: 5; 
 }
 .card-slot:hover { border-color: var(--primary); background: rgba(255,255,255,0.05); }
 .card-slot.filled { border-style: solid; background: var(--bg-card); color: var(--primary); font-family: var(--font-serif); }
 .rotate-handle {
-    width: 18px; height: 18px; /* Larger touch target */
-    background: var(--primary); border-radius: 50%;
+    width: 18px; height: 18px; background: var(--primary); border-radius: 50%;
     position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
-    cursor: crosshair; z-index: 10;
-    touch-action: none; /* Critical for rotate support */
+    cursor: crosshair; z-index: 10; touch-action: none; 
 }
-
 .builder-scrollbar {
-    position: absolute;
-    z-index: 20;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-    opacity: 0; /* Hidden by default */
-    transition: opacity 0.3s ease-out;
-    pointer-events: none; /* Allow touches to pass through */
+    position: absolute; z-index: 20; background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px; opacity: 0; transition: opacity 0.3s ease-out; pointer-events: none; 
 }
-.builder-scrollbar.horizontal {
-    left: 8px; right: 8px; bottom: 8px; height: 6px;
-}
-.builder-scrollbar.vertical {
-    top: 8px; bottom: 8px; right: 8px; width: 6px;
-}
+.builder-scrollbar.horizontal { left: 8px; right: 8px; bottom: 8px; height: 6px; }
+.builder-scrollbar.vertical { top: 8px; bottom: 8px; right: 8px; width: 6px; }
 .builder-scrollbar .thumb {
-    background: var(--primary); 
-    border-radius: 4px;
-    width: 100%; height: 100%;
-    transform-origin: 0 0;
+    background: var(--primary); border-radius: 4px; width: 100%; height: 100%; transform-origin: 0 0;
 }
-/* Show scrollbars when interacting */
-.tarot-table.scrolling .builder-scrollbar {
-    opacity: 1;
-}
-
+.tarot-table.scrolling .builder-scrollbar { opacity: 1; }
 .builder-layout { display: flex; gap: 2rem; height: 600px; }
 .builder-mode { border: 1px solid var(--border-subtle); border-radius: 8px; height: 100%; touch-action: none; }
 .builder-sidebar { width: 250px; display: flex; flex-direction: column; gap: 1rem; }
 .help-box { background: var(--bg-card); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.9rem; }
-
-/* --- MODAL --- */
 .modal {
     position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);
     display: flex; align-items: center; justify-content: center; z-index: 300;
@@ -349,19 +516,7 @@
 }
 .card-select-item:hover { border-color: var(--primary); color: var(--primary); }
 .close-modal { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; }
-
-/* [NEW] Global Custom Scrollbar Styling */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-::-webkit-scrollbar-track {
-    background: transparent; 
-}
-::-webkit-scrollbar-thumb {
-    background: var(--border-active); 
-    border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: var(--primary); 
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-active); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }

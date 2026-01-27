@@ -1,6 +1,7 @@
 // Configuration
-//https://wot-tau.vercel.app/
+
 const API_ROOT = 'https://wot-tau.vercel.app/api'; 
+// localhost:3005
 
 export default class TarotAPI {
     constructor() {
@@ -87,7 +88,6 @@ export default class TarotAPI {
         } catch (err) { console.error("Failed to bootstrap:", err); }
     }
 
-    // [NEW] Save Card Notes
     async saveCardNote(cardId, noteData) {
         const payload = { ...noteData, userId: this.user.id };
         const res = await fetch(`${API_ROOT}/tarot/cards/${cardId}/notes`, {
@@ -96,8 +96,6 @@ export default class TarotAPI {
             body: JSON.stringify(payload)
         });
         const savedNote = await res.json();
-        
-        // Update local cache
         this.notes[cardId] = savedNote;
         this.updateCache();
         return savedNote;
@@ -117,6 +115,19 @@ export default class TarotAPI {
             body: JSON.stringify(payload)
         });
         return await res.json();
+    }
+
+    async updateReading(id, readingData) {
+        const res = await fetch(`${API_ROOT}/tarot/readings/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(readingData)
+        });
+        return await res.json();
+    }
+
+    async deleteReading(id) {
+        await fetch(`${API_ROOT}/tarot/readings/${id}`, { method: 'DELETE' });
     }
 
     async saveSpread(spreadData) {
@@ -143,6 +154,14 @@ export default class TarotAPI {
         if (index !== -1) this.spreads[index] = updated;
         this.updateCache();
         return updated;
+    }
+
+    // [NEW] Delete Spread
+    async deleteSpread(id) {
+        await fetch(`${API_ROOT}/tarot/spreads/${id}`, { method: 'DELETE' });
+        // remove from local cache array
+        this.spreads = this.spreads.filter(s => s._id !== id);
+        this.updateCache();
     }
 
     async getStats() {

@@ -23,7 +23,7 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
-<!-- ... (Rest of body remains exactly the same as previous step, preserved here for completeness) ... -->
+
     <!-- AUTH OVERLAY -->
     <section id="view-auth" class="auth-container">
         <div class="auth-box">
@@ -143,6 +143,22 @@
                     <p class="subtitle">Your journey continues.</p>
                 </header>
                 <div class="dashboard-grid">
+                    
+                    <!-- [NEW] Moon Phase Card -->
+                    <div class="card">
+                        <div class="card-content" style="display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                            <h3 style="font-size: 1.1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">Current Moon</h3>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <i id="moon-icon-display" class="ph ph-moon" style="font-size: 2.5rem; color: var(--primary);"></i>
+                                <div style="display: flex; flex-direction: column;">
+                                    <span id="moon-phase-name" style="font-size: 1.25rem; font-family: var(--font-serif); color: var(--text-main);">Loading...</span>
+                                    <span style="font-size: 0.8rem; color: var(--text-muted);">Astrometric Phase</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-bg-icon"><i class="ph ph-moon-stars"></i></div>
+                    </div>
+
                     <div class="card action-card">
                         <div class="card-content">
                             <h3>New Reading</h3>
@@ -186,7 +202,7 @@
                     <h1>Card Library</h1>
                     <p class="subtitle">Study the 78 keys of the Tarot.</p>
                 </header>
-                <div id="deck-grid" class="dashboard-grid">
+                <div id="deck-grid" class="deck-library-grid">
                     <!-- JS populates cards here -->
                 </div>
             </section>
@@ -251,7 +267,7 @@
             <section id="view-reading-editor" class="view overlay-view hidden">
                 <header class="editor-header">
                     <button id="btn-back-journal" class="btn-text"><i class="ph ph-arrow-left"></i> Back</button>
-                    <!-- [NEW] Action Buttons Group -->
+                    
                     <div style="display: flex; gap: 10px; align-items: center;">
                         <button id="btn-delete-reading" class="btn-text hidden" style="color: #ff6b6b; margin-right: 5px;" title="Delete Entry">
                             <i class="ph ph-trash" style="font-size: 1.2rem;"></i>
@@ -290,7 +306,7 @@
                 </div>
             </section>
 
-            <!-- [REDESIGNED] OVERLAY: CARD NOTE EDITOR -->
+            <!-- OVERLAY: CARD NOTE EDITOR -->
             <section id="view-card-editor" class="view overlay-view hidden">
                 <header class="editor-header">
                     <button id="btn-close-card-editor" class="btn-text"><i class="ph ph-arrow-left"></i> Back</button>

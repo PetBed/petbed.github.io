@@ -33,6 +33,14 @@
 .create-new-card:hover { border-color: var(--primary); background: rgba(255,255,255,0.03); }
 
 /* --- DECK LIBRARY STYLES --- */
+/* [NEW] Dedicated Grid for Library - Denser than Dashboard */
+.deck-library-grid {
+    display: grid;
+    /* 160px fits ~6-7 cards on desktop, vs ~3 with dashboard-grid */
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+    gap: 1rem;
+}
+
 .card-grid { padding: 1.5rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; overflow-y: auto; }
 
 .deck-card-item {

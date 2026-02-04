@@ -34,6 +34,9 @@
 
     /* Grids */
     .dashboard-grid, .readings-grid, .card-grid { grid-template-columns: 1fr; }
+    
+    /* [NEW] Library Grid on Mobile: 2 Columns */
+    .deck-library-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 
     /* --- EDITOR OVERLAY SCROLLING FIX --- */
     .editor-layout, .card-study-layout { 

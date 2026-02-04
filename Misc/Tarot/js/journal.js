@@ -4,7 +4,9 @@ export default class JournalManager {
         this.currentReading = { cards: [] };
         this.editingId = null; 
         this.isFreeForm = false;
+        this.activeSlot = null;
         this.setupModal();
+        this.setupSearch(); // [NEW] Initialize search listener
     }
 
     async loadReadingsList() {
@@ -46,7 +48,6 @@ export default class JournalManager {
         this.editingId = null; 
         this.isFreeForm = false;
         
-        // Hide Delete Button for new entries
         const delBtn = document.getElementById('btn-delete-reading');
         if(delBtn) delBtn.classList.add('hidden');
         
@@ -140,12 +141,11 @@ export default class JournalManager {
                 this.updateSlotUI(el, cardInfo, cardEntry.orientation === 'reversed');
             }
             
-            // [NEW] Append Remove Button
             const removeBtn = document.createElement('div');
             removeBtn.className = 'remove-card-btn';
             removeBtn.innerHTML = '<i class="ph ph-x"></i>';
             removeBtn.onclick = (e) => {
-                e.stopPropagation(); // Stop bubbling to select handler
+                e.stopPropagation(); 
                 this.removeCardFromFreeForm(index);
             };
             el.appendChild(removeBtn);
@@ -163,10 +163,8 @@ export default class JournalManager {
         table.appendChild(addBtn);
     }
 
-    // [NEW] Helper to remove card
     removeCardFromFreeForm(index) {
         this.currentReading.cards.splice(index, 1);
-        // Re-index logic handled by re-rendering
         this.renderFreeForm();
     }
 
@@ -215,10 +213,32 @@ export default class JournalManager {
         if(closeBtn) closeBtn.onclick = () => this.modal.classList.add('hidden');
     }
 
-    populateCardGrid() {
+    // [NEW] Real-time filtering logic
+    setupSearch() {
+        const searchInput = document.getElementById('card-search');
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            this.populateCardGrid(term);
+        });
+    }
+
+    populateCardGrid(filterTerm = "") {
         const grid = document.getElementById('card-grid-select');
         grid.innerHTML = '';
-        this.api.cards.forEach(card => {
+        
+        const filteredCards = this.api.cards.filter(card => 
+            card.name.toLowerCase().includes(filterTerm) ||
+            card.suit.toLowerCase().includes(filterTerm)
+        );
+
+        if (filteredCards.length === 0) {
+            grid.innerHTML = '<div style="grid-column: 1/-1; padding: 2rem; color: var(--text-muted); text-align: center;">No cards match your search.</div>';
+            return;
+        }
+
+        filteredCards.forEach(card => {
             const div = document.createElement('div');
             div.className = 'card-select-item';
             div.innerText = card.name;
@@ -229,10 +249,12 @@ export default class JournalManager {
 
     openCardSelector(posId, domElement) {
         this.activeSlot = { posId: parseInt(posId), domElement };
-        const grid = document.getElementById('card-grid-select');
-        if(grid.children.length === 0) {
-            this.populateCardGrid();
-        }
+        
+        // [NEW] Clear search on open
+        const searchInput = document.getElementById('card-search');
+        if(searchInput) searchInput.value = '';
+        
+        this.populateCardGrid(); // Show all cards initially
         this.modal.classList.remove('hidden');
     }
 

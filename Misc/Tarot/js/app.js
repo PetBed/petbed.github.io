@@ -38,7 +38,7 @@ function updateAuthUI() {
             const btnSaveSpread = document.getElementById('btn-save-spread');
             if(btnSaveSpread) btnSaveSpread.onclick = async () => {
                 await builder.save();
-                populateBuilderSpreads(); // Refreshes grid logic in builder
+                populateBuilderSpreads();
             };
             
             const backBtn = document.getElementById('btn-builder-back');
@@ -59,6 +59,57 @@ function updateAuthUI() {
     }
 }
 
+// [NEW] Moon Phase Logic
+function updateMoonPhase() {
+    const date = new Date();
+    let year = date.getFullYear();
+    let month = date.getMonth() + 1;
+    let day = date.getDate();
+    
+    // Simple algorithm to calculate moon phase (0-7)
+    if (month < 3) {
+        year--;
+        month += 12;
+    }
+    ++month;
+    const c = 365.25 * year;
+    const e = 30.6 * month;
+    let jd = c + e + day - 694039.09;
+    jd /= 29.5305882;
+    let b = parseInt(jd);
+    jd -= b;
+    b = Math.round(jd * 8);
+    if (b >= 8) b = 0;
+
+    const phases = [
+        "New Moon", "Waxing Crescent", "First Quarter", "Waxing Gibbous",
+        "Full Moon", "Waning Gibbous", "Last Quarter", "Waning Crescent"
+    ];
+    
+    const iconEl = document.getElementById('moon-icon-display');
+    const nameEl = document.getElementById('moon-phase-name');
+    
+    if(nameEl) nameEl.innerText = phases[b];
+    
+    if(iconEl) {
+        iconEl.style.transform = 'none';
+        iconEl.style.opacity = '1';
+        
+        if (b === 0) { // New
+            iconEl.className = 'ph ph-circle';
+            iconEl.style.opacity = '0.3';
+        } else if (b === 4) { // Full
+            iconEl.className = 'ph ph-circle-fill';
+        } else {
+            iconEl.className = 'ph ph-moon';
+            // Waning phases (5,6,7) - Flip the moon icon
+            if (b > 4) {
+                iconEl.style.transform = 'scaleX(-1)';
+            }
+        }
+    }
+}
+
 // --- VIEW ROUTER ---
 function showView(viewName) {
     document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -75,6 +126,7 @@ function showView(viewName) {
     const target = document.getElementById(`view-${viewName}`);
     if (target) {
         target.classList.add('active');
+        if(viewName === 'dashboard') updateMoonPhase(); // [NEW] Update on view
         if(viewName === 'readings' && journal) journal.loadReadingsList();
         if(viewName === 'stats') loadStats();
         if(viewName === 'builder') showBuilderGrid();
@@ -121,7 +173,7 @@ function renderSpreadGrid() {
     api.spreads.forEach(s => {
          const card = document.createElement('div');
          card.className = 'reading-item'; 
-         card.style.position = 'relative'; // For absolute positioning of delete button
+         card.style.position = 'relative'; 
          card.innerHTML = `
              <h3>${s.name}</h3>
              <p style="color: var(--text-muted);">${s.positions.length} Cards</p>
@@ -130,17 +182,16 @@ function renderSpreadGrid() {
              </div>
          `;
          
-         // [NEW] Delete Button for Spread
          const deleteBtn = document.createElement('button');
          deleteBtn.className = 'btn-text';
          deleteBtn.innerHTML = '<i class="ph ph-trash"></i>';
          deleteBtn.style.cssText = 'position: absolute; top: 10px; right: 10px; color: #ff6b6b;';
          deleteBtn.title = 'Delete Spread';
          deleteBtn.onclick = async (e) => {
-             e.stopPropagation(); // Prevent opening editor
+             e.stopPropagation(); 
              if (confirm(`Delete spread "${s.name}"? This cannot be undone.`)) {
                  await api.deleteSpread(s._id);
-                 renderSpreadGrid(); // Refresh
+                 renderSpreadGrid(); 
              }
          };
          card.appendChild(deleteBtn);
@@ -346,7 +397,6 @@ function setupAppListeners() {
         }
     });
 
-    // [NEW] Bind Delete Button
     bindClick('btn-delete-reading', () => {
         if(journal) journal.deleteCurrentEntry();
     });

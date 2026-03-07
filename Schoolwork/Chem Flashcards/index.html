@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chemical Flashcards</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+    
+    :root { font-family: 'JetBrains Mono', monospace; }
+    
+    body {
+      background-color: #050505;
+      color: #d4d4d4;
+    }
+
+    .bg-grid {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+    }
+    .animate-shake {
+      animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes scanHorizontal {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(400%); }
+    }
+    .scanner-beam-horizontal {
+      animation: scanHorizontal 2s ease-in-out infinite;
+    }
+    
+    .transform-style-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+    .perspective-1000 { perspective: 1000px; }
+    
+    @keyframes scan {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100%); }
+    }
+    .scanner-beam {
+      background: linear-gradient(to bottom, transparent, rgba(163,230,53,0.1) 50%, rgba(163,230,53,0.3) 100%);
+      animation: scan 3s linear infinite;
+    }
+
+    /* Selection Color */
+    ::selection { background-color: rgba(163, 230, 53, 0.3); }
+  </style>
+</head>
+<body class="min-h-screen relative overflow-x-hidden bg-grid selection:bg-lime-500/30 flex flex-col items-center p-6 md:p-12">
+
+  <!-- Decorative Noise & Overlay -->
+  <div class="fixed inset-0 pointer-events-none z-0 opacity-[0.04] mix-blend-screen" 
+       style="background-image: url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E&quot;);">
+  </div>
+  <div class="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-lime-500/40 to-transparent z-50"></div>
+  
+  <!-- Brutalist System Tags -->
+  <div class="fixed top-4 right-4 text-[10px] text-neutral-600 [writing-mode:vertical-rl] rotate-180 tracking-[0.3em] hidden md:block z-10">
+    SYS_ID:CHEM-MEM // DEPLOYMENT_ACTIVE
+  </div>
+
+  <div class="w-full max-w-4xl z-10 flex flex-col h-full flex-1">
+    
+    <!-- Header & Nav -->
+    <header class="w-full flex flex-col lg:flex-row justify-between items-start lg:items-end mb-8 border-b border-neutral-800 pb-6 gap-6">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold tracking-tighter text-neutral-100 flex items-center gap-3 uppercase">
+          <span class="w-3 h-3 bg-lime-500 inline-block animate-pulse shadow-[0_0_10px_#a3e635]"></span>
+          Ion Memory Core
+        </h1>
+        <p class="text-neutral-500 text-xs mt-2 tracking-widest uppercase">Database Module v1.4 / Form 4 Chemistry</p>
+      </div>
+      
+      <div id="controls-container" class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto transition-opacity duration-300">
+        <div id="category-filters" class="flex flex-wrap gap-2">
+          <!-- Categories injected here -->
+        </div>
+        
+        <div class="hidden sm:block w-px h-6 bg-neutral-800 divider"></div>
+        
+        <button id="btn-shuffle" class="px-3 py-1.5 text-[10px] uppercase tracking-widest border transition-all flex items-center gap-2 border-neutral-800 text-neutral-500 hover:text-neutral-300 hover:border-neutral-600">
+          [ SHUFFLE: OFF ]
+        </button>
+
+        <div class="hidden sm:block w-px h-6 bg-neutral-800"></div>
+
+        <button id="btn-mode" class="px-3 py-1.5 text-[10px] uppercase tracking-widest border transition-all flex items-center gap-2 border-neutral-800 text-neutral-500 hover:text-neutral-300 hover:border-neutral-600">
+          [ MODE: flashcard ]
+        </button>
+      </div>
+    </header>
+
+    <!-- Progress Bar Container -->
+    <div id="progress-bar-container" class="w-full flex gap-[2px] mb-8 h-1 overflow-hidden relative">
+      <!-- Progress elements injected here -->
+    </div>
+
+    <!-- Main Flashcard Area -->
+    <div id="main-content" class="flex-1 flex flex-col items-center justify-center w-full">
+      <div id="card-wrapper" class="relative w-full max-w-2xl aspect-[4/3] perspective-1000 group cursor-pointer">
+        <!-- Card 3D Wrapper -->
+        <div id="card-inner" class="relative w-full h-full transform-style-3d transition-transform duration-[600ms] ease-out">
+          
+          <!-- FRONT FACE -->
+          <div id="card-front" class="absolute inset-0 backface-hidden bg-[#0a0a0a] border border-neutral-800 group-hover:border-lime-500/30 transition-colors p-6 md:p-10 flex flex-col justify-between shadow-2xl">
+            <!-- Targeting Brackets -->
+            <div class="absolute top-0 left-0 w-4 h-4 border-t border-l border-neutral-600 transition-colors group-hover:border-lime-500"></div>
+            <div class="absolute top-0 right-0 w-4 h-4 border-t border-r border-neutral-600 transition-colors group-hover:border-lime-500"></div>
+            <div class="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-neutral-600 transition-colors group-hover:border-lime-500"></div>
+            <div class="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-neutral-600 transition-colors group-hover:border-lime-500"></div>
+
+            <div class="flex justify-between items-start text-neutral-500 text-xs tracking-[0.2em] relative z-10">
+              <span id="front-index">[ INDEX: 001 ]</span>
+              <span id="front-type">// CATION //</span>
+            </div>
+            
+            <div class="flex-1 flex items-center justify-center text-center relative z-10">
+              <h2 id="front-name" class="text-3xl md:text-5xl font-light tracking-tight text-neutral-200">
+                Hydrogen ion
+              </h2>
+            </div>
+            
+            <!-- Interactive Input Mode -->
+            <div id="interactive-mode-ui" class="w-full flex flex-col justify-end pb-4 relative z-10 hidden">
+              <div class="w-full max-w-sm mx-auto flex flex-col gap-2">
+                <div id="input-wrapper" class="relative flex items-center border-b-2 bg-neutral-950/80 px-4 py-3 transition-colors border-cyan-500/50 text-cyan-400 focus-within:border-cyan-400 focus-within:bg-neutral-900">
+                  <span class="mr-3 opacity-50">&gt;</span>
+                  <input
+                    type="text"
+                    id="typing-input"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                    placeholder="e.g. Fe3+, SO42-"
+                    class="bg-transparent border-none outline-none w-full placeholder:text-neutral-700 font-bold tracking-wider"
+                  />
+                  <span id="input-status-text" class="absolute right-4 text-xs tracking-widest hidden"></span>
+                </div>
+                <div class="flex justify-between text-[9px] text-neutral-600 uppercase tracking-widest px-1 mt-1">
+                  <span>Case-Sensitive Input</span>
+                  <span class="opacity-50">Press Enter</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Idle Mode -->
+            <div id="idle-mode-ui" class="flex justify-between items-end border-t border-neutral-800 pt-4 relative z-10">
+              <span class="text-neutral-600 text-[10px] md:text-xs tracking-widest">AWAITING IDENTIFICATION</span>
+              <div class="flex gap-1">
+                <span class="w-1.5 h-1.5 bg-neutral-700 animate-pulse"></span>
+                <span class="w-1.5 h-1.5 bg-neutral-700 animate-pulse" style="animation-delay: 150ms"></span>
+                <span class="w-1.5 h-1.5 bg-neutral-700 animate-pulse" style="animation-delay: 300ms"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- BACK FACE -->
+          <div id="card-back" class="absolute inset-0 backface-hidden rotate-y-180 bg-[#0d0d0d] border border-lime-500/80 p-6 md:p-10 flex flex-col justify-between shadow-[0_0_50px_rgba(163,230,53,0.1)] overflow-hidden">
+            <!-- Subtle Scanner Effect -->
+            <div class="absolute inset-0 w-full h-full pointer-events-none opacity-20">
+              <div class="w-full h-[20%] scanner-beam absolute top-0 left-0"></div>
+            </div>
+
+            <div class="flex justify-between items-start text-lime-400/60 text-xs tracking-[0.2em] relative z-10">
+              <span>[ DECODED_FORMULA ]</span>
+              <span id="back-class">CHG: +1</span>
+            </div>
+            
+            <div class="flex-1 flex items-center justify-center relative z-10 w-full px-4">
+              <div id="back-formula" class="font-bold text-lime-400 drop-shadow-[0_0_25px_rgba(163,230,53,0.4)] whitespace-nowrap text-center" style="font-size: clamp(3rem, 10vw, 7rem)">
+                H<sup>+</sup>
+              </div>
+            </div>
+            
+            <div class="flex justify-between items-end border-t border-lime-400/30 pt-4 relative z-10">
+              <span id="back-name" class="text-lime-400/60 text-[10px] md:text-xs tracking-widest truncate max-w-[60%]">HYDROGEN ION</span>
+              <span class="text-lime-400 text-[10px] md:text-xs tracking-widest">MATCH_OK</span>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- Navigation Controls -->
+      <div class="flex w-full max-w-2xl justify-between items-center mt-10 gap-4">
+        <button id="btn-prev" class="flex-1 md:flex-none px-6 py-4 bg-neutral-900 border border-neutral-800 hover:bg-lime-500 hover:text-black hover:border-lime-500 transition-all uppercase tracking-widest text-xs font-bold flex items-center justify-center gap-3">
+          <span>&lt;&lt;</span> <span id="text-prev">PRV</span>
+        </button>
+        
+        <div id="nav-status" class="hidden md:flex items-center text-neutral-600 text-xs tracking-[0.3em]">
+          RECORD: 001 / 000
+        </div>
+        
+        <button id="btn-next" class="flex-1 md:flex-none px-6 py-4 bg-neutral-900 border border-neutral-800 hover:bg-lime-500 hover:text-black hover:border-lime-500 transition-all uppercase tracking-widest text-xs font-bold flex items-center justify-center gap-3">
+          <span id="text-next">NXT</span> <span>&gt;&gt;</span>
+        </button>
+      </div>
+      
+    </div>
+
+    <!-- Error State Container -->
+    <div id="error-state" class="flex-1 flex items-center justify-center text-red-500 text-sm tracking-widest uppercase border border-red-900 bg-red-950/20 p-8 hidden w-full mt-8">
+      [ ERROR: NO DATA CONFIGURED FOR SELECTED CATEGORY ]
+    </div>
+  </div>
+
+  <!-- Persistent Keyboard Shortcut Hint -->
+  <div class="fixed bottom-4 md:bottom-6 left-1/2 transform -translate-x-1/2 text-neutral-700 text-[9px] md:text-[10px] tracking-widest uppercase text-center w-full px-4 z-10">
+    [ LEFT / RIGHT ] ARROWS TO NAVIGATE &nbsp;&nbsp;&bull;&nbsp;&nbsp; [ SPACE ] OR TAP TO FLIP
+  </div>
+
+  <script>
+    const ION_DATA = [
+      // Cations +1
+      { id: 'c1', type: 'Cation', name: 'Hydrogen ion', formula: 'H<sup>+</sup>', charge: '+1' },
+      { id: 'c2', type: 'Cation', name: 'Lithium ion', formula: 'Li<sup>+</sup>', charge: '+1' },
+      { id: 'c3', type: 'Cation', name: 'Sodium ion', formula: 'Na<sup>+</sup>', charge: '+1' },
+      { id: 'c4', type: 'Cation', name: 'Potassium ion', formula: 'K<sup>+</sup>', charge: '+1' },
+      { id: 'c5', type: 'Cation', name: 'Silver ion', formula: 'Ag<sup>+</sup>', charge: '+1' },
+      { id: 'c6', type: 'Cation', name: 'Ammonium ion', formula: 'NH<sub>4</sub><sup>+</sup>', charge: '+1' },
+      // Cations +2
+      { id: 'c7', type: 'Cation', name: 'Magnesium ion', formula: 'Mg<sup>2+</sup>', charge: '+2' },
+      { id: 'c8', type: 'Cation', name: 'Calcium ion', formula: 'Ca<sup>2+</sup>', charge: '+2' },
+      { id: 'c9', type: 'Cation', name: 'Barium ion', formula: 'Ba<sup>2+</sup>', charge: '+2' },
+      { id: 'c10', type: 'Cation', name: 'Zinc ion', formula: 'Zn<sup>2+</sup>', charge: '+2' },
+      { id: 'c11', type: 'Cation', name: 'Iron(II) ion', formula: 'Fe<sup>2+</sup>', charge: '+2' },
+      { id: 'c12', type: 'Cation', name: 'Tin(II) ion', formula: 'Sn<sup>2+</sup>', charge: '+2' },
+      { id: 'c13', type: 'Cation', name: 'Lead(II) ion', formula: 'Pb<sup>2+</sup>', charge: '+2' },
+      { id: 'c14', type: 'Cation', name: 'Copper(II) ion', formula: 'Cu<sup>2+</sup>', charge: '+2' },
+      { id: 'c15', type: 'Cation', name: 'Manganese(II) ion', formula: 'Mn<sup>2+</sup>', charge: '+2' },
+      // Cations +3
+      { id: 'c16', type: 'Cation', name: 'Aluminium ion', formula: 'Al<sup>3+</sup>', charge: '+3' },
+      { id: 'c17', type: 'Cation', name: 'Iron(III) ion', formula: 'Fe<sup>3+</sup>', charge: '+3' },
+      // Anions -1
+      { id: 'a1', type: 'Anion', name: 'Fluoride ion', formula: 'F<sup>-</sup>', charge: '-1' },
+      { id: 'a2', type: 'Anion', name: 'Chloride ion', formula: 'Cl<sup>-</sup>', charge: '-1' },
+      { id: 'a3', type: 'Anion', name: 'Bromide ion', formula: 'Br<sup>-</sup>', charge: '-1' },
+      { id: 'a4', type: 'Anion', name: 'Iodide ion', formula: 'I<sup>-</sup>', charge: '-1' },
+      { id: 'a5', type: 'Anion', name: 'Hydroxide ion', formula: 'OH<sup>-</sup>', charge: '-1' },
+      { id: 'a6', type: 'Anion', name: 'Nitrate ion', formula: 'NO<sub>3</sub><sup>-</sup>', charge: '-1' },
+      { id: 'a7', type: 'Anion', name: 'Manganate(VII) ion', formula: 'MnO<sub>4</sub><sup>-</sup>', charge: '-1' },
+      // Anions -2
+      { id: 'a8', type: 'Anion', name: 'Oxide ion', formula: 'O<sup>2-</sup>', charge: '-2' },
+      { id: 'a9', type: 'Anion', name: 'Sulphate ion', formula: 'SO<sub>4</sub><sup>2-</sup>', charge: '-2' },
+      { id: 'a10', type: 'Anion', name: 'Carbonate ion', formula: 'CO<sub>3</sub><sup>2-</sup>', charge: '-2' },
+      { id: 'a11', type: 'Anion', name: 'Thiosulphate ion', formula: 'S<sub>2</sub>O<sub>3</sub><sup>2-</sup>', charge: '-2' },
+      { id: 'a12', type: 'Anion', name: 'Dichromate(VI) ion', formula: 'Cr<sub>2</sub>O<sub>7</sub><sup>2-</sup>', charge: '-2' },
+      // Anions -3
+      { id: 'a13', type: 'Anion', name: 'Phosphate ion', formula: 'PO<sub>4</sub><sup>3-</sup>', charge: '-3' },
+      // Acids
+      { id: 'ac1', type: 'Acid', name: 'Hydrochloric acid', formula: 'HCl', charge: 'Acid' },
+      { id: 'ac2', type: 'Acid', name: 'Nitric acid', formula: 'HNO<sub>3</sub>', charge: 'Acid' },
+      { id: 'ac3', type: 'Acid', name: 'Sulphuric acid', formula: 'H<sub>2</sub>SO<sub>4</sub>', charge: 'Acid' },
+      { id: 'ac4', type: 'Acid', name: 'Ethanoic acid', formula: 'CH<sub>3</sub>COOH', charge: 'Acid' },
+      { id: 'ac5', type: 'Acid', name: 'Phosphoric acid', formula: 'H<sub>3</sub>PO<sub>4</sub>', charge: 'Acid' },
+      // Gases
+      { id: 'g1', type: 'Gas', name: 'Bromine gas', formula: 'Br<sub>2</sub>', charge: 'Gas' },
+      { id: 'g2', type: 'Gas', name: 'Nitrogen gas', formula: 'N<sub>2</sub>', charge: 'Gas' },
+      { id: 'g3', type: 'Gas', name: 'Chlorine gas', formula: 'Cl<sub>2</sub>', charge: 'Gas' },
+      { id: 'g4', type: 'Gas', name: 'Hydrogen gas', formula: 'H<sub>2</sub>', charge: 'Gas' },
+      { id: 'g5', type: 'Gas', name: 'Oxygen gas', formula: 'O<sub>2</sub>', charge: 'Gas' },
+      { id: 'g6', type: 'Gas', name: 'Ammonia gas', formula: 'NH<sub>3</sub>', charge: 'Gas' },
+      { id: 'g7', type: 'Gas', name: 'Carbon dioxide gas', formula: 'CO<sub>2</sub>', charge: 'Gas' },
+      { id: 'g8', type: 'Gas', name: 'Nitrogen dioxide gas', formula: 'NO<sub>2</sub>', charge: 'Gas' },
+      { id: 'g9', type: 'Gas', name: 'Sulphur dioxide gas', formula: 'SO<sub>2</sub>', charge: 'Gas' },
+      { id: 'g10', type: 'Gas', name: 'Sulphur trioxide gas', formula: 'SO<sub>3</sub>', charge: 'Gas' },
+      { id: 'g11', type: 'Gas', name: 'Hydrogen chloride gas', formula: 'HCl', charge: 'Gas' }
+    ];
+
+    // State
+    const state = {
+      deck: [],
+      currentIndex: 0,
+      isFlipped: false,
+      activeCategory: 'All',
+      isShuffled: false,
+      appMode: 'flashcard', // 'flashcard' | 'typing' | 'compound'
+      inputState: 'idle',   // 'idle' | 'error' | 'success'
+      currentCompound: null
+    };
+
+    const categories = ['All', 'Cation', 'Anion', 'Acid', 'Gas'];
+
+    // DOM Elements
+    const els = {
+      categoryFilters: document.getElementById('category-filters'),
+      btnShuffle: document.getElementById('btn-shuffle'),
+      btnMode: document.getElementById('btn-mode'),
+      progressBar: document.getElementById('progress-bar-container'),
+      controlsContainer: document.getElementById('controls-container'),
+      
+      mainContent: document.getElementById('main-content'),
+      errorState: document.getElementById('error-state'),
+      cardWrapper: document.getElementById('card-wrapper'),
+      cardInner: document.getElementById('card-inner'),
+      
+      frontIndex: document.getElementById('front-index'),
+      frontType: document.getElementById('front-type'),
+      frontName: document.getElementById('front-name'),
+      
+      interactiveUI: document.getElementById('interactive-mode-ui'),
+      idleUI: document.getElementById('idle-mode-ui'),
+      inputWrapper: document.getElementById('input-wrapper'),
+      typingInput: document.getElementById('typing-input'),
+      inputStatus: document.getElementById('input-status-text'),
+      
+      backClass: document.getElementById('back-class'),
+      backFormula: document.getElementById('back-formula'),
+      backName: document.getElementById('back-name'),
+      
+      btnPrev: document.getElementById('btn-prev'),
+      textPrev: document.getElementById('text-prev'),
+      btnNext: document.getElementById('btn-next'),
+      textNext: document.getElementById('text-next'),
+      navStatus: document.getElementById('nav-status'),
+      divider: document.querySelector('.divider')
+    };
+
+    // Helpers
+    const getPlainFormula = (html) => html.replace(/<[^>]*>?/gm, '');
+
+    const generateCompound = () => {
+      const cations = ION_DATA.filter(ion => ion.type === 'Cation');
+      const anions = ION_DATA.filter(ion => ion.type === 'Anion');
+      
+      const c = cations[Math.floor(Math.random() * cations.length)];
+      const a = anions[Math.floor(Math.random() * anions.length)];
+      
+      const cName = c.name.replace(' ion', '');
+      const aName = a.name.replace(' ion', '').toLowerCase();
+      const compoundName = `${cName} ${aName}`;
+      
+      const cCharge = parseInt(c.charge.replace(/[^0-9]/g, '')) || 1; 
+      const aCharge = parseInt(a.charge.replace(/[^0-9]/g, '')) || 1;
+      
+      let cSub = aCharge;
+      let aSub = cCharge;
+      
+      if (cSub === aSub) {
+        cSub = 1;
+        aSub = 1;
+      } else if (cSub % 2 === 0 && aSub % 2 === 0) {
+        cSub /= 2;
+        aSub /= 2;
+      }
+      
+      const cBaseHtml = c.formula.split('<sup')[0];
+      const aBaseHtml = a.formula.split('<sup')[0];
+      const cBasePlain = getPlainFormula(cBaseHtml);
+      const aBasePlain = getPlainFormula(aBaseHtml);
+      
+      const isPoly = (plain) => (plain.match(/[A-Z]/g) || []).length > 1;
+      const cIsPoly = isPoly(cBasePlain);
+      const aIsPoly = isPoly(aBasePlain);
+      
+      const formatPart = (base, isPoly, sub, isHtml) => {
+        if (sub === 1) return base;
+        if (isPoly) {
+          return isHtml ? `(${base})<sub>${sub}</sub>` : `(${base})${sub}`;
+        }
+        return isHtml ? `${base}<sub>${sub}</sub>` : `${base}${sub}`;
+      };
+      
+      const plainFormula = formatPart(cBasePlain, cIsPoly, cSub, false) + formatPart(aBasePlain, aIsPoly, aSub, false);
+      const htmlFormula = formatPart(cBaseHtml, cIsPoly, cSub, true) + formatPart(aBaseHtml, aIsPoly, aSub, true);
+      
+      return {
+        id: `comp-${Date.now()}`,
+        type: 'Compound',
+        name: compoundName,
+        expectedPlain: plainFormula,
+        formula: htmlFormula,
+        charge: 'NEUTRAL'
+      };
+    };
+
+    // UI Updates
+    const updateDeck = () => {
+      let newDeck = ION_DATA;
+      if (state.activeCategory !== 'All') {
+        newDeck = ION_DATA.filter(item => item.type === state.activeCategory);
+      }
+      if (state.isShuffled) {
+        newDeck = [...newDeck].sort(() => Math.random() - 0.5);
+      }
+      state.deck = newDeck;
+      state.currentIndex = 0;
+      setFlipped(false);
+      resetInput();
+      renderApp();
+    };
+
+    const setFlipped = (flipped) => {
+      state.isFlipped = flipped;
+      if (flipped) {
+        els.cardInner.classList.add('rotate-y-180');
+      } else {
+        els.cardInner.classList.remove('rotate-y-180');
+      }
+    };
+
+    const resetInput = () => {
+      els.typingInput.value = '';
+      state.inputState = 'idle';
+      updateInputStyles();
+    };
+
+    const updateInputStyles = () => {
+      els.inputWrapper.className = `relative flex items-center border-b-2 bg-neutral-950/80 px-4 py-3 transition-colors ${
+        state.inputState === 'error' ? 'border-red-500 text-red-500 animate-shake' : 
+        state.inputState === 'success' ? 'border-lime-500 text-lime-400' : 
+        state.appMode === 'compound' ? 'border-fuchsia-500/50 text-fuchsia-400 focus-within:border-fuchsia-400 focus-within:bg-neutral-900' :
+        'border-cyan-500/50 text-cyan-400 focus-within:border-cyan-400 focus-within:bg-neutral-900'
+      }`;
+
+      // Restart animation if error
+      if (state.inputState === 'error') {
+        els.inputWrapper.classList.remove('animate-shake');
+        void els.inputWrapper.offsetWidth; // Trigger reflow
+        els.inputWrapper.classList.add('animate-shake');
+      }
+
+      els.inputStatus.className = `absolute right-4 text-xs tracking-widest ${state.inputState !== 'idle' ? 'block' : 'hidden'} ${
+        state.inputState === 'success' ? 'text-lime-500' : 'text-red-500'
+      }`;
+      els.inputStatus.innerText = state.inputState === 'success' ? 'MATCH' : 'ERR';
+    };
+
+    const buildCategories = () => {
+      els.categoryFilters.innerHTML = '';
+      categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.innerText = cat;
+        btn.className = `px-3 py-1.5 text-[10px] uppercase tracking-widest border transition-colors ${
+          state.activeCategory === cat 
+          ? 'border-lime-500 text-lime-400 bg-lime-500/10' 
+          : 'border-neutral-800 text-neutral-500 hover:border-neutral-600 hover:text-neutral-300 bg-neutral-900/50'
+        }`;
+        btn.onclick = () => {
+          if(state.appMode === 'compound') return;
+          state.activeCategory = cat;
+          updateDeck();
+          buildCategories();
+        };
+        els.categoryFilters.appendChild(btn);
+      });
+    };
+
+    const renderApp = () => {
+      const displayData = state.appMode === 'compound' ? state.currentCompound : state.deck[state.currentIndex];
+      const isInteractiveMode = state.appMode === 'typing' || state.appMode === 'compound';
+
+      // Header Controls Visuals
+      const isCompound = state.appMode === 'compound';
+      els.categoryFilters.className = `flex flex-wrap gap-2 ${isCompound ? 'opacity-30 pointer-events-none' : ''}`;
+      els.divider.className = `hidden sm:block w-px h-6 bg-neutral-800 ${isCompound ? 'opacity-30' : ''}`;
+      
+      els.btnShuffle.className = `px-3 py-1.5 text-[10px] uppercase tracking-widest border transition-all flex items-center gap-2 ${isCompound ? 'opacity-30 pointer-events-none' : ''} ${
+        state.isShuffled ? 'border-lime-500 text-[#050505] bg-lime-500' : 'border-neutral-800 text-neutral-500 hover:text-neutral-300 hover:border-neutral-600'
+      }`;
+      els.btnShuffle.innerText = `[ SHUFFLE: ${state.isShuffled ? 'ON' : 'OFF'} ]`;
+
+      els.btnMode.className = `px-3 py-1.5 text-[10px] uppercase tracking-widest border transition-all flex items-center gap-2 ${
+        state.appMode === 'typing' ? 'border-cyan-500 text-cyan-400 bg-cyan-500/10' : 
+        state.appMode === 'compound' ? 'border-fuchsia-500 text-fuchsia-400 bg-fuchsia-500/10' : 
+        'border-neutral-800 text-neutral-500 hover:text-neutral-300 hover:border-neutral-600'
+      }`;
+      els.btnMode.innerText = `[ MODE: ${state.appMode} ]`;
+
+      // Progress bar
+      els.progressBar.className = isCompound ? "w-full flex gap-[2px] mb-8 h-1 overflow-hidden relative bg-neutral-900" : "w-full flex gap-[2px] mb-8 h-1";
+      if (isCompound) {
+        els.progressBar.innerHTML = `<div class="absolute top-0 left-0 h-full w-1/4 bg-fuchsia-500/80 scanner-beam-horizontal blur-[2px]"></div>`;
+      } else if (state.deck.length > 0) {
+        els.progressBar.innerHTML = state.deck.map((_, idx) => `
+          <div class="flex-1 transition-colors duration-300 ${idx === state.currentIndex ? 'bg-lime-500' : idx < state.currentIndex ? 'bg-neutral-600' : 'bg-neutral-900'}"></div>
+        `).join('');
+      } else {
+        els.progressBar.innerHTML = '';
+      }
+
+      // Main Content
+      if (!displayData) {
+        els.mainContent.classList.add('hidden');
+        els.errorState.classList.remove('hidden');
+        els.errorState.innerText = isCompound ? '[ INITIALIZING SYNTHESIS CORE... ]' : '[ ERROR: NO DATA CONFIGURED FOR SELECTED CATEGORY ]';
+        return;
+      }
+      
+      els.mainContent.classList.remove('hidden');
+      els.errorState.classList.add('hidden');
+
+      // Card Content
+      els.frontIndex.innerText = isCompound ? '[ ENDLESS SYNTHESIS ]' : `[ INDEX: ${String(state.currentIndex + 1).padStart(3, '0')} ]`;
+      els.frontType.innerText = `// ${displayData.type.toUpperCase()} //`;
+      els.frontName.innerText = displayData.name;
+      
+      els.typingInput.placeholder = isCompound ? "e.g. Al2(SO4)3" : "e.g. Fe3+, SO42-";
+      
+      if (isInteractiveMode) {
+        els.interactiveUI.classList.remove('hidden');
+        els.idleUI.classList.add('hidden');
+      } else {
+        els.interactiveUI.classList.add('hidden');
+        els.idleUI.classList.remove('hidden');
+      }
+      updateInputStyles();
+
+      // Back face
+      const isClassType = ['Acid', 'Gas', 'Compound'].includes(displayData.type);
+      els.backClass.innerText = isClassType ? `CLASS: ${displayData.type.toUpperCase()}` : `CHG: ${displayData.charge}`;
+      els.backFormula.innerHTML = displayData.formula;
+      els.backName.innerText = displayData.name.toUpperCase();
+
+      // Navigation
+      els.textPrev.innerText = isCompound ? 'RND' : 'PRV';
+      els.textNext.innerText = isCompound ? 'RND' : 'NXT';
+      els.navStatus.innerText = isCompound ? 'SYNTHESIS ACTIVE' : `RECORD: ${String(state.currentIndex + 1).padStart(3, '0')} / ${String(state.deck.length).padStart(3, '0')}`;
+    };
+
+    // Actions
+    const checkAnswer = () => {
+      let displayData = state.appMode === 'compound' ? state.currentCompound : state.deck[state.currentIndex];
+      if (!displayData) return;
+
+      const correctStr = state.appMode === 'compound' 
+        ? displayData.expectedPlain 
+        : getPlainFormula(displayData.formula);
+      
+      const cleanInput = els.typingInput.value.replace(/\s+/g, '');
+      const cleanCorrect = correctStr.replace(/\s+/g, '');
+
+      if (cleanInput === cleanCorrect && cleanInput !== '') {
+        state.inputState = 'success';
+        updateInputStyles();
+        setTimeout(() => {
+          setFlipped(true);
+          state.inputState = 'idle';
+          updateInputStyles();
+        }, 400);
+      } else {
+        state.inputState = 'error';
+        updateInputStyles();
+        setTimeout(() => {
+          state.inputState = 'idle';
+          updateInputStyles();
+        }, 500);
+      }
+    };
+
+    const changeCard = (direction) => {
+      resetInput();
+      
+      const nextAction = () => {
+        if (state.appMode === 'compound') {
+          state.currentCompound = generateCompound();
+        } else {
+          if (state.deck.length > 0) {
+            state.currentIndex = (state.currentIndex + direction + state.deck.length) % state.deck.length;
+          }
+        }
+        renderApp();
+      };
+
+      if (state.isFlipped) {
+        setFlipped(false);
+        setTimeout(nextAction, 300);
+      } else {
+        nextAction();
+      }
+    };
+
+    // Event Listeners
+    els.btnShuffle.onclick = () => {
+      state.isShuffled = !state.isShuffled;
+      updateDeck();
+    };
+
+    els.btnMode.onclick = () => {
+      if (state.appMode === 'flashcard') state.appMode = 'typing';
+      else if (state.appMode === 'typing') state.appMode = 'compound';
+      else state.appMode = 'flashcard';
+      
+      if (state.appMode === 'compound' && !state.currentCompound) {
+        state.currentCompound = generateCompound();
+      }
+      
+      resetInput();
+      if (state.isFlipped) setFlipped(false);
+      buildCategories();
+      renderApp();
+    };
+
+    els.cardWrapper.onclick = () => setFlipped(!state.isFlipped);
+    els.interactiveUI.onclick = (e) => e.stopPropagation(); // prevent flip when clicking input
+    
+    els.btnPrev.onclick = (e) => { e.stopPropagation(); changeCard(-1); };
+    els.btnNext.onclick = (e) => { e.stopPropagation(); changeCard(1); };
+
+    els.typingInput.onkeydown = (e) => {
+      if (e.key === 'Enter') checkAnswer();
+    };
+
+    window.addEventListener('keydown', (e) => {
+      if (document.activeElement.tagName === 'INPUT') {
+        if (e.code === 'Escape') document.activeElement.blur();
+        return;
+      }
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setFlipped(!state.isFlipped);
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        changeCard(1);
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        changeCard(-1);
+      }
+    });
+
+    // Init
+    buildCategories();
+    updateDeck();
+    if (state.appMode === 'compound') {
+      state.currentCompound = generateCompound();
+      renderApp();
+    }
+    
+  </script>
+</body>
+</html>

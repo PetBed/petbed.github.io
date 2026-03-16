@@ -1,0 +1,2870 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hadestown · Annotation Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-solid: #080605;
+      --bg-surface: #0f0c08;
+      --bg-card: #181309;
+      --bg-card-hover: #1f1810;
+      --border: #272012;
+      --border-gold: #47350f;
+      --text: #e0cca6;
+      --text-muted: #79613d;
+      --text-dim: #3e2e18;
+      --gold: #c78c22;
+      --gold-bright: #e5a430;
+      --gold-dim: #7a5318;
+      --copper: #9e5018;
+      --hl-bg: rgba(199, 140, 34, 0.14);
+      --hl-border: rgba(199, 140, 34, 0.42);
+      --motif-color: #4a7a9b;
+      --choreo-color: #527a52;
+      --costume-color: #7a527a;
+      --player-h: 68px;
+      --sidebar-w: 360px;
+      --nav-h: 50px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-solid);
+      background-image:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(120, 60, 0, .06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(60, 30, 0, .08) 0%, transparent 60%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+      color: var(--text);
+      font-family: 'EB Garamond', Georgia, serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-h);
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 0;
+      z-index: 100;
+    }
+
+    .nav::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--gold-dim) 35%, var(--gold-dim) 65%, transparent 100%);
+      opacity: .5;
+    }
+
+    .nav-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 11px;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      cursor: pointer;
+      border: none;
+      background: none;
+      transition: color .2s;
+      white-space: nowrap;
+    }
+
+    .nav-brand:hover {
+      color: var(--text);
+    }
+
+    .nav-brand em {
+      color: var(--gold);
+      font-style: normal;
+    }
+
+    .nav-sep {
+      width: 1px;
+      height: 22px;
+      background: var(--border);
+      margin: 0 14px;
+      flex-shrink: 0;
+    }
+
+    .nav-chevron {
+      color: var(--text-dim);
+      font-size: 12px;
+      margin: 0 2px;
+      flex-shrink: 0;
+    }
+
+    .nav-song {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500;
+      font-size: 15px;
+      letter-spacing: .04em;
+      color: var(--text);
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-song small {
+      font-weight: 300;
+      font-style: italic;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
+
+    .nav-tabs {
+      display: flex;
+      flex-shrink: 0;
+    }
+
+    .nav-tab {
+      padding: 0 15px;
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      cursor: pointer;
+      border: none;
+      background: none;
+      border-bottom: 2px solid transparent;
+      position: relative;
+      top: 1px;
+      transition: color .2s, border-color .2s;
+    }
+
+    .nav-tab:hover {
+      color: var(--text);
+    }
+
+    .nav-tab.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+
+    .nav-action {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 13px;
+      margin-left: 8px;
+      border: 1px solid var(--border-gold);
+      border-radius: 3px;
+      background: none;
+      color: var(--gold);
+      cursor: pointer;
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      transition: all .15s;
+    }
+
+    .nav-action:hover {
+      background: rgba(199, 140, 34, .09);
+    }
+
+    /* ── SCREENS ── */
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* ── LIBRARY ── */
+    #view-library {
+      flex-direction: column;
+      min-height: 100vh;
+      padding: calc(var(--nav-h) + 52px) 52px 52px;
+    }
+
+    .lib-eyebrow {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: .3em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    .lib-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 38px;
+      letter-spacing: .02em;
+      color: var(--text);
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+
+    .lib-sub {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: 16px;
+      color: var(--text-muted);
+    }
+
+    .lib-header {
+      margin-bottom: 36px;
+    }
+
+    .song-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .song-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 20px 20px 16px;
+      cursor: pointer;
+      transition: border-color .18s, background .18s, transform .18s;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .song-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+      opacity: 0;
+      transition: opacity .18s;
+    }
+
+    .song-card:hover {
+      border-color: var(--border-gold);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+
+    .song-card:hover::before {
+      opacity: .8;
+    }
+
+    .sc-track {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .sc-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 20px;
+      letter-spacing: .02em;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .sc-meta {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .06em;
+      color: var(--text-muted);
+    }
+
+    .sc-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    .sc-ann-ct {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      color: var(--gold-dim);
+    }
+
+    .sc-ann-ct span {
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .sc-actions {
+      display: flex;
+      gap: 5px;
+      opacity: 0;
+      transition: opacity .15s;
+    }
+
+    .song-card:hover .sc-actions {
+      opacity: 1;
+    }
+
+    .sc-btn {
+      padding: 3px 8px;
+      border-radius: 2px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-muted);
+      transition: all .12s;
+    }
+
+    .sc-btn:hover {
+      border-color: var(--border-gold);
+      color: var(--gold);
+    }
+
+    .sc-btn.danger:hover {
+      border-color: #8a3818;
+      color: #d44;
+      background: rgba(180, 50, 30, .1);
+    }
+
+    .song-card-add {
+      background: none;
+      border: 1px dashed var(--border);
+      border-radius: 5px;
+      padding: 20px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 130px;
+      transition: border-color .18s, background .18s;
+      color: var(--text-dim);
+    }
+
+    .song-card-add:hover {
+      border-color: var(--border-gold);
+      background: var(--bg-card);
+      color: var(--gold);
+    }
+
+    .song-card-add svg {
+      transition: transform .2s;
+    }
+
+    .song-card-add:hover svg {
+      transform: rotate(90deg) scale(1.1);
+    }
+
+    .song-card-add span {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    /* ── ANNOTATE LAYOUT ── */
+    #view-annotate {
+      height: 100vh;
+      padding-top: var(--nav-h);
+      padding-bottom: var(--player-h);
+      flex-direction: row;
+    }
+
+    .lyrics-panel {
+      flex: 1;
+      overflow-y: auto;
+      padding: 52px 36px 52px 44px;
+      max-width: calc(100% - var(--sidebar-w));
+      min-width: 0;
+      transition: max-width .32s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .sidebar-collapsed .lyrics-panel {
+      max-width: calc(100% - 18px);
+    }
+
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      border-left: 1px solid var(--border);
+      background: var(--bg-surface);
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: width .32s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .sidebar-collapsed .sidebar {
+      width: 18px;
+      overflow: hidden;
+    }
+
+    .sidebar-collapsed .sidebar .sb-head,
+    .sidebar-collapsed .sidebar .sb-body {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .15s;
+    }
+
+    .sidebar .sb-head,
+    .sidebar .sb-body {
+      transition: opacity .22s .08s;
+    }
+
+    .sb-toggle {
+      position: absolute;
+      top: 50%;
+      left: -1px;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 52px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-right: none;
+      border-radius: 4px 0 0 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      transition: background .15s, border-color .15s;
+      color: var(--text-dim);
+    }
+
+    .sb-toggle:hover {
+      background: var(--bg-card);
+      border-color: var(--border-gold);
+      color: var(--gold);
+    }
+
+    .sb-toggle svg {
+      transition: transform .32s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .sidebar-collapsed .sb-toggle {
+      left: 0;
+      border-radius: 0 4px 4px 0;
+      border-right: 1px solid var(--border);
+      border-left: none;
+    }
+
+    .sidebar-collapsed .sb-toggle svg {
+      transform: rotate(180deg);
+    }
+
+    /* ── SONG HEADER ── */
+    .song-header {
+      margin-bottom: 44px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    .song-header::after {
+      content: '✦ ✦ ✦';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-solid);
+      padding: 0 14px;
+      color: var(--text-dim);
+      font-size: 8px;
+      letter-spacing: .3em;
+    }
+
+    .track-no {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .song-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 44px;
+      letter-spacing: .02em;
+      color: var(--text);
+      line-height: 1.1;
+      margin-bottom: 14px;
+    }
+
+    .song-meta {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: .1em;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .meta-item .lbl {
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    /* ── LYRICS ── */
+    .section-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding-left: 62px;
+      margin: 30px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-label::after {
+      content: '';
+      height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+      flex: 1;
+      max-width: 100px;
+    }
+
+    .lyric-line {
+      display: flex;
+      align-items: baseline;
+      padding: 2px 0;
+      position: relative;
+      border-radius: 2px;
+    }
+
+    .line-num {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+      min-width: 34px;
+      text-align: right;
+      margin-right: 14px;
+      user-select: none;
+      padding-top: 3px;
+      flex-shrink: 0;
+    }
+
+    .line-dots {
+      min-width: 14px;
+      margin-right: 10px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding-top: 6px;
+      align-items: center;
+    }
+
+    .ann-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform .15s;
+      flex-shrink: 0;
+    }
+
+    .ann-dot:hover {
+      transform: scale(1.6);
+    }
+
+    .ann-dot.t-lyrics {
+      background: var(--gold);
+    }
+
+    .ann-dot.t-motif {
+      background: var(--motif-color);
+    }
+
+    .ann-dot.t-choreo {
+      background: var(--choreo-color);
+    }
+
+    .ann-dot.t-costume {
+      background: var(--costume-color);
+    }
+
+    .line-text {
+      font-family: 'EB Garamond', serif;
+      font-size: 20px;
+      line-height: 1.8;
+      color: var(--text);
+      cursor: text;
+      flex: 1;
+      position: relative;
+    }
+
+    .line-text .spkr {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--copper);
+      margin-right: 10px;
+    }
+
+    .line-text mark {
+      background: var(--hl-bg);
+      border-bottom: 1px solid var(--hl-border);
+      color: inherit;
+      border-radius: 2px;
+      padding: 0 2px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    .line-text mark:hover {
+      background: rgba(199, 140, 34, .26);
+    }
+
+    .line-text mark.t-motif {
+      background: rgba(74, 122, 155, .13);
+      border-bottom-color: rgba(74, 122, 155, .5);
+    }
+
+    .line-text mark.t-choreo {
+      background: rgba(82, 122, 82, .13);
+      border-bottom-color: rgba(82, 122, 82, .5);
+    }
+
+    .spacer-line {
+      height: 10px;
+    }
+
+    /* ── SELECTION TOOLBAR ── */
+    .sel-toolbar {
+      position: fixed;
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-gold);
+      border-radius: 4px;
+      padding: 4px;
+      gap: 1px;
+      z-index: 200;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, .7);
+    }
+
+    .sel-toolbar.on {
+      display: flex;
+      animation: tin .12s ease-out;
+    }
+
+    @keyframes tin {
+      from {
+        opacity: 0;
+        transform: translateY(5px) scale(.97);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .tb-btn {
+      padding: 6px 11px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 2px;
+      transition: background .12s, color .12s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .tb-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text);
+    }
+
+    .tb-btn.hi {
+      color: var(--gold);
+    }
+
+    .tb-btn.hi:hover {
+      background: rgba(199, 140, 34, .1);
+      color: var(--gold-bright);
+    }
+
+    .tb-sep {
+      width: 1px;
+      height: 18px;
+      background: var(--border);
+      margin: auto 0;
+    }
+
+    /* ── OVERLAYS ── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 3, 2, .75);
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+
+    .overlay.on {
+      display: flex;
+    }
+
+    @keyframes min {
+      from {
+        opacity: 0;
+        transform: scale(.96) translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 1;
+      transition: color .15s;
+      flex-shrink: 0;
+      padding: 2px 4px;
+    }
+
+    .close-btn:hover {
+      color: var(--text);
+    }
+
+    .btn {
+      padding: 7px 18px;
+      border-radius: 3px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all .15s;
+    }
+
+    .btn-ghost {
+      background: none;
+      color: var(--text-muted);
+      border-color: var(--border);
+    }
+
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: var(--text-muted);
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: var(--bg-solid);
+      border-color: var(--gold);
+      font-weight: 700;
+    }
+
+    .btn-primary:hover {
+      background: var(--gold-bright);
+      border-color: var(--gold-bright);
+    }
+
+    .btn-danger {
+      background: none;
+      color: #c44;
+      border-color: #6a2020;
+    }
+
+    .btn-danger:hover {
+      background: rgba(180, 50, 30, .12);
+      border-color: #c44;
+    }
+
+    /* ── ANNOTATION EDITOR ── */
+    .ann-editor {
+      background: var(--bg-card);
+      border: 1px solid var(--border-gold);
+      border-radius: 6px;
+      width: 520px;
+      max-width: 95vw;
+      max-height: 88vh;
+      overflow-y: auto;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, .85);
+      animation: min .18s ease-out;
+    }
+
+    .ed-head {
+      padding: 14px 18px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .ed-quote {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: 15px;
+      color: var(--gold);
+      background: rgba(199, 140, 34, .07);
+      border-left: 2px solid var(--gold-dim);
+      padding: 6px 10px;
+      border-radius: 0 3px 3px 0;
+      flex: 1;
+      line-height: 1.5;
+    }
+
+    .ed-body {
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
+    .ed-textarea {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: 'EB Garamond', serif;
+      font-size: 16px;
+      line-height: 1.65;
+      padding: 9px 11px;
+      resize: vertical;
+      min-height: 90px;
+      width: 100%;
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .ed-textarea:focus {
+      border-color: var(--gold-dim);
+    }
+
+    .ed-textarea::placeholder {
+      color: var(--text-dim);
+    }
+
+    .ed-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .ed-lbl {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      min-width: 46px;
+      flex-shrink: 0;
+    }
+
+    .tier-chips {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .t-chip {
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .1em;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-muted);
+      transition: all .15s;
+    }
+
+    .t-chip:hover {
+      border-color: var(--border-gold);
+      color: var(--text);
+    }
+
+    .t-chip.sel-lyrics {
+      background: rgba(199, 140, 34, .14);
+      border-color: var(--gold-dim);
+      color: var(--gold);
+    }
+
+    .t-chip.sel-motif {
+      background: rgba(74, 122, 155, .14);
+      border-color: var(--motif-color);
+      color: #6aafd4;
+    }
+
+    .t-chip.sel-choreo {
+      background: rgba(82, 122, 82, .14);
+      border-color: var(--choreo-color);
+      color: #7abf7a;
+    }
+
+    .t-chip.sel-costume {
+      background: rgba(122, 82, 122, .14);
+      border-color: var(--costume-color);
+      color: #b07ac8;
+    }
+
+    .tags-input {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      padding: 5px 9px;
+      width: 100%;
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .tags-input:focus {
+      border-color: var(--gold-dim);
+    }
+
+    .tags-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .ts-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .ts-lbl {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .ts-lbl input[type=checkbox] {
+      accent-color: var(--gold);
+      cursor: pointer;
+    }
+
+    .ts-lbl span {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .ts-input {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--gold);
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      padding: 4px 7px;
+      width: 68px;
+      text-align: center;
+      outline: none;
+    }
+
+    .ed-foot {
+      padding: 10px 18px 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 7px;
+    }
+
+    /* ── ANNOTATION VIEWER ── */
+    .ann-viewer {
+      background: var(--bg-card);
+      border: 1px solid var(--border-gold);
+      border-radius: 6px;
+      width: 460px;
+      max-width: 95vw;
+      max-height: 82vh;
+      overflow-y: auto;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, .85);
+      animation: min .18s ease-out;
+    }
+
+    .vw-head {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tier-badge {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 3px;
+    }
+
+    .vw-body {
+      padding: 16px 18px;
+    }
+
+    .vw-quote {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: 17px;
+      color: var(--gold);
+      border-left: 2px solid var(--gold-dim);
+      padding: 7px 13px;
+      margin-bottom: 14px;
+      background: rgba(199, 140, 34, .06);
+      line-height: 1.5;
+    }
+
+    .vw-content {
+      font-family: 'EB Garamond', serif;
+      font-size: 16px;
+      color: var(--text);
+      line-height: 1.72;
+      margin-bottom: 12px;
+    }
+
+    .vw-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 4px;
+    }
+
+    .vw-foot {
+      padding: 10px 18px 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ts-play-btn {
+      padding: 5px 11px;
+      background: rgba(74, 122, 155, .14);
+      border: 1px solid rgba(74, 122, 155, .42);
+      border-radius: 3px;
+      color: #6aafd4;
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    .ts-play-btn:hover {
+      background: rgba(74, 122, 155, .26);
+    }
+
+    /* ── SONG MODAL ── */
+    .song-modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border-gold);
+      border-radius: 6px;
+      width: 640px;
+      max-width: 96vw;
+      max-height: 92vh;
+      overflow: hidden;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, .88);
+      display: flex;
+      flex-direction: column;
+      animation: min .18s ease-out;
+    }
+
+    .sm-head {
+      padding: 16px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .sm-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 20px;
+      letter-spacing: .04em;
+      color: var(--text);
+    }
+
+    .sm-body {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    .sm-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .sm-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .sm-field.half {
+      flex: 0 0 calc(50% - 6px);
+    }
+
+    .sm-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .sm-input {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: 'EB Garamond', serif;
+      font-size: 15px;
+      padding: 7px 10px;
+      outline: none;
+      transition: border-color .15s;
+      width: 100%;
+    }
+
+    .sm-input:focus {
+      border-color: var(--gold-dim);
+    }
+
+    .sm-input::placeholder {
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    .led-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .led-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .led-hint {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .04em;
+      color: var(--text-dim);
+      line-height: 1.75;
+      padding: 8px 10px;
+      background: var(--bg-surface);
+      border-left: 2px solid var(--border-gold);
+      border-radius: 0 3px 3px 0;
+    }
+
+    .led-hint code {
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, .04);
+      padding: 1px 4px;
+      border-radius: 2px;
+    }
+
+    .led-ta {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+      line-height: 1.8;
+      padding: 10px 12px;
+      resize: vertical;
+      min-height: 220px;
+      width: 100%;
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .led-ta:focus {
+      border-color: var(--gold-dim);
+    }
+
+    .led-ta::placeholder {
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    .led-preview {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      color: var(--text-dim);
+      letter-spacing: .05em;
+      min-height: 14px;
+    }
+
+    .upload-label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 10px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      transition: all .15s;
+    }
+
+    .upload-label:hover {
+      border-color: var(--border-gold);
+      color: var(--gold);
+    }
+
+    .upload-label input[type=file] {
+      display: none;
+    }
+
+    .sm-foot {
+      padding: 12px 20px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .sm-foot .left {
+      margin-right: auto;
+    }
+
+    /* ── SIDEBAR ── */
+    .sb-head {
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg-surface);
+      z-index: 10;
+    }
+
+    .sb-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 14px;
+      letter-spacing: .08em;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 9px;
+    }
+
+    .ann-badge {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      color: var(--gold);
+      background: rgba(199, 140, 34, .1);
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+
+    .filter-chips {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .f-chip {
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .08em;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-muted);
+      transition: all .15s;
+    }
+
+    .f-chip:hover {
+      border-color: var(--border-gold);
+      color: var(--text);
+    }
+
+    .f-chip.on {
+      border-color: var(--gold-dim);
+      color: var(--gold);
+      background: rgba(199, 140, 34, .07);
+    }
+
+    .sb-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px 0;
+    }
+
+    .ann-card {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background .12s;
+    }
+
+    .ann-card:hover {
+      background: var(--bg-card);
+    }
+
+    .ac-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      margin-bottom: 5px;
+    }
+
+    .ac-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    .ac-quote {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: var(--gold);
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .ac-body {
+      font-family: 'EB Garamond', serif;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 7px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .ac-foot {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .ac-tag {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      color: var(--text-dim);
+      background: var(--bg-surface);
+      padding: 1px 5px;
+      border-radius: 2px;
+    }
+
+    .ac-ts {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      color: var(--motif-color);
+      margin-left: auto;
+    }
+
+    .motif-ledger {
+      padding: 12px;
+    }
+
+    .motif-card {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 7px;
+      background: var(--bg-card);
+      transition: border-color .15s;
+    }
+
+    .motif-card:hover {
+      border-color: var(--border-gold);
+    }
+
+    .m-id {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      color: var(--motif-color);
+      letter-spacing: .12em;
+      margin-bottom: 3px;
+    }
+
+    .m-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+
+    .m-desc {
+      font-family: 'EB Garamond', serif;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-bottom: 6px;
+    }
+
+    .m-occur {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      color: var(--text-dim);
+      letter-spacing: .06em;
+    }
+
+    .empty {
+      padding: 36px 16px;
+      text-align: center;
+      color: var(--text-dim);
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* ── PLAYER ── */
+    .player {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--player-h);
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 14px;
+      z-index: 100;
+    }
+
+    .player::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--gold-dim) 30%, var(--gold-dim) 70%, transparent 100%);
+      opacity: .45;
+    }
+
+    .pl-info {
+      min-width: 150px;
+    }
+
+    .pl-song {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pl-artist {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      color: var(--text-muted);
+      letter-spacing: .1em;
+      margin-top: 1px;
+    }
+
+    .pl-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .c-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      transition: all .15s;
+    }
+
+    .c-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, .04);
+    }
+
+    .c-btn.play-btn {
+      width: 36px;
+      height: 36px;
+      background: var(--gold);
+      color: var(--bg-solid);
+      font-size: 13px;
+    }
+
+    .c-btn.play-btn:hover {
+      background: var(--gold-bright);
+      transform: scale(1.05);
+    }
+
+    .pl-progress {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .time-d {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      min-width: 32px;
+      text-align: center;
+    }
+
+    .prog-track {
+      flex: 1;
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .prog-fill {
+      height: 100%;
+      background: var(--gold);
+      border-radius: 2px;
+      width: 0%;
+      transition: width .4s linear;
+      position: relative;
+    }
+
+    .prog-fill::after {
+      content: '';
+      position: absolute;
+      right: -4px;
+      top: -3px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--gold);
+      opacity: 0;
+      transition: opacity .15s;
+    }
+
+    .prog-track:hover .prog-fill::after {
+      opacity: 1;
+    }
+
+    .prog-markers {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .prog-marker {
+      position: absolute;
+      top: -4px;
+      width: 3px;
+      height: 11px;
+      border-radius: 2px;
+      opacity: .7;
+    }
+
+    .pl-extras {
+      display: flex;
+      gap: 5px;
+    }
+
+    .xtra-btn {
+      padding: 3px 9px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-muted);
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .xtra-btn:hover {
+      border-color: var(--border-gold);
+      color: var(--gold);
+    }
+
+    .xtra-btn.on {
+      border-color: var(--gold-dim);
+      color: var(--gold);
+      background: rgba(199, 140, 34, .07);
+    }
+
+    /* ── TOAST / CONFIRM ── */
+    .toast {
+      position: fixed;
+      bottom: calc(var(--player-h) + 14px);
+      right: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-gold);
+      border-radius: 4px;
+      padding: 8px 14px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      color: var(--gold);
+      z-index: 500;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: all .2s;
+      pointer-events: none;
+    }
+
+    .toast.on {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .confirm-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-gold);
+      border-radius: 5px;
+      padding: 24px 24px 18px;
+      width: 360px;
+      max-width: 94vw;
+      animation: min .15s ease-out;
+    }
+
+    .confirm-box p {
+      font-family: 'EB Garamond', serif;
+      font-size: 16px;
+      color: var(--text);
+      line-height: 1.65;
+      margin-bottom: 18px;
+    }
+
+    .confirm-box em {
+      color: var(--gold);
+      font-style: italic;
+    }
+
+    .confirm-btns {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-solid);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-gold);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gold-dim);
+    }
+
+    /* ── Loading states ── */
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: .4;
+      }
+
+      50% {
+        opacity: .9;
+      }
+    }
+
+    .skel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      min-height: 130px;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    .lib-spinner {
+      grid-column: 1/-1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 48px 0;
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .lib-spinner::before {
+      content: '';
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1px solid var(--border-gold);
+      border-top-color: var(--gold);
+      animation: spin .8s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .song-view-loading {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      gap: 10px;
+    }
+
+    .song-view-loading::before {
+      content: '';
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1px solid var(--border-gold);
+      border-top-color: var(--gold);
+      animation: spin .8s linear infinite;
+    }
+
+    .sm-loading {
+      padding: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .sm-loading::before {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1px solid var(--border-gold);
+      border-top-color: var(--gold);
+      animation: spin .8s linear infinite;
+    }
+
+    .toast.err {
+      border-color: #8a3818 !important;
+      color: #d47 !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <button class="nav-brand" id="nav-brand"><em>H</em>adestown</button>
+    <div class="nav-sep" id="nav-sep" style="display:none"></div>
+    <span class="nav-chevron" id="nav-chevron" style="display:none">›</span>
+    <span class="nav-song" id="nav-song" style="display:none"></span>
+    <div class="nav-tabs" id="nav-tabs" style="display:none">
+      <button class="nav-tab active" data-panel="lyrics">Lyrics</button>
+      <button class="nav-tab" data-panel="motifs">Motif Ledger</button>
+      <button class="nav-tab" data-panel="export">Export</button>
+    </div>
+    <span id="nav-spacer" style="flex:1"></span>
+    <button class="nav-action" id="nav-add-song">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8"
+        stroke-linecap="round">
+        <line x1="5" y1="1" x2="5" y2="9" />
+        <line x1="1" y1="5" x2="9" y2="5" />
+      </svg>
+      Add Song
+    </button>
+  </nav>
+
+  <!-- LIBRARY -->
+  <div id="view-library" class="screen active">
+    <div class="lib-header">
+      <div class="lib-eyebrow">Song Library</div>
+      <h1 class="lib-title">Hadestown</h1>
+      <div class="lib-sub">Original Broadway Cast Recording · Anaïs Mitchell</div>
+    </div>
+    <div class="song-grid" id="song-grid"></div>
+  </div>
+
+  <!-- ANNOTATE -->
+  <div id="view-annotate" class="screen">
+    <main class="lyrics-panel" id="lyrics-panel">
+      <header class="song-header">
+        <div class="track-no">
+          <span id="track-label">Track 01</span>
+          <button class="sc-btn" id="edit-song-btn">✎ Edit Song</button>
+        </div>
+        <h1 class="song-title" id="song-title-el"></h1>
+        <div class="song-meta" id="song-meta-el"></div>
+      </header>
+      <div id="lyrics-root"></div>
+    </main>
+    <aside class="sidebar">
+      <button class="sb-toggle" id="sb-toggle">
+        <svg width="8" height="12" viewBox="0 0 8 12" fill="none" stroke="currentColor" stroke-width="1.6"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6,1 1,6 6,11" />
+        </svg>
+      </button>
+      <div class="sb-head" id="sb-head">
+        <div class="sb-title">Annotations<span class="ann-badge" id="sb-badge">0</span></div>
+        <div class="filter-chips" id="filter-chips">
+          <button class="f-chip on" data-tier="all">All</button>
+          <button class="f-chip" data-tier="lyrics">Lyrics</button>
+          <button class="f-chip" data-tier="motif">Motif</button>
+          <button class="f-chip" data-tier="choreo">Choreo</button>
+          <button class="f-chip" data-tier="costume">Costume</button>
+        </div>
+      </div>
+      <div class="sb-body" id="sb-body">
+        <div class="empty">Select any text to begin.</div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- PLAYER -->
+  <div class="player" id="player" style="display:none">
+    <div class="pl-info">
+      <div class="pl-song" id="pl-song-name">—</div>
+      <div class="pl-artist">Original Broadway Cast · 2019</div>
+    </div>
+    <div class="pl-controls">
+      <button class="c-btn"><svg width="13" height="13" viewBox="0 0 14 14" fill="currentColor">
+          <path d="M2 2h2v10H2zM12 2L5 7l7 5V2z" />
+        </svg></button>
+      <button class="c-btn play-btn" id="play-btn"><svg id="play-icon" width="13" height="13" viewBox="0 0 14 14"
+          fill="currentColor">
+          <path d="M3 2l10 5-10 5V2z" />
+        </svg></button>
+      <button class="c-btn"><svg width="13" height="13" viewBox="0 0 14 14" fill="currentColor">
+          <path d="M10 2h2v10h-2zM2 2l7 5-7 5V2z" />
+        </svg></button>
+    </div>
+    <div class="pl-progress">
+      <span class="time-d" id="t-cur">0:00</span>
+      <div class="prog-track" id="prog-track">
+        <div class="prog-fill" id="prog-fill">
+          <div class="prog-markers" id="prog-markers"></div>
+        </div>
+      </div>
+      <span class="time-d" id="t-total">0:00</span>
+    </div>
+    <div class="pl-extras">
+      <button class="xtra-btn" id="loop-btn">Loop</button>
+      <button class="xtra-btn" id="choreo-btn">Choreo</button>
+    </div>
+  </div>
+
+  <!-- SELECTION TOOLBAR -->
+  <div class="sel-toolbar" id="sel-toolbar">
+    <button class="tb-btn hi" id="tb-annotate">
+      <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M2 9.5l1-3L9 2l2 2-6 6-3 1z" />
+      </svg>
+      Annotate
+    </button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" id="tb-motif">
+      <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="6" cy="6" r="4" />
+        <path d="M6 2v8M2 6h8" />
+      </svg>
+      Motif
+    </button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" id="tb-ts">⏱ Anchor</button>
+  </div>
+
+  <!-- ANNOTATION EDITOR -->
+  <div class="overlay" id="editor-ov">
+    <div class="ann-editor">
+      <div class="ed-head">
+        <div class="ed-quote" id="ed-quote"></div><button class="close-btn" id="ed-close">×</button>
+      </div>
+      <div class="ed-body">
+        <textarea class="ed-textarea" id="ed-text" placeholder="Write your annotation…"></textarea>
+        <div class="ed-row">
+          <span class="ed-lbl">Tier</span>
+          <div class="tier-chips" id="tier-chips">
+            <button class="t-chip sel-lyrics" data-tier="lyrics">Lyrics</button>
+            <button class="t-chip" data-tier="motif">Motif</button>
+            <button class="t-chip" data-tier="choreo">Choreo</button>
+            <button class="t-chip" data-tier="costume">Costume</button>
+          </div>
+        </div>
+        <div class="ed-row">
+          <span class="ed-lbl">Tags</span>
+          <input class="tags-input" id="ed-tags" placeholder="greek-myth, callback, motif:descent  (comma-separated)">
+        </div>
+        <div class="ts-row">
+          <label class="ts-lbl"><input type="checkbox" id="ts-chk"><span>Anchor Timestamp</span></label>
+          <div id="ts-fields" style="display:none;gap:6px;align-items:center;">
+            <input class="ts-input" id="ts-s" placeholder="0:00">
+            <span style="color:var(--text-dim);font-size:12px;">→</span>
+            <input class="ts-input" id="ts-e" placeholder="0:00">
+          </div>
+        </div>
+      </div>
+      <div class="ed-foot">
+        <button class="btn btn-ghost" id="ed-cancel">Cancel</button>
+        <button class="btn btn-primary" id="ed-save">Save Annotation</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANNOTATION VIEWER -->
+  <div class="overlay" id="viewer-ov">
+    <div class="ann-viewer">
+      <div class="vw-head"><span class="tier-badge" id="vw-badge"></span><button class="close-btn"
+          id="vw-close">×</button></div>
+      <div class="vw-body">
+        <div class="vw-quote" id="vw-quote"></div>
+        <div class="vw-content" id="vw-content"></div>
+        <div class="vw-tags" id="vw-tags"></div>
+      </div>
+      <div class="vw-foot" id="vw-foot">
+        <span style="font-family:'Courier Prime';font-size:9px;color:var(--text-dim);margin-left:auto;"
+          id="vw-meta"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SONG MODAL (Add / Edit) -->
+  <div class="overlay" id="song-modal-ov">
+    <div class="song-modal">
+      <div class="sm-head">
+        <span class="sm-heading" id="sm-heading">Add Song</span>
+        <button class="close-btn" id="sm-close">×</button>
+      </div>
+      <div class="sm-body">
+        <!-- Metadata -->
+        <div class="sm-field">
+          <label class="sm-label">Song Title *</label>
+          <input class="sm-input" id="sm-name" placeholder="e.g. Way Down Hadestown">
+        </div>
+        <div class="sm-row">
+          <div class="sm-field half">
+            <label class="sm-label">Track Number</label>
+            <input class="sm-input" id="sm-track" type="number" min="1" placeholder="1">
+          </div>
+          <div class="sm-field half">
+            <label class="sm-label">Duration (m:ss)</label>
+            <input class="sm-input" id="sm-dur" placeholder="3:14">
+          </div>
+        </div>
+        <div class="sm-field">
+          <label class="sm-label">Composer / Lyricist</label>
+          <input class="sm-input" id="sm-composer" placeholder="Anaïs Mitchell">
+        </div>
+
+        <!-- Lyrics editor -->
+        <div class="led-section">
+          <div class="led-top">
+            <span class="sm-label">Lyrics</span>
+            <label class="upload-label">
+              <input type="file" id="txt-upload" accept=".txt,.md">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round">
+                <path d="M6 8V2m-3 3l3-3 3 3" />
+                <path d="M2 10h8" />
+              </svg>
+              Upload .txt
+            </label>
+          </div>
+          <div class="led-hint">
+            <code>[Section Name]</code> → section header &nbsp;·&nbsp;
+            <code>SPEAKER: line text</code> → attributed line &nbsp;·&nbsp;
+            Blank line → stanza break &nbsp;·&nbsp;
+            <code>// comment</code> → ignored
+          </div>
+          <textarea class="led-ta" id="sm-lyrics"
+            placeholder="[Intro]&#10;HERMES: Gather round and I will sing&#10;&#10;[Verse 1]&#10;HERMES: In the days before the cold began&#10;..."></textarea>
+          <div class="led-preview" id="sm-preview"></div>
+        </div>
+      </div>
+      <div class="sm-foot">
+        <div class="left"><button class="btn btn-danger" id="sm-delete" style="display:none">Delete Song</button></div>
+        <button class="btn btn-ghost" id="sm-cancel">Cancel</button>
+        <button class="btn btn-primary" id="sm-save">Save Song</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRM -->
+  <div class="overlay" id="confirm-ov">
+    <div class="confirm-box">
+      <p id="confirm-msg">Are you sure?</p>
+      <div class="confirm-btns">
+        <button class="btn btn-ghost" id="confirm-cancel">Cancel</button>
+        <button class="btn btn-danger" id="confirm-ok">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /* ═══════════════════════════════════════════
+       CONFIG
+       Set your Vercel deployment URL here.
+       During local development use http://localhost:3000
+    ═══════════════════════════════════════════ */
+    const API_BASE = 'https://wot-tau.vercel.app'; // ← update before deploying
+
+    /* ═══ HELPERS ═══ */
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const fmtTime = s => { const t = Math.floor(s || 0); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`; };
+    const parseTsStr = s => { const p = (s || '').split(':'); return p.length === 2 ? parseInt(p[0]) * 60 + parseFloat(p[1]) : parseFloat(s) || 0; };
+
+    const TIER_COLORS = { lyrics: '#c78c22', motif: '#4a7a9b', choreo: '#527a52', costume: '#7a527a' };
+    const TIER_STYLE = { lyrics: 'background:rgba(199,140,34,.12);color:#c78c22', motif: 'background:rgba(74,122,155,.12);color:#6aafd4', choreo: 'background:rgba(82,122,82,.12);color:#7abf7a', costume: 'background:rgba(122,82,122,.12);color:#b07ac8' };
+
+    let toastT;
+    function toast(msg, isErr = false) {
+      const el = $('toast');
+      el.textContent = msg;
+      el.classList.toggle('err', isErr);
+      el.classList.add('on');
+      clearTimeout(toastT);
+      toastT = setTimeout(() => { el.classList.remove('on', 'err'); }, 2800);
+    }
+
+    /* Disable a button while an async op runs, restore when done. */
+    function btnBusy(el, label = 'Saving…') {
+      const orig = el.textContent; el.textContent = label; el.disabled = true;
+      return () => { el.textContent = orig; el.disabled = false; };
+    }
+
+    /* ═══════════════════════════════════════════
+       API LAYER
+       - All fetch calls centralised here
+       - MongoDB _id normalised → .id string on every object
+    ═══════════════════════════════════════════ */
+    function normalise(v) {
+      if (!v || typeof v !== 'object') return v;
+      if (Array.isArray(v)) return v.map(normalise);
+      const o = {};
+      for (const [k, val] of Object.entries(v)) o[k] = normalise(val);
+      if (v._id !== undefined) o.id = String(v._id);
+      return o;
+    }
+
+    async function apiFetch(method, path, body) {
+      const opts = { method, headers: { 'Content-Type': 'application/json' } };
+      if (body !== undefined) opts.body = JSON.stringify(body);
+      let res, json;
+      try {
+        res = await fetch(`${API_BASE}${path}`, opts);
+        json = await res.json().catch(() => ({}));
+      } catch (e) {
+        throw new Error('Network error — is the API reachable?');
+      }
+      if (!res.ok) throw new Error(json.error || json.message || `API error ${res.status}`);
+      return normalise(json);
+    }
+
+    const api = {
+      songs: {
+        list: () => apiFetch('GET', '/api/songs'),
+        get: id => apiFetch('GET', `/api/songs/${id}`),
+        create: data => apiFetch('POST', '/api/songs', data),
+        update: (id, data) => apiFetch('PUT', `/api/songs/${id}`, data),
+        delete: id => apiFetch('DELETE', `/api/songs/${id}`),
+      },
+      annotations: {
+        list: (songId, params = {}) => {
+          const qs = new URLSearchParams(params).toString();
+          return apiFetch('GET', `/api/songs/${songId}/annotations${qs ? '?' + qs : ''}`);
+        },
+        create: (songId, data) => apiFetch('POST', `/api/songs/${songId}/annotations`, data),
+        update: (songId, annId, data) => apiFetch('PUT', `/api/songs/${songId}/annotations/${annId}`, data),
+        delete: (songId, annId) => apiFetch('DELETE', `/api/songs/${songId}/annotations/${annId}`),
+      },
+      motifs: {
+        list: () => apiFetch('GET', '/api/motifs'),
+        create: data => apiFetch('POST', '/api/motifs', data),
+        update: (id, data) => apiFetch('PUT', `/api/motifs/${id}`, data),
+        delete: id => apiFetch('DELETE', `/api/motifs/${id}`),
+      },
+    };
+
+    /* ═══ LYRICS PARSER ═══
+       Format per line:
+         [Section Name]   → new section
+         SPEAKER: text    → speaker attribution (ALL-CAPS prefix up to 25 chars)
+         plain text       → no speaker
+         blank            → spacer
+         // anything      → comment (ignored)
+    */
+    function parseLyricsText(raw) {
+      const lines = (raw || '').split('\n');
+      const result = [];
+      let id = 1, currentSection = null;
+
+      for (const rawLine of lines) {
+        const line = rawLine.trimEnd();
+        if (line.trimStart().startsWith('//')) continue;
+        const secMatch = line.match(/^\[(.+)\]$/);
+        if (secMatch) { currentSection = secMatch[1].trim(); continue; }
+        if (!line.trim()) {
+          result.push({ lineId: id++, section: null, speaker: null, text: '' });
+          continue;
+        }
+        const spkMatch = line.match(/^([A-Z][A-Z0-9 &'\/\-]{0,24}):\s(.+)$/);
+        if (spkMatch) {
+          result.push({ lineId: id++, section: currentSection, speaker: spkMatch[1].trim(), text: spkMatch[2].trim() });
+        } else {
+          result.push({ lineId: id++, section: currentSection, speaker: null, text: line.trim() });
+        }
+        currentSection = null;
+      }
+
+      // clean leading/trailing/double blank lines
+      const clean = [];
+      for (let i = 0; i < result.length; i++) {
+        const empty = !result[i].text;
+        if (empty && (i === 0 || i === result.length - 1)) continue;
+        if (empty && !result[i - 1]?.text) continue;
+        clean.push(result[i]);
+      }
+      return clean;
+    }
+
+    function lyricsToText(lyrics) {
+      const lines = [];
+      let lastSection = null;
+      for (const l of (lyrics || [])) {
+        if (!l.text) { lines.push(''); continue; }
+        if (l.section && l.section !== lastSection) {
+          lines.push(`[${l.section}]`);
+          lastSection = l.section;
+        }
+        lines.push(l.speaker ? `${l.speaker}: ${l.text}` : l.text);
+      }
+      return lines.join('\n');
+    }
+
+    /* ═══ STATE ═══ */
+    let librarySongs = [];   // lightweight list from GET /api/songs (no lyrics)
+    let currentSong = null; // full song object from GET /api/songs/:id  (with lyrics)
+    let currentAnns = [];   // annotations from GET /api/songs/:id/annotations
+    let currentSongId = null; // = currentSong?.id
+
+    const getSong = () => currentSong;
+    const getAnns = () => currentAnns;
+
+    /* ═══ REMAINING STATE ═══ */
+    let activeFilter = 'all';
+    let activeTier = 'lyrics';
+    let pending = null;      // text selection awaiting annotation
+    let editingSongId = null;      // song id open in song modal
+    let editingSong = null;      // full song object open in modal
+    let playTime = 0, playing = false, playTick = null;
+
+    /* ═══ ROUTING ═══ */
+    async function showLibrary() {
+      playing = false; clearInterval(playTick);
+      $('play-icon').innerHTML = '<path d="M3 2l10 5-10 5V2z"/>';
+
+      $('view-library').classList.add('active');
+      $('view-annotate').classList.remove('active');
+      $('player').style.display = 'none';
+
+      ['nav-sep', 'nav-chevron', 'nav-song', 'nav-tabs'].forEach(id => {
+        const el = $(id); if (el) el.style.display = 'none';
+      });
+      $('nav-spacer').style.display = '';
+      $('nav-add-song').style.display = '';
+      currentSong = null; currentAnns = []; currentSongId = null;
+
+      $('song-grid').innerHTML = '<div class="lib-spinner">Loading songs</div>';
+      try {
+        librarySongs = await api.songs.list();
+        renderLibrary();
+      } catch (e) {
+        toast(e.message, true);
+        $('song-grid').innerHTML = '<div class="empty" style="grid-column:1/-1">Could not load songs.<br><em style="font-size:13px">Check that the API is running.</em></div>';
+      }
+    }
+
+    async function openSong(id) {
+      $('view-library').classList.remove('active');
+      $('view-annotate').classList.add('active');
+      $('player').style.display = '';
+
+      $('nav-spacer').style.display = 'none';
+      $('nav-add-song').style.display = 'none';
+      ['nav-sep', 'nav-chevron', 'nav-song', 'nav-tabs'].forEach(elId => {
+        const el = $(elId); if (el) el.style.display = '';
+      });
+
+      // Show spinner inside lyrics panel while fetching
+      $('lyrics-panel').innerHTML = '<div class="song-view-loading">Loading song</div>';
+      $('sb-body').innerHTML = '<div class="empty">Loading…</div>';
+
+      try {
+        const [song, anns] = await Promise.all([
+          api.songs.get(id),
+          api.annotations.list(id),
+        ]);
+        currentSong = song; currentAnns = anns; currentSongId = song.id;
+
+        $('nav-song').innerHTML = `${esc(song.title)} <small>Track ${String(song.trackNo || '?').padStart(2, '0')} · OBC</small>`;
+        playTime = 0; updateProg();
+        $('t-total').textContent = song.durStr || fmtTime(song.dur || 0);
+        $('pl-song-name').textContent = song.title;
+
+        // Restore full lyrics panel structure (was replaced by spinner)
+        $('lyrics-panel').innerHTML = `
+      <header class="song-header">
+        <div class="track-no">
+          <span id="track-label"></span>
+          <button class="sc-btn" id="edit-song-btn">✎ Edit Song</button>
+        </div>
+        <h1 class="song-title" id="song-title-el"></h1>
+        <div class="song-meta" id="song-meta-el"></div>
+      </header>
+      <div id="lyrics-root"></div>`;
+
+        // Re-attach edit button listener (element was recreated above)
+        $('edit-song-btn').addEventListener('click', () => currentSongId && openSongModal(currentSongId));
+
+        renderSongHeader(song);
+        renderLyrics(song);
+        activeFilter = 'all';
+        document.querySelectorAll('.f-chip').forEach(c => c.classList.toggle('on', c.dataset.tier === 'all'));
+        renderSidebar();
+        updateMarkers();
+
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelector('.nav-tab[data-panel="lyrics"]').classList.add('active');
+        $('view-annotate').classList.remove('sidebar-collapsed');
+
+      } catch (e) {
+        toast(e.message, true);
+        $('lyrics-panel').innerHTML = `<div class="empty" style="padding:80px 0">Failed to load song.<br><em style="font-size:13px">${esc(e.message)}</em></div>`;
+      }
+    }
+
+    /* ═══ LIBRARY ═══ */
+    function renderLibrary() {
+      const grid = $('song-grid');
+      grid.innerHTML = '';
+
+      [...librarySongs].sort((a, b) => (a.trackNo || 99) - (b.trackNo || 99)).forEach(song => {
+        const anns = song.annotationCount || 0;
+        const card = document.createElement('div');
+        card.className = 'song-card';
+        card.innerHTML = `
+      <div class="sc-track">Track ${String(song.trackNo || '–').padStart(2, '0')}</div>
+      <div class="sc-title">${esc(song.title)}</div>
+      <div class="sc-meta">${esc(song.composer || 'Anaïs Mitchell')} · ${song.durStr || fmtTime(song.dur || 0)}</div>
+      <div class="sc-footer">
+        <span class="sc-ann-ct"><span>${anns}</span> annotation${anns !== 1 ? 's' : ''}</span>
+        <div class="sc-actions">
+          <button class="sc-btn" data-edit="${song.id}">✎ Edit</button>
+        </div>
+      </div>`;
+        card.addEventListener('click', e => {
+          if (e.target.closest('[data-edit]')) { e.stopPropagation(); openSongModal(song.id); return; }
+          openSong(song.id);
+        });
+        grid.appendChild(card);
+      });
+
+      // Add-song card
+      const add = document.createElement('div');
+      add.className = 'song-card-add';
+      add.innerHTML = `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="11" y1="4" x2="11" y2="18"/><line x1="4" y1="11" x2="18" y2="11"/></svg><span>Add Song</span>`;
+      add.addEventListener('click', () => openSongModal(null));
+      grid.appendChild(add);
+    }
+
+    /* ═══ SONG HEADER ═══ */
+    function renderSongHeader(song) {
+      const trackEl = $('track-label');
+      if (trackEl) trackEl.textContent = `Track ${String(song.trackNo || '?').padStart(2, '0')} of ${librarySongs.length || '?'}`;
+      const titleEl = $('song-title-el');
+      if (titleEl) titleEl.textContent = song.title;
+      const metaEl = $('song-meta-el');
+      if (metaEl) metaEl.innerHTML = `
+    <span class="meta-item"><span class="lbl">From</span> Hadestown (2019)</span>
+    <span class="meta-item"><span class="lbl">Music &amp; Lyrics</span> ${esc(song.composer || 'Anaïs Mitchell')}</span>
+    <span class="meta-item"><span class="lbl">Duration</span> ${song.durStr || fmtTime(song.dur || 0)}</span>
+    <span class="meta-item"><span class="lbl">Annotations</span> <span id="ann-total">${getAnns().length}</span></span>`;
+    }
+
+    /* ═══ LYRICS RENDER ═══ */
+    function renderLyrics(song) {
+      const root = $('lyrics-root'); root.innerHTML = '';
+      const lyrics = song?.lyrics || [];
+      if (!lyrics.length) {
+        root.innerHTML = '<div class="empty" style="padding:48px 0">No lyrics yet.<br><em style="font-size:13px">Click "Edit Song" above to add lyrics.</em></div>';
+        rebuildDots(); return;
+      }
+      let section = null, lineNum = 0;
+      lyrics.forEach(l => {
+        if (l.section && l.section !== section) {
+          section = l.section;
+          const lbl = document.createElement('div');
+          lbl.className = 'section-label';
+          lbl.textContent = section.charAt(0).toUpperCase() + section.slice(1);
+          root.appendChild(lbl);
+        }
+        if (!l.text) { const sp = document.createElement('div'); sp.className = 'spacer-line'; root.appendChild(sp); return; }
+        lineNum++;
+        const row = document.createElement('div'); row.className = 'lyric-line'; row.dataset.lineId = l.lineId;
+        const num = document.createElement('span'); num.className = 'line-num'; num.textContent = lineNum;
+        const dots = document.createElement('div'); dots.className = 'line-dots'; dots.id = `dots-${l.lineId}`;
+        const txt = document.createElement('span'); txt.className = 'line-text'; txt.dataset.lineId = l.lineId; txt.id = `lt-${l.lineId}`;
+        if (l.speaker) { const sp = document.createElement('span'); sp.className = 'spkr'; sp.textContent = l.speaker + ':'; txt.appendChild(sp); }
+        txt.appendChild(document.createTextNode(l.text));
+        row.appendChild(num); row.appendChild(dots); row.appendChild(txt);
+        root.appendChild(row);
+      });
+      getAnns().forEach(a => applyHL(a));
+      rebuildDots();
+    }
+
+    function applyHL(ann) {
+      const el = $(`lt-${ann.lineId}`); if (!el) return;
+      if (el.querySelector(`mark[data-aid="${ann.id}"]`)) return;
+      let tn = null; el.childNodes.forEach(n => { if (n.nodeType === 3) tn = n; });
+      if (!tn) return;
+      const full = tn.textContent;
+      const pre = full.substring(0, ann.startChar), mid = full.substring(ann.startChar, ann.endChar), post = full.substring(ann.endChar);
+      if (!mid) return;
+      const mark = document.createElement('mark');
+      mark.dataset.aid = ann.id;
+      mark.className = ann.tier === 'lyrics' ? '' : `t-${ann.tier}`;
+      mark.textContent = mid;
+      mark.addEventListener('click', e => { e.stopPropagation(); openViewer(ann.id); });
+      tn.replaceWith(document.createTextNode(pre), mark, document.createTextNode(post));
+    }
+
+    function rebuildDots() {
+      document.querySelectorAll('.line-dots').forEach(d => d.innerHTML = '');
+      const byLine = {};
+      getAnns().forEach(a => { (byLine[a.lineId] || (byLine[a.lineId] = [])).push(a); });
+      Object.entries(byLine).forEach(([lid, anns]) => {
+        const el = $(`dots-${lid}`); if (!el) return;
+        anns.forEach(a => {
+          const d = document.createElement('div');
+          d.className = `ann-dot t-${a.tier}`;
+          d.title = `"${a.selectedText}" — ${a.tier}`;
+          d.addEventListener('click', () => openViewer(a.id));
+          el.appendChild(d);
+        });
+      });
+      const total = getAnns().length;
+      const el = $('ann-total'); if (el) el.textContent = total;
+      $('sb-badge').textContent = total;
+    }
+
+    /* ═══ SIDEBAR ═══ */
+    function renderSidebar() {
+      const body = $('sb-body');
+      const list = activeFilter === 'all' ? getAnns() : getAnns().filter(a => a.tier === activeFilter);
+      if (!list.length) { body.innerHTML = '<div class="empty">No annotations in this tier yet.</div>'; return; }
+      body.innerHTML = '';
+      list.forEach(a => {
+        const card = document.createElement('div'); card.className = 'ann-card';
+        card.innerHTML = `
+      <div class="ac-top"><div class="ac-dot" style="background:${TIER_COLORS[a.tier] || TIER_COLORS.lyrics}"></div><div class="ac-quote">"${esc(a.selectedText)}"</div></div>
+      <div class="ac-body">${esc(a.content)}</div>
+      <div class="ac-foot">
+        ${a.tags.slice(0, 3).map(t => `<span class="ac-tag">${esc(t)}</span>`).join('')}
+        ${a.tsAnchor ? `<span class="ac-ts">⏱ ${fmtTime(a.tsAnchor.start)}</span>` : ''}
+      </div>`;
+        card.addEventListener('click', () => openViewer(a.id));
+        body.appendChild(card);
+      });
+    }
+
+    document.querySelectorAll('.f-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.f-chip').forEach(c => c.classList.remove('on'));
+        chip.classList.add('on'); activeFilter = chip.dataset.tier; renderSidebar();
+      });
+    });
+
+    /* ═══ SELECTION TOOLBAR ═══ */
+    document.addEventListener('mouseup', e => {
+      const tb = $('sel-toolbar');
+      if (tb.contains(e.target)) return;
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed || !sel.toString().trim()) { tb.classList.remove('on'); return; }
+      const range = sel.getRangeAt(0);
+      const lp = $('lyrics-panel');
+      if (!lp || !lp.contains(range.commonAncestorContainer)) { tb.classList.remove('on'); return; }
+      let lineEl = range.commonAncestorContainer;
+      while (lineEl && !lineEl.dataset?.lineId) lineEl = lineEl.parentElement;
+      if (!lineEl) { tb.classList.remove('on'); return; }
+      const selText = sel.toString();
+      const song = getSong();
+      const lineData = song?.lyrics?.find(l => l.lineId === parseInt(lineEl.dataset.lineId));
+      const lineText = lineData?.text || '';
+      const startIdx = lineText.indexOf(selText);
+      pending = { lineId: parseInt(lineEl.dataset.lineId), startChar: startIdx >= 0 ? startIdx : 0, endChar: startIdx >= 0 ? startIdx + selText.length : selText.length, selectedText: selText.trim() };
+      const rect = range.getBoundingClientRect();
+      tb.style.left = `${Math.min(rect.left + rect.width / 2 - 90, window.innerWidth - 290)}px`;
+      tb.style.top = `${rect.top - 46 + window.scrollY}px`;
+      tb.classList.add('on');
+    });
+
+    $('tb-annotate').addEventListener('click', () => launchEditor(false, false));
+    $('tb-motif').addEventListener('click', () => launchEditor(true, false));
+    $('tb-ts').addEventListener('click', () => launchEditor(false, true));
+
+    function launchEditor(forceMotif, forceTs) {
+      if (!pending) return;
+      activeTier = forceMotif ? 'motif' : 'lyrics';
+      $('ed-quote').textContent = `"${pending.selectedText}"`;
+      $('ed-text').value = ''; $('ed-tags').value = '';
+      $('ts-chk').checked = forceTs;
+      $('ts-fields').style.display = forceTs ? 'flex' : 'none';
+      setTierChip(activeTier);
+      $('editor-ov').classList.add('on');
+      $('sel-toolbar').classList.remove('on');
+      window.getSelection()?.removeAllRanges();
+      setTimeout(() => $('ed-text').focus(), 80);
+    }
+
+    function setTierChip(tier) {
+      document.querySelectorAll('#tier-chips .t-chip').forEach(c => { c.className = `t-chip ${c.dataset.tier === tier ? 'sel-' + tier : ''}`; });
+      activeTier = tier;
+    }
+    document.querySelectorAll('#tier-chips .t-chip').forEach(c => c.addEventListener('click', () => setTierChip(c.dataset.tier)));
+    $('ts-chk').addEventListener('change', e => { $('ts-fields').style.display = e.target.checked ? 'flex' : 'none'; });
+
+    function closeEditor() { $('editor-ov').classList.remove('on'); }
+    $('ed-close').addEventListener('click', closeEditor);
+    $('ed-cancel').addEventListener('click', closeEditor);
+    $('editor-ov').addEventListener('click', e => { if (e.target === e.currentTarget) closeEditor(); });
+
+    $('ed-save').addEventListener('click', async () => {
+      const content = $('ed-text').value.trim();
+      if (!content || !pending) return;
+      const restore = btnBusy($('ed-save'));
+      try {
+        const tsOn = $('ts-chk').checked;
+        const tags = $('ed-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+        const ann = await api.annotations.create(currentSongId, {
+          lineId: pending.lineId,
+          startChar: pending.startChar,
+          endChar: pending.endChar,
+          selectedText: pending.selectedText,
+          content,
+          author: 'You',
+          tier: activeTier,
+          tags,
+          tsAnchor: tsOn && $('ts-s').value
+            ? { start: parseTsStr($('ts-s').value), end: parseTsStr($('ts-e').value || $('ts-s').value) }
+            : null,
+        });
+        currentAnns.push(ann);
+        applyHL(ann); rebuildDots(); renderSidebar(); updateMarkers();
+        renderSongHeader(getSong());
+        closeEditor();
+        toast('Annotation saved ✓');
+      } catch (e) {
+        toast(e.message, true);
+      } finally {
+        restore();
+      }
+    });
+
+    /* ═══ VIEWER ═══ */
+    function openViewer(id) {
+      const a = getAnns().find(x => x.id === id); if (!a) return;
+      $('vw-badge').textContent = a.tier.charAt(0).toUpperCase() + a.tier.slice(1);
+      $('vw-badge').style.cssText = TIER_STYLE[a.tier] || TIER_STYLE.lyrics;
+      $('vw-quote').textContent = `"${a.selectedText}"`;
+      $('vw-content').textContent = a.content;
+      $('vw-tags').innerHTML = a.tags.map(t => `<span class="ac-tag">${esc(t)}</span>`).join('');
+      $('vw-meta').textContent = `by ${a.author} · ${a.createdAt}`;
+      const foot = $('vw-foot'); foot.querySelector('.ts-play-btn')?.remove();
+      if (a.tsAnchor) {
+        const btn = document.createElement('button'); btn.className = 'ts-play-btn';
+        btn.textContent = `▶ ${fmtTime(a.tsAnchor.start)} → ${fmtTime(a.tsAnchor.end)}`;
+        btn.addEventListener('click', () => { seekTo(a.tsAnchor.start); closeViewer(); toast('Seeking to ' + fmtTime(a.tsAnchor.start)); });
+        foot.insertBefore(btn, $('vw-meta'));
+      }
+      $('viewer-ov').classList.add('on');
+    }
+    function closeViewer() { $('viewer-ov').classList.remove('on'); }
+    $('vw-close').addEventListener('click', closeViewer);
+    $('viewer-ov').addEventListener('click', e => { if (e.target === e.currentTarget) closeViewer(); });
+
+    /* ═══ NAV TABS ═══ */
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const panel = tab.dataset.panel;
+        const titleEl = $('sb-head').querySelector('.sb-title');
+        const chips = $('filter-chips');
+        if (panel === 'lyrics') {
+          titleEl.innerHTML = `Annotations<span class="ann-badge" id="sb-badge">${getAnns().length}</span>`;
+          chips.style.display = ''; renderSidebar();
+        } else if (panel === 'motifs') {
+          titleEl.innerHTML = `Motif Ledger<span class="ann-badge">…</span>`;
+          chips.style.display = 'none';
+          $('sb-body').innerHTML = '<div class="empty">Loading motifs…</div>';
+          api.motifs.list().then(motifs => {
+            titleEl.innerHTML = `Motif Ledger<span class="ann-badge">${motifs.length}</span>`;
+            $('sb-body').innerHTML = '<div class="motif-ledger">' +
+              motifs.map(m => `<div class="motif-card">
+            <div class="m-id">${esc(m.motifId)}</div>
+            <div class="m-name">${esc(m.name)}</div>
+            <div class="m-desc">${esc(m.description)}</div>
+            <div class="m-occur">↗ ${esc((m.occurrences || []).map(o => o.label || o.songId).join(' · '))}</div>
+          </div>`).join('') +
+              `<div style="padding:10px 0 0;border-top:1px solid var(--border);margin-top:6px;">
+            <button class="btn btn-ghost" style="width:100%;display:flex;justify-content:center;" onclick="toast('Motif editor — coming in M1')">+ Define New Motif</button>
+          </div></div>`;
+          }).catch(e => { $('sb-body').innerHTML = `<div class="empty">${esc(e.message)}</div>`; });
+        } else {
+          titleEl.innerHTML = `Export<span class="ann-badge">${getAnns().length} ann.</span>`;
+          chips.style.display = 'none';
+          $('sb-body').innerHTML = `<div style="padding:14px;display:flex;flex-direction:column;gap:10px;">
+        <p style="font-family:'EB Garamond',serif;font-size:14px;color:var(--text-muted);line-height:1.65;margin-bottom:4px;">Export your annotations as a portable bundle.</p>
+        ${[['Markdown / Obsidian Vault', 'md', 'gold'], ['ELAN CSV (Choreography)', 'csv', 'motif-color'], ['JSON (Raw Data)', 'json', 'text-muted']]
+              .map(([lbl, ext, col]) => `<button class="btn btn-ghost" style="display:flex;justify-content:space-between;align-items:center;padding:9px 13px;" onclick="doExport('${ext}')"><span style="color:var(--${col})">${lbl}</span><span style="font-family:'Courier Prime';font-size:9px;color:var(--text-dim)">.${ext}</span></button>`).join('')}
+      </div>`;
+        }
+      });
+    });
+
+    window.doExport = function (fmt) {
+      const song = getSong(); const anns = getAnns();
+      let content = '', filename = '', mime = '';
+      const slug = (song?.title || 'song').replace(/\s+/g, '-').toLowerCase();
+      if (fmt === 'json') { content = JSON.stringify({ song: song?.title, annotations: anns }, null, 2); filename = `${slug}-annotations.json`; mime = 'application/json'; }
+      else if (fmt === 'md') {
+        content = `# ${song?.title || 'Song'} — Annotations\n\n`;
+        anns.forEach(a => { content += `## "${a.selectedText}" (Line ${a.lineId})\n**Tier:** ${a.tier} | **Tags:** ${a.tags.join(', ')}\n\n${a.content}\n\n`; if (a.tsAnchor) content += `> ⏱ ${fmtTime(a.tsAnchor.start)} → ${fmtTime(a.tsAnchor.end)}\n\n`; content += '---\n\n'; });
+        filename = `${slug}-annotations.md`; mime = 'text/markdown';
+      } else {
+        content = 'ID,LineID,Quote,Tier,Content,Tags,TS_Start,TS_End\n';
+        anns.forEach(a => { content += `${a.id},${a.lineId},"${a.selectedText}",${a.tier},"${a.content.replace(/"/g, '""')}","${a.tags.join(';')}",${a.tsAnchor?.start || ''},${a.tsAnchor?.end || ''}\n`; });
+        filename = `${slug}-choreo.csv`; mime = 'text/csv';
+      }
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
+      toast(`Exported ${filename}`);
+    };
+
+    /* ═══ SONG MODAL ═══ */
+    async function openSongModal(songId) {
+      editingSongId = songId;
+      editingSong = null;
+
+      $('sm-heading').textContent = songId ? 'Edit Song' : 'Add Song';
+      $('sm-delete').style.display = songId ? '' : 'none';
+      $('song-modal-ov').classList.add('on');
+
+      if (songId) {
+        $('sm-body').innerHTML = '<div class="sm-loading">Loading song</div>';
+        try {
+          const song = (songId === currentSongId && currentSong)
+            ? currentSong
+            : await api.songs.get(songId);
+          editingSong = song;
+          $('sm-body').innerHTML = smBodyHTML();
+          wireLyricsUpload();
+          $('sm-name').value = song.title || '';
+          $('sm-track').value = song.trackNo || '';
+          $('sm-dur').value = song.durStr || '';
+          $('sm-composer').value = song.composer || '';
+          $('sm-lyrics').value = song.lyrics?.length ? lyricsToText(song.lyrics) : '';
+          $('sm-lyrics').dispatchEvent(new Event('input'));
+        } catch (e) { toast(e.message, true); closeSongModal(); }
+      } else {
+        $('sm-body').innerHTML = smBodyHTML();
+        wireLyricsUpload();
+        setTimeout(() => $('sm-name')?.focus(), 80);
+      }
+    }
+
+    function smBodyHTML() {
+      return `
+  <div class="sm-field">
+    <label class="sm-label">Song Title *</label>
+    <input class="sm-input" id="sm-name" placeholder="e.g. Way Down Hadestown">
+  </div>
+  <div class="sm-row">
+    <div class="sm-field half">
+      <label class="sm-label">Track Number</label>
+      <input class="sm-input" id="sm-track" type="number" min="1" placeholder="1">
+    </div>
+    <div class="sm-field half">
+      <label class="sm-label">Duration (m:ss)</label>
+      <input class="sm-input" id="sm-dur" placeholder="3:14">
+    </div>
+  </div>
+  <div class="sm-field">
+    <label class="sm-label">Composer / Lyricist</label>
+    <input class="sm-input" id="sm-composer" placeholder="Anaïs Mitchell">
+  </div>
+  <div class="led-section">
+    <div class="led-top">
+      <span class="sm-label">Lyrics</span>
+      <label class="upload-label">
+        <input type="file" id="txt-upload" accept=".txt,.md">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 8V2m-3 3l3-3 3 3"/><path d="M2 10h8"/></svg>
+        Upload .txt
+      </label>
+    </div>
+    <div class="led-hint">
+      <code>[Section Name]</code> → section header &nbsp;·&nbsp;
+      <code>SPEAKER: line text</code> → attributed line &nbsp;·&nbsp;
+      Blank line → stanza break &nbsp;·&nbsp;
+      <code>// comment</code> → ignored
+    </div>
+    <textarea class="led-ta" id="sm-lyrics"
+      placeholder="[Intro]&#10;HERMES: Gather round and I will sing&#10;&#10;[Verse 1]&#10;HERMES: In the days before the cold began&#10;..."></textarea>
+    <div class="led-preview" id="sm-preview"></div>
+  </div>`;
+    }
+
+    function wireLyricsUpload() {
+      $('sm-lyrics').addEventListener('input', () => {
+        const p = parseLyricsText($('sm-lyrics').value);
+        const lines = p.filter(l => l.text).length;
+        const secs = [...new Set(p.filter(l => l.section).map(l => l.section))].length;
+        $('sm-preview').textContent = p.length ? `↳ ${lines} line${lines !== 1 ? 's' : ''}, ${secs} section${secs !== 1 ? 's' : ''} detected` : '';
+      });
+      $('txt-upload').addEventListener('change', e => {
+        const file = e.target.files[0]; if (!file) return;
+        const r = new FileReader();
+        r.onload = ev => { $('sm-lyrics').value = ev.target.result; $('sm-lyrics').dispatchEvent(new Event('input')); toast(`Loaded ${file.name}`); };
+        r.readAsText(file); e.target.value = '';
+      });
+    }
+
+    function closeSongModal() { $('song-modal-ov').classList.remove('on'); }
+    $('sm-close').addEventListener('click', closeSongModal);
+    $('sm-cancel').addEventListener('click', closeSongModal);
+    $('song-modal-ov').addEventListener('click', e => { if (e.target === e.currentTarget) closeSongModal(); });
+
+    $('sm-save').addEventListener('click', async () => {
+      const title = $('sm-name')?.value.trim();
+      if (!title) { $('sm-name')?.focus(); toast('Please enter a song title'); return; }
+      const restore = btnBusy($('sm-save'));
+      const durStr = $('sm-dur').value.trim() || '0:00';
+      const payload = {
+        title,
+        trackNo: parseInt($('sm-track').value) || null,
+        durStr, dur: parseTsStr(durStr),
+        composer: $('sm-composer').value.trim() || 'Anaïs Mitchell',
+        lyrics: parseLyricsText($('sm-lyrics').value),
+      };
+      try {
+        if (editingSongId) {
+          const updated = await api.songs.update(editingSongId, payload);
+          if (currentSongId === editingSongId) {
+            currentSong = { ...updated, lyrics: payload.lyrics };
+            renderSongHeader(currentSong); renderLyrics(currentSong); updateMarkers();
+            $('nav-song').innerHTML = `${esc(updated.title)} <small>Track ${String(updated.trackNo || '?').padStart(2, '0')} · OBC</small>`;
+            $('pl-song-name').textContent = updated.title;
+          }
+          toast('Song updated ✓');
+        } else {
+          await api.songs.create(payload);
+          toast('Song added ✓');
+        }
+        closeSongModal();
+        api.songs.list().then(list => { librarySongs = list; }).catch(() => { });
+      } catch (e) {
+        toast(e.message, true);
+      } finally { restore(); }
+    });
+
+    $('sm-delete').addEventListener('click', () => {
+      const title = editingSong?.title || 'this song';
+      openConfirm(`Delete <em>"${esc(title)}"</em> and all its annotations? This cannot be undone.`, async () => {
+        try {
+          await api.songs.delete(editingSongId);
+          toast('Song deleted'); closeSongModal();
+          if (currentSongId === editingSongId) showLibrary();
+          else api.songs.list().then(list => { librarySongs = list; renderLibrary(); }).catch(() => { });
+        } catch (e) { toast(e.message, true); }
+      });
+    });
+
+    $('nav-add-song').addEventListener('click', () => openSongModal(null));
+    $('nav-brand').addEventListener('click', showLibrary);
+
+    /* ═══ CONFIRM ═══ */
+    let confirmCb = null;
+    function openConfirm(msg, cb) { $('confirm-msg').innerHTML = msg; confirmCb = cb; $('confirm-ov').classList.add('on'); }
+    $('confirm-cancel').addEventListener('click', () => { $('confirm-ov').classList.remove('on'); confirmCb = null; });
+    $('confirm-ok').addEventListener('click', () => { $('confirm-ov').classList.remove('on'); if (confirmCb) { confirmCb(); confirmCb = null; } });
+
+    /* ═══ PLAYER ═══ */
+    function seekTo(s) { const song = getSong(); playTime = Math.min(s, song?.dur || 0); updateProg(); }
+    function updateProg() { const dur = getSong()?.dur || 1; $('t-cur').textContent = fmtTime(playTime); $('prog-fill').style.width = `${(playTime / dur) * 100}%`; }
+    function updateMarkers() {
+      const m = $('prog-markers'); if (!m) return;
+      m.innerHTML = ''; const dur = getSong()?.dur || 1;
+      getAnns().forEach(a => {
+        if (!a.tsAnchor) return;
+        const mk = document.createElement('div'); mk.className = 'prog-marker';
+        mk.style.left = `${(a.tsAnchor.start / dur) * 100}%`;
+        mk.style.background = TIER_COLORS[a.tier] || TIER_COLORS.lyrics;
+        mk.title = `"${a.selectedText}"`;
+        m.appendChild(mk);
+      });
+    }
+    $('play-btn').addEventListener('click', () => {
+      const dur = getSong()?.dur || 0; playing = !playing;
+      $('play-icon').innerHTML = playing ? '<path d="M3 2h3v10H3zm5 0h3v10H8z"/>' : '<path d="M3 2l10 5-10 5V2z"/>';
+      if (playing) {
+        playTick = setInterval(() => {
+          playTime = Math.min(playTime + .5, dur); updateProg();
+          if (playTime >= dur) { playing = false; clearInterval(playTick); $('play-icon').innerHTML = '<path d="M3 2l10 5-10 5V2z"/>'; }
+        }, 500);
+      } else clearInterval(playTick);
+    });
+    $('prog-track').addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(); seekTo(((e.clientX - r.left) / r.width) * (getSong()?.dur || 0)); });
+    $('loop-btn').addEventListener('click', function () { this.classList.toggle('on'); });
+    $('choreo-btn').addEventListener('click', function () { this.classList.toggle('on'); toast(this.classList.contains('on') ? 'Choreo layer on' : 'Choreo layer off'); });
+    $('sb-toggle').addEventListener('click', () => $('view-annotate').classList.toggle('sidebar-collapsed'));
+
+    /* ═══ INIT ═══ */
+    showLibrary();
+  </script>
+</body>
+
+</html>

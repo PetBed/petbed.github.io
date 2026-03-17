@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=Spectral:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap"
     rel="stylesheet">
   <style>
     :root {
@@ -33,6 +33,21 @@
       --player-h: 68px;
       --sidebar-w: 360px;
       --nav-h: 50px;
+
+      /* ── User-configurable settings ── */
+      --lyrics-font: 'EB Garamond', Georgia, serif;
+      --lyrics-size: 20px;
+      --lyrics-lh: 1.8;
+      --linenum-w: 34px;
+      --linenum-vis: 1;
+      /* 0 = hidden */
+      --spkr-vis: 1;
+      --section-vis: 1;
+      --hl-opacity: 0.14;
+      --linenum-margin: 14px;
+      /* collapses to 0 when line numbers are hidden */
+      --lyric-padding: 52px;
+      /* left padding of lyrics panel */
     }
 
     *,
@@ -244,13 +259,395 @@
     }
 
     .lib-header {
-      margin-bottom: 36px;
+      margin-bottom: 0;
     }
 
     .song-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 14px;
+    }
+
+    /* ── Library tab bar ── */
+    .lib-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin: 28px 0 32px;
+    }
+
+    .lib-tab {
+      padding: 8px 22px 10px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      position: relative;
+      top: 1px;
+      cursor: pointer;
+      transition: color .2s, border-color .2s;
+    }
+
+    .lib-tab:hover {
+      color: var(--text);
+    }
+
+    .lib-tab.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+
+    /* ── Motif ledger main-page grid ── */
+    .motif-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 14px;
+    }
+
+    .ml-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 18px 20px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .18s, background .18s, transform .18s;
+    }
+
+    .ml-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--motif-color), transparent);
+      opacity: 0;
+      transition: opacity .18s;
+    }
+
+    .ml-card:hover {
+      border-color: rgba(74, 122, 155, .5);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+
+    .ml-card:hover::before {
+      opacity: .7;
+    }
+
+    .ml-card-id {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: .2em;
+      color: var(--motif-color);
+    }
+
+    .ml-card-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 20px;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .ml-card-desc {
+      font-family: 'EB Garamond', serif;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .ml-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    .ml-card-occur {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      color: var(--text-dim);
+    }
+
+    .ml-card-occur span {
+      color: var(--motif-color);
+      font-weight: 700;
+    }
+
+    .ml-card-actions {
+      display: flex;
+      gap: 5px;
+      opacity: 0;
+      transition: opacity .15s;
+    }
+
+    .ml-card:hover .ml-card-actions {
+      opacity: 1;
+    }
+
+    .motif-card-add {
+      background: none;
+      border: 1px dashed var(--border);
+      border-radius: 5px;
+      padding: 20px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 130px;
+      transition: border-color .18s, background .18s;
+      color: var(--text-dim);
+    }
+
+    .motif-card-add:hover {
+      border-color: rgba(74, 122, 155, .5);
+      background: var(--bg-card);
+      color: var(--motif-color);
+    }
+
+    .motif-card-add svg {
+      transition: transform .2s;
+    }
+
+    .motif-card-add:hover svg {
+      transform: rotate(90deg) scale(1.1);
+    }
+
+    .motif-card-add span {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    /* ── Motif modal ── */
+    .motif-modal {
+      background: var(--bg-card);
+      border: 1px solid rgba(74, 122, 155, .4);
+      border-radius: 6px;
+      width: 480px;
+      max-width: 95vw;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, .88);
+      display: flex;
+      flex-direction: column;
+      animation: min .18s ease-out;
+    }
+
+    .mm-head {
+      padding: 14px 18px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .mm-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 18px;
+      letter-spacing: .04em;
+      color: var(--text);
+    }
+
+    .mm-body {
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
+    .mm-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .mm-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .mm-input {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: 'EB Garamond', serif;
+      font-size: 15px;
+      padding: 7px 10px;
+      outline: none;
+      transition: border-color .15s;
+      width: 100%;
+    }
+
+    .mm-input:focus {
+      border-color: var(--motif-color);
+    }
+
+    .mm-input::placeholder {
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    .mm-textarea {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: 'EB Garamond', serif;
+      font-size: 15px;
+      line-height: 1.65;
+      padding: 7px 10px;
+      outline: none;
+      transition: border-color .15s;
+      width: 100%;
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .mm-textarea:focus {
+      border-color: var(--motif-color);
+    }
+
+    .mm-textarea::placeholder {
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    .mm-foot {
+      padding: 10px 18px 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mm-foot .left {
+      margin-right: auto;
+    }
+
+    /* ── Motif picker in annotation editor ── */
+    .ed-motif-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      animation: tin .15s ease-out;
+    }
+
+    .ed-motif-select {
+      background: var(--bg-surface);
+      border: 1px solid rgba(74, 122, 155, .4);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      padding: 5px 9px;
+      outline: none;
+      flex: 1;
+      transition: border-color .15s;
+      cursor: pointer;
+    }
+
+    .ed-motif-select:focus {
+      border-color: var(--motif-color);
+    }
+
+    /* ── Linked motif badge in annotation viewer ── */
+    .vw-motif-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(74, 122, 155, .12);
+      border: 1px solid rgba(74, 122, 155, .35);
+      border-radius: 3px;
+      padding: 3px 9px;
+      margin-bottom: 10px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #6aafd4;
+    }
+
+    .vw-choreo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(82, 122, 82, .12);
+      border: 1px solid rgba(82, 122, 82, .35);
+      border-radius: 3px;
+      padding: 3px 9px;
+      margin-bottom: 10px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .1em;
+      color: #7abf7a;
+    }
+
+    .vw-costume-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(122, 82, 122, .12);
+      border: 1px solid rgba(122, 82, 122, .35);
+      border-radius: 3px;
+      padding: 3px 9px;
+      margin-bottom: 10px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .1em;
+      color: #b07ac8;
+    }
+
+    /* Choreo / costume text inputs in editor (reuse motif row styles) */
+    .ed-choreo-row,
+    .ed-costume-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      animation: tin .15s ease-out;
+    }
+
+    .ed-tier-input {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: 'EB Garamond', serif;
+      font-size: 15px;
+      padding: 5px 9px;
+      outline: none;
+      flex: 1;
+      transition: border-color .15s;
+    }
+
+    .ed-choreo-row .ed-tier-input:focus {
+      border-color: var(--choreo-color);
+    }
+
+    .ed-costume-row .ed-tier-input:focus {
+      border-color: var(--costume-color);
+    }
+
+    .ed-tier-input::placeholder {
+      color: var(--text-dim);
+      font-style: italic;
     }
 
     .song-card {
@@ -415,10 +812,10 @@
     .lyrics-panel {
       flex: 1;
       overflow-y: auto;
-      padding: 52px 36px 52px 44px;
+      padding: 52px 36px 52px var(--lyric-padding);
       max-width: calc(100% - var(--sidebar-w));
       min-width: 0;
-      transition: max-width .32s cubic-bezier(.4, 0, .2, 1);
+      transition: max-width .32s cubic-bezier(.4, 0, .2, 1), padding-left .2s;
     }
 
     .sidebar-collapsed .lyrics-panel {
@@ -572,6 +969,8 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      opacity: var(--section-vis);
+      transition: opacity .2s;
     }
 
     .section-label::after {
@@ -594,12 +993,14 @@
       font-family: 'Courier Prime', monospace;
       font-size: 10px;
       color: var(--text-dim);
-      min-width: 34px;
+      min-width: var(--linenum-w);
       text-align: right;
-      margin-right: 14px;
+      margin-right: var(--linenum-margin);
       user-select: none;
       padding-top: 3px;
       flex-shrink: 0;
+      opacity: var(--linenum-vis);
+      transition: opacity .2s, min-width .2s, margin-right .2s;
     }
 
     .line-dots {
@@ -643,13 +1044,16 @@
     }
 
     .line-text {
-      font-family: 'EB Garamond', serif;
-      font-size: 20px;
-      line-height: 1.8;
+      font-family: var(--lyrics-font);
+      font-size: var(--lyrics-size);
+      line-height: var(--lyrics-lh);
       color: var(--text);
       cursor: text;
       flex: 1;
       position: relative;
+      /* Ensure text is selectable on iOS Safari */
+      -webkit-user-select: text;
+      user-select: text;
     }
 
     .line-text .spkr {
@@ -659,6 +1063,15 @@
       text-transform: uppercase;
       color: var(--copper);
       margin-right: 10px;
+      opacity: var(--spkr-vis);
+      transition: opacity .2s;
+    }
+
+    .line-text .spkr-note {
+      text-transform: none;
+      font-style: italic;
+      letter-spacing: .05em;
+      opacity: .75;
     }
 
     .line-text mark {
@@ -695,11 +1108,16 @@
       display: none;
       background: var(--bg-card);
       border: 1px solid var(--border-gold);
-      border-radius: 4px;
+      border-radius: 6px;
       padding: 4px;
       gap: 1px;
       z-index: 200;
       box-shadow: 0 10px 40px rgba(0, 0, 0, .7);
+      /* Keep fully inside the viewport on small screens */
+      max-width: calc(100vw - 16px);
+      /* Prevent iOS callout/magnifier interfering */
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     .sel-toolbar.on {
@@ -720,7 +1138,9 @@
     }
 
     .tb-btn {
-      padding: 6px 11px;
+      /* min 44×44px tap target per Apple HIG */
+      min-height: 44px;
+      padding: 0 13px;
       font-family: 'Courier Prime', monospace;
       font-size: 10px;
       letter-spacing: .1em;
@@ -753,9 +1173,10 @@
 
     .tb-sep {
       width: 1px;
-      height: 18px;
+      height: 24px;
       background: var(--border);
       margin: auto 0;
+      flex-shrink: 0;
     }
 
     /* ── OVERLAYS ── */
@@ -880,6 +1301,9 @@
       border-radius: 0 3px 3px 0;
       flex: 1;
       line-height: 1.5;
+      white-space: pre-wrap;
+      max-height: 90px;
+      overflow-y: auto;
     }
 
     .ed-body {
@@ -1091,6 +1515,9 @@
       margin-bottom: 14px;
       background: rgba(199, 140, 34, .06);
       line-height: 1.5;
+      white-space: pre-wrap;
+      max-height: 120px;
+      overflow-y: auto;
     }
 
     .vw-content {
@@ -1400,6 +1827,26 @@
       background: var(--bg-card);
     }
 
+    .ann-card.active {
+      background: var(--bg-card);
+      box-shadow: inset 2px 0 0 var(--gold);
+    }
+
+    .ann-card .ac-hint {
+      font-family: 'Courier Prime', monospace;
+      font-size: 8px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-top: 4px;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+
+    .ann-card:hover .ac-hint {
+      opacity: 1;
+    }
+
     .ac-top {
       display: flex;
       align-items: flex-start;
@@ -1514,6 +1961,120 @@
       font-style: italic;
       font-size: 15px;
       line-height: 1.7;
+    }
+
+    /* ── Notes panel ── */
+    .notes-panel {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      padding: 0;
+    }
+
+    .notes-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px 8px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .notes-wordcount {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .1em;
+      color: var(--text-dim);
+      flex: 1;
+    }
+
+    .notes-save-status {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .08em;
+      color: var(--text-dim);
+      transition: color .3s;
+    }
+
+    .notes-save-status.saving {
+      color: var(--gold);
+    }
+
+    .notes-save-status.saved {
+      color: var(--choreo-color);
+    }
+
+    .notes-save-status.err {
+      color: #c44;
+    }
+
+    .notes-export-btn {
+      padding: 3px 9px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      transition: all .15s;
+    }
+
+    .notes-export-btn:hover {
+      border-color: var(--border-gold);
+      color: var(--gold);
+    }
+
+    .notes-save-btn {
+      padding: 4px 13px;
+      border: 1px solid var(--gold-dim);
+      border-radius: 2px;
+      background: none;
+      color: var(--gold);
+      cursor: pointer;
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      transition: all .15s;
+    }
+
+    .notes-save-btn:hover {
+      background: rgba(199, 140, 34, .1);
+      border-color: var(--gold);
+    }
+
+    .notes-save-btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .notes-textarea {
+      flex: 1;
+      resize: none;
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'EB Garamond', serif;
+      font-size: 15px;
+      line-height: 1.8;
+      padding: 16px 16px 24px;
+      min-height: 0;
+    }
+
+    .notes-textarea::placeholder {
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    .notes-textarea:focus {
+      outline: none;
     }
 
     /* ── PLAYER ── */
@@ -1667,6 +2228,14 @@
       height: 11px;
       border-radius: 2px;
       opacity: .7;
+      pointer-events: all;
+      cursor: pointer;
+      transition: opacity .15s, transform .15s;
+    }
+
+    .prog-marker:hover {
+      opacity: 1;
+      transform: scaleY(1.35);
     }
 
     .pl-extras {
@@ -1768,6 +2337,232 @@
     ::-webkit-scrollbar-thumb:hover {
       background: var(--gold-dim);
     }
+
+    /* ══════════════════════════════════════════
+   MOBILE  (≤ 640px)
+   Two changes:
+     1. Sidebar overlays lyrics (no layout shift)
+     2. Player progress bar is its own full-width row
+══════════════════════════════════════════ */
+    @media (max-width: 640px) {
+
+      /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     1. SIDEBAR — true overlay, zero layout impact
+     The sidebar is position:fixed so it never occupies
+     space in the document flow. The lyrics panel is locked
+     to 100% width with NO transition, so toggling
+     sidebar-collapsed can NEVER cause any reflow or
+     scroll-position jump on the lyrics panel.
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+      .lyrics-panel {
+        width: 100% !important;
+        max-width: 100% !important;
+        transition: none !important;
+        padding: 28px 18px 52px !important;
+      }
+
+      /* Settings drawer also mustn't push lyrics on mobile */
+      .settings-open .lyrics-panel {
+        padding-right: 18px !important;
+      }
+
+      /* Sidebar: fixed overlay sliding in from the right.
+     Collapsed: only the 18px toggle tab peeks out. */
+      .sidebar {
+        position: fixed !important;
+        top: var(--nav-h);
+        right: 0;
+        bottom: 100px;
+        width: min(var(--sidebar-w), 88vw) !important;
+        transform: translateX(calc(100% - 18px));
+        transition: transform .28s cubic-bezier(.4, 0, .2, 1);
+        z-index: 80;
+        box-shadow: -8px 0 32px rgba(0, 0, 0, .6);
+        overflow: hidden;
+      }
+
+      /* Expanded: slide fully into view — covers lyrics, no push */
+      #view-annotate:not(.sidebar-collapsed) .sidebar {
+        transform: translateX(0);
+      }
+
+      /* Override desktop collapsed rules */
+      .sidebar-collapsed .sidebar {
+        width: min(var(--sidebar-w), 88vw) !important;
+        overflow: hidden !important;
+        transform: translateX(calc(100% - 18px));
+      }
+
+      /* Toggle tab: always on the left edge of the sidebar panel */
+      .sb-toggle {
+        left: 0 !important;
+        border-left: 1px solid var(--border) !important;
+        border-right: none !important;
+        border-radius: 4px 0 0 4px !important;
+      }
+
+      .sidebar-collapsed .sb-toggle {
+        left: 0 !important;
+        border-left: 1px solid var(--border) !important;
+        border-right: none !important;
+        border-radius: 4px 0 0 4px !important;
+      }
+
+      .sidebar-collapsed .sb-toggle svg {
+        transform: rotate(180deg);
+      }
+
+      #view-annotate:not(.sidebar-collapsed) .sb-toggle svg {
+        transform: rotate(0deg);
+      }
+
+      /* Fade sidebar content */
+      .sidebar-collapsed .sidebar .sb-head,
+      .sidebar-collapsed .sidebar .sb-body {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      #view-annotate:not(.sidebar-collapsed) .sidebar .sb-head,
+      #view-annotate:not(.sidebar-collapsed) .sidebar .sb-body {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* Semi-transparent backdrop behind open sidebar */
+      #sb-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(4, 3, 2, .5);
+        z-index: 79;
+        display: none;
+      }
+
+      #view-annotate:not(.sidebar-collapsed)~#sb-backdrop,
+      .sb-backdrop-on {
+        display: block !important;
+      }
+
+
+      /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     2. PLAYER — explicit 3-row layout
+     Row 1: [song title — full width]
+     Row 2: [prev · ▶ · next]  [loop]
+     Row 3: [0:00 ━━━━━━━━━━━━ 3:14]  ← full width
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+      #view-annotate {
+        padding-bottom: 114px;
+      }
+
+      .player {
+        height: auto !important;
+        min-height: 114px;
+        display: flex;
+        flex-direction: column;
+        /* explicit column — no wrapping surprises */
+        align-items: stretch;
+        padding: 7px 14px 6px;
+        gap: 4px;
+      }
+
+      /* Row 1 — song title */
+      .pl-info {
+        order: 1;
+        width: 100%;
+        flex: none;
+        min-width: 0;
+      }
+
+      .pl-song {
+        font-size: 12px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .pl-artist {
+        display: none;
+      }
+
+      /* Row 2 — controls + loop on one line */
+      .pl-controls {
+        order: 2;
+        width: 100%;
+        flex: none;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .pl-extras {
+        order: 2;
+        /* same row via absolute positioning trick below */
+        position: absolute;
+        right: 14px;
+        /* vertically aligned to the controls row — offset = info row height + gap */
+        bottom: calc(6px + 26px + 4px);
+        /* padding-bottom + progress-row + gap */
+        display: flex;
+        gap: 4px;
+        align-items: center;
+      }
+
+      /* Hide extras that aren't useful on mobile */
+      #choreo-btn {
+        display: none;
+      }
+
+      .pl-status {
+        display: none;
+      }
+
+      #loop-btn {
+        padding: 3px 8px;
+        font-size: 9px;
+      }
+
+      /* Row 3 — full-width progress bar */
+      .pl-progress {
+        order: 3;
+        width: 100%;
+        flex: none;
+        padding: 0;
+        gap: 7px;
+        min-width: 0;
+      }
+
+      /* Taller, easier-to-tap progress track on touch */
+      .prog-track {
+        height: 6px;
+        cursor: pointer;
+      }
+
+      /* Always-visible scrubber handle */
+      .prog-fill::after {
+        width: 14px;
+        height: 14px;
+        right: -7px;
+        top: -4px;
+        opacity: 1 !important;
+      }
+
+      .time-d {
+        font-size: 11px;
+        min-width: 36px;
+      }
+
+      /* Toast and drawer sit above the taller player */
+      .toast {
+        bottom: 126px;
+      }
+
+      .settings-drawer {
+        bottom: 114px;
+      }
+    }
+
+
 
     /* ── Loading states ── */
     .btn:disabled {
@@ -1873,9 +2668,465 @@
       animation: spin .8s linear infinite;
     }
 
-    .toast.err {
-      border-color: #8a3818 !important;
-      color: #d47 !important;
+    /* ── Settings drawer ── */
+    .nav-settings-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 8px;
+      transition: all .15s;
+      flex-shrink: 0;
+    }
+
+    .nav-settings-btn:hover {
+      border-color: var(--border-gold);
+      color: var(--gold);
+      background: rgba(199, 140, 34, .06);
+    }
+
+    .nav-settings-btn.active {
+      border-color: var(--gold-dim);
+      color: var(--gold);
+      background: rgba(199, 140, 34, .1);
+    }
+
+    .settings-drawer {
+      position: fixed;
+      top: var(--nav-h);
+      right: 0;
+      bottom: var(--player-h);
+      width: 300px;
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 90;
+      transform: translateX(100%);
+      transition: transform .28s cubic-bezier(.4, 0, .2, 1);
+      overflow: hidden;
+    }
+
+    .settings-drawer.open {
+      transform: translateX(0);
+    }
+
+    /* shift lyrics panel when drawer is open */
+    .settings-open .lyrics-panel {
+      padding-right: calc(36px + 300px);
+    }
+
+    .sd-head {
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .sd-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 15px;
+      letter-spacing: .06em;
+      color: var(--text);
+    }
+
+    .sd-reset {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 3px 0;
+      transition: color .15s;
+    }
+
+    .sd-reset:hover {
+      color: var(--gold);
+    }
+
+    .sd-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px 0 16px;
+    }
+
+    .sd-section {
+      padding: 14px 16px 4px;
+    }
+
+    .sd-section-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sd-section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .sd-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .sd-lbl {
+      font-family: 'EB Garamond', serif;
+      font-size: 15px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .sd-val {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      color: var(--gold);
+      min-width: 32px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* Range slider */
+    .sd-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      flex: 1;
+      height: 3px;
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+      background: var(--border);
+      accent-color: var(--gold);
+    }
+
+    .sd-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--gold);
+      cursor: pointer;
+      border: 2px solid var(--bg-surface);
+      box-shadow: 0 0 0 1px var(--gold-dim);
+      transition: transform .12s;
+    }
+
+    .sd-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .sd-slider::-moz-range-thumb {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--gold);
+      cursor: pointer;
+      border: 2px solid var(--bg-surface);
+    }
+
+    /* Select */
+    .sd-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: 'EB Garamond', serif;
+      font-size: 14px;
+      padding: 4px 8px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color .15s;
+      flex: 1;
+    }
+
+    .sd-select:focus {
+      border-color: var(--gold-dim);
+    }
+
+    /* Toggle switch */
+    .sd-toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .sd-toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .sd-toggle-track {
+      position: absolute;
+      inset: 0;
+      border-radius: 10px;
+      background: var(--border);
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .sd-toggle input:checked+.sd-toggle-track {
+      background: var(--gold-dim);
+    }
+
+    .sd-toggle-track::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      top: 3px;
+      left: 3px;
+      transition: transform .2s, background .2s;
+    }
+
+    .sd-toggle input:checked+.sd-toggle-track::after {
+      transform: translateX(16px);
+      background: var(--gold);
+    }
+
+    /* ── Player audio states ── */
+    .pl-no-audio .c-btn.play-btn {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+
+    .pl-no-audio .prog-track {
+      cursor: default;
+    }
+
+    .pl-loading-audio .play-btn {
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    .pl-status {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    .pl-status.err {
+      color: #c44;
+    }
+
+    .pl-status.ok {
+      color: var(--choreo-color);
+    }
+
+    /* Audio URL field in song modal */
+    .audio-url-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .audio-url-row .sm-input {
+      font-family: 'Courier Prime', monospace;
+      font-size: 12px;
+    }
+
+    .audio-url-hint {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .04em;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+
+    .audio-url-hint code {
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, .04);
+      padding: 1px 4px;
+      border-radius: 2px;
+    }
+
+    .audio-url-preview {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .06em;
+      color: var(--choreo-color);
+      margin-top: 2px;
+    }
+
+    .audio-url-preview.invalid {
+      color: #c44;
+    }
+
+    /* ── Speaker highlight (when annotation covers the speaker label) ── */
+    .line-text .spkr[data-hl-tier] {
+      border-radius: 2px;
+      padding: 0 2px;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+
+    .line-text .spkr[data-hl-tier="lyrics"] {
+      background: var(--hl-bg);
+    }
+
+    .line-text .spkr[data-hl-tier="motif"] {
+      background: rgba(74, 122, 155, .13);
+    }
+
+    .line-text .spkr[data-hl-tier="choreo"] {
+      background: rgba(82, 122, 82, .13);
+    }
+
+    .line-text .spkr[data-hl-tier="costume"] {
+      background: rgba(122, 82, 122, .13);
+    }
+
+    /* ── Reselect range mode ── */
+    .reselect-banner {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-gold);
+      padding: 9px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      animation: tin .15s ease-out;
+    }
+
+    .reselect-banner::before {
+      content: '◈';
+      font-size: 12px;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    .reselect-cancel {
+      margin-left: auto;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 3px 9px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      transition: all .15s;
+    }
+
+    .reselect-cancel:hover {
+      border-color: var(--border-gold);
+      color: var(--text);
+    }
+
+    .tb-reselect {
+      display: none;
+    }
+
+    .in-reselect .tb-normal {
+      display: none;
+    }
+
+    .in-reselect .tb-reselect {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .ed-reselect-btn {
+      padding: 5px 12px;
+      border-radius: 3px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      border: 1px solid var(--border-gold);
+      background: none;
+      color: var(--gold);
+      cursor: pointer;
+      transition: all .15s;
+      margin-right: auto;
+    }
+
+    .ed-reselect-btn:hover {
+      background: rgba(199, 140, 34, .09);
+    }
+
+    /* ── Viewer action buttons ── */
+    .vw-act-btn {
+      padding: 4px 11px;
+      border-radius: 3px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-muted);
+      transition: all .15s;
+    }
+
+    .vw-act-btn:hover {
+      border-color: var(--border-gold);
+      color: var(--gold);
+    }
+
+    .vw-act-btn.del:hover {
+      border-color: #8a3818;
+      color: #d44;
+      background: rgba(180, 50, 30, .08);
+    }
+
+    /* Edit-mode indicator on the annotation editor */
+    .ann-editor.editing .ed-quote {
+      border-left-color: var(--motif-color);
+      color: #6aafd4;
+      background: rgba(74, 122, 155, .07);
+    }
+
+    .ed-mode-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 0 18px 0;
+      margin-bottom: -6px;
     }
   </style>
 </head>
@@ -1890,7 +3141,7 @@
     <span class="nav-song" id="nav-song" style="display:none"></span>
     <div class="nav-tabs" id="nav-tabs" style="display:none">
       <button class="nav-tab active" data-panel="lyrics">Lyrics</button>
-      <button class="nav-tab" data-panel="motifs">Motif Ledger</button>
+      <button class="nav-tab" data-panel="notes">Notes</button>
       <button class="nav-tab" data-panel="export">Export</button>
     </div>
     <span id="nav-spacer" style="flex:1"></span>
@@ -1902,16 +3153,133 @@
       </svg>
       Add Song
     </button>
+    <button class="nav-settings-btn" id="nav-settings-btn" title="Settings">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"
+        stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="8" cy="8" r="2.5" />
+        <path
+          d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06" />
+      </svg>
+    </button>
   </nav>
 
-  <!-- LIBRARY -->
+  <!-- SETTINGS DRAWER -->
+  <div class="settings-drawer" id="settings-drawer">
+    <div class="sd-head">
+      <span class="sd-title">Display Settings</span>
+      <button class="sd-reset" id="sd-reset">Reset defaults</button>
+    </div>
+    <div class="sd-body">
+
+      <!-- TYPOGRAPHY -->
+      <div class="sd-section">
+        <div class="sd-section-label">Typography</div>
+
+        <div class="sd-row">
+          <span class="sd-lbl">Lyric font</span>
+          <select class="sd-select" id="sd-font">
+            <option value="'EB Garamond', Georgia, serif">EB Garamond</option>
+            <option value="'Lora', Georgia, serif">Lora</option>
+            <option value="'Spectral', Georgia, serif">Spectral</option>
+            <option value="Georgia, serif">Georgia</option>
+            <option value="'Courier Prime', monospace">Courier Prime</option>
+          </select>
+        </div>
+
+        <div class="sd-row">
+          <span class="sd-lbl">Font size</span>
+          <input class="sd-slider" id="sd-size" type="range" min="14" max="32" step="1" value="20">
+          <span class="sd-val" id="sd-size-val">20px</span>
+        </div>
+
+        <div class="sd-row">
+          <span class="sd-lbl">Line height</span>
+          <input class="sd-slider" id="sd-lh" type="range" min="1.2" max="2.8" step="0.05" value="1.8">
+          <span class="sd-val" id="sd-lh-val">1.8</span>
+        </div>
+      </div>
+
+      <!-- LAYOUT -->
+      <div class="sd-section">
+        <div class="sd-section-label">Layout</div>
+
+        <div class="sd-row">
+          <span class="sd-lbl">Line number width</span>
+          <input class="sd-slider" id="sd-linenum-w" type="range" min="0" max="60" step="2" value="34">
+          <span class="sd-val" id="sd-linenum-w-val">34px</span>
+        </div>
+
+        <div class="sd-row">
+          <span class="sd-lbl">Left padding</span>
+          <input class="sd-slider" id="sd-padding" type="range" min="16" max="96" step="4" value="52">
+          <span class="sd-val" id="sd-padding-val">52px</span>
+        </div>
+
+        <div class="sd-row">
+          <span class="sd-lbl">Sidebar width</span>
+          <input class="sd-slider" id="sd-sidebar-w" type="range" min="240" max="520" step="10" value="360">
+          <span class="sd-val" id="sd-sidebar-w-val">360px</span>
+        </div>
+      </div>
+
+      <!-- VISIBILITY -->
+      <div class="sd-section">
+        <div class="sd-section-label">Visibility</div>
+
+        <div class="sd-row">
+          <span class="sd-lbl">Line numbers</span>
+          <label class="sd-toggle">
+            <input type="checkbox" id="sd-linenum-vis" checked>
+            <div class="sd-toggle-track"></div>
+          </label>
+        </div>
+
+        <div class="sd-row">
+          <span class="sd-lbl">Speaker labels</span>
+          <label class="sd-toggle">
+            <input type="checkbox" id="sd-spkr-vis" checked>
+            <div class="sd-toggle-track"></div>
+          </label>
+        </div>
+
+        <div class="sd-row">
+          <span class="sd-lbl">Section headers</span>
+          <label class="sd-toggle">
+            <input type="checkbox" id="sd-section-vis" checked>
+            <div class="sd-toggle-track"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- ANNOTATIONS -->
+      <div class="sd-section">
+        <div class="sd-section-label">Annotations</div>
+
+        <div class="sd-row">
+          <span class="sd-lbl">Highlight opacity</span>
+          <input class="sd-slider" id="sd-hl-opacity" type="range" min="0.04" max="0.5" step="0.02" value="0.14">
+          <span class="sd-val" id="sd-hl-opacity-val">14%</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
   <div id="view-library" class="screen active">
     <div class="lib-header">
-      <div class="lib-eyebrow">Song Library</div>
+      <div class="lib-eyebrow">Library</div>
       <h1 class="lib-title">Hadestown</h1>
       <div class="lib-sub">Original Broadway Cast Recording · Anaïs Mitchell</div>
     </div>
-    <div class="song-grid" id="song-grid"></div>
+    <div class="lib-tabs">
+      <button class="lib-tab active" data-lib-tab="songs">Songs</button>
+      <button class="lib-tab" data-lib-tab="motifs">Motif Ledger</button>
+    </div>
+    <div id="lib-songs-panel">
+      <div class="song-grid" id="song-grid"></div>
+    </div>
+    <div id="lib-motifs-panel" style="display:none">
+      <div class="motif-grid" id="motif-grid"></div>
+    </div>
   </div>
 
   <!-- ANNOTATE -->
@@ -1951,6 +3319,8 @@
   </div>
 
   <!-- PLAYER -->
+  <audio id="audio-el" preload="none" style="display:none"></audio>
+
   <div class="player" id="player" style="display:none">
     <div class="pl-info">
       <div class="pl-song" id="pl-song-name">—</div>
@@ -1971,13 +3341,13 @@
     <div class="pl-progress">
       <span class="time-d" id="t-cur">0:00</span>
       <div class="prog-track" id="prog-track">
-        <div class="prog-fill" id="prog-fill">
-          <div class="prog-markers" id="prog-markers"></div>
-        </div>
+        <div class="prog-fill" id="prog-fill"></div>
+        <div class="prog-markers" id="prog-markers"></div>
       </div>
       <span class="time-d" id="t-total">0:00</span>
     </div>
     <div class="pl-extras">
+      <span class="pl-status" id="pl-status"></span>
       <button class="xtra-btn" id="loop-btn">Loop</button>
       <button class="xtra-btn" id="choreo-btn">Choreo</button>
     </div>
@@ -1985,30 +3355,36 @@
 
   <!-- SELECTION TOOLBAR -->
   <div class="sel-toolbar" id="sel-toolbar">
-    <button class="tb-btn hi" id="tb-annotate">
+    <!-- Normal annotation buttons -->
+    <button class="tb-btn hi tb-normal" id="tb-annotate">
       <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
         <path d="M2 9.5l1-3L9 2l2 2-6 6-3 1z" />
       </svg>
       Annotate
     </button>
-    <div class="tb-sep"></div>
-    <button class="tb-btn" id="tb-motif">
+    <div class="tb-sep tb-normal"></div>
+    <button class="tb-btn tb-normal" id="tb-motif">
       <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="6" cy="6" r="4" />
         <path d="M6 2v8M2 6h8" />
       </svg>
       Motif
     </button>
-    <div class="tb-sep"></div>
-    <button class="tb-btn" id="tb-ts">⏱ Anchor</button>
+    <div class="tb-sep tb-normal"></div>
+    <button class="tb-btn tb-normal" id="tb-ts">⏱ Anchor</button>
+    <!-- Reselect mode buttons (hidden until reselect mode active) -->
+    <button class="tb-btn hi tb-reselect" id="tb-confirm-range">✔ Confirm Range</button>
+    <div class="tb-sep tb-reselect"></div>
+    <button class="tb-btn tb-reselect" id="tb-cancel-reselect">✕ Cancel</button>
   </div>
 
   <!-- ANNOTATION EDITOR -->
   <div class="overlay" id="editor-ov">
-    <div class="ann-editor">
+    <div class="ann-editor" id="ann-editor-box">
       <div class="ed-head">
         <div class="ed-quote" id="ed-quote"></div><button class="close-btn" id="ed-close">×</button>
       </div>
+      <div class="ed-mode-label" id="ed-mode-label" style="display:none">Editing annotation</div>
       <div class="ed-body">
         <textarea class="ed-textarea" id="ed-text" placeholder="Write your annotation…"></textarea>
         <div class="ed-row">
@@ -2032,8 +3408,26 @@
             <input class="ts-input" id="ts-e" placeholder="0:00">
           </div>
         </div>
+        <!-- Motif picker — shown when tier = motif -->
+        <div class="ed-motif-row" id="ed-motif-row" style="display:none">
+          <span class="ed-lbl">Motif</span>
+          <select class="ed-motif-select" id="ed-motif-select">
+            <option value="">— None / Unlinked —</option>
+          </select>
+        </div>
+        <!-- Choreo note — shown when tier = choreo -->
+        <div class="ed-choreo-row" id="ed-choreo-row" style="display:none">
+          <span class="ed-lbl" style="color:var(--choreo-color)">Staging</span>
+          <input class="ed-tier-input" id="ed-choreo-input" placeholder="Movement, blocking, entrances, exits, props…">
+        </div>
+        <!-- Costume note — shown when tier = costume -->
+        <div class="ed-costume-row" id="ed-costume-row" style="display:none">
+          <span class="ed-lbl" style="color:var(--costume-color)">Costume</span>
+          <input class="ed-tier-input" id="ed-costume-input" placeholder="Character, garment, colour, transformation…">
+        </div>
       </div>
       <div class="ed-foot">
+        <button class="ed-reselect-btn" id="ed-reselect" style="display:none">◈ Reselect Range</button>
         <button class="btn btn-ghost" id="ed-cancel">Cancel</button>
         <button class="btn btn-primary" id="ed-save">Save Annotation</button>
       </div>
@@ -2046,13 +3440,51 @@
       <div class="vw-head"><span class="tier-badge" id="vw-badge"></span><button class="close-btn"
           id="vw-close">×</button></div>
       <div class="vw-body">
+        <div id="vw-motif-badge" class="vw-motif-badge" style="display:none"></div>
+        <div id="vw-choreo-badge" class="vw-choreo-badge" style="display:none"></div>
+        <div id="vw-costume-badge" class="vw-costume-badge" style="display:none"></div>
         <div class="vw-quote" id="vw-quote"></div>
         <div class="vw-content" id="vw-content"></div>
         <div class="vw-tags" id="vw-tags"></div>
       </div>
       <div class="vw-foot" id="vw-foot">
-        <span style="font-family:'Courier Prime';font-size:9px;color:var(--text-dim);margin-left:auto;"
-          id="vw-meta"></span>
+        <span style="font-family:'Courier Prime';font-size:9px;color:var(--text-dim);" id="vw-meta"></span>
+        <div class="vw-actions">
+          <button class="vw-act-btn" id="vw-edit">✎ Edit</button>
+          <button class="vw-act-btn del" id="vw-delete">✕ Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOTIF MODAL -->
+  <div class="overlay" id="motif-modal-ov">
+    <div class="motif-modal">
+      <div class="mm-head">
+        <span class="mm-title" id="mm-title">Add Motif</span>
+        <button class="close-btn" id="mm-close">×</button>
+      </div>
+      <div class="mm-body">
+        <div class="mm-field">
+          <label class="mm-label">Motif ID * <span
+              style="color:var(--text-dim);font-size:8px;letter-spacing:.05em;text-transform:none;">(e.g. M1, M2 — must
+              be unique)</span></label>
+          <input class="mm-input" id="mm-motif-id" placeholder="M1">
+        </div>
+        <div class="mm-field">
+          <label class="mm-label">Name *</label>
+          <input class="mm-input" id="mm-name" placeholder="e.g. The Descent">
+        </div>
+        <div class="mm-field">
+          <label class="mm-label">Description</label>
+          <textarea class="mm-textarea" id="mm-desc"
+            placeholder="What defines this motif — musical, lyrical, or staging pattern…"></textarea>
+        </div>
+      </div>
+      <div class="mm-foot">
+        <div class="left"><button class="btn btn-danger" id="mm-delete" style="display:none">Delete Motif</button></div>
+        <button class="btn btn-ghost" id="mm-cancel">Cancel</button>
+        <button class="btn btn-primary" id="mm-save">Save Motif</button>
       </div>
     </div>
   </div>
@@ -2064,51 +3496,8 @@
         <span class="sm-heading" id="sm-heading">Add Song</span>
         <button class="close-btn" id="sm-close">×</button>
       </div>
-      <div class="sm-body">
-        <!-- Metadata -->
-        <div class="sm-field">
-          <label class="sm-label">Song Title *</label>
-          <input class="sm-input" id="sm-name" placeholder="e.g. Way Down Hadestown">
-        </div>
-        <div class="sm-row">
-          <div class="sm-field half">
-            <label class="sm-label">Track Number</label>
-            <input class="sm-input" id="sm-track" type="number" min="1" placeholder="1">
-          </div>
-          <div class="sm-field half">
-            <label class="sm-label">Duration (m:ss)</label>
-            <input class="sm-input" id="sm-dur" placeholder="3:14">
-          </div>
-        </div>
-        <div class="sm-field">
-          <label class="sm-label">Composer / Lyricist</label>
-          <input class="sm-input" id="sm-composer" placeholder="Anaïs Mitchell">
-        </div>
-
-        <!-- Lyrics editor -->
-        <div class="led-section">
-          <div class="led-top">
-            <span class="sm-label">Lyrics</span>
-            <label class="upload-label">
-              <input type="file" id="txt-upload" accept=".txt,.md">
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"
-                stroke-linecap="round">
-                <path d="M6 8V2m-3 3l3-3 3 3" />
-                <path d="M2 10h8" />
-              </svg>
-              Upload .txt
-            </label>
-          </div>
-          <div class="led-hint">
-            <code>[Section Name]</code> → section header &nbsp;·&nbsp;
-            <code>SPEAKER: line text</code> → attributed line &nbsp;·&nbsp;
-            Blank line → stanza break &nbsp;·&nbsp;
-            <code>// comment</code> → ignored
-          </div>
-          <textarea class="led-ta" id="sm-lyrics"
-            placeholder="[Intro]&#10;HERMES: Gather round and I will sing&#10;&#10;[Verse 1]&#10;HERMES: In the days before the cold began&#10;..."></textarea>
-          <div class="led-preview" id="sm-preview"></div>
-        </div>
+      <div class="sm-body" id="sm-body">
+        <!-- populated dynamically by openSongModal() -->
       </div>
       <div class="sm-foot">
         <div class="left"><button class="btn btn-danger" id="sm-delete" style="display:none">Delete Song</button></div>
@@ -2239,7 +3628,14 @@
           result.push({ lineId: id++, section: null, speaker: null, text: '' });
           continue;
         }
-        const spkMatch = line.match(/^([A-Z][A-Z0-9 &'\/\-]{0,24}):\s(.+)$/);
+        // Speaker pattern — handles all of:
+        //   HERMES:
+        //   HERMES (spoken):
+        //   HERMES & EURYDICE:
+        //   HERMES & EURYDICE (spoken):
+        //   HERMES, EURYDICE & ORPHEUS (whispered):
+        //   WORKER 1 & WORKER 2:
+        const spkMatch = line.match(/^([A-Z][A-Z0-9 ,&'\/\-\.]*?(?:\s*\([^)]+\))?)\s*:\s(.+)$/);
         if (spkMatch) {
           result.push({ lineId: id++, section: currentSection, speaker: spkMatch[1].trim(), text: spkMatch[2].trim() });
         } else {
@@ -2286,13 +3682,20 @@
     let activeFilter = 'all';
     let activeTier = 'lyrics';
     let pending = null;      // text selection awaiting annotation
+    let editingAnnId = null;      // non-null when editor is in edit (update) mode
+    let reselectState = null;      // non-null when awaiting a range reselection
     let editingSongId = null;      // song id open in song modal
     let editingSong = null;      // full song object open in modal
     let playTime = 0, playing = false, playTick = null;
+    let activeLibTab = 'songs';  // 'songs' | 'motifs'
+    let libraryMotifs = [];        // cached list for picker + grid
+    let editingMotifId = null;      // _id of motif open in motif modal
 
     /* ═══ ROUTING ═══ */
     async function showLibrary() {
       playing = false; clearInterval(playTick);
+      audio.pause(); audio.src = '';
+      audioReady = false;
       $('play-icon').innerHTML = '<path d="M3 2l10 5-10 5V2z"/>';
 
       $('view-library').classList.add('active');
@@ -2304,15 +3707,45 @@
       });
       $('nav-spacer').style.display = '';
       $('nav-add-song').style.display = '';
+      updateLibNavButton();
       currentSong = null; currentAnns = []; currentSongId = null;
 
+      // Wire lib tab buttons (safe to re-wire — idempotent via onclick)
+      document.querySelectorAll('.lib-tab').forEach(btn => {
+        btn.onclick = () => switchLibTab(btn.dataset.libTab);
+      });
+
+      // Load both in parallel
       $('song-grid').innerHTML = '<div class="lib-spinner">Loading songs</div>';
+      $('motif-grid').innerHTML = '<div class="lib-spinner" style="grid-column:1/-1">Loading motifs</div>';
       try {
-        librarySongs = await api.songs.list();
+        const [songs, motifs] = await Promise.all([api.songs.list(), api.motifs.list()]);
+        librarySongs = songs;
+        libraryMotifs = motifs;
         renderLibrary();
+        renderMotifGrid();
       } catch (e) {
         toast(e.message, true);
-        $('song-grid').innerHTML = '<div class="empty" style="grid-column:1/-1">Could not load songs.<br><em style="font-size:13px">Check that the API is running.</em></div>';
+      }
+      switchLibTab(activeLibTab);
+    }
+
+    function switchLibTab(tab) {
+      activeLibTab = tab;
+      document.querySelectorAll('.lib-tab').forEach(b => b.classList.toggle('active', b.dataset.libTab === tab));
+      $('lib-songs-panel').style.display = tab === 'songs' ? '' : 'none';
+      $('lib-motifs-panel').style.display = tab === 'motifs' ? '' : 'none';
+      updateLibNavButton();
+    }
+
+    function updateLibNavButton() {
+      const btn = $('nav-add-song');
+      if (activeLibTab === 'motifs') {
+        btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg> Add Motif`;
+        btn.onclick = () => openMotifModal(null);
+      } else {
+        btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg> Add Song`;
+        btn.onclick = () => openSongModal(null);
       }
     }
 
@@ -2342,6 +3775,7 @@
         playTime = 0; updateProg();
         $('t-total').textContent = song.durStr || fmtTime(song.dur || 0);
         $('pl-song-name').textContent = song.title;
+        loadAudio(song);
 
         // Restore full lyrics panel structure (was replaced by spinner)
         $('lyrics-panel').innerHTML = `
@@ -2409,6 +3843,106 @@
       grid.appendChild(add);
     }
 
+    /* ═══ MOTIF LEDGER (main page) ═══ */
+    function renderMotifGrid() {
+      const grid = $('motif-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      if (!libraryMotifs.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.style.gridColumn = '1/-1';
+        empty.innerHTML = 'No motifs yet.<br><em style="font-size:13px">Click "Add Motif" to define your first.</em>';
+        grid.appendChild(empty);
+      }
+
+      libraryMotifs.forEach(m => {
+        const occur = (m.occurrences || []).length;
+        const card = document.createElement('div');
+        card.className = 'ml-card';
+        card.innerHTML = `
+      <div class="ml-card-id">${esc(m.motifId)}</div>
+      <div class="ml-card-name">${esc(m.name)}</div>
+      <div class="ml-card-desc">${esc(m.description || '—')}</div>
+      <div class="ml-card-footer">
+        <span class="ml-card-occur"><span>${occur}</span> occurrence${occur !== 1 ? 's' : ''}</span>
+        <div class="ml-card-actions">
+          <button class="sc-btn" data-edit-motif="${m.id}">✎ Edit</button>
+        </div>
+      </div>`;
+        card.addEventListener('click', e => {
+          if (e.target.closest('[data-edit-motif]')) { e.stopPropagation(); openMotifModal(m.id); }
+        });
+        grid.appendChild(card);
+      });
+
+      // Add card
+      const add = document.createElement('div');
+      add.className = 'motif-card-add';
+      add.innerHTML = `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="11" y1="4" x2="11" y2="18"/><line x1="4" y1="11" x2="18" y2="11"/></svg><span>Add Motif</span>`;
+      add.addEventListener('click', () => openMotifModal(null));
+      grid.appendChild(add);
+    }
+
+    /* ── Motif modal ── */
+    function openMotifModal(motifDbId) {
+      editingMotifId = motifDbId;
+      const m = motifDbId ? libraryMotifs.find(x => x.id === motifDbId) : null;
+      $('mm-title').textContent = m ? 'Edit Motif' : 'Add Motif';
+      $('mm-motif-id').value = m?.motifId || '';
+      $('mm-motif-id').disabled = !!m;           // ID is immutable once created
+      $('mm-name').value = m?.name || '';
+      $('mm-desc').value = m?.description || '';
+      $('mm-delete').style.display = m ? '' : 'none';
+      $('motif-modal-ov').classList.add('on');
+      setTimeout(() => (m ? $('mm-name') : $('mm-motif-id')).focus(), 80);
+    }
+
+    function closeMotifModal() { $('motif-modal-ov').classList.remove('on'); }
+    $('mm-close').addEventListener('click', closeMotifModal);
+    $('mm-cancel').addEventListener('click', closeMotifModal);
+    $('motif-modal-ov').addEventListener('click', e => { if (e.target === e.currentTarget) closeMotifModal(); });
+
+    $('mm-save').addEventListener('click', async () => {
+      const motifId = $('mm-motif-id').value.trim().toUpperCase();
+      const name = $('mm-name').value.trim();
+      if (!motifId) { $('mm-motif-id').focus(); toast('Motif ID is required'); return; }
+      if (!name) { $('mm-name').focus(); toast('Name is required'); return; }
+
+      const restore = btnBusy($('mm-save'));
+      try {
+        if (editingMotifId) {
+          const updated = await api.motifs.update(editingMotifId, { name, description: $('mm-desc').value.trim() });
+          const idx = libraryMotifs.findIndex(x => x.id === editingMotifId);
+          if (idx !== -1) libraryMotifs[idx] = updated;
+          toast('Motif updated ✓');
+        } else {
+          const created = await api.motifs.create({ motifId, name, description: $('mm-desc').value.trim() });
+          libraryMotifs.push(created);
+          toast('Motif created ✓');
+        }
+        closeMotifModal();
+        renderMotifGrid();
+      } catch (e) {
+        toast(e.message, true);
+      } finally { restore(); }
+    });
+
+    $('mm-delete').addEventListener('click', () => {
+      const m = libraryMotifs.find(x => x.id === editingMotifId);
+      if (!m) return;
+      openConfirm(`Delete motif <em>${esc(m.motifId)} — ${esc(m.name)}</em>? This cannot be undone.`, async () => {
+        try {
+          await api.motifs.delete(editingMotifId);
+          libraryMotifs = libraryMotifs.filter(x => x.id !== editingMotifId);
+          closeMotifModal();
+          renderMotifGrid();
+          toast('Motif deleted');
+        } catch (e) { toast(e.message, true); }
+      });
+    });
+
     /* ═══ SONG HEADER ═══ */
     function renderSongHeader(song) {
       const trackEl = $('track-label');
@@ -2446,7 +3980,19 @@
         const num = document.createElement('span'); num.className = 'line-num'; num.textContent = lineNum;
         const dots = document.createElement('div'); dots.className = 'line-dots'; dots.id = `dots-${l.lineId}`;
         const txt = document.createElement('span'); txt.className = 'line-text'; txt.dataset.lineId = l.lineId; txt.id = `lt-${l.lineId}`;
-        if (l.speaker) { const sp = document.createElement('span'); sp.className = 'spkr'; sp.textContent = l.speaker + ':'; txt.appendChild(sp); }
+        if (l.speaker) {
+          const sp = document.createElement('span'); sp.className = 'spkr';
+          // Split "HERMES & EURYDICE (spoken)" into name + optional note
+          const noteMatch = l.speaker.match(/^(.*?)(\s*\([^)]+\))?\s*$/);
+          sp.appendChild(document.createTextNode((noteMatch[1] || l.speaker).trim()));
+          if (noteMatch[2]) {
+            const note = document.createElement('span'); note.className = 'spkr-note';
+            note.textContent = ' ' + noteMatch[2].trim();
+            sp.appendChild(note);
+          }
+          sp.appendChild(document.createTextNode(':'));
+          txt.appendChild(sp);
+        }
         txt.appendChild(document.createTextNode(l.text));
         row.appendChild(num); row.appendChild(dots); row.appendChild(txt);
         root.appendChild(row);
@@ -2455,39 +4001,200 @@
       rebuildDots();
     }
 
+    /* Apply highlight marks for an annotation.
+       For single-line annotations this is identical to the old behaviour.
+       For multi-line: highlight suffix of first line, full middle lines,
+       prefix of last line. Each mark carries the same data-aid so clicks
+       on any segment open the same viewer. */
     function applyHL(ann) {
-      const el = $(`lt-${ann.lineId}`); if (!el) return;
-      if (el.querySelector(`mark[data-aid="${ann.id}"]`)) return;
-      let tn = null; el.childNodes.forEach(n => { if (n.nodeType === 3) tn = n; });
-      if (!tn) return;
-      const full = tn.textContent;
-      const pre = full.substring(0, ann.startChar), mid = full.substring(ann.startChar, ann.endChar), post = full.substring(ann.endChar);
-      if (!mid) return;
-      const mark = document.createElement('mark');
-      mark.dataset.aid = ann.id;
-      mark.className = ann.tier === 'lyrics' ? '' : `t-${ann.tier}`;
-      mark.textContent = mid;
-      mark.addEventListener('click', e => { e.stopPropagation(); openViewer(ann.id); });
-      tn.replaceWith(document.createTextNode(pre), mark, document.createTextNode(post));
+      const startLineId = ann.lineId;
+      const endLineId = ann.endLineId || ann.lineId;
+
+      // Speaker highlight on the start line (only on first line)
+      if (ann.includesSpeaker) applySpkrHL(ann.id, ann.tier, startLineId);
+
+      if (startLineId === endLineId) {
+        applyHLToLine(ann.id, ann.tier, startLineId, ann.startChar, ann.endChar);
+        return;
+      }
+
+      const song = getSong();
+      if (!song) return;
+      const textLines = song.lyrics.filter(l => l.text);
+      const startIdx = textLines.findIndex(l => l.lineId === startLineId);
+      const endIdx = textLines.findIndex(l => l.lineId === endLineId);
+      if (startIdx === -1 || endIdx === -1) return;
+
+      for (let i = startIdx; i <= endIdx; i++) {
+        const l = textLines[i];
+        const lineStart = (i === startIdx) ? ann.startChar : 0;
+        const lineEnd = (i === endIdx) ? ann.endChar : l.text.length;
+        applyHLToLine(ann.id, ann.tier, l.lineId, lineStart, lineEnd);
+      }
+    }
+
+    /* Highlight the .spkr span on a line for an annotation.
+       Uses data attributes so multiple annotations can overlap on the same speaker
+       and CSS applies the visual. Idempotent. */
+    function applySpkrHL(annId, tier, lineId) {
+      const lineEl = $(`lt-${lineId}`);
+      if (!lineEl) return;
+      const spkr = lineEl.querySelector('.spkr');
+      if (!spkr) return;
+
+      // Store a space-separated list of ann ids so several anns can co-exist
+      const existing = (spkr.dataset.hlIds || '').split(' ').filter(Boolean);
+      if (existing.includes(annId)) return; // idempotent
+      existing.push(annId);
+      spkr.dataset.hlIds = existing.join(' ');
+      spkr.dataset.hlTier = tier;
+      // Single click → scroll sidebar; double click → open viewer (last-added annId wins)
+      spkr.onclick = e => { e.stopPropagation(); scrollToAnnInSidebar(annId); };
+      spkr.ondblclick = e => { e.stopPropagation(); openViewer(annId); };
+    }
+
+    /* Remove speaker highlight for an annotation id */
+    function removeSpkrHL(annId) {
+      document.querySelectorAll(`.spkr[data-hl-ids]`).forEach(spkr => {
+        const ids = (spkr.dataset.hlIds || '').split(' ').filter(id => id !== annId);
+        if (ids.length === 0) {
+          delete spkr.dataset.hlIds;
+          delete spkr.dataset.hlTier;
+          spkr.onclick = null;
+        } else {
+          spkr.dataset.hlIds = ids.join(' ');
+          // Pick the tier of the remaining first annotation for colour
+          const remaining = getAnns().find(a => a.id === ids[0]);
+          if (remaining) spkr.dataset.hlTier = remaining.tier;
+        }
+      });
+    }
+
+    /* Highlight [startChar, endChar) within a single line's text node(s).
+       Handles lines that already have existing <mark> splits by computing
+       the offset relative to each text node found. */
+    function applyHLToLine(annId, tier, lineId, startChar, endChar) {
+      const el = $(`lt-${lineId}`);
+      if (!el) return;
+      if (el.querySelector(`mark[data-aid="${annId}"]`)) return;
+
+      const segments = [];
+      let cursor = 0;
+
+      function collectTextNodes(node) {
+        if (node.nodeType === 1 && node.classList.contains('spkr')) return;
+        if (node.nodeType === 3) {
+          segments.push({ node, start: cursor, end: cursor + node.textContent.length });
+          cursor += node.textContent.length;
+          return;
+        }
+        for (const child of node.childNodes) collectTextNodes(child);
+      }
+      collectTextNodes(el);
+
+      for (let i = segments.length - 1; i >= 0; i--) {
+        const { node, start, end } = segments[i];
+        const hlStart = Math.max(startChar, start) - start;
+        const hlEnd = Math.min(endChar, end) - start;
+        if (hlEnd <= hlStart) continue;
+
+        const full = node.textContent;
+        const pre = full.substring(0, hlStart);
+        const mid = full.substring(hlStart, hlEnd);
+        const post = full.substring(hlEnd);
+        if (!mid) continue;
+
+        const mark = document.createElement('mark');
+        mark.dataset.aid = annId;
+        mark.className = tier === 'lyrics' ? '' : `t-${tier}`;
+        mark.textContent = mid;
+        // Single click → scroll sidebar to card
+        mark.addEventListener('click', e => { e.stopPropagation(); scrollToAnnInSidebar(annId); });
+        // Double click → open viewer
+        mark.addEventListener('dblclick', e => { e.stopPropagation(); openViewer(annId); });
+        node.replaceWith(document.createTextNode(pre), mark, document.createTextNode(post));
+      }
     }
 
     function rebuildDots() {
       document.querySelectorAll('.line-dots').forEach(d => d.innerHTML = '');
       const byLine = {};
-      getAnns().forEach(a => { (byLine[a.lineId] || (byLine[a.lineId] = [])).push(a); });
+
+      getAnns().forEach(a => {
+        const startLineId = a.lineId;
+        const endLineId = a.endLineId || a.lineId;
+
+        // Always add to start line
+        (byLine[startLineId] || (byLine[startLineId] = [])).push(a);
+
+        // For multi-line: also add a dot on the last line so the span is visible
+        if (endLineId !== startLineId) {
+          if (!byLine[endLineId]) byLine[endLineId] = [];
+          if (!byLine[endLineId].includes(a)) byLine[endLineId].push(a);
+        }
+      });
+
       Object.entries(byLine).forEach(([lid, anns]) => {
         const el = $(`dots-${lid}`); if (!el) return;
         anns.forEach(a => {
           const d = document.createElement('div');
           d.className = `ann-dot t-${a.tier}`;
-          d.title = `"${a.selectedText}" — ${a.tier}`;
-          d.addEventListener('click', () => openViewer(a.id));
+          d.title = `"${a.selectedText.substring(0, 50)}${a.selectedText.length > 50 ? '…' : ''}" — ${a.tier}`;
+          // Single click → scroll sidebar to card
+          d.addEventListener('click', () => scrollToAnnInSidebar(a.id));
+          // Double click → open viewer
+          d.addEventListener('dblclick', e => { e.stopPropagation(); openViewer(a.id); });
           el.appendChild(d);
         });
       });
+
       const total = getAnns().length;
       const el = $('ann-total'); if (el) el.textContent = total;
       $('sb-badge').textContent = total;
+    }
+
+    /* ─── Shared navigation helpers ─── */
+
+    /* Single-click from sidebar → scroll lyrics panel to line, flash it */
+    function scrollToAnnInLyrics(annId) {
+      const a = getAnns().find(x => x.id === annId);
+      if (!a) return;
+
+      const lineEl = document.querySelector(`.lyric-line[data-line-id="${a.lineId}"]`)
+        || $(`lt-${a.lineId}`)?.closest('.lyric-line');
+      if (!lineEl) return;
+
+      // On mobile use 'instant' so the scroll position is committed before
+      // the sidebar dismisses — smooth scroll + sidebar collapse together
+      // can cause Safari to reset the scroll position mid-animation.
+      lineEl.scrollIntoView({ behavior: isMobile() ? 'instant' : 'smooth', block: 'center' });
+
+      // Flash the line background
+      const color = a.tier === 'motif' ? '74,122,155'
+        : a.tier === 'choreo' ? '82,122,82'
+          : a.tier === 'costume' ? '122,82,122'
+            : '199,140,34';
+      lineEl.style.transition = 'background .15s';
+      lineEl.style.background = `rgba(${color},.18)`;
+      setTimeout(() => { lineEl.style.background = ''; }, 900);
+    }
+
+    /* Single-click from lyrics → scroll sidebar to card, flash it */
+    function scrollToAnnInSidebar(annId) {
+      // Make sure we're on the Lyrics tab
+      const lyricsTab = document.querySelector('.nav-tab[data-panel="lyrics"]');
+      if (lyricsTab && !lyricsTab.classList.contains('active')) lyricsTab.click();
+
+      // Find and flash the card
+      const card = $('sb-body')?.querySelector(`[data-ann-id="${annId}"]`);
+      if (!card) return;
+
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      // Active flash
+      document.querySelectorAll('.ann-card.active').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      setTimeout(() => card.classList.remove('active'), 1200);
     }
 
     /* ═══ SIDEBAR ═══ */
@@ -2497,15 +4204,38 @@
       if (!list.length) { body.innerHTML = '<div class="empty">No annotations in this tier yet.</div>'; return; }
       body.innerHTML = '';
       list.forEach(a => {
-        const card = document.createElement('div'); card.className = 'ann-card';
+        const card = document.createElement('div');
+        card.className = 'ann-card';
+        card.dataset.annId = a.id; // so scrollToAnnInSidebar can find it
         card.innerHTML = `
       <div class="ac-top"><div class="ac-dot" style="background:${TIER_COLORS[a.tier] || TIER_COLORS.lyrics}"></div><div class="ac-quote">"${esc(a.selectedText)}"</div></div>
       <div class="ac-body">${esc(a.content)}</div>
       <div class="ac-foot">
         ${a.tags.slice(0, 3).map(t => `<span class="ac-tag">${esc(t)}</span>`).join('')}
         ${a.tsAnchor ? `<span class="ac-ts">⏱ ${fmtTime(a.tsAnchor.start)}</span>` : ''}
-      </div>`;
-        card.addEventListener('click', () => openViewer(a.id));
+      </div>
+      <div class="ac-hint">Double-click to open · Click to jump to lyrics</div>`;
+
+        // Single click → jump to lyrics line
+        card.addEventListener('click', e => {
+          scrollToAnnInLyrics(a.id);
+          // On mobile: dismiss the overlay sidebar AFTER the instant scroll has
+          // committed to the DOM — a 80ms delay is enough for Safari to paint
+          // the new scroll position before the sidebar slide animation starts.
+          if (isMobile()) {
+            setTimeout(() => {
+              $('view-annotate').classList.add('sidebar-collapsed');
+              updateSidebarBackdrop();
+            }, 80);
+          }
+        });
+
+        // Double click → open viewer
+        card.addEventListener('dblclick', e => {
+          e.stopPropagation();
+          openViewer(a.id);
+        });
+
         body.appendChild(card);
       });
     }
@@ -2518,40 +4248,273 @@
     });
 
     /* ═══ SELECTION TOOLBAR ═══ */
+
+    /* Walk up from a DOM node to find the .line-text element (has id="lt-N") */
+    function getLineTextEl(node) {
+      let n = node;
+      while (n) {
+        if (n.nodeType === 1 && n.id && n.id.startsWith('lt-')) return n;
+        n = n.parentElement;
+      }
+      return null;
+    }
+
+    /* Given a Range endpoint (container node + offset), return how many characters
+       into the lyric text it is — skipping the speaker label span entirely.
+       Works even if existing <mark> elements have split the text node. */
+    function charOffsetInLineText(targetNode, offsetInTarget, lineTextEl) {
+      let total = 0;
+      let found = false;
+
+      function walk(node) {
+        if (found) return;
+        // Skip speaker label — it's not part of lyric text
+        if (node.nodeType === 1 && node.classList.contains('spkr')) return;
+
+        if (node.nodeType === 3) { // text node
+          if (node === targetNode) {
+            total += offsetInTarget;
+            found = true;
+            return;
+          }
+          total += node.textContent.length;
+          return;
+        }
+
+        for (const child of node.childNodes) walk(child);
+      }
+
+      walk(lineTextEl);
+      return found ? total : 0;
+    }
+
+    /* Returns true if node is inside a .spkr element within lineTextEl */
+    function isInsideSpkr(node, lineTextEl) {
+      let n = node;
+      while (n && n !== lineTextEl) {
+        if (n.nodeType === 1 && n.classList?.contains('spkr')) return true;
+        n = n.parentElement;
+      }
+      return false;
+    }
+
+    /* ─────────────────────────────────────────────
+       SELECTION DETECTION
+       iOS Safari fires selectionchange (not mouseup) when the user
+       lifts the selection handles. Desktop uses mouseup as before.
+       Both paths share positionAndShowToolbar().
+    ──────────────────────────────────────────── */
+
+    let selectionChangeTimer = null; // debounce for iOS selectionchange
+
+    function positionAndShowToolbar() {
+      const tb = $('sel-toolbar');
+      const sel = window.getSelection();
+
+      if (!sel || sel.isCollapsed || !sel.toString().trim()) {
+        tb.classList.remove('on');
+        return;
+      }
+
+      let range;
+      try { range = sel.getRangeAt(0); } catch (e) { tb.classList.remove('on'); return; }
+
+      const lp = $('lyrics-panel');
+      if (!lp || !lp.contains(range.commonAncestorContainer)) {
+        tb.classList.remove('on'); return;
+      }
+
+      // Resolve start line + char offset
+      const startLineTextEl = getLineTextEl(range.startContainer);
+      if (!startLineTextEl) { tb.classList.remove('on'); return; }
+      const startLineId = parseInt(startLineTextEl.dataset.lineId);
+
+      const includesSpeaker = isInsideSpkr(range.startContainer, startLineTextEl);
+      const startChar = includesSpeaker
+        ? 0
+        : charOffsetInLineText(range.startContainer, range.startOffset, startLineTextEl);
+
+      // Resolve end line + char offset
+      const endLineTextEl = getLineTextEl(range.endContainer);
+      if (!endLineTextEl) { tb.classList.remove('on'); return; }
+      const endLineId = parseInt(endLineTextEl.dataset.lineId);
+      const endChar = charOffsetInLineText(range.endContainer, range.endOffset, endLineTextEl);
+
+      pending = {
+        lineId: startLineId,
+        endLineId: endLineId !== startLineId ? endLineId : null,
+        startChar,
+        endChar,
+        selectedText: sel.toString().trim(),
+        includesSpeaker,
+      };
+
+      // ── Position toolbar ──────────────────────────────────────────────────────
+      // Use getBoundingClientRect() which gives viewport-relative coords —
+      // correct for position:fixed regardless of any scroll container.
+      const rect = range.getBoundingClientRect();
+      const tbWidth = 290; // approximate — clamp keeps it in bounds
+      const margin = 8;
+
+      // Prefer above the selection; fall back to below if not enough space
+      const topAbove = rect.top - 54;
+      const topBelow = rect.bottom + 6;
+      const top = topAbove >= margin ? topAbove : topBelow;
+
+      const rawLeft = rect.left + rect.width / 2 - tbWidth / 2;
+      const left = Math.max(margin, Math.min(rawLeft, window.innerWidth - tbWidth - margin));
+
+      tb.style.left = `${left}px`;
+      tb.style.top = `${top}px`;
+
+      tb.classList.toggle('in-reselect', !!reselectState);
+      tb.classList.add('on');
+    }
+
+    // ── Desktop: mouseup ─────────────────────────────────────────────────────
     document.addEventListener('mouseup', e => {
       const tb = $('sel-toolbar');
       if (tb.contains(e.target)) return;
-      const sel = window.getSelection();
-      if (!sel || sel.isCollapsed || !sel.toString().trim()) { tb.classList.remove('on'); return; }
-      const range = sel.getRangeAt(0);
-      const lp = $('lyrics-panel');
-      if (!lp || !lp.contains(range.commonAncestorContainer)) { tb.classList.remove('on'); return; }
-      let lineEl = range.commonAncestorContainer;
-      while (lineEl && !lineEl.dataset?.lineId) lineEl = lineEl.parentElement;
-      if (!lineEl) { tb.classList.remove('on'); return; }
-      const selText = sel.toString();
-      const song = getSong();
-      const lineData = song?.lyrics?.find(l => l.lineId === parseInt(lineEl.dataset.lineId));
-      const lineText = lineData?.text || '';
-      const startIdx = lineText.indexOf(selText);
-      pending = { lineId: parseInt(lineEl.dataset.lineId), startChar: startIdx >= 0 ? startIdx : 0, endChar: startIdx >= 0 ? startIdx + selText.length : selText.length, selectedText: selText.trim() };
-      const rect = range.getBoundingClientRect();
-      tb.style.left = `${Math.min(rect.left + rect.width / 2 - 90, window.innerWidth - 290)}px`;
-      tb.style.top = `${rect.top - 46 + window.scrollY}px`;
-      tb.classList.add('on');
+      // Small delay so the selection is fully committed before we read it
+      setTimeout(positionAndShowToolbar, 10);
+    });
+
+    // ── iOS Safari: selectionchange ──────────────────────────────────────────
+    // selectionchange fires continuously while the user drags handles.
+    // Debounce 300ms so we only act once the user has stopped dragging.
+    document.addEventListener('selectionchange', () => {
+      clearTimeout(selectionChangeTimer);
+      selectionChangeTimer = setTimeout(() => {
+        // Only act if the selection is inside the lyrics panel
+        const sel = window.getSelection();
+        if (!sel || sel.isCollapsed) return;
+        const lp = $('lyrics-panel');
+        try {
+          const range = sel.getRangeAt(0);
+          if (lp && lp.contains(range.commonAncestorContainer)) {
+            positionAndShowToolbar();
+          }
+        } catch (e) { /* selection may have disappeared */ }
+      }, 300);
+    });
+
+    // ── iOS Safari: touchend fallback ────────────────────────────────────────
+    // On some iOS versions selectionchange is unreliable — touchend is a
+    // reliable second trigger. The debounce prevents double-firing.
+    document.addEventListener('touchend', e => {
+      const tb = $('sel-toolbar');
+      if (tb.contains(e.target)) return;
+      clearTimeout(selectionChangeTimer);
+      selectionChangeTimer = setTimeout(() => {
+        const sel = window.getSelection();
+        if (!sel || sel.isCollapsed || !sel.toString().trim()) {
+          tb.classList.remove('on'); return;
+        }
+        const lp = $('lyrics-panel');
+        try {
+          const range = sel.getRangeAt(0);
+          if (lp && lp.contains(range.commonAncestorContainer)) positionAndShowToolbar();
+        } catch (e) { }
+      }, 300);
     });
 
     $('tb-annotate').addEventListener('click', () => launchEditor(false, false));
     $('tb-motif').addEventListener('click', () => launchEditor(true, false));
     $('tb-ts').addEventListener('click', () => launchEditor(false, true));
 
+    // Dismiss toolbar on tap outside (iOS doesn't always fire mousedown)
+    document.addEventListener('touchstart', e => {
+      const tb = $('sel-toolbar');
+      if (tb.classList.contains('on') && !tb.contains(e.target)) {
+        tb.classList.remove('on');
+      }
+    }, { passive: true });
+
+    /* ── Reselect Range orchestration ── */
+
+    /* Enter reselect mode: stash form data, close editor, show banner */
+    function enterReselectMode(annId) {
+      reselectState = {
+        annId,
+        content: $('ed-text').value,
+        tier: activeTier,
+        tags: $('ed-tags').value,
+        tsOn: $('ts-chk').checked,
+        tsStart: $('ts-s').value,
+        tsEnd: $('ts-e').value,
+      };
+      closeEditor();
+
+      // Inject banner at top of lyrics panel
+      const existingBanner = $('reselect-banner');
+      if (existingBanner) existingBanner.remove();
+      const banner = document.createElement('div');
+      banner.className = 'reselect-banner'; banner.id = 'reselect-banner';
+      banner.innerHTML = `Select the new text range for this annotation
+    <button class="reselect-cancel" id="reselect-cancel-btn">Cancel</button>`;
+      const lyricsRoot = $('lyrics-root');
+      if (lyricsRoot) lyricsRoot.parentElement.insertBefore(banner, lyricsRoot);
+      $('reselect-cancel-btn').addEventListener('click', cancelReselectMode);
+    }
+
+    /* Abort reselect — restore editor with stashed data */
+    function cancelReselectMode() {
+      if (!reselectState) return;
+      const s = reselectState;
+      reselectState = null;
+      $('sel-toolbar').classList.remove('in-reselect', 'on');
+      $('reselect-banner')?.remove();
+      // Reopen editor with saved state (no new range)
+      const ann = getAnns().find(a => a.id === s.annId);
+      if (ann) launchEditorForEdit(ann);
+    }
+
+    /* Confirm new range — reopen editor with new pending + stashed form */
+    function confirmReselectRange() {
+      if (!reselectState || !pending) return;
+      const s = reselectState;
+      const newRange = { ...pending }; // snapshot before launchEditorForEdit nulls pending
+      reselectState = null;
+      $('sel-toolbar').classList.remove('in-reselect', 'on');
+      $('reselect-banner')?.remove();
+      window.getSelection()?.removeAllRanges();
+
+      // Open editor in edit mode, then fill form with stashed data + new range
+      const ann = getAnns().find(a => a.id === s.annId);
+      if (!ann) return;
+
+      launchEditorForEdit({ ...ann, selectedText: newRange.selectedText });
+
+      // Overwrite with stashed form values and new range quote
+      $('ed-quote').textContent = `"${newRange.selectedText}"`;
+      $('ed-text').value = s.content;
+      $('ed-tags').value = s.tags;
+      $('ts-chk').checked = s.tsOn;
+      $('ts-fields').style.display = s.tsOn ? 'flex' : 'none';
+      $('ts-s').value = s.tsStart;
+      $('ts-e').value = s.tsEnd;
+      setTierChip(s.tier);
+
+      // Restore pending so ed-save knows a range reselect happened
+      pending = newRange;
+    }
+
+    $('tb-confirm-range').addEventListener('click', confirmReselectRange);
+    $('tb-cancel-reselect').addEventListener('click', () => {
+      cancelReselectMode();
+    });
+
     function launchEditor(forceMotif, forceTs) {
       if (!pending) return;
+      editingAnnId = null;
       activeTier = forceMotif ? 'motif' : 'lyrics';
       $('ed-quote').textContent = `"${pending.selectedText}"`;
       $('ed-text').value = ''; $('ed-tags').value = '';
       $('ts-chk').checked = forceTs;
       $('ts-fields').style.display = forceTs ? 'flex' : 'none';
+      $('ed-mode-label').style.display = 'none';
+      $('ann-editor-box').classList.remove('editing');
+      $('ed-save').textContent = 'Save Annotation';
       setTierChip(activeTier);
       $('editor-ov').classList.add('on');
       $('sel-toolbar').classList.remove('on');
@@ -2559,43 +4522,169 @@
       setTimeout(() => $('ed-text').focus(), 80);
     }
 
+    /* Open editor pre-filled for editing an existing annotation */
+    function launchEditorForEdit(ann) {
+      editingAnnId = ann.id;
+      pending = null;
+      activeTier = ann.tier || 'lyrics';
+      $('ed-quote').textContent = `"${ann.selectedText}"`;
+      $('ed-text').value = ann.content || '';
+      $('ed-tags').value = (ann.tags || []).join(', ');
+      const hasTs = !!(ann.tsAnchor);
+      $('ts-chk').checked = hasTs;
+      $('ts-fields').style.display = hasTs ? 'flex' : 'none';
+      if (hasTs) {
+        $('ts-s').value = fmtTime(ann.tsAnchor.start);
+        $('ts-e').value = fmtTime(ann.tsAnchor.end);
+      } else {
+        $('ts-s').value = ''; $('ts-e').value = '';
+      }
+      $('ed-mode-label').style.display = '';
+      $('ann-editor-box').classList.add('editing');
+      $('ed-save').textContent = 'Update Annotation';
+      $('ed-reselect').style.display = '';
+      $('ed-reselect').onclick = () => enterReselectMode(ann.id);
+      setTierChip(activeTier);
+      // Pre-fill tier-specific fields
+      if (activeTier === 'motif') populateMotifPicker(ann.linkedMotifId || null);
+      if (activeTier === 'choreo') { const el = $('ed-choreo-input'); if (el) el.value = ann.choreoNote || ''; }
+      if (activeTier === 'costume') { const el = $('ed-costume-input'); if (el) el.value = ann.costumeNote || ''; }
+      $('editor-ov').classList.add('on');
+      setTimeout(() => $('ed-text').focus(), 80);
+    }
+
     function setTierChip(tier) {
       document.querySelectorAll('#tier-chips .t-chip').forEach(c => { c.className = `t-chip ${c.dataset.tier === tier ? 'sel-' + tier : ''}`; });
       activeTier = tier;
+
+      // Show the right tier-specific row, hide all others
+      const motifRow = $('ed-motif-row');
+      const choreoRow = $('ed-choreo-row');
+      const costumeRow = $('ed-costume-row');
+      if (motifRow) motifRow.style.display = tier === 'motif' ? '' : 'none';
+      if (choreoRow) choreoRow.style.display = tier === 'choreo' ? '' : 'none';
+      if (costumeRow) costumeRow.style.display = tier === 'costume' ? '' : 'none';
+
+      if (tier === 'motif') populateMotifPicker();
+    }
+
+    /* Populate the motif picker select with current libraryMotifs */
+    async function populateMotifPicker(selectedMotifId = null) {
+      const sel = $('ed-motif-select');
+      if (!sel) return;
+
+      // Refresh the cached list if empty
+      if (!libraryMotifs.length) {
+        try { libraryMotifs = await api.motifs.list(); } catch (e) { /* use empty */ }
+      }
+
+      sel.innerHTML = '<option value="">— None / Unlinked —</option>';
+      libraryMotifs.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.motifId;
+        opt.textContent = `${m.motifId} — ${m.name}`;
+        if (m.motifId === selectedMotifId) opt.selected = true;
+        sel.appendChild(opt);
+      });
     }
     document.querySelectorAll('#tier-chips .t-chip').forEach(c => c.addEventListener('click', () => setTierChip(c.dataset.tier)));
     $('ts-chk').addEventListener('change', e => { $('ts-fields').style.display = e.target.checked ? 'flex' : 'none'; });
 
-    function closeEditor() { $('editor-ov').classList.remove('on'); }
+    function closeEditor() {
+      $('editor-ov').classList.remove('on');
+      $('ann-editor-box').classList.remove('editing');
+      $('ed-mode-label').style.display = 'none';
+      $('ed-save').textContent = 'Save Annotation';
+      $('ed-reselect').style.display = 'none';
+      editingAnnId = null;
+      // If closing editor normally (not entering reselect), clean up reselect too
+      if (reselectState === null) {
+        $('reselect-banner')?.remove();
+        $('sel-toolbar').classList.remove('in-reselect');
+      }
+    }
     $('ed-close').addEventListener('click', closeEditor);
     $('ed-cancel').addEventListener('click', closeEditor);
     $('editor-ov').addEventListener('click', e => { if (e.target === e.currentTarget) closeEditor(); });
 
     $('ed-save').addEventListener('click', async () => {
       const content = $('ed-text').value.trim();
-      if (!content || !pending) return;
+      if (!content) return;
       const restore = btnBusy($('ed-save'));
+
+      const tsOn = $('ts-chk').checked;
+      const tags = $('ed-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+      const tsAnchor = tsOn && $('ts-s').value
+        ? { start: parseTsStr($('ts-s').value), end: parseTsStr($('ts-e').value || $('ts-s').value) }
+        : null;
+      const linkedMotifId = activeTier === 'motif' ? ($('ed-motif-select')?.value || null) : null;
+      const choreoNote = activeTier === 'choreo' ? ($('ed-choreo-input')?.value.trim() || null) : null;
+      const costumeNote = activeTier === 'costume' ? ($('ed-costume-input')?.value.trim() || null) : null;
+
       try {
-        const tsOn = $('ts-chk').checked;
-        const tags = $('ed-tags').value.split(',').map(t => t.trim()).filter(Boolean);
-        const ann = await api.annotations.create(currentSongId, {
-          lineId: pending.lineId,
-          startChar: pending.startChar,
-          endChar: pending.endChar,
-          selectedText: pending.selectedText,
-          content,
-          author: 'You',
-          tier: activeTier,
-          tags,
-          tsAnchor: tsOn && $('ts-s').value
-            ? { start: parseTsStr($('ts-s').value), end: parseTsStr($('ts-e').value || $('ts-s').value) }
-            : null,
-        });
-        currentAnns.push(ann);
-        applyHL(ann); rebuildDots(); renderSidebar(); updateMarkers();
-        renderSongHeader(getSong());
-        closeEditor();
-        toast('Annotation saved ✓');
+        if (editingAnnId) {
+          /* ── UPDATE existing annotation ── */
+          const payload = { content, tier: activeTier, tags, tsAnchor, linkedMotifId, choreoNote, costumeNote };
+
+          // If the user reselected a range, include the new position fields too
+          if (pending) {
+            payload.lineId = pending.lineId;
+            payload.endLineId = pending.endLineId || null;
+            payload.startChar = pending.startChar;
+            payload.endChar = pending.endChar;
+            payload.selectedText = pending.selectedText;
+            payload.includesSpeaker = pending.includesSpeaker || false;
+          }
+
+          const updated = await api.annotations.update(currentSongId, editingAnnId, payload);
+
+          // Patch in-memory list
+          const idx = currentAnns.findIndex(x => x.id === editingAnnId);
+          if (idx !== -1) currentAnns[idx] = { ...currentAnns[idx], ...updated };
+
+          // If range changed: remove all old marks + speaker HL, re-apply with new range
+          if (pending) {
+            document.querySelectorAll(`mark[data-aid="${editingAnnId}"]`).forEach(
+              m => m.replaceWith(document.createTextNode(m.textContent))
+            );
+            removeSpkrHL(editingAnnId);
+            applyHL(currentAnns[idx]);
+            rebuildDots();
+          }
+
+          renderSidebar();
+          updateMarkers();
+          closeEditor();
+          toast('Annotation updated ✓');
+
+        } else {
+          /* ── CREATE new annotation ── */
+          if (!pending) return;
+          const ann = await api.annotations.create(currentSongId, {
+            lineId: pending.lineId,
+            endLineId: pending.endLineId || null,
+            startChar: pending.startChar,
+            endChar: pending.endChar,
+            selectedText: pending.selectedText,
+            includesSpeaker: pending.includesSpeaker || false,
+            linkedMotifId,
+            choreoNote,
+            costumeNote,
+            content,
+            author: 'You',
+            tier: activeTier,
+            tags,
+            tsAnchor,
+          });
+          currentAnns.push(ann);
+          applyHL(ann);
+          rebuildDots();
+          renderSidebar();
+          updateMarkers();
+          renderSongHeader(getSong());
+          closeEditor();
+          toast('Annotation saved ✓');
+        }
       } catch (e) {
         toast(e.message, true);
       } finally {
@@ -2605,25 +4694,178 @@
 
     /* ═══ VIEWER ═══ */
     function openViewer(id) {
-      const a = getAnns().find(x => x.id === id); if (!a) return;
+      const a = getAnns().find(x => x.id === id);
+      if (!a) return;
+
       $('vw-badge').textContent = a.tier.charAt(0).toUpperCase() + a.tier.slice(1);
       $('vw-badge').style.cssText = TIER_STYLE[a.tier] || TIER_STYLE.lyrics;
+
+      // Linked motif badge
+      const motifBadge = $('vw-motif-badge');
+      if (a.linkedMotifId && a.tier === 'motif') {
+        const m = libraryMotifs.find(x => x.motifId === a.linkedMotifId);
+        motifBadge.textContent = m ? `◈ ${m.motifId} — ${m.name}` : `◈ ${a.linkedMotifId}`;
+        motifBadge.style.display = '';
+      } else {
+        motifBadge.style.display = 'none';
+      }
+
+      // Choreo staging badge
+      const choreoBadge = $('vw-choreo-badge');
+      if (a.choreoNote && a.tier === 'choreo') {
+        choreoBadge.textContent = `✦ ${a.choreoNote}`;
+        choreoBadge.style.display = '';
+      } else {
+        choreoBadge.style.display = 'none';
+      }
+
+      // Costume detail badge
+      const costumeBadge = $('vw-costume-badge');
+      if (a.costumeNote && a.tier === 'costume') {
+        costumeBadge.textContent = `✦ ${a.costumeNote}`;
+        costumeBadge.style.display = '';
+      } else {
+        costumeBadge.style.display = 'none';
+      }
+
       $('vw-quote').textContent = `"${a.selectedText}"`;
       $('vw-content').textContent = a.content;
       $('vw-tags').innerHTML = a.tags.map(t => `<span class="ac-tag">${esc(t)}</span>`).join('');
-      $('vw-meta').textContent = `by ${a.author} · ${a.createdAt}`;
-      const foot = $('vw-foot'); foot.querySelector('.ts-play-btn')?.remove();
+      $('vw-meta').textContent = `by ${a.author} · ${a.createdAt?.split('T')[0] || a.createdAt || ''}`;
+
+      // Timestamp play button — remove stale one first
+      $('vw-foot').querySelector('.ts-play-btn')?.remove();
       if (a.tsAnchor) {
-        const btn = document.createElement('button'); btn.className = 'ts-play-btn';
+        const btn = document.createElement('button');
+        btn.className = 'ts-play-btn';
         btn.textContent = `▶ ${fmtTime(a.tsAnchor.start)} → ${fmtTime(a.tsAnchor.end)}`;
         btn.addEventListener('click', () => { seekTo(a.tsAnchor.start); closeViewer(); toast('Seeking to ' + fmtTime(a.tsAnchor.start)); });
-        foot.insertBefore(btn, $('vw-meta'));
+        $('vw-foot').insertBefore(btn, $('vw-meta'));
       }
+
+      // Edit button — opens editor pre-filled
+      $('vw-edit').onclick = () => {
+        closeViewer();
+        launchEditorForEdit(a);
+      };
+
+      // Delete button — confirm then DELETE /api/…
+      $('vw-delete').onclick = () => {
+        openConfirm(
+          `Delete annotation on <em>"${esc(a.selectedText)}"</em>? This cannot be undone.`,
+          async () => {
+            try {
+              await api.annotations.delete(currentSongId, a.id);
+              currentAnns = currentAnns.filter(x => x.id !== a.id);
+              // Remove all text marks (may span multiple lines)
+              document.querySelectorAll(`mark[data-aid="${a.id}"]`).forEach(
+                mark => mark.replaceWith(document.createTextNode(mark.textContent))
+              );
+              // Remove speaker highlight if this annotation had one
+              removeSpkrHL(a.id);
+              rebuildDots();
+              renderSidebar();
+              updateMarkers();
+              renderSongHeader(getSong());
+              closeViewer();
+              toast('Annotation deleted');
+            } catch (e) {
+              toast(e.message, true);
+            }
+          }
+        );
+      };
+
       $('viewer-ov').classList.add('on');
     }
+
     function closeViewer() { $('viewer-ov').classList.remove('on'); }
     $('vw-close').addEventListener('click', closeViewer);
     $('viewer-ov').addEventListener('click', e => { if (e.target === e.currentTarget) closeViewer(); });
+
+    /* ═══ NOTES PANEL ═══ */
+    function renderNotesPanel() {
+      const song = getSong();
+      const titleEl = $('sb-head').querySelector('.sb-title');
+      const chips = $('filter-chips');
+      const body = $('sb-body');
+
+      titleEl.innerHTML = 'Song Notes';
+      chips.style.display = 'none';
+
+      const words = (song?.notes || '').trim().split(/\s+/).filter(Boolean).length;
+
+      body.style.display = 'flex';
+      body.style.flexDirection = 'flex';
+      body.innerHTML = `
+    <div class="notes-panel">
+      <div class="notes-toolbar">
+        <span class="notes-wordcount" id="notes-wordcount">${words} word${words !== 1 ? 's' : ''}</span>
+        <span class="notes-save-status" id="notes-save-status"></span>
+        <button class="notes-export-btn" id="notes-export-btn">↓ Export</button>
+        <button class="notes-save-btn" id="notes-save-btn">Save</button>
+      </div>
+      <textarea
+        class="notes-textarea"
+        id="notes-textarea"
+        placeholder="Write your analysis of this song as a whole — themes, structure, dramatic arc, musical motifs, staging observations, historical context…"
+        spellcheck="true"
+      >${esc(song?.notes || '')}</textarea>
+    </div>`;
+
+      const ta = $('notes-textarea');
+      const wcEl = $('notes-wordcount');
+      const saveBtn = $('notes-save-btn');
+
+      // Live word count only — no auto-save
+      ta.addEventListener('input', () => {
+        const w = ta.value.trim().split(/\s+/).filter(Boolean).length;
+        wcEl.textContent = `${w} word${w !== 1 ? 's' : ''}`;
+        setNotesStatus(''); // clear "Saved" status when the user starts editing again
+      });
+
+      // Save button
+      saveBtn.addEventListener('click', () => saveNotes(ta.value, saveBtn));
+
+      // Export button
+      $('notes-export-btn').addEventListener('click', () => {
+        const text = ta.value.trim();
+        if (!text) { toast('No notes to export'); return; }
+        const slug = (song?.title || 'song').replace(/\s+/g, '-').toLowerCase();
+        const md = `# ${song?.title || 'Song'} — Notes\n\n${text}`;
+        const blob = new Blob([md], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `${slug}-notes.md`; a.click();
+        URL.revokeObjectURL(url);
+        toast('Notes exported ✓');
+      });
+
+      // Show saved status if notes already exist
+      if (song?.notes) setNotesStatus('saved', 'Saved');
+    }
+
+    function setNotesStatus(type, msg = '') {
+      const el = $('notes-save-status');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = `notes-save-status${type ? ' ' + type : ''}`;
+    }
+
+    async function saveNotes(text, btn) {
+      if (!currentSongId) return;
+      const restore = btn ? btnBusy(btn, 'Saving…') : null;
+      try {
+        await api.songs.update(currentSongId, { notes: text });
+        if (currentSong) currentSong.notes = text;
+        setNotesStatus('saved', 'Saved');
+      } catch (e) {
+        setNotesStatus('err', 'Save failed');
+        toast('Could not save notes: ' + e.message, true);
+      } finally {
+        if (restore) restore();
+      }
+    }
 
     /* ═══ NAV TABS ═══ */
     document.querySelectorAll('.nav-tab').forEach(tab => {
@@ -2636,23 +4878,8 @@
         if (panel === 'lyrics') {
           titleEl.innerHTML = `Annotations<span class="ann-badge" id="sb-badge">${getAnns().length}</span>`;
           chips.style.display = ''; renderSidebar();
-        } else if (panel === 'motifs') {
-          titleEl.innerHTML = `Motif Ledger<span class="ann-badge">…</span>`;
-          chips.style.display = 'none';
-          $('sb-body').innerHTML = '<div class="empty">Loading motifs…</div>';
-          api.motifs.list().then(motifs => {
-            titleEl.innerHTML = `Motif Ledger<span class="ann-badge">${motifs.length}</span>`;
-            $('sb-body').innerHTML = '<div class="motif-ledger">' +
-              motifs.map(m => `<div class="motif-card">
-            <div class="m-id">${esc(m.motifId)}</div>
-            <div class="m-name">${esc(m.name)}</div>
-            <div class="m-desc">${esc(m.description)}</div>
-            <div class="m-occur">↗ ${esc((m.occurrences || []).map(o => o.label || o.songId).join(' · '))}</div>
-          </div>`).join('') +
-              `<div style="padding:10px 0 0;border-top:1px solid var(--border);margin-top:6px;">
-            <button class="btn btn-ghost" style="width:100%;display:flex;justify-content:center;" onclick="toast('Motif editor — coming in M1')">+ Define New Motif</button>
-          </div></div>`;
-          }).catch(e => { $('sb-body').innerHTML = `<div class="empty">${esc(e.message)}</div>`; });
+        } else if (panel === 'notes') {
+          renderNotesPanel();
         } else {
           titleEl.innerHTML = `Export<span class="ann-badge">${getAnns().length} ann.</span>`;
           chips.style.display = 'none';
@@ -2703,16 +4930,20 @@
           editingSong = song;
           $('sm-body').innerHTML = smBodyHTML();
           wireLyricsUpload();
+          wireAudioUrl();
           $('sm-name').value = song.title || '';
           $('sm-track').value = song.trackNo || '';
           $('sm-dur').value = song.durStr || '';
           $('sm-composer').value = song.composer || '';
+          $('sm-audio-url').value = song.audioUrl || '';
+          $('sm-audio-url').dispatchEvent(new Event('input'));
           $('sm-lyrics').value = song.lyrics?.length ? lyricsToText(song.lyrics) : '';
           $('sm-lyrics').dispatchEvent(new Event('input'));
         } catch (e) { toast(e.message, true); closeSongModal(); }
       } else {
         $('sm-body').innerHTML = smBodyHTML();
         wireLyricsUpload();
+        wireAudioUrl();
         setTimeout(() => $('sm-name')?.focus(), 80);
       }
     }
@@ -2737,6 +4968,15 @@
     <label class="sm-label">Composer / Lyricist</label>
     <input class="sm-input" id="sm-composer" placeholder="Anaïs Mitchell">
   </div>
+  <div class="sm-field audio-url-row">
+    <label class="sm-label">Audio File URL</label>
+    <input class="sm-input" id="sm-audio-url" placeholder="Paste Google Drive share link or direct audio URL…">
+    <div class="audio-url-hint">
+      Paste the <strong>Google Drive share link</strong> — the URL will be converted automatically.<br>
+      Make sure the file is shared as <code>Anyone with the link → Viewer</code>.
+    </div>
+    <div class="audio-url-preview" id="sm-audio-preview" style="display:none"></div>
+  </div>
   <div class="led-section">
     <div class="led-top">
       <span class="sm-label">Lyrics</span>
@@ -2748,7 +4988,9 @@
     </div>
     <div class="led-hint">
       <code>[Section Name]</code> → section header &nbsp;·&nbsp;
-      <code>SPEAKER: line text</code> → attributed line &nbsp;·&nbsp;
+      <code>SPEAKER: text</code> → attributed line &nbsp;·&nbsp;
+      <code>SPEAKER (spoken): text</code> → with note &nbsp;·&nbsp;
+      <code>A &amp; B: text</code> → multiple speakers &nbsp;·&nbsp;
       Blank line → stanza break &nbsp;·&nbsp;
       <code>// comment</code> → ignored
     </div>
@@ -2773,6 +5015,36 @@
       });
     }
 
+    function wireAudioUrl() {
+      const input = $('sm-audio-url');
+      const preview = $('sm-audio-preview');
+      if (!input) return;
+
+      function refreshPreview() {
+        const raw = input.value.trim();
+        if (!raw) { preview.style.display = 'none'; return; }
+
+        const isGdrive = raw.includes('drive.google.com');
+        const id = isGdrive ? gdriveFileId(raw) : null;
+        const stream = gdriveToStream(raw);
+
+        preview.style.display = 'flex';
+        if (isGdrive && id) {
+          preview.className = 'audio-url-preview';
+          preview.textContent = `✓ Google Drive · ID: ${id}`;
+        } else if (isGdrive && !id) {
+          preview.className = 'audio-url-preview invalid';
+          preview.textContent = '⚠ Could not parse Drive file ID from this URL';
+        } else {
+          preview.className = 'audio-url-preview';
+          preview.textContent = `✓ Direct URL`;
+        }
+      }
+
+      input.addEventListener('input', refreshPreview);
+      refreshPreview(); // run once on open in case field is pre-filled
+    }
+
     function closeSongModal() { $('song-modal-ov').classList.remove('on'); }
     $('sm-close').addEventListener('click', closeSongModal);
     $('sm-cancel').addEventListener('click', closeSongModal);
@@ -2783,11 +5055,13 @@
       if (!title) { $('sm-name')?.focus(); toast('Please enter a song title'); return; }
       const restore = btnBusy($('sm-save'));
       const durStr = $('sm-dur').value.trim() || '0:00';
+      const rawAudioUrl = $('sm-audio-url')?.value.trim() || null;
       const payload = {
         title,
         trackNo: parseInt($('sm-track').value) || null,
         durStr, dur: parseTsStr(durStr),
         composer: $('sm-composer').value.trim() || 'Anaïs Mitchell',
+        audioUrl: rawAudioUrl || null,
         lyrics: parseLyricsText($('sm-lyrics').value),
       };
       try {
@@ -2798,6 +5072,7 @@
             renderSongHeader(currentSong); renderLyrics(currentSong); updateMarkers();
             $('nav-song').innerHTML = `${esc(updated.title)} <small>Track ${String(updated.trackNo || '?').padStart(2, '0')} · OBC</small>`;
             $('pl-song-name').textContent = updated.title;
+            loadAudio(currentSong); // reload audio in case URL changed
           }
           toast('Song updated ✓');
         } else {
@@ -2823,7 +5098,6 @@
       });
     });
 
-    $('nav-add-song').addEventListener('click', () => openSongModal(null));
     $('nav-brand').addEventListener('click', showLibrary);
 
     /* ═══ CONFIRM ═══ */
@@ -2832,37 +5106,408 @@
     $('confirm-cancel').addEventListener('click', () => { $('confirm-ov').classList.remove('on'); confirmCb = null; });
     $('confirm-ok').addEventListener('click', () => { $('confirm-ov').classList.remove('on'); if (confirmCb) { confirmCb(); confirmCb = null; } });
 
-    /* ═══ PLAYER ═══ */
-    function seekTo(s) { const song = getSong(); playTime = Math.min(s, song?.dur || 0); updateProg(); }
-    function updateProg() { const dur = getSong()?.dur || 1; $('t-cur').textContent = fmtTime(playTime); $('prog-fill').style.width = `${(playTime / dur) * 100}%`; }
+    /* ═══════════════════════════════════════════
+       AUDIO PLAYER
+       Wraps the native <audio> element.
+       Falls back gracefully when no audioUrl is set.
+    ═══════════════════════════════════════════ */
+
+    /* ── Google Drive URL converter ──
+       Accepts any of:
+         https://drive.google.com/file/d/FILE_ID/view?…
+         https://drive.google.com/open?id=FILE_ID
+         https://drive.google.com/uc?id=FILE_ID&…
+       Returns a direct streaming URL, or the original if it's already direct. */
+    function gdriveToStream(url) {
+      if (!url) return null;
+      url = url.trim();
+
+      // Non-Drive URLs (e.g. direct mp3 links) — use as-is, no proxy needed
+      if (!url.includes('drive.google.com')) return url;
+
+      let id = null;
+
+      // Format: /file/d/FILE_ID/…
+      const fileMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if (fileMatch) id = fileMatch[1];
+
+      // Format: ?id=FILE_ID or &id=FILE_ID
+      if (!id) {
+        const idMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (idMatch) id = idMatch[1];
+      }
+
+      if (!id) return url; // can't parse, fall back to original
+
+      // Route through our backend proxy which handles CORS + follows Drive redirects.
+      // We encode the canonical Drive URL so the proxy can reconstruct it cleanly.
+      const canonicalDriveUrl = `https://drive.google.com/uc?export=open&id=${id}`;
+      return `${API_BASE}/api/proxy/audio?url=${encodeURIComponent(canonicalDriveUrl)}`;
+    }
+
+    /* Extract the file ID from a Google Drive URL for display */
+    function gdriveFileId(url) {
+      if (!url || !url.includes('drive.google.com')) return null;
+      const m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      return m ? m[1] : null;
+    }
+
+    const audio = $('audio-el');
+    let audioReady = false; // true once metadata loaded
+
+    function setPlayerStatus(msg, type = '') {
+      const el = $('pl-status');
+      el.textContent = msg;
+      el.className = 'pl-status' + (type ? ' ' + type : '');
+    }
+
+    function loadAudio(song) {
+      audioReady = false;
+      audio.pause();
+      audio.src = '';
+      $('player').classList.remove('pl-no-audio', 'pl-loading-audio');
+      setPlayerStatus('');
+
+      const raw = song?.audioUrl;
+      if (!raw) {
+        $('player').classList.add('pl-no-audio');
+        setPlayerStatus('No audio');
+        return;
+      }
+
+      const streamUrl = gdriveToStream(raw);
+      $('player').classList.add('pl-loading-audio');
+      setPlayerStatus('Loading…');
+
+      audio.src = streamUrl;
+      audio.load();
+    }
+
+    /* Sync the progress bar fill + timestamps from the audio element */
+    function updateProg() {
+      const dur = audio.duration || getSong()?.dur || 1;
+      const t = audioReady ? audio.currentTime : playTime;
+      $('t-cur').textContent = fmtTime(t);
+      $('prog-fill').style.width = `${(t / dur) * 100}%`;
+    }
+
     function updateMarkers() {
       const m = $('prog-markers'); if (!m) return;
-      m.innerHTML = ''; const dur = getSong()?.dur || 1;
+      m.innerHTML = '';
+      const dur = (audioReady ? audio.duration : null) || getSong()?.dur || 1;
+
       getAnns().forEach(a => {
         if (!a.tsAnchor) return;
-        const mk = document.createElement('div'); mk.className = 'prog-marker';
+        const mk = document.createElement('div');
+        mk.className = 'prog-marker';
         mk.style.left = `${(a.tsAnchor.start / dur) * 100}%`;
         mk.style.background = TIER_COLORS[a.tier] || TIER_COLORS.lyrics;
-        mk.title = `"${a.selectedText}"`;
+        mk.title = `${fmtTime(a.tsAnchor.start)} — "${a.selectedText.substring(0, 40)}${a.selectedText.length > 40 ? '…' : ''}"`;
+
+        mk.addEventListener('click', e => {
+          e.stopPropagation(); // don't also trigger prog-track seek
+
+          // Seek audio to annotation timestamp
+          seekTo(a.tsAnchor.start);
+
+          // Scroll the lyrics panel to the annotation's first line
+          const lineEl = document.querySelector(`.lyric-line[data-line-id="${a.lineId}"]`)
+            || $(`lt-${a.lineId}`)?.closest('.lyric-line');
+          if (lineEl) {
+            lineEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Brief flash to orient the eye
+            lineEl.style.transition = 'background .15s';
+            lineEl.style.background = `rgba(${a.tier === 'motif' ? '74,122,155' : '199,140,34'},.12)`;
+            setTimeout(() => { lineEl.style.background = ''; }, 800);
+          }
+
+          toast(`↳ ${fmtTime(a.tsAnchor.start)} — "${a.selectedText.substring(0, 30)}${a.selectedText.length > 30 ? '…' : ''}"`);
+        });
+
         m.appendChild(mk);
       });
     }
-    $('play-btn').addEventListener('click', () => {
-      const dur = getSong()?.dur || 0; playing = !playing;
-      $('play-icon').innerHTML = playing ? '<path d="M3 2h3v10H3zm5 0h3v10H8z"/>' : '<path d="M3 2l10 5-10 5V2z"/>';
-      if (playing) {
-        playTick = setInterval(() => {
-          playTime = Math.min(playTime + .5, dur); updateProg();
-          if (playTime >= dur) { playing = false; clearInterval(playTick); $('play-icon').innerHTML = '<path d="M3 2l10 5-10 5V2z"/>'; }
-        }, 500);
-      } else clearInterval(playTick);
+
+    function seekTo(s) {
+      const dur = (audioReady ? audio.duration : null) || getSong()?.dur || 0;
+      const t = Math.max(0, Math.min(s, dur));
+      if (audioReady) {
+        audio.currentTime = t;
+      } else {
+        playTime = t; // fallback: track without audio
+      }
+      updateProg();
+    }
+
+    /* ── Audio element event handlers ── */
+    audio.addEventListener('loadedmetadata', () => {
+      audioReady = true;
+      $('player').classList.remove('pl-loading-audio');
+      setPlayerStatus('', 'ok');
+      $('t-total').textContent = fmtTime(audio.duration);
+      updateProg();
+      updateMarkers();
     });
-    $('prog-track').addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(); seekTo(((e.clientX - r.left) / r.width) * (getSong()?.dur || 0)); });
-    $('loop-btn').addEventListener('click', function () { this.classList.toggle('on'); });
-    $('choreo-btn').addEventListener('click', function () { this.classList.toggle('on'); toast(this.classList.contains('on') ? 'Choreo layer on' : 'Choreo layer off'); });
-    $('sb-toggle').addEventListener('click', () => $('view-annotate').classList.toggle('sidebar-collapsed'));
+
+    audio.addEventListener('timeupdate', () => {
+      if (!audioReady) return;
+      updateProg();
+      // Keep playTime in sync for timestamp anchors etc.
+      playTime = audio.currentTime;
+    });
+
+    audio.addEventListener('ended', () => {
+      playing = false;
+      $('play-icon').innerHTML = '<path d="M3 2l10 5-10 5V2z"/>';
+      if ($('loop-btn').classList.contains('on')) {
+        audio.currentTime = 0;
+        audio.play().then(() => { playing = true; $('play-icon').innerHTML = '<path d="M3 2h3v10H3zm5 0h3v10H8z"/>'; }).catch(() => { });
+      }
+    });
+
+    audio.addEventListener('error', () => {
+      $('player').classList.remove('pl-loading-audio');
+      setPlayerStatus('Load error', 'err');
+      toast('Audio failed to load — check the URL and sharing settings', true);
+      audioReady = false;
+    });
+
+    audio.addEventListener('waiting', () => { setPlayerStatus('Buffering…'); });
+    audio.addEventListener('playing', () => { setPlayerStatus('', 'ok'); });
+    audio.addEventListener('canplay', () => {
+      $('player').classList.remove('pl-loading-audio');
+      setPlayerStatus('', 'ok');
+    });
+
+    /* ── Play / pause button ── */
+    $('play-btn').addEventListener('click', async () => {
+      if ($('player').classList.contains('pl-no-audio')) {
+        toast('No audio file linked — edit the song to add one');
+        return;
+      }
+      if (!audioReady && audio.src) {
+        // Still loading — just wait
+        return;
+      }
+      if (audio.paused) {
+        try {
+          await audio.play();
+          playing = true;
+          $('play-icon').innerHTML = '<path d="M3 2h3v10H3zm5 0h3v10H8z"/>';
+        } catch (e) {
+          toast('Playback blocked — click play again or check browser settings', true);
+        }
+      } else {
+        audio.pause();
+        playing = false;
+        $('play-icon').innerHTML = '<path d="M3 2l10 5-10 5V2z"/>';
+      }
+    });
+
+    /* ── Progress bar click to seek ── */
+    $('prog-track').addEventListener('click', e => {
+      if ($('player').classList.contains('pl-no-audio')) return;
+      const r = e.currentTarget.getBoundingClientRect();
+      const pct = (e.clientX - r.left) / r.width;
+      const dur = (audioReady ? audio.duration : null) || getSong()?.dur || 0;
+      seekTo(pct * dur);
+    });
+
+    /* ── Loop & choreo ── */
+    $('loop-btn').addEventListener('click', function () {
+      this.classList.toggle('on');
+      audio.loop = this.classList.contains('on');
+    });
+    $('choreo-btn').addEventListener('click', function () {
+      this.classList.toggle('on');
+      toast(this.classList.contains('on') ? 'Choreo layer on' : 'Choreo layer off');
+    });
+    $('sb-toggle').addEventListener('click', () => {
+      $('view-annotate').classList.toggle('sidebar-collapsed');
+      updateSidebarBackdrop();
+    });
+
+    /* ── Mobile sidebar backdrop ──────────────────────────────────────────────
+       On narrow screens we inject a single #sb-backdrop div once.
+       It sits behind the open sidebar and closes it when tapped.            */
+    function isMobile() { return window.innerWidth <= 640; }
+
+    (function injectBackdrop() {
+      if ($('sb-backdrop')) return;
+      const bd = document.createElement('div');
+      bd.id = 'sb-backdrop';
+      document.body.appendChild(bd);
+      bd.addEventListener('click', () => {
+        $('view-annotate').classList.add('sidebar-collapsed');
+        updateSidebarBackdrop();
+      });
+    })();
+
+    function updateSidebarBackdrop() {
+      const bd = $('sb-backdrop');
+      if (!bd) return;
+      const isOpen = isMobile() && !$('view-annotate').classList.contains('sidebar-collapsed');
+      bd.style.display = isOpen ? 'block' : 'none';
+    }
+
+    // Keep backdrop in sync on resize (e.g. rotating phone → tablet width)
+    window.addEventListener('resize', updateSidebarBackdrop, { passive: true });
+
+    /* ═══════════════════════════════════════════
+       SETTINGS
+       All values are persisted to localStorage
+       under 'hadestown_settings' and applied as
+       CSS custom properties on :root.
+    ═══════════════════════════════════════════ */
+    const SETTINGS_KEY = 'hadestown_settings';
+
+    const DEFAULTS = {
+      font: "'EB Garamond', Georgia, serif",
+      size: 20,
+      lh: 1.8,
+      linenumW: 34,
+      padding: 52,
+      sidebarW: 360,
+      linenumVis: true,
+      spkrVis: true,
+      sectionVis: true,
+      hlOpacity: 0.14,
+    };
+
+    function loadSettings() {
+      try {
+        const raw = localStorage.getItem(SETTINGS_KEY);
+        return raw ? { ...DEFAULTS, ...JSON.parse(raw) } : { ...DEFAULTS };
+      } catch (e) { return { ...DEFAULTS }; }
+    }
+
+    function saveSettings(s) {
+      try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch (e) { }
+    }
+
+    function applySettings(s) {
+      const r = document.documentElement.style;
+      r.setProperty('--lyrics-font', s.font);
+      r.setProperty('--lyrics-size', s.size + 'px');
+      r.setProperty('--lyrics-lh', s.lh);
+      r.setProperty('--lyric-padding', s.padding + 'px');
+      r.setProperty('--sidebar-w', s.sidebarW + 'px');
+
+      // Line numbers: collapse width+margin to zero when hidden so no dead space remains
+      r.setProperty('--linenum-vis', s.linenumVis ? '1' : '0');
+      r.setProperty('--linenum-w', s.linenumVis ? s.linenumW + 'px' : '0px');
+      r.setProperty('--linenum-margin', s.linenumVis ? '14px' : '0px');
+
+      // Speaker labels and section headers: fade out only, layout stays intact
+      r.setProperty('--spkr-vis', s.spkrVis ? '1' : '0');
+      r.setProperty('--section-vis', s.sectionVis ? '1' : '0');
+
+      // Highlight: update both the fill and border derived from the opacity value
+      r.setProperty('--hl-opacity', s.hlOpacity);
+      r.setProperty('--hl-bg', `rgba(199,140,34,${s.hlOpacity})`);
+      r.setProperty('--hl-border', `rgba(199,140,34,${Math.min(s.hlOpacity * 3, 1).toFixed(2)})`);
+    }
+
+    function populateSettingsUI(s) {
+      $('sd-font').value = s.font;
+      $('sd-size').value = s.size; $('sd-size-val').textContent = s.size + 'px';
+      $('sd-lh').value = s.lh; $('sd-lh-val').textContent = parseFloat(s.lh).toFixed(2);
+      $('sd-linenum-w').value = s.linenumW; $('sd-linenum-w-val').textContent = s.linenumW + 'px';
+      $('sd-padding').value = s.padding; $('sd-padding-val').textContent = s.padding + 'px';
+      $('sd-sidebar-w').value = s.sidebarW; $('sd-sidebar-w-val').textContent = s.sidebarW + 'px';
+      $('sd-linenum-vis').checked = s.linenumVis;
+      $('sd-spkr-vis').checked = s.spkrVis;
+      $('sd-section-vis').checked = s.sectionVis;
+      $('sd-hl-opacity').value = s.hlOpacity;
+      $('sd-hl-opacity-val').textContent = Math.round(s.hlOpacity * 100) + '%';
+    }
+
+    // Current settings object — mutated in place by controls
+    let settings = loadSettings();
+    applySettings(settings);
+
+    /* ── Wire up each control ── */
+    function bindSlider(id, valId, key, fmt) {
+      const el = $(id);
+      el.addEventListener('input', () => {
+        const v = parseFloat(el.value);
+        settings[key] = v;
+        $(valId).textContent = fmt(v);
+        applySettings(settings);
+        saveSettings(settings);
+      });
+    }
+
+    function bindToggle(id, key) {
+      $(id).addEventListener('change', e => {
+        settings[key] = e.target.checked;
+        applySettings(settings);
+        saveSettings(settings);
+      });
+    }
+
+    bindSlider('sd-size', 'sd-size-val', 'size', v => v + 'px');
+    bindSlider('sd-lh', 'sd-lh-val', 'lh', v => v.toFixed(2));
+    bindSlider('sd-linenum-w', 'sd-linenum-w-val', 'linenumW', v => v + 'px');
+    bindSlider('sd-padding', 'sd-padding-val', 'padding', v => v + 'px');
+    bindSlider('sd-sidebar-w', 'sd-sidebar-w-val', 'sidebarW', v => v + 'px');
+    bindSlider('sd-hl-opacity', 'sd-hl-opacity-val', 'hlOpacity', v => Math.round(v * 100) + '%');
+
+    bindToggle('sd-linenum-vis', 'linenumVis');
+    bindToggle('sd-spkr-vis', 'spkrVis');
+    bindToggle('sd-section-vis', 'sectionVis');
+
+    // Dim the line-number-width slider when line numbers are hidden
+    function syncLinenumSlider() {
+      const on = settings.linenumVis;
+      $('sd-linenum-w').disabled = !on;
+      $('sd-linenum-w').style.opacity = on ? '1' : '0.35';
+      $('sd-linenum-w-val').style.opacity = on ? '1' : '0.35';
+    }
+    $('sd-linenum-vis').addEventListener('change', syncLinenumSlider);
+
+    $('sd-font').addEventListener('change', e => {
+      settings.font = e.target.value;
+      applySettings(settings);
+      saveSettings(settings);
+    });
+
+    $('sd-reset').addEventListener('click', () => {
+      settings = { ...DEFAULTS };
+      applySettings(settings);
+      saveSettings(settings);
+      populateSettingsUI(settings);
+      toast('Settings reset to defaults');
+    });
+
+    /* ── Drawer open / close ── */
+    function openSettings() {
+      populateSettingsUI(settings);
+      syncLinenumSlider();
+      $('settings-drawer').classList.add('open');
+      $('nav-settings-btn').classList.add('active');
+      document.body.classList.add('settings-open');
+    }
+    function closeSettings() {
+      $('settings-drawer').classList.remove('open');
+      $('nav-settings-btn').classList.remove('active');
+      document.body.classList.remove('settings-open');
+    }
+    $('nav-settings-btn').addEventListener('click', () => {
+      $('settings-drawer').classList.contains('open') ? closeSettings() : openSettings();
+    });
+    // Close on outside click
+    document.addEventListener('mousedown', e => {
+      if (!$('settings-drawer').classList.contains('open')) return;
+      if ($('settings-drawer').contains(e.target)) return;
+      if ($('nav-settings-btn').contains(e.target)) return;
+      closeSettings();
+    });
 
     /* ═══ INIT ═══ */
+    // Populate settings UI now so drawer controls reflect any saved values immediately
+    populateSettingsUI(settings);
+    syncLinenumSlider();
     showLibrary();
   </script>
 </body>

@@ -1,0 +1,2682 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>SPECIMEN — A Living Field Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --bg: #030b12;
+      --surf0: #061120;
+      --surf1: #091829;
+      --surf2: #0c2038;
+      --surf3: #0f2847;
+      --acc: #00c9a7;
+      --acc2: #5e6ad2;
+      --acc3: #e8763a;
+      --text: #cde8f5;
+      --text2: #5f9ab8;
+      --text3: #234e6a;
+      --border: #0d2840;
+      --nav-h: 64px;
+      --fd: 'Cinzel', serif;
+      --fm: 'IBM Plex Mono', monospace;
+    }
+
+    html,
+    body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--fm);
+      font-size: 13px;
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior: none
+    }
+
+    #shell {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      position: relative
+    }
+
+    #view-host {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-bottom: calc(var(--nav-h) + 12px);
+      scroll-behavior: smooth
+    }
+
+    #view-host::-webkit-scrollbar {
+      display: none
+    }
+
+    #bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      height: var(--nav-h);
+      background: rgba(6, 17, 32, .96);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 100
+    }
+
+    .nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text3);
+      font-family: var(--fm);
+      position: relative;
+      transition: color .2s
+    }
+
+    .nav-btn.active {
+      color: var(--acc)
+    }
+
+    .nav-btn:not(.active):hover {
+      color: var(--text2)
+    }
+
+    .nav-btn .ni {
+      font-size: 16px;
+      line-height: 1
+    }
+
+    .nav-btn .nl {
+      font-size: 8.5px;
+      text-transform: uppercase;
+      letter-spacing: .12em
+    }
+
+    .nav-badge {
+      position: absolute;
+      top: 8px;
+      right: calc(50% - 18px);
+      background: var(--acc);
+      color: var(--bg);
+      font-size: 8px;
+      font-weight: 700;
+      border-radius: 8px;
+      min-width: 14px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 3px
+    }
+
+    .view {
+      padding: 18px 14px;
+      animation: fade-in .25s ease
+    }
+
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(4px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .h-display {
+      font-family: var(--fd);
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: .2em
+    }
+
+    .h-section {
+      font-family: var(--fd);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--text2);
+      margin-bottom: 10px
+    }
+
+    .h-page {
+      font-family: var(--fd);
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      margin-bottom: 18px
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--fm);
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      cursor: pointer;
+      border: none;
+      border-radius: 7px;
+      padding: 10px 22px;
+      transition: filter .15s, transform .1s, opacity .15s
+    }
+
+    .btn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px)
+    }
+
+    .btn:active {
+      transform: none;
+      filter: none
+    }
+
+    .btn-acc {
+      background: var(--acc);
+      color: var(--bg)
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text2);
+      border: 1px solid var(--border)
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--acc2);
+      color: var(--acc2)
+    }
+
+    .btn-lg {
+      padding: 13px 32px;
+      font-size: 13px
+    }
+
+    .btn-block {
+      width: 100%
+    }
+
+    /* HERO */
+    .hero-card {
+      background: linear-gradient(140deg, var(--surf1) 0%, var(--surf2) 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 14px
+    }
+
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse 55% 50% at 15% 65%, rgba(0, 201, 167, .08), transparent)
+    }
+
+    .hero-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 3px
+    }
+
+    .hero-icon {
+      font-size: 22px;
+      filter: drop-shadow(0 0 9px var(--acc))
+    }
+
+    .hero-title {
+      font-family: var(--fd);
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: .4em;
+      color: var(--acc);
+      text-shadow: 0 0 28px rgba(0, 201, 167, .3)
+    }
+
+    .hero-tagline {
+      font-size: 9.5px;
+      color: var(--text2);
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      margin-left: 32px;
+      margin-bottom: 18px
+    }
+
+    .hero-pack-row {
+      display: flex;
+      align-items: center;
+      gap: 18px
+    }
+
+    .pack-num-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 56px
+    }
+
+    .pack-num {
+      font-family: var(--fd);
+      font-size: 46px;
+      line-height: 1;
+      color: var(--acc)
+    }
+
+    .pack-num-lbl {
+      font-size: 8px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .1em
+    }
+
+    .cooldown-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px
+    }
+
+    .cd-lbl {
+      font-size: 8.5px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .1em
+    }
+
+    .cd-time {
+      font-family: var(--fd);
+      font-size: 24px;
+      color: var(--acc2)
+    }
+
+    .rarity-pills {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 14px;
+      scrollbar-width: none
+    }
+
+    .rarity-pills::-webkit-scrollbar {
+      display: none
+    }
+
+    .rp {
+      flex-shrink: 0;
+      min-width: 60px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: var(--surf1);
+      border: 1px solid var(--rp-b, var(--border));
+      text-align: center
+    }
+
+    .rp-num {
+      display: block;
+      font-family: var(--fd);
+      font-size: 18px;
+      color: var(--rp-c, var(--text2))
+    }
+
+    .rp-lbl {
+      display: block;
+      font-size: 7.5px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-top: 1px
+    }
+
+    .stat-chips {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 20px
+    }
+
+    .stat-chip {
+      background: var(--surf1);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 6px;
+      text-align: center
+    }
+
+    .sc-num {
+      display: block;
+      font-family: var(--fd);
+      font-size: 20px;
+      margin-bottom: 2px
+    }
+
+    .sc-lbl {
+      display: block;
+      font-size: 7.5px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .07em
+    }
+
+    .section-row {
+      margin-bottom: 20px
+    }
+
+    .hscroll {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      scrollbar-width: none
+    }
+
+    .hscroll .scard {
+      width: 190px;
+      flex-shrink: 0
+    }
+
+    .hscroll::-webkit-scrollbar {
+      display: none
+    }
+
+    .onboard {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--surf1);
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      color: var(--text2);
+      font-size: 11.5px;
+      line-height: 1.85
+    }
+
+    .onboard p+p {
+      margin-top: 6px
+    }
+
+    /* SPECIES CARD — playing card ratio 5:7, one template used everywhere */
+    .scard {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      background: linear-gradient(160deg, var(--surf2), var(--surf3));
+      border: 1px solid var(--scard-b, var(--border));
+      transition: transform .22s, box-shadow .22s;
+      flex-shrink: 0;
+      width: 100%;
+      aspect-ratio: 5/7;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .scard:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px var(--scard-g, transparent)
+    }
+
+    /* Rarity colour bar across top */
+    .scard-pip {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--scard-c, var(--text3));
+      z-index: 3
+    }
+
+    /* Photo: top 52% of card */
+    .scard-photo {
+      flex: 0 0 52%;
+      position: relative;
+      overflow: hidden
+    }
+
+    .scard-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block
+    }
+
+    .scard-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--fd);
+      font-size: 26px;
+      color: var(--scard-c, var(--text3));
+      opacity: .2;
+      background: var(--surf1);
+    }
+
+    /* Rarity badge overlaid on photo bottom-right */
+    .scard-rar-badge {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      z-index: 2;
+      font-size: 6.5px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--scard-c);
+      background: rgba(0, 0, 0, .75);
+      padding: 2px 5px;
+      border-radius: 3px;
+      border: 1px solid var(--scard-b);
+    }
+
+    /* Body: lower 48% */
+    .scard-body {
+      flex: 1;
+      padding: 6px 8px 6px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .scard-name {
+      font-size: 10.5px;
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--scard-c, var(--text));
+      text-transform: capitalize;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 1px;
+      flex-shrink: 0;
+    }
+
+    .scard-sci {
+      font-size: 7.5px;
+      font-style: italic;
+      color: var(--text3);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 5px;
+      flex-shrink: 0;
+    }
+
+    .scard-divider {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 4px;
+      flex-shrink: 0
+    }
+
+    .scard-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      justify-content: flex-start;
+      overflow: hidden
+    }
+
+    .scard-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 7.5px;
+      line-height: 1.3
+    }
+
+    .scard-row-key {
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--text3);
+      flex-shrink: 0;
+      margin-right: 4px
+    }
+
+    .scard-row-val {
+      color: var(--text2);
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0
+    }
+
+    /* Chips row — country, date, group, rarity, IUCN */
+    .scard-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      margin-top: auto;
+      padding-top: 5px;
+      flex-shrink: 0
+    }
+
+    .scard-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 7px;
+      line-height: 1;
+      padding: 2px 4px;
+      border-radius: 3px;
+      background: rgba(0, 0, 0, .25);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      white-space: nowrap;
+    }
+
+    .scard-chip.iucn {
+      border-color: var(--scard-b);
+      color: var(--scard-c)
+    }
+
+    /* Shimmer on hover */
+    .scard-shimmer {
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 45%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .055), transparent);
+      transform: skewX(-20deg);
+      pointer-events: none;
+      z-index: 4
+    }
+
+    .scard:hover .scard-shimmer {
+      animation: shimmer .55s ease forwards
+    }
+
+    @keyframes shimmer {
+      to {
+        left: 155%
+      }
+    }
+
+    /* PACK OPENING */
+    .pack-opening-view {
+      min-height: calc(100vh - var(--nav-h));
+      display: flex;
+      flex-direction: column;
+      padding: 18px 14px
+    }
+
+    .pre-open {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 22px;
+      text-align: center;
+      padding: 40px 0
+    }
+
+    .pack-icon {
+      font-size: 80px;
+      animation: float 3.2s ease-in-out infinite;
+      filter: drop-shadow(0 0 22px var(--acc));
+      display: block
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-11px)
+      }
+    }
+
+    .pre-open-title {
+      font-family: var(--fd);
+      font-size: 18px;
+      letter-spacing: .15em
+    }
+
+    .pre-open-sub {
+      font-size: 11px;
+      color: var(--text2)
+    }
+
+    .pack-remaining-badge {
+      font-size: 9.5px;
+      color: var(--text3);
+      border: 1px solid var(--border);
+      padding: 4px 14px;
+      border-radius: 20px
+    }
+
+    .loading-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 18px;
+      text-align: center
+    }
+
+    .loader-ring {
+      width: 50px;
+      height: 50px;
+      border: 2px solid var(--border);
+      border-top-color: var(--acc);
+      border-radius: 50%;
+      animation: spin .8s linear infinite
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .load-txt {
+      font-size: 12.5px;
+      color: var(--text2);
+      letter-spacing: .1em
+    }
+
+    .load-sub {
+      font-size: 10px;
+      color: var(--text3)
+    }
+
+    .error-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 16px;
+      text-align: center
+    }
+
+    .err-icon {
+      font-size: 44px
+    }
+
+    .err-msg {
+      font-size: 11.5px;
+      color: var(--acc3);
+      max-width: 280px;
+      line-height: 1.7
+    }
+
+    .reveal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px
+    }
+
+    .reveal-title {
+      font-family: var(--fd);
+      font-size: 15px;
+      letter-spacing: .16em
+    }
+
+    .reveal-prog {
+      font-size: 11px;
+      color: var(--text2)
+    }
+
+    .reveal-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 22px
+    }
+
+    .card-back {
+      height: 192px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surf1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--fd);
+      font-size: 36px;
+      color: var(--text3)
+    }
+
+    .reveal-slot.revealed {
+      animation: pop-in .42s cubic-bezier(.34, 1.56, .64, 1) both
+    }
+
+    @keyframes pop-in {
+      from {
+        transform: scale(.55) rotateY(90deg);
+        opacity: 0
+      }
+
+      to {
+        transform: none;
+        opacity: 1
+      }
+    }
+
+    .post-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 260px;
+      margin: 0 auto
+    }
+
+    /* COLLECTION */
+    .col-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px
+    }
+
+    .col-badge {
+      font-size: 11px;
+      color: var(--text2);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 10px
+    }
+
+    .filter-panel {
+      margin-bottom: 16px
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 9px 12px;
+      font-family: var(--fm);
+      font-size: 11.5px;
+      background: var(--surf1);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--text);
+      outline: none;
+      margin-bottom: 8px;
+      transition: border-color .15s
+    }
+
+    .search-input::placeholder {
+      color: var(--text3)
+    }
+
+    .search-input:focus {
+      border-color: var(--acc)
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px
+    }
+
+    .filter-sel {
+      flex: 1;
+      padding: 7px 6px;
+      font-family: var(--fm);
+      font-size: 9.5px;
+      background: var(--surf1);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text2);
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      transition: border-color .15s
+    }
+
+    .filter-sel:focus {
+      border-color: var(--acc)
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text3);
+      font-size: 11.5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px
+    }
+
+    /* DETAIL — full-width card, all content inside */
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--text2);
+      font-family: var(--fm);
+      font-size: 10.5px;
+      letter-spacing: .1em;
+      cursor: pointer;
+      margin-bottom: 16px;
+      padding: 4px 0;
+      transition: color .15s;
+      display: block
+    }
+
+    .back-btn:hover {
+      color: var(--acc)
+    }
+
+    .detail-card {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--detail-b, var(--border));
+      background: var(--surf1);
+      box-shadow: 0 0 48px var(--detail-g, transparent);
+    }
+
+    .detail-photo {
+      position: relative;
+      width: 100%;
+      height: 260px;
+      background: var(--surf2);
+      overflow: hidden
+    }
+
+    .detail-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block
+    }
+
+    .detail-photo-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--fd);
+      font-size: 80px;
+      color: var(--detail-c, var(--text3));
+      opacity: .13
+    }
+
+    .detail-rar-tag {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      font-size: 8.5px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--detail-c);
+      background: rgba(0, 0, 0, .75);
+      border: 1px solid var(--detail-b);
+      padding: 4px 10px;
+      border-radius: 4px
+    }
+
+    .detail-body {
+      padding: 20px
+    }
+
+    .detail-name {
+      font-family: var(--fd);
+      font-size: 20px;
+      text-transform: capitalize;
+      color: var(--text);
+      margin-bottom: 4px;
+      line-height: 1.2
+    }
+
+    .detail-sci {
+      font-style: italic;
+      font-size: 12px;
+      color: var(--text2);
+      margin-bottom: 18px
+    }
+
+    .detail-tax {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px
+    }
+
+    .detail-tax td {
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px
+    }
+
+    .detail-tax-key {
+      color: var(--text3);
+      width: 76px;
+      letter-spacing: .04em
+    }
+
+    .detail-tax-val {
+      color: var(--text2)
+    }
+
+    .detail-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 2px
+    }
+
+    .detail-chip {
+      font-size: 10px;
+      padding: 4px 10px;
+      border-radius: 5px;
+      background: var(--surf2);
+      border: 1px solid var(--border);
+      color: var(--text2)
+    }
+
+    /* STATS */
+    .stats-chips {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-bottom: 22px
+    }
+
+    .stats-chip {
+      background: var(--surf1);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 8px;
+      text-align: center
+    }
+
+    .stc-num {
+      display: block;
+      font-family: var(--fd);
+      font-size: 26px;
+      margin-bottom: 3px
+    }
+
+    .stc-lbl {
+      display: block;
+      font-size: 7.5px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .08em
+    }
+
+    .bar-list {
+      margin-bottom: 24px
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 9px;
+      font-size: 10.5px
+    }
+
+    .bar-label {
+      min-width: 90px;
+      color: var(--bar-c, var(--text2))
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 5px;
+      background: var(--surf1);
+      border-radius: 3px;
+      overflow: hidden
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: var(--bar-c, var(--acc));
+      transition: width 1.1s cubic-bezier(.22, 1, .36, 1)
+    }
+
+    .bar-count {
+      min-width: 26px;
+      text-align: right;
+      color: var(--text2)
+    }
+
+    .hidden {
+      display: none !important
+    }
+
+    /* ── CARD STACK REVEAL ── */
+    .poke-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 20px 0;
+      flex: 1;
+      width: 100%
+    }
+
+    .poke-progress {
+      font-family: var(--fd);
+      font-size: 10px;
+      letter-spacing: .22em;
+      color: var(--text2);
+      text-transform: uppercase;
+      transition: opacity .2s
+    }
+
+    /* The stage is exactly one card tall. All cards sit at 0,0 stacked by z-index. */
+    .poke-stage {
+      position: relative;
+      width: 210px;
+      height: 294px;
+      margin: 0 auto
+    }
+
+    .poke-slot {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 210px;
+      height: 294px;
+      cursor: pointer
+    }
+
+    .poke-slot .scard {
+      width: 210px;
+      border-radius: 14px;
+      cursor: pointer;
+      flex-shrink: 0
+    }
+
+    /* Sweep: top card flies off to the upper-right */
+    .poke-slot.sweeping {
+      animation: card-sweep .38s cubic-bezier(.4, 0, 1, 1) forwards;
+      pointer-events: none
+    }
+
+    @keyframes card-sweep {
+      to {
+        transform: translateX(140%) translateY(-18%) rotate(18deg);
+        opacity: 0
+      }
+    }
+
+    /* Rarity label */
+    .poke-hint {
+      font-family: var(--fd);
+      font-size: 12px;
+      letter-spacing: .22em;
+      text-align: center;
+      height: 20px;
+      line-height: 20px
+    }
+
+    .poke-hint.pop {
+      animation: rar-pop .35s cubic-bezier(.34, 1.56, .64, 1) both
+    }
+
+    @keyframes rar-pop {
+      from {
+        transform: scale(.65);
+        opacity: 0
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1
+      }
+    }
+
+    /* Tap cue */
+    .poke-tap {
+      font-size: 10px;
+      letter-spacing: .14em;
+      color: var(--text3);
+      text-align: center;
+      animation: hint-pulse 1.9s ease-in-out infinite
+    }
+
+    @keyframes hint-pulse {
+
+      0%,
+      100% {
+        opacity: .3
+      }
+
+      50% {
+        opacity: .85
+      }
+    }
+
+    .poke-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 260px
+    }
+
+    .poke-summary-header {
+      font-family: var(--fd);
+      font-size: 11px;
+      letter-spacing: .2em;
+      color: var(--text2);
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 14px
+    }
+
+    .poke-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      width: 100%;
+      margin-bottom: 20px
+    }
+
+    /* ── DEV MODE ── */
+    .dev-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: rgba(0, 0, 0, .75);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      animation: fade-in .18s ease
+    }
+
+    .dev-panel {
+      width: 100%;
+      max-width: 480px;
+      background: #020e08;
+      border-top: 2px solid #00ff88;
+      padding: 22px 18px 32px;
+      font-family: var(--fm)
+    }
+
+    .dev-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px
+    }
+
+    .dev-title {
+      font-family: var(--fd);
+      font-size: 12px;
+      letter-spacing: .22em;
+      color: #00ff88
+    }
+
+    .dev-subtitle {
+      font-size: 9px;
+      color: #1a6b3a;
+      letter-spacing: .1em;
+      margin-top: 2px
+    }
+
+    .dev-close {
+      background: none;
+      border: 1px solid #1a6b3a;
+      color: #1a6b3a;
+      font-family: var(--fm);
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .dev-close:hover {
+      border-color: #00ff88;
+      color: #00ff88
+    }
+
+    .dev-section {
+      margin-bottom: 16px
+    }
+
+    .dev-section-lbl {
+      font-size: 8.5px;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      color: #1a6b3a;
+      margin-bottom: 8px
+    }
+
+    .dev-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .dev-btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: 1px solid #00ff88;
+      background: transparent;
+      color: #00ff88;
+      font-family: var(--fm);
+      font-size: 11px;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      letter-spacing: .06em
+    }
+
+    .dev-btn:hover {
+      background: #00ff88;
+      color: #020e08
+    }
+
+    .dev-btn.danger {
+      border-color: #ff4455;
+      color: #ff4455
+    }
+
+    .dev-btn.danger:hover {
+      background: #ff4455;
+      color: #fff
+    }
+
+    .dev-toast {
+      font-size: 9.5px;
+      color: #00ff88;
+      margin-top: 8px;
+      min-height: 14px;
+      letter-spacing: .08em
+    }
+
+    @media(min-width:768px) {
+      #shell {
+        max-width: 720px
+      }
+
+      #bottom-nav {
+        max-width: 720px
+      }
+
+      .dev-panel {
+        max-width: 720px
+      }
+
+      .card-grid {
+        grid-template-columns: repeat(3, 1fr)
+      }
+
+      .poke-summary-grid {
+        grid-template-columns: repeat(3, 1fr)
+      }
+
+      .poke-stage {
+        width: 260px;
+        height: 364px
+      }
+
+      .poke-slot {
+        width: 260px;
+        height: 364px
+      }
+
+      .poke-slot .scard {
+        width: 260px
+      }
+
+      .hscroll .scard {
+        width: 220px
+      }
+    }
+
+    /* ── SETTINGS VIEW ── */
+    .settings-section {
+      margin-bottom: 28px
+    }
+
+    .settings-section-title {
+      font-family: var(--fd);
+      font-size: 10px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--text2);
+      margin-bottom: 14px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px
+    }
+
+    .setting-label {
+      font-size: 11px;
+      color: var(--text);
+      flex-shrink: 0;
+      min-width: 110px
+    }
+
+    .setting-desc {
+      font-size: 8.5px;
+      color: var(--text3);
+      margin-top: 1px
+    }
+
+    .setting-control {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0
+    }
+
+    /* Stepper: − value + */
+    .stepper {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden
+    }
+
+    .stepper-btn {
+      background: var(--surf1);
+      border: none;
+      color: var(--text2);
+      width: 28px;
+      height: 28px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s, color .15s;
+      flex-shrink: 0
+    }
+
+    .stepper-btn:hover {
+      background: var(--surf2);
+      color: var(--acc)
+    }
+
+    .stepper-val {
+      min-width: 36px;
+      text-align: center;
+      font-family: var(--fd);
+      font-size: 11px;
+      color: var(--text);
+      padding: 0 4px;
+      background: var(--surf2);
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border)
+    }
+
+    /* Segment control */
+    .seg {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden
+    }
+
+    .seg-btn {
+      background: var(--surf1);
+      border: none;
+      color: var(--text3);
+      font-family: var(--fm);
+      font-size: 9.5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      white-space: nowrap
+    }
+
+    .seg-btn+.seg-btn {
+      border-left: 1px solid var(--border)
+    }
+
+    .seg-btn.active {
+      background: var(--acc);
+      color: var(--bg);
+      font-weight: 700
+    }
+
+    /* Slider */
+    .setting-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 120px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--surf3);
+      outline: none;
+      cursor: pointer
+    }
+
+    .setting-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--acc);
+      cursor: pointer
+    }
+
+    .setting-slider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--acc);
+      cursor: pointer;
+      border: none
+    }
+
+    .slider-val {
+      font-family: var(--fd);
+      font-size: 10px;
+      color: var(--text2);
+      min-width: 32px;
+      text-align: right
+    }
+
+    .settings-reset {
+      margin-top: 8px
+    }
+
+    /* Import / Export */
+    .ie-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 28px
+    }
+
+    .ie-btn-row {
+      display: flex;
+      gap: 10px
+    }
+
+    .ie-status {
+      font-size: 9px;
+      letter-spacing: .08em;
+      color: var(--text3);
+      min-height: 14px;
+      margin-top: -4px
+    }
+
+    .ie-status.ok {
+      color: var(--acc)
+    }
+
+    .ie-status.err {
+      color: #ff4455
+    }
+
+    /* Dev mode mobile unlock flash */
+    .nav-btn.dev-flash {
+      animation: dev-flash-anim .6s ease forwards
+    }
+
+    @keyframes dev-flash-anim {
+      0% {
+        color: var(--text3)
+      }
+
+      20% {
+        color: #00ff88;
+        text-shadow: 0 0 12px #00ff88, 0 0 24px #00ff88
+      }
+
+      50% {
+        color: #00ff88;
+        text-shadow: 0 0 20px #00ff88, 0 0 40px #00ff88
+      }
+
+      100% {
+        color: var(--acc);
+        text-shadow: none
+      }
+    }
+
+    .nav-btn.dev-armed .ni {
+      animation: dev-pulse 1.2s ease-in-out infinite
+    }
+
+    @keyframes dev-pulse {
+
+      0%,
+      100% {
+        opacity: .5;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.18);
+        color: #00ff88
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="shell">
+    <div id="view-host"></div>
+    <nav id="bottom-nav">
+      <button class="nav-btn active" data-view="home"><span class="ni">⌂</span><span class="nl">Home</span></button>
+      <button class="nav-btn" data-view="packs" id="nav-packs"><span class="ni">◈</span><span
+          class="nl">Packs</span></button>
+      <button class="nav-btn" data-view="collection"><span class="ni">◫</span><span class="nl">Field
+          Book</span></button>
+      <button class="nav-btn" data-view="stats"><span class="ni">◉</span><span class="nl">Stats</span></button>
+      <button class="nav-btn" data-view="settings"><span class="ni">⚙</span><span class="nl">Settings</span></button>
+    </nav>
+  </div>
+  <script>
+    const PACK_SIZE = 6, PACK_COOLDOWN_MS = 5 * 60 * 1000, INITIAL_PACKS = 3, STORAGE_KEY = 'specimen-v2';
+    const RARITY = {
+      Common: { c: '#7fa8bb', b: '#2a4d60', g: 'rgba(127,168,187,.12)', label: 'COMMON' },
+      Uncommon: { c: '#3fd68a', b: '#115c3a', g: 'rgba(63,214,138,.14)', label: 'UNCOMMON' },
+      Rare: { c: '#5aacf5', b: '#1148a8', g: 'rgba(90,172,245,.18)', label: 'RARE' },
+      Epic: { c: '#c47cf8', b: '#5c24a8', g: 'rgba(196,124,248,.18)', label: 'EPIC' },
+      Legendary: { c: '#f5bf3a', b: '#9c6a08', g: 'rgba(245,191,58,.22)', label: 'LEGENDARY' },
+    };
+    const RO = ['Legendary', 'Epic', 'Rare', 'Uncommon', 'Common'];
+    const IUCN = { EX: { rarity: 'Legendary', label: 'Extinct' }, EW: { rarity: 'Legendary', label: 'Extinct in Wild' }, CR: { rarity: 'Epic', label: 'Critically Endangered' }, EN: { rarity: 'Rare', label: 'Endangered' }, VU: { rarity: 'Uncommon', label: 'Vulnerable' }, NT: { rarity: 'Common', label: 'Near Threatened' }, LC: { rarity: 'Common', label: 'Least Concern' }, DD: { rarity: 'Uncommon', label: 'Data Deficient' } };
+    const TAXONS = [{ key: 212, label: 'Birds' }, { key: 359, label: 'Mammals' }, { key: 358, label: 'Reptiles' }, { key: 131, label: 'Amphibians' }, { key: 204, label: 'Fish' }, { key: 216, label: 'Insects' }, { key: 6160, label: 'Plants' }, { key: 5, label: 'Fungi' }];
+
+    let state = { collection: [], recentPulls: [], packsAvailable: INITIAL_PACKS, lastPackTime: null, totalPacksOpened: 0 };
+    function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) { } }
+    function loadState() { try { const d = localStorage.getItem(STORAGE_KEY); if (d) state = { ...state, ...JSON.parse(d) }; } catch (_) { } }
+
+    let currentView = 'home', previousView = 'home', selectedCard = null;
+    let packPhase = 'idle', packCards = [], revealIdx = 0, packErrMsg = '';
+    let colSearch = '', colRarity = 'All', colClass = 'All', colSort = 'newest';
+
+    function navigate(v, opts = {}) {
+      previousView = currentView; currentView = v;
+      if (opts.card) selectedCard = opts.card;
+      updateNav(); renderView(v);
+    }
+    function updateNav() {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === currentView));
+      const np = document.getElementById('nav-packs');
+      const eb = np.querySelector('.nav-badge'); if (eb) eb.remove();
+      if (state.packsAvailable > 0) { const b = mk('span', 'nav-badge', state.packsAvailable); np.appendChild(b); }
+    }
+
+    function assignRarity(ic, rec) {
+      // Direct IUCN mapping takes priority
+      if (ic && IUCN[ic]) return IUCN[ic].rarity;
+
+      // Smart combined score: 0-100, lower = rarer
+      let score = 50;
+
+      // Factor 1: taxonomic class tendency
+      // Reflects real-world threat levels and documentation richness
+      const classMod = {
+        'Amphibia': -30,        // most threatened vertebrate class globally
+        'Chondrichthyes': -22,  // sharks & rays, ~30% threatened
+        'Fungi': -18,           // vastly underdocumented kingdom
+        'Reptilia': -14,
+        'Mammalia': -10,
+        'Myxini': -12,          // hagfish, poorly known
+        'Cephalaspidomorphi': -12, // lampreys
+        'Aves': +12,            // most comprehensively surveyed class
+        'Insecta': +18,
+        'Arachnida': +6,
+        'Actinopterygii': +8,   // bony fish, well-recorded
+        'Liliopsida': +8,       // monocots
+        'Magnoliopsida': +8,    // dicots
+        'Malacostraca': +4,     // crustaceans
+      };
+      score += (classMod[rec?.['class']] || 0);
+
+      // Factor 2: image count as proxy for how commonly encountered this species is
+      // Species with many photos = frequently observed = more common
+      const imgs = (rec?.media || []).filter(m => m.type === 'StillImage').length;
+      if (imgs >= 8) score += 18;
+      else if (imgs >= 4) score += 9;
+      else if (imgs >= 2) score += 3;
+      else if (imgs === 1) score -= 14; // only one photo ever taken → likely obscure
+
+      // Factor 3: coordinate precision
+      // Fine precision (GPS-grade) = species recorded frequently in the field
+      // Coarse precision = infrequent, estimated, or old museum record
+      const unc = rec?.coordinateUncertaintyInMeters;
+      if (unc && unc < 100) score += 8;
+      else if (unc && unc < 1000) score += 4;
+      else if (unc && unc > 50000) score -= 8;
+
+      // Factor 4: small jitter so same-class species still vary (±13 pts)
+      score += (Math.random() * 26) - 13;
+
+      // Map final score to rarity tier
+      if (score < 10) return 'Legendary';
+      if (score < 26) return 'Epic';
+      if (score < 44) return 'Rare';
+      if (score < 62) return 'Uncommon';
+      return 'Common';
+    }
+    // Pure scientific-name fallback - only used when no vernacular name found
+    function sciNameFallback(s) {
+      if (!s) return 'Unknown Species';
+      const p = s.split(' '), e = p[1] || p[0];
+      return e.charAt(0).toUpperCase() + e.slice(1);
+    }
+    // Fetch English vernacular name from GBIF species API.
+    // Returns best English common name string, or null if none found.
+    async function fetchEnglishName(speciesKey) {
+      if (!speciesKey) return null;
+      try {
+        const res = await fetch(`https://api.gbif.org/v1/species/${speciesKey}/vernacularNames?limit=20`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        const results = data.results || [];
+        // Filter to English only (GBIF uses 'eng' and occasionally 'en')
+        const english = results.filter(v => v.language === 'eng' || v.language === 'en');
+        if (!english.length) return null;
+        // Prefer entries explicitly marked preferred, then first English entry
+        const best = english.find(v => v.preferred === true) || english[0];
+        const name = best.vernacularName?.trim();
+        // Reject empty, non-ASCII, or suspiciously long names
+        if (!name || !/^[\x20-\x7E]+$/.test(name) || name.length > 52) return null;
+        // Title-case: "great white shark" -> "Great White Shark"
+        return name.replace(/\b\w/g, c => c.toUpperCase());
+      } catch { return null; }
+    }
+    function fmtTime(ms) { const s = Math.floor(ms / 1000), m = Math.floor(s / 60); return `${m}:${String(s % 60).padStart(2, '0')}`; }
+    function mk(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
+    function uniq(arr, k) { return [...new Set(arr.map(x => x[k]).filter(Boolean))].sort(); }
+    function rarCounts() { return RO.reduce((a, r) => { a[r] = state.collection.filter(c => c.rarity === r).length; return a; }, {}); }
+
+    async function fetchPack() {
+      // Pick 3 distinct random groups for diversity within each pack
+      const shuffled = [...TAXONS].sort(() => Math.random() - .5).slice(0, 3);
+
+      // Fetch candidates from all 3 groups concurrently
+      const groupResults = await Promise.all(shuffled.map(async g => {
+        try {
+          const off = Math.floor(Math.random() * 400);
+          const res = await fetch(`https://api.gbif.org/v1/occurrence/search?mediaType=StillImage&taxonKey=${g.key}&limit=20&offset=${off}&hasCoordinate=true`);
+          if (!res.ok) return { g, hits: [] };
+          const data = await res.json();
+          const seen = new Set(), hits = [];
+          for (const r of (data.results || [])) {
+            if (hits.length >= 3) break; // up to 3 candidates per group
+            if (!r.species || seen.has(r.species)) continue;
+            const m = (r.media || []).find(x => x.type === 'StillImage' && x.identifier);
+            if (!m) continue;
+            seen.add(r.species);
+            hits.push({ r, g, m });
+          }
+          return { g, hits };
+        } catch { return { g, hits: [] }; }
+      }));
+
+      // Take 2 from each group first, overflow fills remaining slots
+      const selected = [], overflow = [];
+      for (const { hits } of groupResults) {
+        selected.push(...hits.slice(0, 2));
+        overflow.push(...hits.slice(2));
+      }
+      // Shuffle overflow so the fill isn't always group-ordered
+      overflow.sort(() => Math.random() - .5);
+      while (selected.length < PACK_SIZE && overflow.length) selected.push(overflow.shift());
+
+      if (selected.length < 2) throw new Error('Not enough specimens found. Check your connection and try again.');
+
+      const finalSlice = selected.slice(0, PACK_SIZE);
+
+      // Fetch English vernacular names for all cards in parallel.
+      // Each GBIF species key gets its own /vernacularNames call.
+      const vernacularNames = await Promise.all(
+        finalSlice.map(({ r }) => fetchEnglishName(r.speciesKey || r.taxonKey))
+      );
+
+      return finalSlice.map(({ r, g, m }, i) => ({
+        uid: `${r.speciesKey || r.taxonKey}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        // Resolution order: dedicated English vernacular API → sciName fallback
+        name: vernacularNames[i] || sciNameFallback(r.species),
+        scientificName: r.species || 'sp.',
+        family: r.family || '—', order: r.order || '—',
+        class: r.class || g.label, kingdom: r.kingdom || '—', country: r.country || '—',
+        iucnStatus: r.iucnRedListCategory || null,
+        image: m.identifier,
+        rarity: assignRarity(r.iucnRedListCategory, r),
+        collectedAt: Date.now(), group: g.label,
+      }));
+    }
+
+    function buildCard(card, onClick) {
+      const r = RARITY[card.rarity] || RARITY.Common;
+      const iucnInfo = card.iucnStatus ? IUCN[card.iucnStatus] : null;
+
+      const w = mk('div', 'scard');
+      w.style.setProperty('--scard-c', r.c);
+      w.style.setProperty('--scard-b', r.b);
+      w.style.setProperty('--scard-g', r.g);
+
+      // Top colour pip
+      w.appendChild(mk('div', 'scard-pip'));
+
+      // Photo section
+      const photo = mk('div', 'scard-photo');
+      if (card.image) {
+        const img = mk('img', 'scard-img');
+        img.src = card.image; img.alt = card.scientificName;
+        img.onerror = () => {
+          img.remove();
+          const fb = mk('div', 'scard-fallback');
+          fb.textContent = (card['class'] || '?').charAt(0).toUpperCase();
+          photo.appendChild(fb);
+        };
+        photo.appendChild(img);
+      } else {
+        const fb = mk('div', 'scard-fallback');
+        fb.textContent = (card['class'] || '?').charAt(0).toUpperCase();
+        photo.appendChild(fb);
+      }
+      photo.appendChild(mk('div', 'scard-rar-badge', r.label));
+      w.appendChild(photo);
+
+      // Body section
+      const body = mk('div', 'scard-body');
+      body.appendChild(mk('div', 'scard-name', card.name || 'Unknown'));
+      body.appendChild(mk('div', 'scard-sci', card.scientificName || ''));
+      body.appendChild(mk('div', 'scard-divider'));
+
+      // Taxonomy rows: Class + Family only (country/group go in chips below)
+      const meta = mk('div', 'scard-meta');
+      function metaRow(key, val) {
+        if (!val || val === '—') return;
+        const row = mk('div', 'scard-row');
+        row.appendChild(mk('span', 'scard-row-key', key));
+        row.appendChild(mk('span', 'scard-row-val', val));
+        meta.appendChild(row);
+      }
+      metaRow('Kingdom', card.kingdom);
+      metaRow('Class', card['class']);
+      metaRow('Order', card.order);
+      metaRow('Family', card.family);
+      body.appendChild(meta);
+
+      // Chips row — all contextual details
+      const chips = mk('div', 'scard-chips');
+      function chip(icon, val, extraCls) {
+        if (!val || val === '—') return;
+        const c = mk('span', 'scard-chip' + (extraCls ? ' ' + extraCls : ''));
+        c.textContent = icon + ' ' + val;
+        chips.appendChild(c);
+      }
+      chip('📍', card.country);
+      chip('📅', card.collectedAt ? new Date(card.collectedAt).toLocaleDateString() : null);
+      chip('🌐', card.group || card['class']);
+      chip('◈', card.rarity);
+      if (iucnInfo) {
+        const ic = mk('span', 'scard-chip iucn');
+        ic.textContent = card.iucnStatus + ' ' + iucnInfo.label;
+        chips.appendChild(ic);
+      }
+      body.appendChild(chips);
+
+      w.appendChild(body);
+      w.appendChild(mk('div', 'scard-shimmer'));
+
+      if (onClick) w.addEventListener('click', () => onClick(card));
+      return w;
+    }
+
+    /* ── VIEWS ── */
+    function renderHome() {
+      const host = document.getElementById('view-host'); host.innerHTML = '';
+      const v = mk('div', 'view');
+      // hero
+      const hero = mk('div', 'hero-card');
+      const lr = mk('div', 'hero-logo'); lr.appendChild(mk('span', 'hero-icon', '🌿')); lr.appendChild(mk('span', 'hero-title', 'SPECIMEN'));
+      hero.appendChild(lr); hero.appendChild(mk('div', 'hero-tagline', 'A Living Field Collection'));
+      const pr = mk('div', 'hero-pack-row');
+      const pnw = mk('div', 'pack-num-wrap'); pnw.appendChild(mk('span', 'pack-num', state.packsAvailable)); pnw.appendChild(mk('span', 'pack-num-lbl', 'packs available'));
+      pr.appendChild(pnw);
+      if (state.packsAvailable > 0) { const b = mk('button', 'btn btn-acc', 'Open Pack'); b.addEventListener('click', () => navigate('packs')); pr.appendChild(b); }
+      else { const cw = mk('div', 'cooldown-wrap'); cw.appendChild(mk('span', 'cd-lbl', 'Next pack')); const ct = mk('span', 'cd-time', '—'); ct.id = 'cd-home'; cw.appendChild(ct); pr.appendChild(cw); }
+      hero.appendChild(pr); v.appendChild(hero);
+      // rarity pills
+      const rp = mk('div', 'rarity-pills'); const rc = rarCounts();
+      RO.forEach(n => { const r = RARITY[n], pill = mk('div', 'rp'); pill.style.setProperty('--rp-c', r.c); pill.style.setProperty('--rp-b', r.b); pill.appendChild(mk('span', 'rp-num', rc[n] || 0)); pill.appendChild(mk('span', 'rp-lbl', n)); rp.appendChild(pill); });
+      v.appendChild(rp);
+      // stat chips
+      const sc = mk('div', 'stat-chips');
+      [[state.collection.length, 'Species', '#00c9a7'], [state.totalPacksOpened, 'Packs', '#c47cf8'], [rc.Legendary || 0, 'Legendaries', '#f5bf3a'], [new Set(state.collection.map(c => c.family)).size, 'Families', '#5aacf5']].forEach(([num, lbl, col]) => {
+        const chip = mk('div', 'stat-chip'); const ne = mk('span', 'sc-num', num); ne.style.color = col; chip.appendChild(ne); chip.appendChild(mk('span', 'sc-lbl', lbl)); sc.appendChild(chip);
+      }); v.appendChild(sc);
+      // recent
+      if (state.recentPulls.length) {
+        const sec = mk('div', 'section-row'); sec.appendChild(mk('div', 'h-section', 'Last Pack'));
+        const row = mk('div', 'hscroll'); state.recentPulls.forEach(card => row.appendChild(buildCard(card, c => navigate('detail', { card: c }))));
+        sec.appendChild(row); v.appendChild(sec);
+      }
+      if (!state.collection.length) { const h = mk('div', 'onboard'); h.innerHTML = '<p>🌍 Open your first pack to begin discovering Earth\'s species.</p><p>Each pack pulls 6 real specimens live from GBIF — a global database of over 2 billion biodiversity records.</p>'; v.appendChild(h); }
+      host.appendChild(v);
+    }
+
+    function renderPacks() {
+      const host = document.getElementById('view-host'); host.innerHTML = '';
+      const v = mk('div', 'pack-opening-view');
+      if (packPhase === 'idle') renderPreOpen(v);
+      else if (packPhase === 'loading') renderLoading(v);
+      else if (packPhase === 'error') renderError(v);
+      else renderReveal(v);
+      host.appendChild(v);
+    }
+
+    function renderPreOpen(v) {
+      const pre = mk('div', 'pre-open');
+      pre.appendChild(mk('span', 'pack-icon', '📦'));
+      pre.appendChild(mk('div', 'pre-open-title', `Field Pack #${state.totalPacksOpened + 1}`));
+      pre.appendChild(mk('div', 'pre-open-sub', '6 real species await discovery'));
+      pre.appendChild(mk('div', 'pack-remaining-badge', `${state.packsAvailable} pack${state.packsAvailable !== 1 ? 's' : ''} remaining`));
+      if (state.packsAvailable > 0) { const b = mk('button', 'btn btn-acc btn-lg', 'Tear Open Pack'); b.addEventListener('click', startPack); pre.appendChild(b); }
+      else { const cw = mk('div'); cw.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:8px'; cw.appendChild(mk('div', null, 'No packs available')); const ct = mk('span', 'cd-time', '—'); ct.id = 'cd-packs'; cw.appendChild(ct); pre.appendChild(cw); }
+      v.appendChild(pre);
+    }
+
+    async function startPack() {
+      if (state.packsAvailable <= 0 || packPhase !== 'idle') return;
+      packPhase = 'loading'; packCards = []; revealIdx = 0; renderPacks();
+      try {
+        const cards = await fetchPack();
+        state.collection = [...state.collection, ...cards]; state.recentPulls = cards;
+        state.packsAvailable = Math.max(0, state.packsAvailable - 1); state.lastPackTime = Date.now(); state.totalPacksOpened++;
+        saveState(); updateNav();
+        // Sort: Common first (top of deck), Legendary last (big finale at bottom)
+        const rarSort = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary'];
+        packCards = cards.sort((a, b) => rarSort.indexOf(a.rarity) - rarSort.indexOf(b.rarity));
+        packPhase = 'revealing'; renderPacks();
+      } catch (err) { packPhase = 'error'; packErrMsg = err.message || 'Network error.'; renderPacks(); }
+    }
+
+    function renderLoading(v) {
+      const ls = mk('div', 'loading-screen'); ls.appendChild(mk('div', 'loader-ring')); ls.appendChild(mk('div', 'load-txt', 'Searching field records…')); ls.appendChild(mk('div', 'load-sub', 'Querying GBIF biodiversity database')); v.appendChild(ls);
+    }
+
+    function renderError(v) {
+      const es = mk('div', 'error-screen'); es.appendChild(mk('div', 'err-icon', '⚠')); es.appendChild(mk('div', 'err-msg', packErrMsg));
+      const b = mk('button', 'btn btn-acc', 'Try Again'); b.addEventListener('click', () => { packPhase = 'idle'; renderPacks(); }); es.appendChild(b); v.appendChild(es);
+    }
+
+    function renderReveal(v) {
+      // Summary screen — rendered fresh when packPhase flips to 'done'
+      if (packPhase === 'done') {
+        const wrap = mk('div', 'poke-wrap');
+        wrap.appendChild(mk('div', 'poke-summary-header', `Pack #${state.totalPacksOpened} — Complete`));
+        const grid = mk('div', 'poke-summary-grid');
+        [...packCards].reverse().forEach(card => grid.appendChild(buildCard(card, c => navigate('detail', { card: c }))));
+        wrap.appendChild(grid);
+        const post = mk('div', 'poke-actions');
+        const b1 = mk('button', 'btn btn-acc btn-block', 'View Collection'); b1.addEventListener('click', () => navigate('collection')); post.appendChild(b1);
+        if (state.packsAvailable > 0) {
+          const b2 = mk('button', 'btn btn-ghost btn-block', `Open Another (${state.packsAvailable})`);
+          b2.addEventListener('click', () => { packPhase = 'idle'; packCards = []; revealIdx = 0; renderPacks(); });
+          post.appendChild(b2);
+        }
+        wrap.appendChild(post); v.appendChild(wrap); return;
+      }
+
+      // ── Build the whole stack once. All cards go into the DOM at position 0,0.
+      // Cards are ordered bottom→top: packCards[last] is lowest z-index (Legendary),
+      // packCards[0] is highest z-index (Common) and gets dismissed first.
+      const wrap = mk('div', 'poke-wrap');
+      const progress = mk('div', 'poke-progress', `Card 1 of ${packCards.length}`);
+      progress.id = 'poke-progress';
+      wrap.appendChild(progress);
+
+      const stage = mk('div', 'poke-stage');
+      stage.id = 'poke-stage';
+
+      // Render all cards into the stage, bottom card first so top card is last in DOM
+      packCards.forEach((card, i) => {
+        const slot = mk('div', 'poke-slot');
+        slot.dataset.idx = i;
+        // Higher index = lower in the deck = lower z-index
+        slot.style.zIndex = packCards.length - i;
+        slot.appendChild(buildCard(card, null));
+        slot.addEventListener('click', dismissTopCard);
+        stage.appendChild(slot);
+      });
+      wrap.appendChild(stage);
+
+      // Rarity label — updated in-place by dismissTopCard
+      const topCard = packCards[0];
+      const topR = RARITY[topCard.rarity] || RARITY.Common;
+      const hint = mk('div', 'poke-hint pop', topCard.rarity);
+      hint.id = 'poke-hint';
+      hint.style.color = topR.c;
+      wrap.appendChild(hint);
+
+      const tapHint = mk('div', 'poke-tap', 'tap card to reveal');
+      tapHint.id = 'poke-tap';
+      wrap.appendChild(tapHint);
+
+      const actions = mk('div', 'poke-actions');
+      const btn = mk('button', 'btn btn-acc btn-block', 'Next →');
+      btn.id = 'poke-next-btn';
+      btn.addEventListener('click', e => { e.stopPropagation(); dismissTopCard(); });
+      actions.appendChild(btn);
+      wrap.appendChild(actions);
+      v.appendChild(wrap);
+
+      // Initialise the counter and label for card at revealIdx=0
+      updatePackHUD();
+    }
+
+    // Called once after renderReveal to sync HUD to revealIdx (always 0 on fresh render)
+    function updatePackHUD() {
+      const card = packCards[revealIdx];
+      if (!card) return;
+      const r = RARITY[card.rarity] || RARITY.Common;
+      const total = packCards.length;
+      const isLast = revealIdx === total - 1;
+
+      const prog = document.getElementById('poke-progress');
+      if (prog) prog.textContent = `Card ${revealIdx + 1} of ${total}`;
+
+      const hint = document.getElementById('poke-hint');
+      if (hint) {
+        hint.textContent = card.rarity;
+        hint.style.color = r.c;
+        // Re-trigger pop animation
+        hint.classList.remove('pop');
+        void hint.offsetWidth; // reflow to reset animation
+        hint.classList.add('pop');
+      }
+
+      const tap = document.getElementById('poke-tap');
+      if (tap) tap.textContent = isLast ? 'tap to finish' : 'tap card to reveal';
+
+      const btn = document.getElementById('poke-next-btn');
+      if (btn) btn.textContent = isLast ? 'View All Cards' : 'Next →';
+    }
+
+    function dismissTopCard() {
+      // Find the topmost non-sweeping slot
+      const slots = [...document.querySelectorAll('.poke-slot:not(.sweeping)')];
+      if (!slots.length) return;
+      // Highest z-index = current top card
+      const top = slots.reduce((a, b) => parseInt(b.style.zIndex) > parseInt(a.style.zIndex) ? b : a);
+      if (top.classList.contains('sweeping')) return;
+
+      const isLast = revealIdx === packCards.length - 1;
+      top.classList.add('sweeping');
+
+      setTimeout(() => {
+        top.remove();
+        if (isLast) {
+          packPhase = 'done';
+          renderPacks(); // only re-render for the summary screen
+        } else {
+          revealIdx++;
+          updatePackHUD();
+        }
+      }, 380);
+    }
+
+    function renderCollection() {
+      const host = document.getElementById('view-host'); host.innerHTML = '';
+      const v = mk('div', 'view');
+      const hdr = mk('div', 'col-header'); hdr.appendChild(mk('span', 'h-page', 'Collection')); hdr.appendChild(mk('span', 'col-badge', state.collection.length)); v.appendChild(hdr);
+      const fp = mk('div', 'filter-panel');
+      const si = mk('input', 'search-input'); si.type = 'text'; si.placeholder = 'Search by name…'; si.value = colSearch;
+      si.addEventListener('input', e => { colSearch = e.target.value; rebuildGrid(grid); }); fp.appendChild(si);
+      const fr = mk('div', 'filter-row');
+      fr.appendChild(buildSel(['All', ...RO], colRarity, v => { colRarity = v; rebuildGrid(grid); }));
+      const classes = ['All', ...uniq(state.collection, 'class')];
+      fr.appendChild(buildSel(classes, colClass, v => { colClass = v; rebuildGrid(grid); }));
+      fr.appendChild(buildSel([['newest', 'Newest'], ['rarity', 'Rarity'], ['alpha', 'A–Z']], colSort, v => { colSort = v; rebuildGrid(grid); }));
+      fp.appendChild(fr); v.appendChild(fp);
+      const grid = mk('div', 'card-grid'); v.appendChild(grid); rebuildGrid(grid); host.appendChild(v);
+    }
+
+    function buildSel(opts, sel, onChange) {
+      const s = mk('select', 'filter-sel');
+      opts.forEach(o => { const [val, label] = Array.isArray(o) ? o : [o, o]; const op = mk('option', null, label); op.value = val; if (val === sel) op.selected = true; s.appendChild(op); });
+      s.addEventListener('change', e => onChange(e.target.value)); return s;
+    }
+
+    function getFiltered() {
+      return state.collection.filter(c => {
+        if (colRarity !== 'All' && c.rarity !== colRarity) return false;
+        if (colClass !== 'All' && c.class !== colClass) return false;
+        if (colSearch) { const s = colSearch.toLowerCase(); if (!c.name?.toLowerCase().includes(s) && !c.scientificName?.toLowerCase().includes(s)) return false; }
+        return true;
+      }).sort((a, b) => {
+        if (colSort === 'rarity') return RO.indexOf(a.rarity) - RO.indexOf(b.rarity);
+        if (colSort === 'alpha') return (a.scientificName || '').localeCompare(b.scientificName || '');
+        return b.collectedAt - a.collectedAt;
+      });
+    }
+
+    function rebuildGrid(grid) {
+      grid.innerHTML = '';
+      const filtered = getFiltered();
+      if (!filtered.length) {
+        const e = mk('div', 'empty-state');
+        if (!state.collection.length) { e.appendChild(mk('p', null, 'Your collection is empty.')); const b = mk('button', 'btn btn-acc', 'Open First Pack'); b.addEventListener('click', () => navigate('packs')); e.appendChild(b); }
+        else e.appendChild(mk('p', null, 'No species match your filters.'));
+        grid.style.display = 'block'; grid.appendChild(e); return;
+      }
+      grid.style.display = '';
+      filtered.forEach(card => grid.appendChild(buildCard(card, c => navigate('detail', { card: c }))));
+    }
+
+    function renderDetail() {
+      const card = selectedCard; if (!card) { navigate(previousView); return; }
+      const host = document.getElementById('view-host'); host.innerHTML = '';
+      const v = mk('div', 'view');
+
+      const back = mk('button', 'back-btn', '← Back');
+      back.addEventListener('click', () => navigate(previousView));
+      v.appendChild(back);
+
+      const r = RARITY[card.rarity] || RARITY.Common;
+      const iucn = card.iucnStatus ? IUCN[card.iucnStatus] : null;
+
+      const dc = mk('div', 'detail-card');
+      dc.style.setProperty('--detail-c', r.c);
+      dc.style.setProperty('--detail-b', r.b);
+      dc.style.setProperty('--detail-g', r.g);
+
+      // Photo
+      const photo = mk('div', 'detail-photo');
+      if (card.image) {
+        const img = document.createElement('img');
+        img.src = card.image; img.alt = card.scientificName;
+        img.onerror = () => { img.remove(); photo.appendChild(mk('div', 'detail-photo-fallback', (card['class'] || '?').charAt(0))); };
+        photo.appendChild(img);
+      } else {
+        photo.appendChild(mk('div', 'detail-photo-fallback', (card['class'] || '?').charAt(0)));
+      }
+      const rarTag = mk('div', 'detail-rar-tag', r.label);
+      rarTag.style.color = r.c; rarTag.style.borderColor = r.b;
+      photo.appendChild(rarTag);
+      dc.appendChild(photo);
+
+      // Body
+      const body = mk('div', 'detail-body');
+      body.appendChild(mk('div', 'detail-name', card.name || 'Unknown'));
+      body.appendChild(mk('div', 'detail-sci', card.scientificName || ''));
+
+      // Taxonomy table
+      const tbl = mk('table', 'detail-tax'); const tb = mk('tbody');
+      [['Kingdom', card.kingdom], ['Class', card['class']], ['Order', card.order], ['Family', card.family]].forEach(([k, val]) => {
+        const tr = mk('tr');
+        tr.appendChild(mk('td', 'detail-tax-key', k));
+        tr.appendChild(mk('td', 'detail-tax-val', val || '—'));
+        tb.appendChild(tr);
+      });
+      tbl.appendChild(tb); body.appendChild(tbl);
+
+      // Meta chips
+      const chips = mk('div', 'detail-chips');
+      [
+        `📍 ${card.country || 'Unknown'}`,
+        `📅 ${new Date(card.collectedAt).toLocaleDateString()}`,
+        `🌐 ${card.group || card['class'] || '—'}`,
+        `◈ ${card.rarity}`,
+      ].forEach(t => chips.appendChild(mk('span', 'detail-chip', t)));
+      // IUCN chip inline with others if present
+      if (iucn) {
+        const ic = mk('span', 'detail-chip');
+        ic.style.borderColor = r.b; ic.style.color = r.c;
+        ic.textContent = `${card.iucnStatus} ${iucn.label}`;
+        chips.appendChild(ic);
+      }
+      body.appendChild(chips);
+      dc.appendChild(body);
+      v.appendChild(dc);
+      host.appendChild(v);
+    }
+
+    function renderStats() {
+      const host = document.getElementById('view-host'); host.innerHTML = '';
+      const v = mk('div', 'view'); v.appendChild(mk('div', 'h-page', 'Statistics'));
+      const rc = rarCounts(), n = state.collection.length;
+      const chips = mk('div', 'stats-chips');
+      [[n, 'Species', '#00c9a7'], [state.totalPacksOpened, 'Packs', '#c47cf8'], [rc.Legendary || 0, 'Legendaries', '#f5bf3a'], [new Set(state.collection.map(c => c.family)).size, 'Families', '#5aacf5'], [new Set(state.collection.map(c => c.class)).size, 'Classes', '#3fd68a'], [new Set(state.collection.map(c => c.country)).size, 'Countries', '#e8763a']].forEach(([num, lbl, col]) => {
+        const chip = mk('div', 'stats-chip'); const ne = mk('span', 'stc-num', num); ne.style.color = col; chip.appendChild(ne); chip.appendChild(mk('span', 'stc-lbl', lbl)); chips.appendChild(chip);
+      }); v.appendChild(chips);
+      v.appendChild(mk('div', 'h-section', 'Rarity Distribution'));
+      const rb = mk('div', 'bar-list');
+      RO.forEach(name => {
+        const r = RARITY[name], count = rc[name] || 0, pct = n ? (count / n * 100) : 0;
+        const row = mk('div', 'bar-row'); row.style.setProperty('--bar-c', r.c);
+        const lbl = mk('span', 'bar-label', name); const track = mk('div', 'bar-track'); const fill = mk('div', 'bar-fill'); fill.style.width = '0%';
+        track.appendChild(fill); row.appendChild(lbl); row.appendChild(track); row.appendChild(mk('span', 'bar-count', count)); rb.appendChild(row);
+        requestAnimationFrame(() => requestAnimationFrame(() => { fill.style.width = pct + '%'; }));
+      }); v.appendChild(rb);
+      const fm = {}; state.collection.forEach(c => { if (c.family && c.family !== '—') fm[c.family] = (fm[c.family] || 0) + 1; });
+      const topF = Object.entries(fm).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      if (topF.length) {
+        v.appendChild(mk('div', 'h-section', 'Top Families'));
+        const fb = mk('div', 'bar-list'); const maxF = topF[0][1];
+        topF.forEach(([fam, count]) => {
+          const row = mk('div', 'bar-row'); const lbl = mk('span', 'bar-label', fam); lbl.style.color = 'var(--text2)';
+          const track = mk('div', 'bar-track'); const fill = mk('div', 'bar-fill'); fill.style.width = '0%'; fill.style.background = 'var(--acc)';
+          track.appendChild(fill); row.appendChild(lbl); row.appendChild(track); row.appendChild(mk('span', 'bar-count', count)); fb.appendChild(row);
+          requestAnimationFrame(() => requestAnimationFrame(() => { fill.style.width = (count / maxF * 100) + '%'; }));
+        }); v.appendChild(fb);
+      }
+      host.appendChild(v);
+    }
+
+    function renderView(v) {
+      document.getElementById('view-host').scrollTop = 0;
+      ({ home: renderHome, packs: renderPacks, collection: renderCollection, detail: renderDetail, stats: renderStats, settings: renderSettings }[v] || renderHome)();
+    }
+
+    function tickTimer() {
+      if (!state.lastPackTime) return;
+      const rem = Math.max(0, PACK_COOLDOWN_MS - (Date.now() - state.lastPackTime));
+      if (rem === 0 && state.packsAvailable === 0) {
+        state.packsAvailable = 1; saveState(); updateNav();
+        if (currentView === 'home') renderHome();
+        if (currentView === 'packs') renderPacks();
+        return;
+      }
+      ['cd-home', 'cd-packs'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = fmtTime(rem); });
+    }
+
+    let settingsTaps = 0, settingsTapTimer = null, devArmed = false;
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const v = btn.dataset.view;
+
+        // ── Settings tap counter for mobile dev unlock ──
+        if (v === 'settings') {
+          clearTimeout(settingsTapTimer);
+          settingsTaps++;
+          if (settingsTaps >= 5) {
+            settingsTaps = 0;
+            devArmed = true;
+            // Flash the settings button
+            btn.classList.remove('dev-flash');
+            void btn.offsetWidth; // reflow to restart animation
+            btn.classList.add('dev-flash');
+            btn.addEventListener('animationend', () => btn.classList.remove('dev-flash'), { once: true });
+            // Pulse the home button to hint what to tap next
+            const homeBtn = document.querySelector('.nav-btn[data-view="home"]');
+            if (homeBtn) homeBtn.classList.add('dev-armed');
+          } else {
+            // Reset if idle for 2s
+            settingsTapTimer = setTimeout(() => { settingsTaps = 0; }, 2000);
+          }
+        }
+
+        // ── Home tap while armed → open dev panel ──
+        if (v === 'home' && devArmed) {
+          devArmed = false;
+          document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('dev-armed'));
+          // Navigate first so home renders, then overlay the panel
+          if (v === 'packs' && currentView !== 'packs') { packPhase = 'idle'; packCards = []; revealIdx = 0; }
+          navigate(v);
+          setTimeout(() => { devMode = true; openDevPanel(); }, 120);
+          return;
+        }
+
+        if (v === 'packs' && currentView !== 'packs') { packPhase = 'idle'; packCards = []; revealIdx = 0; }
+        navigate(v);
+      });
+    });
+
+    /* ── KONAMI CODE + DEV MODE ── */
+    const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a', 'Enter'];
+    let konamiIdx = 0, devMode = false;
+
+    document.addEventListener('keydown', e => {
+      if (e.key === KONAMI[konamiIdx] || e.key.toLowerCase() === KONAMI[konamiIdx]) {
+        konamiIdx++;
+        if (konamiIdx === KONAMI.length) { konamiIdx = 0; toggleDevMode(); }
+      } else {
+        konamiIdx = (e.key === KONAMI[0] || e.key.toLowerCase() === KONAMI[0]) ? 1 : 0;
+      }
+    });
+
+    function toggleDevMode() {
+      devMode = !devMode;
+      const existing = document.getElementById('dev-overlay');
+      if (existing) { existing.remove(); return; }
+      if (devMode) openDevPanel();
+    }
+
+    function openDevPanel() {
+      const overlay = mk('div', 'dev-overlay'); overlay.id = 'dev-overlay';
+      overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.remove(); devMode = false; } });
+      const panel = mk('div', 'dev-panel');
+
+      // Header
+      const hdr = mk('div', 'dev-header');
+      const titles = mk('div');
+      titles.appendChild(mk('div', 'dev-title', '⌗ DEV MODE'));
+      titles.appendChild(mk('div', 'dev-subtitle', '↑↑↓↓←→←→BA⏎ to toggle'));
+      hdr.appendChild(titles);
+      const close = mk('button', 'dev-close', 'Close ✕');
+      close.addEventListener('click', () => { overlay.remove(); devMode = false; });
+      hdr.appendChild(close);
+      panel.appendChild(hdr);
+
+      const toast = mk('div', 'dev-toast'); toast.id = 'dev-toast';
+
+      // Pack controls
+      const packSec = mk('div', 'dev-section');
+      packSec.appendChild(mk('div', 'dev-section-lbl', 'Give Packs'));
+      const packBtns = mk('div', 'dev-btns');
+      [['+1', 1], ['+5', 5], ['+10', 10], ['Fill (99)', 99]].forEach(([lbl, n]) => {
+        const b = mk('button', 'dev-btn', lbl);
+        b.addEventListener('click', () => {
+          state.packsAvailable = Math.min(state.packsAvailable + n, 99);
+          saveState(); updateNav();
+          if (currentView === 'home') renderHome();
+          if (currentView === 'packs' && packPhase === 'idle') renderPacks();
+          devToast(toast, `+${n} pack${n !== 1 ? 's' : ''} granted. You now have ${state.packsAvailable}.`);
+        });
+        packBtns.appendChild(b);
+      });
+      packSec.appendChild(packBtns); panel.appendChild(packSec);
+
+      // Data controls
+      const dataSec = mk('div', 'dev-section');
+      dataSec.appendChild(mk('div', 'dev-section-lbl', 'Data'));
+      const dataBtns = mk('div', 'dev-btns');
+
+      const clearBtn = mk('button', 'dev-btn danger', '⚠ Wipe All Cards');
+      clearBtn.addEventListener('click', () => {
+        if (clearBtn.dataset.confirm === '1') {
+          state.collection = []; state.recentPulls = []; state.totalPacksOpened = 0;
+          state.packsAvailable = INITIAL_PACKS; state.lastPackTime = null;
+          saveState(); updateNav();
+          if (currentView !== 'packs' && currentView !== 'detail') renderView(currentView);
+          else { navigate('home'); }
+          devToast(toast, 'All card data wiped. Collection reset.');
+          clearBtn.textContent = '⚠ Wipe All Cards'; delete clearBtn.dataset.confirm;
+        } else {
+          clearBtn.dataset.confirm = '1'; clearBtn.textContent = 'Click again to confirm';
+          setTimeout(() => { clearBtn.textContent = '⚠ Wipe All Cards'; delete clearBtn.dataset.confirm; }, 3000);
+        }
+      });
+      dataBtns.appendChild(clearBtn);
+
+      const resetBtn = mk('button', 'dev-btn danger', 'Reset Pack Timer');
+      resetBtn.addEventListener('click', () => {
+        state.lastPackTime = null; saveState();
+        devToast(toast, 'Pack timer reset.');
+      });
+      dataBtns.appendChild(resetBtn);
+
+      dataSec.appendChild(dataBtns); panel.appendChild(dataSec);
+      panel.appendChild(toast);
+      overlay.appendChild(panel);
+      document.body.appendChild(overlay);
+    }
+
+    function devToast(el, msg) {
+      el.textContent = '> ' + msg;
+      el.style.opacity = '1';
+      clearTimeout(el._t);
+      el._t = setTimeout(() => { el.style.opacity = '0'; }, 3500);
+    }
+
+
+    /* ══════════════════════════════════════════════
+       SETTINGS SYSTEM
+    ══════════════════════════════════════════════ */
+    const SETTINGS_KEY = 'specimen-settings-v1';
+    const SETTINGS_DEFAULTS = {
+      shellWidth: 720,   // desktop shell max-width px
+      fontSize: 13,    // base font size px
+      gridColsDesk: 3,     // collection grid cols on desktop
+      gridColsMob: 2,     // collection grid cols on mobile
+      photoRatio: 52,    // card photo % of card height
+      cardRadius: 12,    // card border-radius px
+      accentHue: 171,   // HSL hue for accent colour (171 = teal)
+    };
+
+    let userSettings = { ...SETTINGS_DEFAULTS };
+
+    function loadSettings() {
+      try {
+        const d = localStorage.getItem(SETTINGS_KEY);
+        if (d) userSettings = { ...SETTINGS_DEFAULTS, ...JSON.parse(d) };
+      } catch (_) { }
+    }
+
+    function saveSettings() {
+      try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(userSettings)); } catch (_) { }
+    }
+
+    function applySettings() {
+      const s = userSettings;
+      const acc = `hsl(${s.accentHue},100%,39%)`;
+      // zoom scales every px-based value uniformly — the only reliable way
+      // to resize a page where all sizes are hardcoded in px.
+      // Base font size is 13px, so zoom = desired/13.
+      const zoom = (s.fontSize / 13).toFixed(4);
+
+      let css = `
+    :root{ --acc:${acc}; }
+    #shell{max-width:${s.shellWidth}px;zoom:${zoom}}
+    #bottom-nav{zoom:${zoom}}
+    .scard-photo{flex-basis:${s.photoRatio}%}
+    .scard-body{flex-basis:${100 - s.photoRatio}%}
+    .scard{border-radius:${s.cardRadius}px}
+    .detail-card{border-radius:${s.cardRadius + 2}px}
+    .card-grid{grid-template-columns:repeat(${s.gridColsMob},1fr)}
+    .poke-summary-grid{grid-template-columns:repeat(${s.gridColsMob},1fr)}
+    @media(min-width:768px){
+      #shell{max-width:${s.shellWidth}px}
+      #bottom-nav{max-width:${s.shellWidth}px}
+      .dev-panel{max-width:${s.shellWidth}px}
+      .card-grid{grid-template-columns:repeat(${s.gridColsDesk},1fr)}
+      .poke-summary-grid{grid-template-columns:repeat(${s.gridColsDesk},1fr)}
+    }
+  `;
+      let el = document.getElementById('usr-style');
+      if (!el) { el = document.createElement('style'); el.id = 'usr-style'; document.head.appendChild(el); }
+      el.textContent = css;
+    }
+
+    // Convert HSL hue (100% sat, given light%) to "r,g,b" string for rgba()
+    function hslToRgb(h, s, l) {
+      s /= 100; l /= 100;
+      const k = n => (n + h / 30) % 12;
+      const a = s * Math.min(l, 1 - l);
+      const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+      return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)].join(',');
+    }
+
+    function resetSettings() {
+      userSettings = { ...SETTINGS_DEFAULTS };
+      saveSettings();
+      applySettings();
+      renderSettings();
+    }
+
+    /* ── RENDER SETTINGS VIEW ───────────────────────────────────── */
+    function renderSettings() {
+      const host = document.getElementById('view-host'); host.innerHTML = '';
+      const v = mk('div', 'view');
+      v.appendChild(mk('div', 'h-page', 'Settings'));
+
+      function section(title) {
+        const s = mk('div', 'settings-section');
+        s.appendChild(mk('div', 'settings-section-title', title));
+        return s;
+      }
+
+      // Helper: stepper control
+      function stepper(min, max, step, val, unit, onChange) {
+        const wrap = mk('div', 'stepper');
+        const minus = mk('button', 'stepper-btn', '−');
+        const display = mk('div', 'stepper-val', val + (unit || ''));
+        const plus = mk('button', 'stepper-btn', '+');
+        minus.addEventListener('click', () => {
+          const nv = Math.max(min, parseFloat(display.textContent) - step);
+          display.textContent = nv + (unit || ''); onChange(nv);
+        });
+        plus.addEventListener('click', () => {
+          const nv = Math.min(max, parseFloat(display.textContent) + step);
+          display.textContent = nv + (unit || ''); onChange(nv);
+        });
+        wrap.appendChild(minus); wrap.appendChild(display); wrap.appendChild(plus);
+        return wrap;
+      }
+
+      // Helper: segment control
+      function segment(options, current, onChange) {
+        const wrap = mk('div', 'seg');
+        options.forEach(([val, label]) => {
+          const btn = mk('button', 'seg-btn' + (val === current ? ' active' : ''), label);
+          btn.addEventListener('click', () => {
+            wrap.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            onChange(val);
+          });
+          wrap.appendChild(btn);
+        });
+        return wrap;
+      }
+
+      // Helper: slider
+      function slider(min, max, step, val, unit, onChange) {
+        const wrap = mk('div', 'setting-control');
+        const inp = document.createElement('input');
+        inp.type = 'range'; inp.className = 'setting-slider';
+        inp.min = min; inp.max = max; inp.step = step; inp.value = val;
+        const lbl = mk('span', 'slider-val', val + (unit || ''));
+        inp.addEventListener('input', () => {
+          lbl.textContent = inp.value + (unit || '');
+          onChange(Number(inp.value));
+        });
+        wrap.appendChild(inp); wrap.appendChild(lbl);
+        return wrap;
+      }
+
+      // Helper: row
+      function row(labelText, descText, control) {
+        const r = mk('div', 'setting-row');
+        const left = mk('div');
+        left.appendChild(mk('div', 'setting-label', labelText));
+        if (descText) left.appendChild(mk('div', 'setting-desc', descText));
+        r.appendChild(left); r.appendChild(control);
+        return r;
+      }
+
+      // ── Layout ──────────────────────────────────────────────────
+      const layoutSec = section('Layout');
+      layoutSec.appendChild(row('Shell Width', 'Desktop max width',
+        slider(480, 1400, 20, userSettings.shellWidth, 'px', v => { userSettings.shellWidth = v; saveSettings(); applySettings(); })
+      ));
+      layoutSec.appendChild(row('Collection Columns', 'Desktop grid',
+        stepper(1, 6, 1, userSettings.gridColsDesk, '', v => { userSettings.gridColsDesk = v; saveSettings(); applySettings(); })
+      ));
+      layoutSec.appendChild(row('Mobile Columns', 'Mobile grid',
+        stepper(1, 3, 1, userSettings.gridColsMob, '', v => { userSettings.gridColsMob = v; saveSettings(); applySettings(); })
+      ));
+      v.appendChild(layoutSec);
+
+      // ── Cards ───────────────────────────────────────────────────
+      const cardSec = section('Cards');
+      cardSec.appendChild(row('Photo Size', '% of card height',
+        slider(30, 70, 1, userSettings.photoRatio, '%', v => { userSettings.photoRatio = v; saveSettings(); applySettings(); })
+      ));
+      cardSec.appendChild(row('Corner Radius', '',
+        slider(0, 24, 2, userSettings.cardRadius, 'px', v => { userSettings.cardRadius = v; saveSettings(); applySettings(); })
+      ));
+      v.appendChild(cardSec);
+
+      // ── Typography ──────────────────────────────────────────────
+      const typeSec = section('Typography');
+      typeSec.appendChild(row('Font Size', 'Base size for all text',
+        segment([[11, 'S'], [13, 'M'], [15, 'L'], [17, 'XL']], userSettings.fontSize, v => { userSettings.fontSize = v; saveSettings(); applySettings(); })
+      ));
+      v.appendChild(typeSec);
+
+      // ── Accent Colour ───────────────────────────────────────────
+      const colSec = section('Accent Colour');
+      colSec.appendChild(row('Hue', 'Shifts the accent colour',
+        slider(0, 360, 1, userSettings.accentHue, '°', v => { userSettings.accentHue = v; saveSettings(); applySettings(); })
+      ));
+      // Colour preview swatch
+      const swatch = mk('div');
+      swatch.id = 'acc-swatch';
+      swatch.style.cssText = 'width:100%;height:28px;border-radius:6px;margin-top:-6px;margin-bottom:12px;transition:background .15s';
+      swatch.style.background = `hsl(${userSettings.accentHue},100%,39%)`;
+      // Keep swatch live as slider moves
+      const origApply = applySettings;
+      colSec.appendChild(swatch);
+      v.appendChild(colSec);
+
+      // ── Data: Import / Export ───────────────────────────────────
+      const dataSec = section('Data');
+      const ieStat = mk('div', 'ie-status', '');
+
+      const ieRow = mk('div', 'ie-btn-row');
+
+      const expBtn = mk('button', 'btn btn-ghost', '⬇ Export');
+      expBtn.title = 'Download all cards and settings as a JSON file';
+      expBtn.addEventListener('click', () => {
+        exportData();
+        ieStat.className = 'ie-status ok';
+        ieStat.textContent = `✓ Exported ${state.collection.length} cards`;
+        setTimeout(() => { ieStat.textContent = ''; }, 4000);
+      });
+      ieRow.appendChild(expBtn);
+
+      // Hidden file input — triggered by import button
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file'; fileInput.accept = '.json'; fileInput.style.display = 'none';
+      fileInput.addEventListener('change', () => importData(fileInput.files[0], ieStat));
+      document.body.appendChild(fileInput);
+
+      const impBtn = mk('button', 'btn btn-ghost', '⬆ Import');
+      impBtn.title = 'Load a previously exported JSON backup';
+      impBtn.addEventListener('click', () => { fileInput.value = ''; fileInput.click(); });
+      ieRow.appendChild(impBtn);
+
+      const ieWrap = mk('div', 'ie-section');
+      const ieDesc = mk('div', 'setting-desc', 'Export saves all cards + settings to a JSON file you can import on any device.');
+      ieDesc.style.marginBottom = '8px';
+      ieWrap.appendChild(ieDesc);
+      ieWrap.appendChild(ieRow);
+      ieWrap.appendChild(ieStat);
+      dataSec.appendChild(ieWrap);
+      v.appendChild(dataSec);
+
+      // ── Reset ───────────────────────────────────────────────────
+      const resetBtn = mk('button', 'btn btn-ghost settings-reset', 'Reset Visual Defaults');
+      resetBtn.addEventListener('click', resetSettings);
+      v.appendChild(resetBtn);
+
+      host.appendChild(v);
+
+      // Patch slider inputs to also update the swatch live
+      v.querySelectorAll('.setting-slider').forEach(inp => {
+        inp.addEventListener('input', () => {
+          const sw = document.getElementById('acc-swatch');
+          if (sw) sw.style.background = `hsl(${userSettings.accentHue},100%,39%)`;
+        });
+      });
+    }
+
+
+    /* ── IMPORT / EXPORT ─────────────────────────────────────────── */
+    function exportData() {
+      const payload = {
+        version: 2,
+        exportedAt: new Date().toISOString(),
+        state: {
+          collection: state.collection,
+          recentPulls: state.recentPulls,
+          packsAvailable: state.packsAvailable,
+          lastPackTime: state.lastPackTime,
+          totalPacksOpened: state.totalPacksOpened,
+        },
+        settings: userSettings,
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `specimen-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importData(file, statusEl) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const payload = JSON.parse(e.target.result);
+          if (!payload.state || !Array.isArray(payload.state.collection))
+            throw new Error('Invalid file format');
+          // Restore state
+          state = { ...state, ...payload.state };
+          saveState();
+          // Restore settings if present
+          if (payload.settings) {
+            userSettings = { ...SETTINGS_DEFAULTS, ...payload.settings };
+            saveSettings();
+            applySettings();
+          }
+          updateNav();
+          if (currentView === 'settings') renderSettings();
+          else renderView(currentView);
+          statusEl.className = 'ie-status ok';
+          statusEl.textContent = `✓ Imported ${state.collection.length} cards successfully`;
+        } catch (err) {
+          statusEl.className = 'ie-status err';
+          statusEl.textContent = `✗ ${err.message}`;
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    loadSettings(); applySettings(); loadState(); updateNav(); renderView('home'); setInterval(tickTimer, 1000);
+  </script>
+</body>
+
+</html>

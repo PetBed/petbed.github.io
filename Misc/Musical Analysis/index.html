@@ -2096,6 +2096,35 @@
       title: 'Song not found in library';
     }
 
+    /* ── Markdown in annotations — **bold**, *italic*, > blockquote ── */
+    .ann-bq {
+      display: block;
+      border-left: 2px solid var(--gold-dim);
+      margin: 3px 0;
+      padding: 3px 10px;
+      background: rgba(199, 140, 34, .05);
+      color: var(--text-muted);
+      font-style: italic;
+      border-radius: 0 2px 2px 0;
+    }
+
+    html.light-mode .ann-bq {
+      background: rgba(192, 57, 43, .04);
+      border-left-color: var(--border-gold);
+    }
+
+    .vw-content strong,
+    .ac-body strong {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .vw-content em,
+    .ac-body em {
+      font-style: italic;
+      color: var(--text-muted);
+    }
+
     /* Notes preview pane */
     .notes-preview {
       flex: 1;
@@ -2677,37 +2706,48 @@
 
 
       /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     2. PLAYER — explicit 3-row layout
-     Row 1: [song title — full width]
-     Row 2: [prev · ▶ · next]  [loop]
-     Row 3: [0:00 ━━━━━━━━━━━━ 3:14]  ← full width
+     2. PLAYER — CSS grid 3-row layout
+     ┌─────────────────────────────────┐
+     │ Song title            (col 1+2) │  row 1
+     ├─────────────────┬───────────────┤
+     │  ← · ▶ · →     │    [Loop]     │  row 2
+     ├─────────────────┴───────────────┤
+     │  0:00 ━━━━━━━━━━━━━━━━   5:17  │  row 3
+     └─────────────────────────────────┘
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
       #view-annotate {
-        padding-bottom: 114px;
+        padding-bottom: 110px;
       }
 
       .player {
         height: auto !important;
-        min-height: 114px;
-        display: flex;
-        flex-direction: column;
-        /* explicit column — no wrapping surprises */
-        align-items: stretch;
-        padding: 7px 14px 6px;
-        gap: 4px;
+        min-height: 110px;
+        display: grid !important;
+        grid-template-areas:
+          "info     info"
+          "controls extras"
+          "progress progress";
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto auto;
+        align-items: center;
+        padding: 8px 14px 8px;
+        gap: 2px 0;
+        /* Remove the desktop flex properties */
+        flex-direction: unset;
+        flex-wrap: unset;
+        align-content: unset;
       }
 
-      /* Row 1 — song title */
+      /* Row 1 — song title spanning both columns */
       .pl-info {
-        order: 1;
-        width: 100%;
-        flex: none;
+        grid-area: info;
         min-width: 0;
+        padding-bottom: 2px;
       }
 
       .pl-song {
-        font-size: 12px;
+        font-size: 13px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -2717,29 +2757,30 @@
         display: none;
       }
 
-      /* Row 2 — controls + loop on one line */
+      /* Row 2 col 1 — prev · play · next */
       .pl-controls {
-        order: 2;
-        width: 100%;
-        flex: none;
+        grid-area: controls;
         justify-content: center;
-        gap: 10px;
+        gap: 8px;
+        /* Clear desktop flex-child properties */
+        order: unset;
+        width: auto;
+        flex: unset;
       }
 
+      /* Row 2 col 2 — Loop button, right-aligned */
       .pl-extras {
-        order: 2;
-        /* same row via absolute positioning trick below */
-        position: absolute;
-        right: 14px;
-        /* vertically aligned to the controls row — offset = info row height + gap */
-        bottom: calc(6px + 26px + 4px);
-        /* padding-bottom + progress-row + gap */
+        grid-area: extras;
         display: flex;
-        gap: 4px;
         align-items: center;
+        gap: 5px;
+        /* Clear the absolute positioning from previous implementation */
+        position: static;
+        bottom: auto;
+        right: auto;
+        order: unset;
       }
 
-      /* Hide extras that aren't useful on mobile */
       #choreo-btn {
         display: none;
       }
@@ -2749,18 +2790,20 @@
       }
 
       #loop-btn {
-        padding: 3px 8px;
+        padding: 4px 10px;
         font-size: 9px;
       }
 
-      /* Row 3 — full-width progress bar */
+      /* Row 3 — full-width progress bar spanning both columns */
       .pl-progress {
-        order: 3;
+        grid-area: progress;
         width: 100%;
-        flex: none;
-        padding: 0;
-        gap: 7px;
+        padding: 3px 0 0;
+        gap: 8px;
         min-width: 0;
+        /* Clear desktop flex-child properties */
+        order: unset;
+        flex: unset;
       }
 
       /* Taller, easier-to-tap progress track on touch */
@@ -2780,16 +2823,16 @@
 
       .time-d {
         font-size: 11px;
-        min-width: 36px;
+        min-width: 34px;
       }
 
       /* Toast and drawer sit above the taller player */
       .toast {
-        bottom: 126px;
+        bottom: 122px;
       }
 
       .settings-drawer {
-        bottom: 114px;
+        bottom: 110px;
       }
     }
 
@@ -3783,7 +3826,7 @@
        Set your Vercel deployment URL here.
        During local development use http://localhost:3000
     ═══════════════════════════════════════════ */
-    const API_BASE = 'https://wot-tau.vercel.app'; // ← update before deploying
+    const API_BASE = 'http://localhost:3005'; // ← update before deploying
 
     /* ═══ HELPERS ═══ */
     const $ = id => document.getElementById(id);
@@ -3814,6 +3857,67 @@
         }
         // Unresolved — dimmed, non-navigable
         return `<span class="wiki-link-missing" title="Song not found in library: ${esc(query)}">${esc(query)}</span>`;
+      }).join('');
+    }
+
+    /* ── Annotation content renderer ─────────────────────────────────────────────
+       Renders a safe subset of Markdown inside annotation text, then resolves
+       [[Song Title]] wiki links. Supported syntax:
+    
+         **bold**        → <strong>
+         *italic*        → <em>
+         > blockquote    → <blockquote class="ann-bq"> (line must start with "> ")
+    
+       Plain text segments are always passed through esc() so no raw HTML ever
+       leaks from user content into the DOM.
+    ────────────────────────────────────────────────────────────────────────── */
+    function renderAnnotationContent(text) {
+      if (!text) return '';
+      const lines = String(text).split('\n');
+
+      // Process each line, tagging whether it produced a block element
+      const out = lines.map(line => {
+        if (line.startsWith('> ') || line === '>') {
+          const inner = line.startsWith('> ') ? line.slice(2) : '';
+          return { block: true, html: `<blockquote class="ann-bq">${renderInlineMd(inner)}</blockquote>` };
+        }
+        return { block: false, html: renderInlineMd(line) };
+      });
+
+      // Join lines: preserve newline between two plain-text lines (keeps pre-wrap
+      // line breaks working); omit the newline when a block element is adjacent so
+      // we don't get a blank gap from pre-wrap around <blockquote>.
+      let result = '';
+      for (let i = 0; i < out.length; i++) {
+        result += out[i].html;
+        if (i < out.length - 1 && !out[i].block && !out[i + 1].block) {
+          result += '\n';
+        }
+      }
+      return result;
+    }
+
+    /* Process inline Markdown tokens + wiki links within a single line of text.
+       Order matters: **bold** is matched before *italic* so double-stars win. */
+    function renderInlineMd(text) {
+      const tokens = String(text).split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*|\[\[[^\]\n]+\]\])/g);
+      return tokens.map(tok => {
+        // **bold**
+        if (/^\*\*[^*\n]+\*\*$/.test(tok))
+          return `<strong>${esc(tok.slice(2, -2))}</strong>`;
+        // *italic*
+        if (/^\*[^*\n]+\*$/.test(tok))
+          return `<em>${esc(tok.slice(1, -1))}</em>`;
+        // [[wiki link]]
+        if (/^\[\[[^\]\n]+\]\]$/.test(tok)) {
+          const query = tok.slice(2, -2).trim();
+          const song = librarySongs.find(s => s.title.toLowerCase() === query.toLowerCase());
+          return song
+            ? `<a class="wiki-link" data-song-id="${esc(song.id)}" tabindex="0" title="Go to: ${esc(song.title)}">${esc(query)}</a>`
+            : `<span class="wiki-link-missing" title="Song not found in library: ${esc(query)}">${esc(query)}</span>`;
+        }
+        // Plain text — always escaped
+        return esc(tok);
       }).join('');
     }
 
@@ -4512,7 +4616,7 @@
         card.dataset.annId = a.id; // so scrollToAnnInSidebar can find it
         card.innerHTML = `
       <div class="ac-top"><div class="ac-dot" style="background:${TIER_COLORS[a.tier] || TIER_COLORS.lyrics}"></div><div class="ac-quote">"${esc(a.selectedText)}"</div></div>
-      <div class="ac-body">${renderWikiLinks(a.content)}</div>
+      <div class="ac-body">${renderAnnotationContent(a.content)}</div>
       <div class="ac-foot">
         ${a.tags.slice(0, 3).map(t => `<span class="ac-tag">${esc(t)}</span>`).join('')}
         ${a.tsAnchor ? `<span class="ac-ts">⏱ ${fmtTime(a.tsAnchor.start)}</span>` : ''}
@@ -5072,7 +5176,7 @@
       }
 
       $('vw-quote').textContent = `"${a.selectedText}"`;
-      $('vw-content').innerHTML = renderWikiLinks(a.content);
+      $('vw-content').innerHTML = renderAnnotationContent(a.content);
       $('vw-content').onclick = handleWikiLinkClick;
       $('vw-tags').innerHTML = a.tags.map(t => `<span class="ac-tag">${esc(t)}</span>`).join('');
       $('vw-meta').textContent = `by ${a.author} · ${a.createdAt?.split('T')[0] || a.createdAt || ''}`;

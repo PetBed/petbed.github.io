@@ -140,6 +140,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	let taskSubjectFilter = "all";
 	let taskStatusFilter = "all";
 	let taskSort = "dueDate";
+	let taskCollapseState = {};
 	let editingTaskId = null;
 	let pipVideoElement = null;
 	let pipCanvas = null;
@@ -153,11 +154,21 @@ document.addEventListener("DOMContentLoaded", function () {
 	let currentCardIndex = 0;
 	let shuffledFlashcards = [];
 	let sortableInstance = null;
+	let taskSortableInstance = null;
+	let subtaskSortableInstances = [];
+	let soundLibrarySortableInstance = null;
+	let flashcardSetSortableInstance = null;
   let sessionSecondsStudied = 0;
 
+  if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission().then(permission => {
+            console.log("Notification permission:", permission);
+        });
+  }
 
 	// --- Constants & Config ---
-	const API_URL = "https://wot-tau.vercel.app"; // local: http://localhost:3005
+	const API_URL = "https://wot-tau.vercel.app"; // local: https://wot-tau.vercel.app
+	const TASK_VIEW_PREFS_KEY = "studyTaskViewPreferences";
 	const subjectColors = {Malay: "#8B0000", English: "#1D3557", History: "#D2691E", Accounting: "#FFD60A", "Modern Mathematics": "#00B4D8", Moral: "#6A4C93", "Additional Mathematics": "#00B4D8", Physics: "#E63946", Biology: "#2D6A4F", Economy: "#606C38", Chemistry: "#6C757D", PJPK: "#9EF01A", Other: "#64748b"};
 	const RBT_ACCENT = "#FFD60A";
 	const exams = [
@@ -183,6 +194,8 @@ document.addEventListener("DOMContentLoaded", function () {
 		{subject: "Malay Listening", date: "2026-05-08T07:30:00"},
 		{subject: "English Listening", date: "2026-05-08T08:35:00"},
 		{subject: "PJPK", date: "2026-05-08T09:40:00"},
+		{subject: "Economy 2", date: "2026-05-08T12:30:00"},
+		{subject: "Economy 1", date: "2026-05-08T14:45:00"},
 	];
 	const quotes = ["The secret of getting ahead is getting started.", "The expert in anything was once a beginner.", "Believe you can and you're halfway there.", "Well done is better than well said.", "Strive for progress, not perfection.", "The future belongs to those who believe in the beauty of their dreams.", "Success is the sum of small efforts, repeated day in and day out.", "Don't watch the clock; do what it does. Keep going.", "It does not matter how slowly you go as long as you do not stop.", "The pain you feel today will be the strength you feel tomorrow."];
 
@@ -205,6 +218,37 @@ document.addEventListener("DOMContentLoaded", function () {
 		const rawHtml = marked.parse(text);
 		// Sanitize the HTML to prevent XSS attacks
 		return DOMPurify.sanitize(rawHtml);
+	}
+
+	function saveTaskViewPreferences() {
+		localStorage.setItem(
+			TASK_VIEW_PREFS_KEY,
+			JSON.stringify({
+				taskSubjectFilter,
+				taskStatusFilter,
+				taskSort,
+			})
+		);
+	}
+
+	function loadTaskViewPreferences() {
+		try {
+			const rawPrefs = localStorage.getItem(TASK_VIEW_PREFS_KEY);
+			if (!rawPrefs) return;
+			const prefs = JSON.parse(rawPrefs);
+			if (prefs.taskSubjectFilter) taskSubjectFilter = prefs.taskSubjectFilter;
+			if (prefs.taskStatusFilter) taskStatusFilter = prefs.taskStatusFilter;
+			if (prefs.taskSort) taskSort = prefs.taskSort;
+		} catch (error) {
+			console.warn("Failed to load task view preferences:", error);
+		}
+	}
+
+	const isTaskExpanded = (taskId) => taskCollapseState[taskId] === true;
+
+	function toggleTaskSubtasks(taskId) {
+		taskCollapseState[taskId] = !isTaskExpanded(taskId);
+		renderTasksPage();
 	}
 
 	// --- App Initialization & Auth Check ---
@@ -280,6 +324,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	async function initializeApp() {
 		await loadDataFromDB();
+		loadTaskViewPreferences();
 		populateCalendarWithExams();
 		renderCalendar();
 		renderCountdowns();
@@ -295,6 +340,9 @@ document.addEventListener("DOMContentLoaded", function () {
 			});
 		};
 		populateSubjects();
+		filterSubjectEl.value = taskSubjectFilter;
+		filterStatusEl.value = taskStatusFilter;
+		sortTasksEl.value = taskSort;
 		renderTasksPage();
 		renderStudyLogs();
 		updateTimerDisplay();
@@ -361,6 +409,16 @@ document.addEventListener("DOMContentLoaded", function () {
 			const taskId = subtaskItem.dataset.parentId;
 			const subtaskId = subtaskItem.dataset.id;
 			deleteSubTask(taskId, subtaskId);
+		} else if (target.closest(".move-task-up-btn") && taskItem) {
+			moveTaskByOffset(taskItem.dataset.id, -1);
+		} else if (target.closest(".move-task-down-btn") && taskItem) {
+			moveTaskByOffset(taskItem.dataset.id, 1);
+		} else if (target.closest(".move-subtask-up-btn") && subtaskItem) {
+			moveSubTaskByOffset(subtaskItem.dataset.parentId, subtaskItem.dataset.id, -1);
+		} else if (target.closest(".move-subtask-down-btn") && subtaskItem) {
+			moveSubTaskByOffset(subtaskItem.dataset.parentId, subtaskItem.dataset.id, 1);
+		} else if (target.closest(".task-collapse-btn") && taskItem) {
+			toggleTaskSubtasks(taskItem.dataset.id);
 		}
 	});
 
@@ -369,14 +427,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	filterSubjectEl.addEventListener("change", (e) => {
 		taskSubjectFilter = e.target.value;
+		saveTaskViewPreferences();
 		renderTasksPage();
 	});
 	filterStatusEl.addEventListener("change", (e) => {
 		taskStatusFilter = e.target.value;
+		saveTaskViewPreferences();
 		renderTasksPage();
 	});
 	sortTasksEl.addEventListener("change", (e) => {
 		taskSort = e.target.value;
+		saveTaskViewPreferences();
 		renderTasksPage();
 	});
 
@@ -602,8 +663,9 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 	function renderStudyChart() {
 		const ctx = studyChartCanvas.getContext("2d");
-		const labels = Object.keys(studyLogs);
-		const data = labels.map((label) => (studyLogs[label] / 3600).toFixed(2));
+		const sortedStudyEntries = Object.entries(studyLogs).sort((a, b) => b[1] - a[1]);
+		const labels = sortedStudyEntries.map(([subject]) => subject);
+		const data = sortedStudyEntries.map(([, seconds]) => (seconds / 3600).toFixed(2));
 		if (studyChart) studyChart.destroy();
 		if (labels.length === 0) {
 			ctx.clearRect(0, 0, studyChartCanvas.width, studyChartCanvas.height);
@@ -714,7 +776,11 @@ document.addEventListener("DOMContentLoaded", function () {
 				body: JSON.stringify({text, subject, time, deadline, userId: currentUser.id}),
 			});
 			if (!response.ok) throw new Error("Server error");
-			await loadTasks();
+			const savedTask = await response.json();
+			// Replace the temp task with the real one from server (gets the real _id)
+			const tempIndex = tasks.findIndex((t) => t._id === tempId);
+			if (tempIndex !== -1) tasks[tempIndex] = savedTask;
+			renderTasksPage();
 		} catch (error) {
 			console.error("Failed to add task:", error);
 			tasks = tasks.filter((t) => t._id !== tempId);
@@ -724,19 +790,79 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	}
 	async function toggleTask(task) {
+		const originalCompleted = task.completed;
+		task.completed = !task.completed;
+		renderTasksPage();
 		try {
-			await fetch(`${API_URL}/api/study/tasks/${task._id}`, {method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify({completed: !task.completed})});
-			await loadTasks();
+			const response = await fetch(`${API_URL}/api/study/tasks/${task._id}`, {method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify({completed: task.completed})});
+			if (!response.ok) throw new Error("Server error");
 		} catch (error) {
 			console.error("Failed to toggle task:", error);
+			task.completed = originalCompleted;
+			renderTasksPage();
 		}
 	}
 	async function deleteTask(taskId) {
+		const taskIndex = tasks.findIndex((t) => t._id === taskId);
+		if (taskIndex === -1) return;
+		const deletedTask = tasks[taskIndex];
+		tasks.splice(taskIndex, 1);
+		renderTasksPage();
 		try {
-			await fetch(`${API_URL}/api/study/tasks/${taskId}`, {method: "DELETE"});
-			await loadTasks();
+			const response = await fetch(`${API_URL}/api/study/tasks/${taskId}`, {method: "DELETE"});
+			if (!response.ok) throw new Error("Server error");
 		} catch (error) {
 			console.error("Failed to delete task:", error);
+			tasks.splice(taskIndex, 0, deletedTask);
+			renderTasksPage();
+		}
+	}
+
+	async function saveTaskOrder(orderedIds) {
+		try {
+			await fetch(`${API_URL}/api/study/tasks/reorder`, {
+				method: "PUT",
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify({orderedIds}),
+			});
+		} catch (error) {
+			console.error("Failed to save task order:", error);
+		}
+	}
+
+	async function saveSubTaskOrder(taskId, orderedIds) {
+		try {
+			await fetch(`${API_URL}/api/study/tasks/${taskId}/subtasks/reorder`, {
+				method: "PUT",
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify({orderedIds}),
+			});
+		} catch (error) {
+			console.error("Failed to save sub-task order:", error);
+		}
+	}
+
+	async function saveSoundLibraryOrder(orderedIds) {
+		try {
+			await fetch(`${API_URL}/api/study/sound-library/reorder`, {
+				method: "PUT",
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify({userId: currentUser.id, orderedIds}),
+			});
+		} catch (error) {
+			console.error("Failed to save sound order:", error);
+		}
+	}
+
+	async function saveFlashcardSetOrder(orderedIds) {
+		try {
+			await fetch(`${API_URL}/api/study/flashcard-sets/reorder`, {
+				method: "PUT",
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify({orderedIds}),
+			});
+		} catch (error) {
+			console.error("Failed to save flashcard set order:", error);
 		}
 	}
 
@@ -764,14 +890,12 @@ document.addEventListener("DOMContentLoaded", function () {
 			});
 			if (!response.ok) throw new Error("Server error");
 
+			// Silently update the temp subtask ID with the real one from the server
 			const updatedTask = await response.json();
 			const taskIndex = tasks.findIndex((t) => t._id === taskId);
-			if (taskIndex !== -1) tasks[taskIndex] = updatedTask;
-
-			if (fromModal) {
-				renderSubtasksInModal(taskId);
-			} else {
-				renderTasksPage();
+			if (taskIndex !== -1) {
+				// Only replace the subTasks array to get real IDs, without triggering a re-render
+				tasks[taskIndex].subTasks = updatedTask.subTasks;
 			}
 		} catch (error) {
 			console.error("Failed to add sub-task:", error);
@@ -811,39 +935,43 @@ document.addEventListener("DOMContentLoaded", function () {
 			});
 			if (!response.ok) throw new Error("Server error");
 
+			// Silently sync IDs without re-rendering
 			const updatedTask = await response.json();
 			const taskIndex = tasks.findIndex((t) => t._id === taskId);
-			if (taskIndex !== -1) tasks[taskIndex] = updatedTask;
-
-			if (fromModal) {
-				renderSubtasksInModal(taskId);
-			} else {
-				renderTasksPage();
-			}
+			if (taskIndex !== -1) tasks[taskIndex].subTasks = updatedTask.subTasks;
 		} catch (error) {
 			console.error("Failed to update sub-task:", error);
-			// Optional: add logic to revert optimistic update on failure
+			// Revert is handled by the calling function (e.g. toggleSubTask)
 		}
 	}
 
 	async function deleteSubTask(taskId, subtaskId, fromModal = false) {
+		const task = tasks.find((t) => t._id === taskId);
+		if (!task) return;
+		const subtaskIndex = task.subTasks.findIndex((st) => st._id === subtaskId);
+		if (subtaskIndex === -1) return;
+		const deletedSubTask = task.subTasks[subtaskIndex];
+		task.subTasks.splice(subtaskIndex, 1);
+
+		if (fromModal) {
+			renderSubtasksInModal(taskId);
+		} else {
+			renderTasksPage();
+		}
+
 		try {
 			const response = await fetch(`${API_URL}/api/study/tasks/${taskId}/subtasks/${subtaskId}`, {
 				method: "DELETE",
 			});
 			if (!response.ok) throw new Error("Server error");
-
-			const updatedTask = await response.json();
-			const taskIndex = tasks.findIndex((t) => t._id === taskId);
-			if (taskIndex !== -1) tasks[taskIndex] = updatedTask;
-
+		} catch (error) {
+			console.error("Failed to delete sub-task:", error);
+			task.subTasks.splice(subtaskIndex, 0, deletedSubTask);
 			if (fromModal) {
 				renderSubtasksInModal(taskId);
 			} else {
 				renderTasksPage();
 			}
-		} catch (error) {
-			console.error("Failed to delete sub-task:", error);
 		}
 	}
 
@@ -1031,17 +1159,29 @@ document.addEventListener("DOMContentLoaded", function () {
 		} else if (taskSort === "time") {
 			tasksToRender.sort((a, b) => a.time - b.time);
 		}
+		// "custom" sort uses the server-side order field — no client sort needed
+
+		// Destroy existing sortable before re-rendering
+		if (taskSortableInstance) {
+			taskSortableInstance.destroy();
+			taskSortableInstance = null;
+		}
+		subtaskSortableInstances.forEach((instance) => instance.destroy());
+		subtaskSortableInstances = [];
+
 		fullTaskListEl.innerHTML = "";
 		if (!tasksToRender.length) {
 			fullTaskListEl.innerHTML = `<p class="text-slate-400 text-center py-4">No tasks match your filters.</p>`;
 			return;
 		}
+		const isCustomSort = taskSort === "custom";
 		tasksToRender.forEach((task) => {
 			const el = document.createElement("div");
 			el.className = "task-item p-3 bg-slate-100 dark:bg-slate-700/50 rounded-lg";
 			el.dataset.id = task._id;
 			const completedClass = task.completed ? " line-through text-slate-400 dark:text-slate-500" : "";
-			let subtasksHtml = '<div class="pl-6 mt-2 space-y-1">';
+			const isExpanded = isTaskExpanded(task._id);
+			let subtasksHtml = `<div class="subtask-list pl-2 mt-2 space-y-1" data-task-id="${task._id}" ${isCustomSort ? 'aria-label="Sub-tasks. Drag or use move buttons to reorder."' : ""}>`;
 			let progressBarHtml = "";
 			if (task.subTasks && task.subTasks.length > 0) {
 				const completedCount = task.subTasks.filter((st) => st.completed).length;
@@ -1049,6 +1189,9 @@ document.addEventListener("DOMContentLoaded", function () {
 				const percentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 				progressBarHtml = `
                     <div class="mt-2 flex items-center gap-2">
+						<button type="button" class="task-collapse-btn flex h-6 w-6 items-center justify-center rounded text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200" aria-expanded="${isExpanded}" aria-label="${isExpanded ? "Collapse sub-tasks" : "Expand sub-tasks"}" title="${isExpanded ? "Collapse sub-tasks" : "Expand sub-tasks"}">
+							<i class="${isExpanded ? "icon-angle-up" : "icon-angle-down"}"></i>
+						</button>
                         <div class="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-2">
                             <div class="bg-green-500 h-2 rounded-full" style="width: ${percentage}%"></div>
                         </div>
@@ -1059,13 +1202,20 @@ document.addEventListener("DOMContentLoaded", function () {
 					const subCompletedClass = st.completed ? " line-through text-slate-500" : "dark:text-slate-300";
 					subtasksHtml += `
                         <div class="subtask-item group flex items-center justify-between" data-id="${st._id}" data-parent-id="${task._id}">
-                            <div class="flex items-center flex-grow">
+                            <div class="flex items-center flex-grow min-w-0">
+								${isCustomSort ? `<button type="button" class="subtask-drag-handle mr-2 flex-shrink-0 cursor-grab text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 transition-colors" title="Drag to reorder sub-task" aria-label="Drag to reorder sub-task"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></button>` : ""}
                                 <input type="checkbox" ${st.completed ? "checked" : ""} class="subtask-checkbox h-4 w-4 rounded border-gray-300 text-blue-600 cursor-pointer">
                                 <span class="subtask-text-view ml-2 text-sm cursor-pointer ${subCompletedClass}">${st.text}</span>
                             </div>
-                            <button class="delete-subtask-btn text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                            </button>
+							<div class="flex items-center">
+								${isCustomSort ? `
+									<button type="button" class="move-subtask-up-btn text-slate-400 hover:text-blue-500 mr-1" aria-label="Move sub-task up" title="Move sub-task up">↑</button>
+									<button type="button" class="move-subtask-down-btn text-slate-400 hover:text-blue-500 mr-1" aria-label="Move sub-task down" title="Move sub-task down">↓</button>
+								` : ""}
+                            	<button class="delete-subtask-btn text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100">
+                                	<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            	</button>
+							</div>
                         </div>
                     `;
 				});
@@ -1074,6 +1224,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 			el.innerHTML = `
                 <div class="flex items-start justify-between group">
+                    ${isCustomSort ? `<button type="button" class="task-drag-handle self-start mt-0.5 mr-2 flex-shrink-0 cursor-grab text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 transition-colors" title="Drag to reorder task" aria-label="Drag to reorder task"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></button>` : ""}
                     <div class="flex items-start flex-grow">
                         <input type="checkbox" ${task.completed ? "checked" : ""} class="task-checkbox mt-1 mr-3 h-5 w-5 rounded border-gray-300 text-blue-600 cursor-pointer">
                         <div class="task-details-view w-full">
@@ -1091,17 +1242,112 @@ document.addEventListener("DOMContentLoaded", function () {
                         <button class="delete-task-btn opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
+						${isCustomSort ? `
+							<button type="button" class="move-task-up-btn text-slate-400 hover:text-blue-500 ml-1" aria-label="Move task up" title="Move task up">↑</button>
+							<button type="button" class="move-task-down-btn text-slate-400 hover:text-blue-500 ml-1" aria-label="Move task down" title="Move task down">↓</button>
+						` : ""}
                     </div>
                 </div>
                 ${progressBarHtml}
-                ${subtasksHtml}
-                <div class="mt-2 pl-6 flex items-center gap-2">
-                    <input type="text" id="subtask-input-${task._id}" class="w-full text-sm p-1 border border-slate-200 dark:border-slate-600 rounded bg-white dark:bg-slate-700" placeholder="Add sub-task...">
-                    <button class="add-subtask-btn text-xs bg-blue-500 text-white rounded px-2 py-1" data-task-id="${task._id}">Add</button>
+				<div class="subtask-panel overflow-hidden ${isExpanded ? "expanded" : ""}" data-task-id="${task._id}">
+                	${subtasksHtml}
+                	<div class="mt-2 pl-2 flex items-center gap-2">
+                    	<input type="text" id="subtask-input-${task._id}" class="w-full text-sm p-1 border border-slate-200 dark:border-slate-600 rounded bg-white dark:bg-slate-700" placeholder="Add sub-task...">
+                    	<button class="add-subtask-btn text-xs bg-blue-500 text-white rounded px-2 py-1" data-task-id="${task._id}">Add</button>
+                	</div>
                 </div>
             `;
 			fullTaskListEl.appendChild(el);
 		});
+
+		applySubtaskPanelHeights();
+
+		// Initialize Sortable only in custom order mode
+		if (isCustomSort) {
+			taskSortableInstance = new Sortable(fullTaskListEl, {
+				animation: 150,
+				handle: ".task-drag-handle",
+				delayOnTouchOnly: true,
+				delay: 120,
+				touchStartThreshold: 5,
+				ghostClass: "sortable-ghost",
+				dragClass: "sortable-drag",
+				onEnd: (evt) => {
+					// Reorder the local tasks array to match the new DOM order
+					const newOrderedIds = [...evt.to.children].map((el) => el.dataset.id);
+					const taskMap = new Map(tasks.map((t) => [t._id, t]));
+					// Rebuild tasks array in new order (preserving any tasks not visible due to filters)
+					const reorderedVisible = newOrderedIds.map((id) => taskMap.get(id)).filter(Boolean);
+					const hiddenTasks = tasks.filter((t) => !newOrderedIds.includes(t._id));
+					tasks = [...reorderedVisible, ...hiddenTasks];
+					saveTaskOrder(newOrderedIds);
+				},
+			});
+
+			document.querySelectorAll(".subtask-list").forEach((subtaskListEl) => {
+				const taskId = subtaskListEl.dataset.taskId;
+				const subtaskSortable = new Sortable(subtaskListEl, {
+					animation: 150,
+					handle: ".subtask-drag-handle",
+					delayOnTouchOnly: true,
+					delay: 120,
+					touchStartThreshold: 5,
+					ghostClass: "sortable-ghost",
+					dragClass: "sortable-drag",
+					onEnd: (evt) => {
+						const subtaskIds = [...evt.to.children].map((el) => el.dataset.id);
+						const task = tasks.find((t) => t._id === taskId);
+						if (!task || !Array.isArray(task.subTasks)) return;
+						const subtaskMap = new Map(task.subTasks.map((st) => [st._id, st]));
+						task.subTasks = subtaskIds.map((id) => subtaskMap.get(id)).filter(Boolean);
+						saveSubTaskOrder(taskId, subtaskIds);
+					},
+				});
+				subtaskSortableInstances.push(subtaskSortable);
+			});
+		}
+	}
+
+	function applySubtaskPanelHeights() {
+		document.querySelectorAll(".subtask-panel").forEach((panelEl) => {
+			const taskId = panelEl.dataset.taskId;
+			const expanded = isTaskExpanded(taskId);
+			if (expanded) {
+				panelEl.style.maxHeight = "0px";
+				requestAnimationFrame(() => {
+					panelEl.style.maxHeight = `${panelEl.scrollHeight}px`;
+				});
+			} else {
+				panelEl.style.maxHeight = `${panelEl.scrollHeight}px`;
+				requestAnimationFrame(() => {
+					panelEl.style.maxHeight = "0px";
+				});
+			}
+		});
+	}
+
+	function moveTaskByOffset(taskId, offset) {
+		if (taskSort !== "custom") return;
+		const currentIndex = tasks.findIndex((task) => task._id === taskId);
+		const targetIndex = currentIndex + offset;
+		if (currentIndex < 0 || targetIndex < 0 || targetIndex >= tasks.length) return;
+		const [movedTask] = tasks.splice(currentIndex, 1);
+		tasks.splice(targetIndex, 0, movedTask);
+		renderTasksPage();
+		saveTaskOrder(tasks.map((task) => task._id));
+	}
+
+	function moveSubTaskByOffset(taskId, subtaskId, offset) {
+		if (taskSort !== "custom") return;
+		const task = tasks.find((t) => t._id === taskId);
+		if (!task || !Array.isArray(task.subTasks)) return;
+		const currentIndex = task.subTasks.findIndex((subtask) => subtask._id === subtaskId);
+		const targetIndex = currentIndex + offset;
+		if (currentIndex < 0 || targetIndex < 0 || targetIndex >= task.subTasks.length) return;
+		const [movedSubTask] = task.subTasks.splice(currentIndex, 1);
+		task.subTasks.splice(targetIndex, 0, movedSubTask);
+		renderTasksPage();
+		saveSubTaskOrder(taskId, task.subTasks.map((subtask) => subtask._id));
 	}
 
 	function renderStudyLogs() {
@@ -1110,10 +1356,11 @@ document.addEventListener("DOMContentLoaded", function () {
 			studyLogContainer.innerHTML = `<p class="text-slate-400 text-center py-2">No sessions logged.</p>`;
 			return;
 		}
-		for (const subject in studyLogs) {
+		const sortedStudyEntries = Object.entries(studyLogs).sort((a, b) => b[1] - a[1]);
+		for (const [subject, seconds] of sortedStudyEntries) {
 			const el = document.createElement("div");
 			el.className = "flex items-center justify-between p-2 bg-slate-100 dark:bg-slate-700/50 rounded-md text-sm";
-			el.innerHTML = `<div class="flex items-center"><span class="w-2.5 h-2.5 rounded-full mr-2" style="background-color:${getColorForSubject(subject)};"></span><span class="font-medium text-slate-700 dark:text-slate-200">${subject}</span></div><span class="font-semibold text-slate-600 dark:text-slate-300">${formatLogTime(studyLogs[subject] || 0)}</span>`;
+			el.innerHTML = `<div class="flex items-center"><span class="w-2.5 h-2.5 rounded-full mr-2" style="background-color:${getColorForSubject(subject)};"></span><span class="font-medium text-slate-700 dark:text-slate-200">${subject}</span></div><span class="font-semibold text-slate-600 dark:text-slate-300">${formatLogTime(seconds || 0)}</span>`;
 			studyLogContainer.appendChild(el);
 		}
 	}
@@ -1247,30 +1494,32 @@ document.addEventListener("DOMContentLoaded", function () {
 			deadline: editTaskDeadline.value,
 		};
 
-		// Optimistic UI update
+		// Optimistic UI update — snapshot original for rollback
 		const taskIndex = tasks.findIndex((t) => t._id === taskIdToSave);
+		let originalTask = null;
 		if (taskIndex > -1) {
-			// Important: Merge updates with existing subTasks to avoid deleting them
-			const existingSubTasks = tasks[taskIndex].subTasks || [];
-			tasks[taskIndex] = {...tasks[taskIndex], ...updates, subTasks: existingSubTasks};
+			originalTask = {...tasks[taskIndex], subTasks: [...(tasks[taskIndex].subTasks || [])]};
+			tasks[taskIndex] = {...tasks[taskIndex], ...updates, subTasks: originalTask.subTasks};
 			renderTasksPage();
 		}
 
 		closeEditModal();
 
 		try {
-			// Use the locally saved ID for the fetch request
-			await fetch(`${API_URL}/api/study/tasks/${taskIdToSave}`, {
+			const response = await fetch(`${API_URL}/api/study/tasks/${taskIdToSave}`, {
 				method: "PUT",
 				headers: {"Content-Type": "application/json"},
 				body: JSON.stringify(updates),
 			});
-			// Reload tasks from server to get the final state
-			await loadTasks();
+			if (!response.ok) throw new Error("Server error");
+			// Success — local state is already correct, no reload needed
 		} catch (error) {
 			console.error("Failed to save task changes:", error);
-			// If save fails, reload tasks from server to revert the optimistic update
-			await loadTasks();
+			// Rollback the optimistic update
+			if (taskIndex > -1 && originalTask) {
+				tasks[taskIndex] = originalTask;
+				renderTasksPage();
+			}
 		}
 	}
 
@@ -1388,6 +1637,10 @@ document.addEventListener("DOMContentLoaded", function () {
 	// Render the list of sounds
 	function renderSoundLibrary() {
 		if (!isYouTubeApiReady) return;
+		if (soundLibrarySortableInstance) {
+			soundLibrarySortableInstance.destroy();
+			soundLibrarySortableInstance = null;
+		}
 		soundLibraryList.innerHTML = "";
 		if (soundLibrary.length === 0) {
 			soundLibraryList.innerHTML = `<p class="text-slate-400 text-center text-sm py-2">Your sound library is empty.</p>`;
@@ -1397,8 +1650,12 @@ document.addEventListener("DOMContentLoaded", function () {
 			const isPlaying = sound._id === currentPlayingSoundId;
 			const el = document.createElement("div");
 			el.className = `sound-item group flex items-center justify-between p-2 rounded-lg text-sm ${isPlaying ? "bg-blue-100 dark:bg-blue-900/50" : "hover:bg-slate-100 dark:hover:bg-slate-700/50"}`;
+			el.dataset.soundId = sound._id;
 			el.innerHTML = `
-                <span class="font-medium text-slate-700 dark:text-slate-200 truncate">${sound.name}</span>
+                <div class="flex items-center min-w-0">
+					<button type="button" class="sound-drag-handle mr-2 flex-shrink-0 cursor-grab text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 transition-colors" title="Drag to reorder sound" aria-label="Drag to reorder sound"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></button>
+                	<span class="font-medium text-slate-700 dark:text-slate-200 truncate">${sound.name}</span>
+				</div>
                 <div class="flex items-center md:opacity-0 group-hover:opacity-100 transition-opacity">
                     <button data-url="${sound.url}" data-id="${sound._id}" class="play-sound-btn p-1 text-slate-500 hover:text-blue-500">
                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
@@ -1418,6 +1675,22 @@ document.addEventListener("DOMContentLoaded", function () {
 		document.querySelectorAll(".play-sound-btn").forEach((btn) => btn.addEventListener("click", (e) => handlePlaySound(e.currentTarget.dataset.id, e.currentTarget.dataset.url)));
 		document.querySelectorAll(".edit-sound-btn").forEach((btn) => btn.addEventListener("click", (e) => handleEditSound(e.currentTarget.dataset.id)));
 		document.querySelectorAll(".delete-sound-btn").forEach((btn) => btn.addEventListener("click", (e) => handleDeleteSound(e.currentTarget.dataset.id)));
+
+		soundLibrarySortableInstance = new Sortable(soundLibraryList, {
+			animation: 150,
+			handle: ".sound-drag-handle",
+			delayOnTouchOnly: true,
+			delay: 120,
+			touchStartThreshold: 5,
+			ghostClass: "sortable-ghost",
+			dragClass: "sortable-drag",
+			onEnd: (evt) => {
+				const orderedIds = [...evt.to.children].map((item) => item.dataset.soundId);
+				const soundMap = new Map(soundLibrary.map((sound) => [sound._id, sound]));
+				soundLibrary = orderedIds.map((id) => soundMap.get(id)).filter(Boolean);
+				saveSoundLibraryOrder(orderedIds);
+			},
+		});
 	}
 
 	// Handle adding a new sound from the form
@@ -1772,6 +2045,12 @@ document.addEventListener("DOMContentLoaded", function () {
 	// ==========================================
 
 	function renderFlashcardSets() {
+		// Destroy existing sortable before re-rendering
+		if (flashcardSetSortableInstance) {
+			flashcardSetSortableInstance.destroy();
+			flashcardSetSortableInstance = null;
+		}
+
 		flashcardSetsGrid.innerHTML = "";
 		if (flashcardSets.length === 0) {
 			flashcardSetsGrid.innerHTML = `<p class="text-slate-500 dark:text-slate-400 col-span-full text-center">You haven't created any flashcard sets yet. Click "Create New Set" to start!</p>`;
@@ -1782,6 +2061,9 @@ document.addEventListener("DOMContentLoaded", function () {
 			el.className = "set-card group relative bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm cursor-pointer hover:shadow-lg transition-shadow";
 			el.dataset.setId = set._id;
 			el.innerHTML = `
+                <div class="set-drag-handle absolute top-2 left-2 cursor-grab text-slate-300 dark:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity z-10" title="Drag to reorder">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                </div>
                 <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button data-action="edit" class="p-1.5 bg-slate-100 dark:bg-slate-700 rounded-md hover:bg-slate-200 dark:hover:bg-slate-600">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -1790,11 +2072,24 @@ document.addEventListener("DOMContentLoaded", function () {
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </button>
                 </div>
-                <p class="font-bold text-lg text-slate-800 dark:text-slate-100">${set.name}</p>
+                <p class="font-bold text-lg text-slate-800 dark:text-slate-100 mt-4">${set.name}</p>
                 <p class="text-sm text-slate-500 dark:text-slate-400" style="color:${getColorForSubject(set.subject)};">${set.subject}</p>
                 <p class="text-sm text-slate-400 dark:text-slate-500 mt-2">${set.flashcards.length} cards</p>
             `;
 			flashcardSetsGrid.appendChild(el);
+		});
+
+		flashcardSetSortableInstance = new Sortable(flashcardSetsGrid, {
+			animation: 150,
+			handle: ".set-drag-handle",
+			ghostClass: "sortable-ghost",
+			dragClass: "sortable-drag",
+			onEnd: (evt) => {
+				const newOrderedIds = [...evt.to.children].map((el) => el.dataset.setId);
+				const setMap = new Map(flashcardSets.map((s) => [s._id, s]));
+				flashcardSets = newOrderedIds.map((id) => setMap.get(id)).filter(Boolean);
+				saveFlashcardSetOrder(newOrderedIds);
+			},
 		});
 	}
 

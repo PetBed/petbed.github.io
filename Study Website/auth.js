@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	const forgotContinueBtn = document.getElementById("forgot-continue-btn");
 
 	// --- State ---
-	const API_URL = "https://wot-tau.vercel.app"; // local: http://localhost:3005
+	const API_URL = "https://wot-tau.vercel.app"; // local: https://wot-tau.vercel.app
 	let resetUserId = null;
 
 	// --- Initial Check ---

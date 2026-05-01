@@ -290,6 +290,15 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     cursor: grabbing;
 }
 
+.subtask-panel {
+    max-height: 0;
+    transition: max-height 0.25s ease-in-out;
+}
+
+.task-collapse-chevron {
+    transition: transform 0.2s ease-in-out;
+}
+
 #claim-drop-btn {
     position: relative;
 }

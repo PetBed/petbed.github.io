@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	let currentPlayingSoundId = null;
 
 	// --- Constants & Config ---
-	const API_URL = "https://wot-tau.vercel.app"; //http://localhost:3005
+	const API_URL = "https://wot-tau.vercel.app"; //https://wot-tau.vercel.app
 	const subjectColors = {Malay: "#8B0000", English: "#1D3557", History: "#D2691E", Accounting: "#FFD60A", "Modern Mathematics": "#00B4D8", Moral: "#6A4C93", "Additional Mathematics": "#00B4D8", Physics: "#E63946", Biology: "#2D6A4F", Economy: "#606C38", Chemistry: "#6C757D", PJPK: "#9EF01A", Other: "#64748b"};
 	const RBT_ACCENT = "#FFD60A";
 	const exams = [

@@ -191,11 +191,11 @@ document.addEventListener("DOMContentLoaded", function () {
 		{subject: "Biology 1", date: "2026-05-06T09:45:00"},
 		{subject: "Chemistry 2", date: "2026-05-07T06:55:00"},
 		{subject: "Chemistry 1", date: "2026-05-07T09:45:00"},
+		{subject: "Economy 1", date: "2026-05-07T11:15:00"},
 		{subject: "Malay Listening", date: "2026-05-08T07:30:00"},
 		{subject: "English Listening", date: "2026-05-08T08:35:00"},
 		{subject: "PJPK", date: "2026-05-08T09:40:00"},
-		{subject: "Economy 2", date: "2026-05-08T12:30:00"},
-		{subject: "Economy 1", date: "2026-05-08T14:45:00"},
+		{subject: "Economy 2", date: "2026-05-08T11:15:00"},
 	];
 	const quotes = ["The secret of getting ahead is getting started.", "The expert in anything was once a beginner.", "Believe you can and you're halfway there.", "Well done is better than well said.", "Strive for progress, not perfection.", "The future belongs to those who believe in the beauty of their dreams.", "Success is the sum of small efforts, repeated day in and day out.", "Don't watch the clock; do what it does. Keep going.", "It does not matter how slowly you go as long as you do not stop.", "The pain you feel today will be the strength you feel tomorrow."];
 

@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class 4A · Grade Book</title>
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0a0f1e;
+      --card: #111827;
+      --card2: #1a2235;
+      --bdr: #1e3a5f;
+      --teal: #0d9488;
+      --teall: #2dd4bf;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --lite: #94a3b8;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      min-height: 100vh;
+      font-family: 'Trebuchet MS', sans-serif;
+      color: var(--text);
+      padding: 20px 24px;
+      box-sizing: border-box;
+    }
+    .cs {
+      background: var(--card);
+      border: 1px solid var(--bdr);
+      border-radius: 14px;
+      padding: 22px;
+    }
+    .lbl {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+    }
+    .tab-btn {
+      padding: 7px 18px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .sort-btn {
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: inherit;
+      transition: all 0.1s;
+    }
+    .subj-btn, .rank-btn {
+      padding: 6px 13px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: inherit;
+    }
+    select {
+      font-family: inherit;
+      outline: none;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--bdr);
+    }
+    /* Scrollbar styles for tables */
+    .table-container { overflow-x: auto; }
+    .table-container::-webkit-scrollbar { height: 8px; }
+    .table-container::-webkit-scrollbar-track { background: var(--bg); }
+    .table-container::-webkit-scrollbar-thumb { background: var(--bdr); border-radius: 4px; }
+    
+    .chart-container { position: relative; width: 100%; height: 210px; }
+    .chart-container.large { height: 290px; }
+    .chart-container.medium { height: 240px; }
+    .chart-container.small { height: 160px; }
+  </style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<!-- GOOGLE SHEETS SETTINGS MODAL -->
+<div id="configModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(10,15,30,0.85); backdrop-filter:blur(6px); z-index:1000; align-items:center; justify-content:center;">
+  <div class="cs" style="width:100%; max-width:540px; border-color:var(--teal); box-shadow: 0 10px 30px rgba(13,148,136,0.15); margin: 20px; max-height: 90vh; overflow-y: auto; box-sizing: border-box;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <h2 style="margin:0; font-size:18px; color:#f1f5f9; display:flex; align-items:center; gap:8px;">
+        <span>🌐</span> Connect Google Sheet
+      </h2>
+      <button onclick="closeConfigModal()" style="background:none; border:none; color:var(--muted); font-size:24px; cursor:pointer; padding:0; line-height:1;">&times;</button>
+    </div>
+    
+    <p style="font-size:13px; color:var(--lite); line-height:1.5; margin-bottom:18px; margin-top:0;">
+      Dynamically import student score records directly from any shared Google Spreadsheet. Updates publish instantly when you sync!
+    </p>
+    
+    <div style="margin-bottom:16px;">
+      <label class="lbl" style="display:block; margin-bottom:6px;">Google Sheets URL or Spreadsheet ID</label>
+      <input type="text" id="sheetUrlInput" placeholder="https://docs.google.com/spreadsheets/d/.../edit" style="width:100%; padding:10px 14px; background:var(--bg); border:1px solid var(--bdr); border-radius:8px; color:var(--text); font-family:inherit; font-size:13px; box-sizing:border-box;">
+    </div>
+    
+    <div id="connectionStatus" style="font-size:12px; margin-bottom:16px; padding:10px 14px; border-radius:8px; display:none; line-height:1.4;"></div>
+    
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-bottom:20px;">
+      <button onclick="closeConfigModal()" class="tab-btn" style="border:1px solid var(--bdr); background:transparent; color:var(--lite);">Close</button>
+      <button onclick="connectGoogleSheet()" class="tab-btn" style="border:1px solid var(--teal); background:var(--teal); color:#0f1923;">Connect & Sync</button>
+    </div>
+    
+    <div style="border-top:1px solid var(--bdr); padding-top:16px;">
+      <div class="lbl" style="margin-bottom:10px;">Setup Instructions:</div>
+      <ol style="font-size:12px; color:var(--muted); padding-left:18px; margin:0; display:flex; flex-direction:column; gap:8px; line-height:1.5;">
+        <li>Create a Google Spreadsheet.</li>
+        <li>Rename your second tab to exactly <b>AR 1</b>.</li>
+        <li>Set score column headers on <b>Row 2</b> of that tab. The first column must be <b>Name</b>. Subsequent columns should match subject tags exactly (e.g. <code>BM</code>, <code>BI</code>, <code>MATE</code>, <code>PSV</code>, <code>PJK</code>).</li>
+        <li>Click <b>Share</b> in Google Sheets, and change access to <b>"Anyone with the link can view"</b>.</li>
+        <li>Copy your browser's address URL, paste it above, or save it as the <code>DEFAULT_SHEET_ID</code> inside the HTML code!</li>
+      </ol>
+    </div>
+
+    <!-- SHAREABLE DYNAMIC DASHBOARD LINKS -->
+    <div id="shareableLinkContainer" style="margin-top:20px; border-top:1px dashed var(--bdr); padding-top:16px; display:none;">
+      <div class="lbl" style="margin-bottom:6px;">🔗 Shareable Classroom Link</div>
+      <p style="font-size:11px; color:var(--muted); margin-bottom:8px; line-height:1.4;">Anyone using this customized URL will automatically read your live spreadsheet data directly:</p>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <input type="text" id="shareableUrlInput" readonly style="flex:1; padding:7px 10px; background:var(--bg); border:1px solid var(--bdr); border-radius:6px; color:var(--teall); font-size:11px; font-family:monospace;" onclick="this.select()">
+        <button onclick="copyShareableUrl()" class="sort-btn" style="border:1px solid var(--teal); background:var(--teal)15; color:var(--teall); padding:7px 14px;">Copy</button>
+      </div>
+      <span id="copyFeedback" style="display:block; font-size:10px; color:var(--teall); margin-top:4px; text-align:right;"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIGURATION ───────────────────────────────────────────────────────────
+// REPLACE THIS VALUE with your actual Spreadsheet ID to open automatically on load
+const DEFAULT_SHEET_ID = '12pQdZDrSvXUGLDrx96i6lE5nYqhseplf-rg0mhYWTa8';
+
+// ─── SUBJECTS & CONSTANTS ────────────────────────────────────────────────────
+const SUBJECTS = ['BM','BI','SEJ','MATE','P. ISLAM','BC','P. MORAL','FIZIK','KIMIA','BIO','ADD MAT','EKONOMI','AKAUN','PSV','PJK'];
+const EXCLUDED_FROM_STATS = ['PJK']; // PJK is excluded from average, GPA, grade, and pass metrics
+
+function gradePoint(score) {
+  if (score >= 90) return 0; if (score >= 80) return 1; if (score >= 70) return 2;
+  if (score >= 65) return 3; if (score >= 60) return 4; if (score >= 55) return 5;
+  if (score >= 50) return 6; if (score >= 45) return 7; if (score >= 40) return 8;
+  return 9;
+}
+function letterGrade(score) {
+  if (score >= 90) return 'A+'; if (score >= 80) return 'A'; if (score >= 70) return 'A-';
+  if (score >= 65) return 'B+'; if (score >= 60) return 'B'; if (score >= 55) return 'C+';
+  if (score >= 50) return 'C'; if (score >= 45) return 'D'; if (score >= 40) return 'E';
+  return 'F';
+}
+function gradeColor(score) {
+  if (score >= 90) return '#10b981'; if (score >= 80) return '#34d399'; if (score >= 70) return '#a3e635';
+  if (score >= 65) return '#facc15'; if (score >= 60) return '#fb923c'; if (score >= 55) return '#fbbf24';
+  if (score >= 50) return '#f97316'; if (score >= 45) return '#f87171'; if (score >= 40) return '#ef4444';
+  return '#dc2626';
+}
+function gradeColorByLetter(letter) {
+  if (letter === 'N/A' || letter === '-') return '#334155';
+  const m = {'A+':'#10b981','A':'#34d399','A-':'#a3e635','B+':'#facc15','B':'#fb923c','C+':'#fbbf24','C':'#f97316','D':'#f87171','E':'#ef4444','F':'#dc2626'};
+  return m[letter] || '#64748b';
+}
+function medalColor(i) { return i===0?'#f59e0b':i===1?'#94a3b8':i===2?'#b45309':'#1e293b'; }
+function firstName(name) { return name.split(' ')[0]; }
+
+const BG = '#0a0f1e', CARD = '#111827', CARD2 = '#1a2235', BDR = '#1e3a5f';
+const TEAL = '#0d9488', TEALL = '#2dd4bf', TEXT = '#e2e8f0', MUTED = '#64748b', LITE = '#94a3b8';
+
+Chart.defaults.color = MUTED;
+Chart.defaults.font.family = "'Trebuchet MS', sans-serif";
+Chart.defaults.borderColor = BDR;
+Chart.defaults.plugins.tooltip.backgroundColor = CARD;
+Chart.defaults.plugins.tooltip.titleColor = TEXT;
+Chart.defaults.plugins.tooltip.bodyColor = TEXT;
+Chart.defaults.plugins.tooltip.borderColor = BDR;
+Chart.defaults.plugins.tooltip.borderWidth = 1;
+Chart.defaults.plugins.tooltip.padding = 10;
+Chart.defaults.plugins.tooltip.cornerRadius = 10;
+
+// ─── STATE MANAGEMENT & COMPUTED DATA ────────────────────────────────────────
+let state = {
+  tab: 'dashboard',
+  selStudent: 0,
+  selSubject: 'BM',
+  rankFor: 'overall',
+  sbSort: 'rank',
+  sheetId: ''
+};
+
+let students = [];
+let ranked = [];
+let rankMap = {};
+let subStats = [];
+let gradeDist = [];
+let classAvg = 0;
+let classGpa = 0;
+let passCount = 0;
+let appLoadError = '';
+
+// Re-computes overall statistics when source dataset changes
+function recalculateData(sourceData) {
+  if (!sourceData || sourceData.length === 0) {
+    students = [];
+    ranked = [];
+    rankMap = {};
+    subStats = [];
+    gradeDist = [];
+    classAvg = 0;
+    classGpa = 0;
+    passCount = 0;
+    return;
+  }
+
+  students = sourceData.map(r => {
+    const subs = Object.keys(r.s);
+    const countedSubs = subs.filter(sub => !EXCLUDED_FROM_STATS.includes(sub));
+    const valsCounted = countedSubs.map(sub => r.s[sub]);
+    
+    let avg = 0, gpa = 0, grade = 'N/A';
+    if (valsCounted.length > 0) {
+      avg = valsCounted.reduce((a,b)=>a+b,0) / valsCounted.length;
+      gpa = valsCounted.map(gradePoint).reduce((a,b)=>a+b,0) / valsCounted.length;
+      grade = letterGrade(avg);
+    }
+    return { ...r, subs, countedSubs, avg, gpa, grade };
+  });
+
+  ranked = [...students].sort((a,b) => a.gpa-b.gpa || b.avg-a.avg).map((s,i)=>({...s,rank:i+1}));
+  rankMap = Object.fromEntries(ranked.map(s=>[s.name,s.rank]));
+
+  subStats = SUBJECTS.map(sub => {
+    const scrs = students.filter(s=>sub in s.s).map(s=>s.s[sub]);
+    if (!scrs.length) return null;
+    const isExcluded = EXCLUDED_FROM_STATS.includes(sub);
+    
+    if (isExcluded) {
+      return { sub, n:scrs.length, avg: null, max: Math.max(...scrs), min: Math.min(...scrs), pass: null, passRate: null, isExcluded };
+    }
+    
+    const avg = scrs.reduce((a,b)=>a+b,0)/scrs.length;
+    const pass = scrs.filter(s=>s>=40).length;
+    return { sub, n:scrs.length, avg, max:Math.max(...scrs), min:Math.min(...scrs), pass, passRate:pass/scrs.length*100, isExcluded };
+  }).filter(Boolean);
+
+  gradeDist = (() => {
+    const gs = ['A+','A','A-','B+','B','C+','C','D','E','F'];
+    const c = Object.fromEntries(gs.map(g=>[g,0]));
+    students.forEach(s => s.countedSubs.forEach(sub => { c[letterGrade(s.s[sub])]++; }));
+    return gs.map(g=>({ grade:g, count:c[g] }));
+  })();
+
+  const validStudents = students.filter(s => s.countedSubs.length > 0);
+  if (validStudents.length > 0) {
+    classAvg = validStudents.reduce((a,s)=>a+s.avg,0)/validStudents.length;
+    classGpa = validStudents.reduce((a,s)=>a+s.gpa,0)/validStudents.length;
+    passCount = validStudents.filter(s=>s.countedSubs.every(sub=>s.s[sub]>=40)).length;
+  } else {
+    classAvg = 0;
+    classGpa = 0;
+    passCount = 0;
+  }
+
+  // Safe checks for selection indices out of bounds
+  if (state.selStudent >= students.length) {
+    state.selStudent = 0;
+  }
+}
+
+const TABS = [
+  {id:'dashboard',icon:'📊',label:'Dashboard'},
+  {id:'scoreboard',icon:'📋',label:'Scoreboard'},
+  {id:'student',icon:'🎓',label:'Student'},
+  {id:'subject',icon:'📚',label:'Subject'},
+  {id:'rankings',icon:'🏆',label:'Rankings'},
+];
+
+let chartInstances = [];
+
+// ─── ACTION HANDLERS ─────────────────────────────────────────────────────────
+window.setTab = (id) => { state.tab = id; render(); };
+window.setSelStudent = (e) => { state.selStudent = Number(e.target.value); render(); };
+window.setSelSubject = (sub) => { state.selSubject = sub; render(); };
+window.setSbSort = (sort) => { state.sbSort = sort; render(); };
+window.setRankFor = (sub) => { state.rankFor = sub; render(); };
+
+// ─── RENDERING ENGINE ────────────────────────────────────────────────────────
+function render() {
+  chartInstances.forEach(c => c.destroy());
+  chartInstances = [];
+  
+  let html = `
+    <!-- HEADER -->
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="color:var(--teal);font-size:10px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;margin-bottom:3px;">Academic Year 2026</div>
+        <h1 style="margin:0;font-size:30px;font-weight:800;color:#f1f5f9;letter-spacing:-0.02em;">Class 4A · Grade Book</h1>
+        <div style="color:var(--muted);font-size:13px;margin-top:4px; display:flex; align-items:center; gap:8px;">
+          <span>${students.length} students &nbsp;·&nbsp; ${SUBJECTS.length} subjects</span>
+          ${state.sheetId ? `<span style="background:var(--teal)20; color:var(--teall); font-size:10px; padding:2px 8px; border-radius:50px; font-weight:700;">🟢 Online Sheet Synced</span>` : ''}
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button onclick="openConfigModal()" class="tab-btn" style="border:1px solid ${state.sheetId ? 'var(--teal)' : 'var(--bdr)'}; background:var(--card); color:${state.sheetId ? 'var(--teall)' : 'var(--lite)'}; display:flex; align-items:center; gap:6px;">
+          <span>🔗</span> ${state.sheetId ? 'Configure Sheet' : 'Connect Google Sheet'}
+        </button>
+        ${[{label:'Class Avg',val:classAvg.toFixed(1)},{label:'Class GPA',val:classGpa.toFixed(2)},{label:'All-Pass',val:passCount}].map(x=>`
+          <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:8px 14px;text-align:center;">
+            <div class="lbl" style="margin-bottom:2px;">${x.label}</div>
+            <div style="font-size:18px;font-weight:800;color:var(--teall);">${x.val}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- ERROR WARNING BANNER -->
+    ${renderErrorBanner()}
+
+    <!-- TABS -->
+    <div style="display:flex;gap:6px;margin-bottom:22px;flex-wrap:wrap;">
+      ${TABS.map(t=>`
+        <button onclick="setTab('${t.id}')" class="tab-btn" style="
+          border: 1px solid ${state.tab===t.id ? TEAL : BDR};
+          background: ${state.tab===t.id ? TEAL : CARD};
+          color: ${state.tab===t.id ? '#0f1923' : LITE};
+        ">${t.icon} ${t.label}</button>
+      `).join('')}
+    </div>
+  `;
+
+  if (students.length === 0) {
+    html += renderEmptyState();
+  } else {
+    if (state.tab === 'dashboard') html += renderDashboard();
+    if (state.tab === 'scoreboard') html += renderScoreboard();
+    if (state.tab === 'student') html += renderStudent();
+    if (state.tab === 'subject') html += renderSubject();
+    if (state.tab === 'rankings') html += renderRankings();
+  }
+
+  html += `
+    <div style="margin-top:28px;color:var(--muted);font-size:10px;text-align:center;letter-spacing:0.05em; line-height: 1.5;">
+      Class 4A · Academic Year 2026 · GPA Scale: A+(0) A(1) A-(2) B+(3) B(4) C+(5) C(6) D(7) E(8) F(9) · Lower GPA = Better<br>
+      <span style="opacity:0.7;">Note: PJK is tracked visually but excluded from all academic statistics.</span>
+    </div>
+  `;
+
+  document.getElementById('root').innerHTML = html;
+  if (students.length > 0) {
+    setTimeout(initCharts, 0);
+  }
+}
+
+function renderErrorBanner() {
+  if (!appLoadError) return '';
+  return `
+    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-sizing: border-box;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 16px;">⚠️</span>
+        <span style="font-size: 13px; color: #f87171; font-weight: 600;">${appLoadError}</span>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button onclick="openConfigModal()" class="sort-btn" style="border:1px solid #ef4444; background:#ef444415; color:#f87171;">Review Connection</button>
+        <button onclick="dismissErrorBanner()" style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:18px; font-weight:700;">&times;</button>
+      </div>
+    </div>
+  `;
+}
+
+window.dismissErrorBanner = () => {
+  appLoadError = '';
+  render();
+};
+
+function renderEmptyState() {
+  return `
+    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:50vh; text-align:center; padding: 40px;" class="cs">
+      <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+      <h3 style="margin:0 0 10px; color:#f1f5f9; font-size: 20px;">No Active Grade Book Loaded</h3>
+      <p style="color:var(--muted); font-size:13px; max-width:440px; margin:0 0 24px; line-height:1.6;">
+        To activate the dashboard, please enter your Google Spreadsheet URL in the link settings. Ensure your tab is named "AR 1" and labels are placed on Row 2.
+      </p>
+      <button onclick="openConfigModal()" class="tab-btn" style="border: 1px solid var(--teal); background: var(--teal); color: #0f1923; padding: 10px 24px;">
+        🔗 Connect Google Spreadsheet
+      </button>
+    </div>
+  `;
+}
+
+// ─── TAB COMPONENTS ──────────────────────────────────────────────────────────
+function renderDashboard() {
+  const total = students.reduce((a,s)=>a+s.countedSubs.length,0);
+  const pass = students.reduce((a,s)=>a+s.countedSubs.filter(sub=>s.s[sub]>=40).length,0);
+  const fail = total - pass;
+  const dashStats = subStats.filter(s => !s.isExcluded);
+
+  return `
+    <div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+        <div class="cs">
+          <div class="lbl" style="margin-bottom:14px;">Grade Distribution — Academic Subjects</div>
+          <div class="chart-container"><canvas id="dashGradeDist"></canvas></div>
+        </div>
+        <div class="cs">
+          <div class="lbl" style="margin-bottom:14px;">Subject Average Scores</div>
+          <div class="chart-container"><canvas id="dashSubStats"></canvas></div>
+        </div>
+      </div>
+
+      <div class="cs" style="margin-bottom:16px;">
+        <div class="lbl" style="margin-bottom:14px;">Subject Summary Table (Academic Only)</div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>${['Subject','Students','Average','Highest','Lowest','Pass Count','Pass Rate','Grade'].map(h=>`
+                <th style="padding:6px 10px;color:var(--muted);font-weight:700;text-align:center;white-space:nowrap;">${h}</th>
+              `).join('')}</tr>
+            </thead>
+            <tbody>
+              ${dashStats.map((s,i)=>`
+                <tr style="background:${i%2===0?'transparent':'var(--card2)'}">
+                  <td style="padding:7px 10px;font-weight:700;color:var(--teall);">${s.sub}</td>
+                  ${[s.n, s.avg !== null ? s.avg.toFixed(1) : '-', s.max, s.min, s.pass, s.passRate !== null ? s.passRate.toFixed(0)+'%' : '-'].map(v=>`
+                    <td style="padding:7px 10px;text-align:center;">${v}</td>
+                  `).join('')}
+                  <td style="padding:7px 10px;text-align:center;">
+                    <span style="padding:2px 8px;border-radius:6px;background:${gradeColorByLetter(letterGrade(s.avg))};color:#0f1923;font-weight:800;font-size:11px;">${s.avg !== null ? letterGrade(s.avg) : '-'}</span>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 300px;gap:16px;">
+        <div class="cs">
+          <div class="lbl" style="margin-bottom:14px;">🏆 Top 10 Students</div>
+          ${ranked.slice(0,10).map((s,i)=>`
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:${i%2===0?'transparent':'var(--card2)'};border-radius:8px;margin-bottom:2px;">
+              <div style="width:30px;height:30px;border-radius:50%;background:${medalColor(i)};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:${i<3?'#0f1923':'var(--lite)'};flex-shrink:0;">${i+1}</div>
+              <div style="flex:1;font-weight:600;font-size:13px;">${s.name}</div>
+              <div style="color:var(--muted);font-size:12px;">Avg <b style="color:var(--teall);">${s.avg.toFixed(1)}</b></div>
+              <div style="color:var(--muted);font-size:12px;">GPA <b style="color:var(--teall);">${s.gpa.toFixed(2)}</b></div>
+              <span style="padding:2px 10px;border-radius:6px;background:${gradeColorByLetter(s.grade)};color:#0f1923;font-weight:800;font-size:11px;">${s.grade}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="cs">
+          <div class="lbl" style="margin-bottom:14px;">Pass / Fail Breakdown</div>
+          <div class="chart-container small"><canvas id="dashPie"></canvas></div>
+          <div style="margin-top:10px;">
+            ${[{name:'Pass (≥40)', value:pass, fill:TEAL}, {name:'Fail (<40)', value:fail, fill:'#ef4444'}].map(d=>`
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                <div style="width:10px;height:10px;border-radius:50%;background:${d.fill}"></div>
+                <div style="flex:1;font-size:12px;color:var(--lite);">${d.name}</div>
+                <div style="font-weight:700;">${d.value} <span style="color:var(--muted);font-weight:400;">(${total > 0 ? (d.value/total*100).toFixed(0) : 0}%)</span></div>
+              </div>
+            `).join('')}
+          </div>
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr);color:var(--muted);font-size:11px;">Total academic entries: ${total}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderScoreboard() {
+  const base = [...ranked];
+  if (state.sbSort === 'name') base.sort((a,b)=>a.name.localeCompare(b.name));
+  else if (state.sbSort === 'avg') base.sort((a,b)=>b.avg-a.avg);
+  else if (state.sbSort === 'gpa') base.sort((a,b)=>a.gpa-b.gpa||b.avg-a.avg);
+
+  return `
+    <div class="cs">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+        <div class="lbl" style="margin:0;">Full Class Scoreboard</div>
+        <div style="display:flex;gap:6px;margin-left:auto;">
+          ${[['rank','By Rank'],['name','By Name'],['avg','By Avg'],['gpa','By GPA']].map(([v,l])=>`
+            <button onclick="setSbSort('${v}')" class="sort-btn" style="
+              border: 1px solid ${state.sbSort===v ? TEAL : BDR};
+              background: ${state.sbSort===v ? TEAL : CARD};
+              color: ${state.sbSort===v ? '#0f1923' : MUTED};
+            ">${l}</button>
+          `).join('')}
+        </div>
+      </div>
+      <div class="table-container" style="max-height: 70vh; overflow-y: auto;">
+        <table style="font-size:11px;position:relative;">
+          <thead style="position:sticky;top:0;z-index:10;background:var(--card);">
+            <tr>
+              <th style="text-align:left;padding:8px 10px;color:var(--muted);border-bottom:2px solid var(--bdr);font-weight:700;white-space:nowrap;position:sticky;left:0;z-index:11;background:var(--card);">Rank · Student</th>
+              ${SUBJECTS.map(s=>`<th style="padding:8px 6px;color:var(--muted);border-bottom:2px solid var(--bdr);font-weight:700;white-space:nowrap;min-width:50px;">${s}</th>`).join('')}
+              <th style="padding:8px 6px;color:var(--teall);border-bottom:2px solid var(--bdr);font-weight:800;">Avg</th>
+              <th style="padding:8px 6px;color:var(--teall);border-bottom:2px solid var(--bdr);font-weight:800;">GPA</th>
+              <th style="padding:8px 6px;color:var(--teall);border-bottom:2px solid var(--bdr);font-weight:800;">Grade</th>
+              <th style="padding:8px 6px;color:var(--teall);border-bottom:2px solid var(--bdr);font-weight:800;" title="Counted Subjects">Subs</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${base.map((s,idx)=>`
+              <tr style="background:${idx%2===0?'transparent':'var(--card2)'}">
+                <td style="padding:6px 10px;font-weight:600;white-space:nowrap;position:sticky;left:0;background:${idx%2===0?'var(--card)':'var(--card2)'};z-index:1;">
+                  <span style="color:var(--muted);margin-right:6px;font-size:10px;">#${s.rank}</span>${s.name}
+                </td>
+                ${SUBJECTS.map(sub=>`
+                  <td style="padding:6px 5px;text-align:center;">
+                    ${s.s[sub] !== undefined 
+                      ? `<span style="display:inline-block;padding:2px 5px;border-radius:4px;background:${gradeColor(s.s[sub])}25;color:${gradeColor(s.s[sub])};font-weight:700;">${s.s[sub]}</span>` 
+                      : `<span style="color:var(--bdr);">—</span>`}
+                  </td>
+                `).join('')}
+                <td style="padding:6px;text-align:center;font-weight:800;color:var(--teall);">${s.avg.toFixed(1)}</td>
+                <td style="padding:6px;text-align:center;font-weight:800;color:var(--teall);">${s.gpa.toFixed(2)}</td>
+                <td style="padding:6px;text-align:center;">
+                  <span style="padding:2px 8px;border-radius:5px;background:${gradeColorByLetter(s.grade)};color:#0f1923;font-weight:800;font-size:11px;">${s.grade}</span>
+                </td>
+                <td style="padding:6px;text-align:center;color:var(--muted);">${s.countedSubs.length}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderStudent() {
+  const student = students[state.selStudent];
+  if (!student) return '';
+  const rank = rankMap[student.name] || '-';
+  const subEntries = SUBJECTS.filter(sub => sub in student.s);
+  
+  const countedScores = student.countedSubs.map(sub => student.s[sub]);
+  const best = countedScores.length ? Math.max(...countedScores) : '-';
+  const worst = countedScores.length ? Math.min(...countedScores) : '-';
+
+  return `
+    <div>
+      <div style="margin-bottom:18px;">
+        <div class="lbl" style="margin-bottom:8px;">Select Student</div>
+        <select onchange="setSelStudent(event)" style="background:var(--card);border:1px solid var(--bdr);color:var(--text);border-radius:9px;padding:9px 14px;font-size:13px;width:100%;max-width:400px;">
+          ${students.map((s,i)=>`<option value="${i}" ${state.selStudent===i?'selected':''}>${s.name}</option>`).join('')}
+        </select>
+      </div>
+      
+      <div class="cs" style="margin-bottom:16px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+        <div style="width:64px;height:64px;border-radius:50%;background:${TEAL}22;border:2px solid ${TEAL};display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:${TEAL};flex-shrink:0;">
+          ${student.name.charAt(0)}
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:19px;font-weight:800;">${student.name}</div>
+          <div style="color:var(--muted);font-size:12px;margin-top:3px;">Overall Rank <b style="color:var(--teall);">#${rank}</b> of ${students.length} &nbsp;·&nbsp; ${student.countedSubs.length} academic subjects</div>
+        </div>
+        ${[{l:'Avg Score',v:student.avg.toFixed(1)},{l:'GPA',v:student.gpa.toFixed(2)},{l:'Grade',v:student.grade,isBadge:true}].map(x=>`
+          <div style="text-align:center;">
+            <div class="lbl">${x.l}</div>
+            ${x.isBadge
+              ? `<span style="display:inline-block;margin-top:4px;padding:5px 18px;border-radius:8px;background:${gradeColorByLetter(x.v)};color:#0f1923;font-size:24px;font-weight:800;">${x.v}</span>`
+              : `<div style="font-size:28px;font-weight:800;color:var(--teall);margin-top:4px;">${x.v}</div>`}
+          </div>
+        `).join('')}
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="cs">
+          <div class="lbl" style="margin-bottom:14px;">Subject Breakdown</div>
+          <div style="display:flex;flex-direction:column;gap:9px;">
+            ${subEntries.map(sub=>{
+              const score = student.s[sub];
+              const lg = letterGrade(score);
+              const gp = gradePoint(score);
+              const isExcluded = EXCLUDED_FROM_STATS.includes(sub);
+              return `
+                <div style="display:flex;align-items:center;gap:8px;opacity:${isExcluded ? '0.6':'1'};">
+                  <div style="width:68px;color:var(--muted);font-size:11px;font-weight:700;flex-shrink:0;">${sub}${isExcluded?'*':''}</div>
+                  <div style="flex:1;background:#0a0f1e;border-radius:4px;height:16px;overflow:hidden;">
+                    <div style="width:${score}%;height:100%;background:${gradeColor(score)};border-radius:4px;transition:width 0.4s;"></div>
+                  </div>
+                  <div style="width:28px;text-align:right;font-weight:800;font-size:12px;color:${gradeColor(score)};">${score}</div>
+                  <span style="width:28px;text-align:center;padding:1px 5px;border-radius:4px;background:${isExcluded?'transparent':gradeColor(score)+'22'};color:${isExcluded?'var(--muted)':gradeColor(score)};font-size:10px;font-weight:800;">${isExcluded?'-':lg}</span>
+                  <span style="width:14px;text-align:center;color:var(--muted);font-size:10px;">${isExcluded?'-':gp}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;color:var(--muted);font-size:11px;">
+            <span>Best: <b style="color:var(--teall);">${best}</b></span>
+            <span>Worst: <b style="color:#f87171;">${worst}</b></span>
+            <span>Avg GP: <b style="color:var(--teall);">${student.gpa.toFixed(2)}</b></span>
+          </div>
+        </div>
+        <div class="cs">
+          <div class="lbl" style="margin-bottom:14px;">Academic Performance Radar</div>
+          <div class="chart-container large"><canvas id="stuRadar"></canvas></div>
+        </div>
+      </div>
+
+      <div class="cs" style="margin-top:16px;">
+        <div class="lbl" style="margin-bottom:14px;">Score vs. Class Average (Academic)</div>
+        <div class="chart-container"><canvas id="stuVsClass"></canvas></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSubject() {
+  const stat = subStats.find(s => s.sub === state.selSubject);
+  
+  const headerHtml = `
+    <div style="margin-bottom:18px;">
+      <div class="lbl" style="margin-bottom:10px;">Select Subject</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${SUBJECTS.map(sub=>{
+          const hasSub = students.some(s=>sub in s.s);
+          if(!hasSub) return '';
+          return `<button onclick="setSelSubject('${sub}')" class="subj-btn" style="
+            border: 1px solid ${state.selSubject===sub ? TEAL : BDR};
+            background: ${state.selSubject===sub ? TEAL : CARD};
+            color: ${state.selSubject===sub ? '#0f1923' : LITE};
+          ">${sub}</button>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+
+  if (!stat) return headerHtml + `<div style="color:var(--muted);">No data.</div>`;
+
+  const subStudents = [...students.filter(s => state.selSubject in s.s)].sort((a,b) => b.s[state.selSubject] - a.s[state.selSubject]);
+  
+  return headerHtml + `
+    <div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:16px;">
+        ${[
+          {l:'Students', v:stat.n},
+          {l:'Average', v:stat.avg !== null ? stat.avg.toFixed(1) : 'N/A'},
+          {l:'Highest', v:stat.max},
+          {l:'Lowest', v:stat.min},
+          {l:'Pass Count', v:stat.pass !== null ? stat.pass : 'N/A'},
+          {l:'Fail Count', v:stat.pass !== null ? stat.n - stat.pass : 'N/A'},
+          {l:'Pass Rate', v:stat.passRate !== null ? stat.passRate.toFixed(0)+'%' : 'N/A'},
+          {l:'Class Grade', v:stat.avg !== null ? letterGrade(stat.avg) : 'N/A', isBadge:true},
+        ].map(c=>`
+          <div class="cs">
+            <div class="lbl">${c.l}</div>
+            ${c.isBadge
+              ? `<span style="display:inline-block;margin-top:4px;padding:2px 12px;border-radius:6px;background:${gradeColorByLetter(c.v)};color:#0f1923;font-size:22px;font-weight:800;">${c.v}</span>`
+              : `<div style="font-size:22px;font-weight:800;color:var(--teall);margin-top:4px;">${c.v}</div>`}
+          </div>
+        `).join('')}
+      </div>
+
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;">
+        <div class="cs">
+          <div class="lbl" style="margin-bottom:14px;">Score by Student — ${state.selSubject}</div>
+          <div class="chart-container medium"><canvas id="subBar"></canvas></div>
+        </div>
+        <div class="cs">
+          <div class="lbl" style="margin-bottom:14px;">Grade Spread — ${state.selSubject}</div>
+          ${stat.isExcluded 
+            ? `<div style="height:240px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;">Grades not applicable for ${stat.sub}</div>`
+            : `<div class="chart-container medium"><canvas id="subDist"></canvas></div>`
+          }
+        </div>
+      </div>
+
+      <div class="cs">
+        <div class="lbl" style="margin-bottom:14px;">Student Rankings — ${state.selSubject}</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:6px;">
+          ${subStudents.map((s,i)=>{
+            const score = s.s[state.selSubject];
+            return `
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:${i%2===0?'transparent':'var(--card2)'};border-radius:8px;">
+                <div style="width:26px;height:26px;border-radius:50%;background:${medalColor(i)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:${i<3?'#0f1923':'var(--muted)'};flex-shrink:0;">${i+1}</div>
+                <div style="flex:1;font-size:12px;font-weight:600;">${s.name}</div>
+                <div style="width:80px;background:var(--bg);border-radius:3px;height:10px;overflow:hidden;">
+                  <div style="width:${score}%;height:100%;background:${gradeColor(score)};"></div>
+                </div>
+                <span style="padding:2px 7px;border-radius:4px;background:${gradeColor(score)}25;color:${gradeColor(score)};font-weight:800;font-size:12px;">${score}</span>
+                <span style="width:22px;text-align:center;color:${stat.isExcluded ? 'var(--muted)' : gradeColor(score)};font-size:10px;font-weight:800;">${stat.isExcluded ? '-' : letterGrade(score)}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderRankings() {
+  const rankingOptions = ['overall', ...SUBJECTS.filter(sub=>students.some(s=>sub in s.s))];
+  
+  let listHtml = '';
+  if (state.rankFor === 'overall') {
+    listHtml = `
+      <div class="lbl" style="margin-bottom:14px;">Overall Rankings · by GPA (lower=better), then Avg Score (higher=better)</div>
+      ${ranked.map((s,i)=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:${i<3?TEAL+'0d':'transparent'};border-radius:10px;border:1px solid ${i<3?TEAL+'33':'transparent'};margin-bottom:4px;">
+          <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;background:${medalColor(i)};color:${i<3?'#0f1923':'var(--muted)'};flex-shrink:0;">${i+1}</div>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:13px;">${s.name}</div>
+            <div style="color:var(--muted);font-size:10px;margin-top:2px;">Counted: ${s.countedSubs.join(' · ')}</div>
+          </div>
+          <div style="text-align:right;min-width:60px;">
+            <div style="color:var(--muted);font-size:10px;">Avg Score</div>
+            <div style="font-weight:800;color:var(--teall);">${s.avg.toFixed(1)}</div>
+          </div>
+          <div style="text-align:right;min-width:50px;">
+            <div style="color:var(--muted);font-size:10px;">GPA</div>
+            <div style="font-weight:800;color:var(--teall);">${s.gpa.toFixed(2)}</div>
+          </div>
+          <span style="padding:4px 12px;border-radius:7px;background:${gradeColorByLetter(s.grade)};color:#0f1923;font-weight:800;font-size:12px;">${s.grade}</span>
+        </div>
+      `).join('')}
+    `;
+  } else {
+    const isExcluded = EXCLUDED_FROM_STATS.includes(state.rankFor);
+    const list = [...students.filter(s=>state.rankFor in s.s)].sort((a,b)=>b.s[state.rankFor]-a.s[state.rankFor]);
+    listHtml = `
+      <div class="lbl" style="margin-bottom:14px;">${state.rankFor} Rankings · by Score (highest first)</div>
+      ${list.map((s,i)=>{
+        const score = s.s[state.rankFor];
+        return `
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:${i<3?TEAL+'0d':'transparent'};border-radius:10px;border:1px solid ${i<3?TEAL+'33':'transparent'};margin-bottom:4px;">
+            <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;background:${medalColor(i)};color:${i<3?'#0f1923':'var(--muted)'};flex-shrink:0;">${i+1}</div>
+            <div style="flex:1;font-weight:600;font-size:13px;">${s.name}</div>
+            <div style="width:140px;background:var(--bg);border-radius:4px;height:12px;overflow:hidden;">
+              <div style="width:${score}%;height:100%;background:${gradeColor(score)};border-radius:4px;"></div>
+            </div>
+            <div style="font-weight:800;color:${gradeColor(score)};min-width:28px;text-align:right;">${score}</div>
+            <span style="padding:2px 10px;border-radius:6px;background:${isExcluded?'transparent':gradeColor(score)+'25'};color:${isExcluded?'var(--muted)':gradeColor(score)};font-weight:800;font-size:12px;">${isExcluded?'-':letterGrade(score)}</span>
+          </div>
+        `;
+      }).join('')}
+    `;
+  }
+
+  return `
+    <div>
+      <div style="margin-bottom:18px;">
+        <div class="lbl" style="margin-bottom:10px;">Rankings For</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          ${rankingOptions.map(sub=>`
+            <button onclick="setRankFor('${sub}')" class="rank-btn" style="
+              border: 1px solid ${state.rankFor===sub ? TEAL : BDR};
+              background: ${state.rankFor===sub ? TEAL : CARD};
+              color: ${state.rankFor===sub ? '#0f1923' : LITE};
+            ">${sub==='overall'?'🏆 Overall':sub}</button>
+          `).join('')}
+        </div>
+      </div>
+      <div class="cs">${listHtml}</div>
+    </div>
+  `;
+}
+
+// ─── CHART INITIALIZATION ────────────────────────────────────────────────────
+function initCharts() {
+  if (students.length === 0) return;
+
+  if (state.tab === 'dashboard') {
+    const ctxGD = document.getElementById('dashGradeDist');
+    if (ctxGD) {
+      chartInstances.push(new Chart(ctxGD, {
+        type: 'bar',
+        data: {
+          labels: gradeDist.map(d=>d.grade),
+          datasets: [{
+            data: gradeDist.map(d=>d.count),
+            backgroundColor: gradeDist.map(d=>gradeColorByLetter(d.grade)),
+            borderRadius: 5
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: BDR } }, x: { grid: { display: false } } } }
+      }));
+    }
+
+    const dashStats = subStats.filter(s => !s.isExcluded);
+    const ctxSS = document.getElementById('dashSubStats');
+    if (ctxSS) {
+      chartInstances.push(new Chart(ctxSS, {
+        type: 'bar',
+        data: {
+          labels: dashStats.map(s=>s.sub),
+          datasets: [{
+            data: dashStats.map(s=>s.avg),
+            backgroundColor: dashStats.map(s=>gradeColor(s.avg)),
+            borderRadius: 5
+          }]
+        },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw.toFixed(1) } } }, scales: { x: { max: 100, beginAtZero: true, grid: { color: BDR } }, y: { grid: { display: false } } } }
+      }));
+    }
+
+    const ctxPie = document.getElementById('dashPie');
+    if (ctxPie) {
+      const total = students.reduce((a,s)=>a+s.countedSubs.length,0);
+      const pass = students.reduce((a,s)=>a+s.countedSubs.filter(sub=>s.s[sub]>=40).length,0);
+      chartInstances.push(new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+          labels: ['Pass (≥40)', 'Fail (<40)'],
+          datasets: [{
+            data: [pass, total-pass],
+            backgroundColor: [TEAL, '#ef4444'],
+            borderWidth: 0
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } } }
+      }));
+    }
+  }
+
+  if (state.tab === 'student') {
+    const student = students[state.selStudent];
+    const chartSubEntries = SUBJECTS.filter(sub => sub in student.s && !EXCLUDED_FROM_STATS.includes(sub));
+    
+    const ctxRad = document.getElementById('stuRadar');
+    if (ctxRad) {
+      chartInstances.push(new Chart(ctxRad, {
+        type: 'radar',
+        data: {
+          labels: chartSubEntries,
+          datasets: [{
+            label: student.name,
+            data: chartSubEntries.map(sub=>student.s[sub]),
+            backgroundColor: TEAL + '40',
+            borderColor: TEAL,
+            pointBackgroundColor: TEAL,
+            borderWidth: 2
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { r: { min: 0, max: 100, ticks: { maxTicksLimit: 5, backdropColor: 'transparent', color: MUTED }, grid: { color: BDR }, angleLines: { color: BDR }, pointLabels: { color: LITE, font: { size: 9 } } } } }
+      }));
+    }
+
+    const ctxVs = document.getElementById('stuVsClass');
+    if (ctxVs) {
+      chartInstances.push(new Chart(ctxVs, {
+        type: 'bar',
+        data: {
+          labels: chartSubEntries,
+          datasets: [
+            { label: 'Your Score', data: chartSubEntries.map(sub=>student.s[sub]), backgroundColor: TEAL, borderRadius: 4 },
+            { label: 'Class Avg', data: chartSubEntries.map(sub=>{const st=subStats.find(s=>s.sub===sub); return st&&st.avg!==null?st.avg:0;}), backgroundColor: '#334155', borderRadius: 4 }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { max: 100, beginAtZero: true, grid: { color: BDR } }, x: { grid: { display: false } } } }
+      }));
+    }
+  }
+
+  if (state.tab === 'subject') {
+    const stat = subStats.find(s => s.sub === state.selSubject);
+    if (!stat) return;
+    const subStudents = [...students.filter(s => state.selSubject in s.s)].sort((a,b) => b.s[state.selSubject] - a.s[state.selSubject]);
+    
+    const ctxBar = document.getElementById('subBar');
+    if (ctxBar) {
+      chartInstances.push(new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+          labels: subStudents.map(s=>firstName(s.name)),
+          datasets: [{
+            label: 'Score',
+            data: subStudents.map(s=>s.s[state.selSubject]),
+            backgroundColor: subStudents.map(s=>gradeColor(s.s[state.selSubject])),
+            borderRadius: 4
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { title: (ctx)=>subStudents[ctx[0].dataIndex].name } } }, scales: { y: { max: 100, beginAtZero: true, grid: { color: BDR } }, x: { grid: { display: false }, ticks: { font: { size: 8 } } } } }
+      }));
+    }
+
+    const ctxDist = document.getElementById('subDist');
+    if (ctxDist && !stat.isExcluded) {
+      const gs = ['A+','A','A-','B+','B','C+','C','D','E','F'];
+      const c = Object.fromEntries(gs.map(g=>[g,0]));
+      subStudents.forEach(s=>{ c[letterGrade(s.s[state.selSubject])]++; });
+      const dist = gs.filter(g=>c[g]>0).map(g=>({grade:g, count:c[g]}));
+
+      chartInstances.push(new Chart(ctxDist, {
+        type: 'bar',
+        data: {
+          labels: dist.map(d=>d.grade),
+          datasets: [{
+            data: dist.map(d=>d.count),
+            backgroundColor: dist.map(d=>gradeColorByLetter(d.grade)),
+            borderRadius: 4
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: BDR } }, x: { grid: { display: false } } } }
+      }));
+    }
+  }
+}
+
+// ─── GOOGLE SHEETS SYNC SYSTEM ───────────────────────────────────────────────
+window.openConfigModal = () => {
+  document.getElementById('configModal').style.display = 'flex';
+  document.getElementById('sheetUrlInput').value = state.sheetId && state.sheetId !== 'YOUR_GOOGLE_SHEET_ID_HERE' ? `https://docs.google.com/spreadsheets/d/${state.sheetId}/edit` : '';
+  updateShareableLinkUI();
+};
+
+window.closeConfigModal = () => {
+  document.getElementById('configModal').style.display = 'none';
+};
+
+function extractSheetId(input) {
+  const match = input.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  if (match) return match[1];
+  const clean = input.trim();
+  if (clean.length > 20 && !clean.includes('/')) return clean;
+  return null;
+}
+
+function updateShareableLinkUI() {
+  const container = document.getElementById('shareableLinkContainer');
+  const input = document.getElementById('shareableUrlInput');
+  if (state.sheetId && state.sheetId !== 'YOUR_GOOGLE_SHEET_ID_HERE') {
+    container.style.display = 'block';
+    const base = window.location.href.split('?')[0];
+    input.value = `${base}?sheetId=${state.sheetId}`;
+  } else {
+    container.style.display = 'none';
+  }
+}
+
+window.copyShareableUrl = () => {
+  const input = document.getElementById('shareableUrlInput');
+  input.select();
+  input.setSelectionRange(0, 99999);
+  try {
+    const success = document.execCommand('copy');
+    if (success) {
+      const fb = document.getElementById('copyFeedback');
+      fb.textContent = 'Copied shareable dashboard link!';
+      setTimeout(() => { fb.textContent = ''; }, 2000);
+    }
+  } catch (err) {
+    console.error('Copy failed', err);
+  }
+};
+
+window.connectGoogleSheet = async () => {
+  const inputVal = document.getElementById('sheetUrlInput').value;
+  const statusDiv = document.getElementById('connectionStatus');
+  
+  if (!inputVal.trim()) {
+    state.sheetId = '';
+    recalculateData([]);
+    statusDiv.style.display = 'block';
+    statusDiv.style.background = 'rgba(13,148,136,0.1)';
+    statusDiv.style.color = 'var(--teall)';
+    statusDiv.style.border = '1px solid var(--teal)';
+    statusDiv.textContent = 'Disconnected. App reset.';
+    updateShareableLinkUI();
+    
+    // Clear URL param gracefully
+    const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+    
+    render();
+    return;
+  }
+  
+  const id = extractSheetId(inputVal);
+  if (!id) {
+    statusDiv.style.display = 'block';
+    statusDiv.style.background = 'rgba(239,68,68,0.1)';
+    statusDiv.style.color = '#f87171';
+    statusDiv.style.border = '1px solid #ef4444';
+    statusDiv.textContent = 'Invalid address. Ensure your input contains a valid spreadsheet URL or ID.';
+    return;
+  }
+  
+  statusDiv.style.display = 'block';
+  statusDiv.style.background = 'rgba(250,204,21,0.1)';
+  statusDiv.style.color = '#facc15';
+  statusDiv.style.border = '1px solid #eab308';
+  statusDiv.textContent = 'Fetching tab "AR 1" starting at Row 2...';
+  
+  try {
+    const data = await fetchGoogleSheetData(id);
+    state.sheetId = id;
+    
+    recalculateData(data);
+    
+    statusDiv.style.background = 'rgba(16,185,129,0.1)';
+    statusDiv.style.color = '#34d399';
+    statusDiv.style.border = '1px solid #10b981';
+    statusDiv.textContent = `Success! Retrieved academic records for ${data.length} students.`;
+    
+    // Set query string parameter gracefully
+    const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?sheetId=${id}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+    
+    updateShareableLinkUI();
+    setTimeout(() => {
+      closeConfigModal();
+      render();
+    }, 1200);
+    
+  } catch (err) {
+    console.error(err);
+    statusDiv.style.background = 'rgba(239,68,68,0.1)';
+    statusDiv.style.color = '#f87171';
+    statusDiv.style.border = '1px solid #ef4444';
+    statusDiv.textContent = `Sync failed: ${err.message || 'Verify sheet sharing configuration.'}`;
+  }
+};
+
+async function fetchGoogleSheetData(sheetId) {
+  // Query only the "AR 1" tab, reading headers from row 2 (range A2:Z)
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=AR%201&range=A1:Z`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Connection failed. Check your internet connectivity or Sheet ID.");
+  const text = await res.text();
+  
+  const startIdx = text.indexOf('{');
+  const endIdx = text.lastIndexOf('}');
+  if (startIdx === -1 || endIdx === -1) {
+    throw new Error("Unable to parse Google Sheets response format.");
+  }
+  
+  const jsonStr = text.substring(startIdx, endIdx + 1);
+  const data = JSON.parse(jsonStr);
+  
+  if (data.status === 'error') {
+    throw new Error(data.errors?.[0]?.detailed_message || "Google Sheets returned an error. Verify that the sheet has a tab called 'AR 1'.");
+  }
+  
+  const cols = data.table.cols.map(c => c.label ? c.label.trim() : '');
+  const rows = data.table.rows.map(r => {
+    const obj = {};
+    if (r && r.c) {
+      r.c.forEach((cell, idx) => {
+        const colName = cols[idx];
+        if (colName) {
+          obj[colName] = cell ? cell.v : null;
+        }
+      });
+    }
+    return obj;
+  });
+  
+  return mapGoogleSheetData(rows);
+}
+
+function mapGoogleSheetData(rows) {
+  // Clean list of common summary/calculated names to filter them out of the student records
+  const excludedNames = [
+    'gpa', 'average', 'avg', 'mean', 'total', 'class average', 'class avg', 
+    'max', 'min', 'highest', 'lowest', 'percentage', 'percent', 'stdev', 'standard deviation'
+  ];
+
+  return rows.map(row => {
+    // Locate student name column dynamically (case-insensitive)
+    const nameKey = Object.keys(row).find(k => k.trim().toLowerCase() === 'name') || 'Name';
+    const name = row[nameKey] ? String(row[nameKey]).trim() : 'Unknown';
+    
+    const s = {};
+    SUBJECTS.forEach(sub => {
+      // Locate score values dynamically matching subject names
+      const subKey = Object.keys(row).find(k => k.trim().toUpperCase() === sub.toUpperCase());
+      if (subKey !== undefined && row[subKey] !== null && row[subKey] !== '') {
+        const val = Number(row[subKey]);
+        if (!isNaN(val)) {
+          s[sub] = val;
+        }
+      }
+    });
+    return { name, s };
+  }).filter(item => {
+    if (!item.name || item.name === 'Unknown' || Object.keys(item.s).length === 0) return false;
+    
+    // Explicitly ignore any rows representing summary values like "GPA" or "Class Avg"
+    const lowerName = item.name.toLowerCase();
+    const isSummaryRow = excludedNames.some(ex => 
+      lowerName === ex || 
+      lowerName.startsWith(ex + ' ') || 
+      lowerName.endsWith(' ' + ex)
+    );
+    return !isSummaryRow;
+  });
+}
+
+// ─── INITIALIZATION ONPAGE LOAD ──────────────────────────────────────────────
+window.onload = async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get('sheetId') || DEFAULT_SHEET_ID;
+  
+  if (id && id !== 'YOUR_GOOGLE_SHEET_ID_HERE') {
+    state.sheetId = id;
+    renderLoadingState("Syncing with live Google Sheet (AR 1)...");
+    try {
+      const data = await fetchGoogleSheetData(id);
+      recalculateData(data);
+      render();
+    } catch (err) {
+      console.error(err);
+      appLoadError = `Sync Failed: ${err.message || 'Check connection or share settings'}.`;
+      recalculateData([]);
+      render();
+    }
+  } else {
+    recalculateData([]);
+    render();
+  }
+};
+
+function renderLoadingState(msg) {
+  document.getElementById('root').innerHTML = `
+    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:60vh; text-align:center;">
+      <div style="border: 4px solid rgba(13,148,136,0.1); border-left-color: var(--teal); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+      <div style="font-size: 16px; font-weight:700; color:var(--text);">${msg}</div>
+      <div style="font-size: 12px; color:var(--muted); margin-top:8px;">Reading second tab "AR 1" starting from Row 2. Make sure configuration is shared as "Anyone with the link can view".</div>
+    </div>
+    <style>
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+  `;
+}
+
+</script>
+</body>
+</html>

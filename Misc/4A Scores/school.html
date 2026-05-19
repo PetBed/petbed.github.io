@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whole School Grade Book & Analytics</title>
+  <!-- Chart.js for high-fidelity animations and data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0a0f1e;
+      --card: #111827;
+      --card2: #1a2235;
+      --bdr: #1e3a5f;
+      --teal: #0d9488;
+      --teall: #2dd4bf;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --lite: #94a3b8;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      min-height: 100vh;
+      font-family: 'Trebuchet MS', sans-serif;
+      color: var(--text);
+      padding: 20px 24px;
+      box-sizing: border-box;
+    }
+    .cs {
+      background: var(--card);
+      border: 1px solid var(--bdr);
+      border-radius: 14px;
+      padding: 22px;
+    }
+    .lbl {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+    }
+    .tab-btn {
+      padding: 7px 18px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .sort-btn {
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: inherit;
+      transition: all 0.1s;
+    }
+    .subj-btn, .rank-btn {
+      padding: 6px 13px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: inherit;
+    }
+    select, input {
+      font-family: inherit;
+      outline: none;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--bdr);
+    }
+    .table-container { overflow-x: auto; }
+    .table-container::-webkit-scrollbar { height: 8px; }
+    .table-container::-webkit-scrollbar-track { background: var(--bg); }
+    .table-container::-webkit-scrollbar-thumb { background: var(--bdr); border-radius: 4px; }
+    
+    .chart-container { position: relative; width: 100%; height: 210px; }
+    .chart-container.large { height: 290px; }
+    .chart-container.medium { height: 240px; }
+    .chart-container.small { height: 160px; }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<!-- DEBUG LOG UI -->
+<div style="margin: 20px 24px; background:var(--card); border:1px solid var(--bdr); border-radius:8px; overflow:hidden;">
+  <div style="padding:10px 14px; background:var(--card2); display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleDebug()">
+    <span style="font-size:12px; font-weight:700; color:var(--muted);">🐛 Connection Debug Log</span>
+    <span id="debugToggleIcon" style="font-size:12px; color:var(--muted);">▼ Expand</span>
+  </div>
+  <div id="debugContent" style="display:none; padding:14px; max-height:250px; overflow-y:auto; font-family:monospace; font-size:11px; color:var(--lite); line-height:1.5;">
+  </div>
+</div>
+
+<!-- GOOGLE SHEETS SETTINGS MODAL -->
+<div id="configModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(10,15,30,0.85); backdrop-filter:blur(6px); z-index:1000; align-items:center; justify-content:center;">
+  <div class="cs" style="width:100%; max-width:540px; border-color:var(--teal); box-shadow: 0 10px 30px rgba(13,148,136,0.15); margin: 20px; max-height: 90vh; overflow-y: auto; box-sizing: border-box;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <h2 style="margin:0; font-size:18px; color:#f1f5f9; display:flex; align-items:center; gap:8px;">
+        <span>🌐</span> Connect School Google Sheet
+      </h2>
+      <button onclick="closeConfigModal()" style="background:none; border:none; color:var(--muted); font-size:24px; cursor:pointer; padding:0; line-height:1;">&times;</button>
+    </div>
+    
+    <p style="font-size:13px; color:var(--lite); line-height:1.5; margin-bottom:18px; margin-top:0;">
+      Dynamically import records for all grades and classrooms. The system instantly groups and maps your students, performance aggregates, and subject averages.
+    </p>
+    
+    <div style="margin-bottom:16px;">
+      <label class="lbl" style="display:block; margin-bottom:6px;">Google Sheets URL or Spreadsheet ID</label>
+      <input type="text" id="sheetUrlInput" placeholder="https://docs.google.com/spreadsheets/d/.../edit" style="width:100%; padding:10px 14px; background:var(--bg); border:1px solid var(--bdr); border-radius:8px; color:var(--text); font-family:inherit; font-size:13px; box-sizing:border-box;">
+    </div>
+    
+    <div id="connectionStatus" style="font-size:12px; margin-bottom:16px; padding:10px 14px; border-radius:8px; display:none; line-height:1.4;"></div>
+    
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-bottom:20px;">
+      <button onclick="closeConfigModal()" class="tab-btn" style="border:1px solid var(--bdr); background:transparent; color:var(--lite);">Close</button>
+      <button onclick="connectGoogleSheet()" class="tab-btn" style="border:1px solid var(--teal); background:var(--teal); color:#0f1923;">Connect & Sync</button>
+    </div>
+    
+    <div style="border-top:1px solid var(--bdr); padding-top:16px;">
+      <div class="lbl" style="margin-bottom:10px;">Spreadsheet Format Requirements:</div>
+      <ol style="font-size:12px; color:var(--muted); padding-left:18px; margin:0; display:flex; flex-direction:column; gap:8px; line-height:1.5;">
+        <li>Set up a sheet tab named exactly <b>School Scores</b>.</li>
+        <li>Row 1 must contain headers configured in the following positional order:</li>
+        <ul style="margin:4px 0; padding-left:18px;">
+          <li><b>Column 1:</b> Class (e.g., <code>4A</code>, <code>5A</code>, <code>4B</code>, <code>5B</code>)</li>
+          <li><b>Column 2:</b> Name (Student's Name)</li>
+          <li><b>Subsequent Columns:</b> Dynamic Subjects (e.g., <code>BM</code>, <code>BI</code>, <code>MATE</code>)</li>
+        </ul>
+        <li>The system automatically computes the student cohort (e.g., <i>Form 4</i> or <i>Form 5</i>) from the first character of the Class column value!</li>
+        <li>Set share permissions on Google Sheets to <b>"Anyone with the link can view"</b> before testing.</li>
+      </ol>
+    </div>
+
+    <!-- SHAREABLE LINKS -->
+    <div id="shareableLinkContainer" style="margin-top:20px; border-top:1px dashed var(--bdr); padding-top:16px; display:none;">
+      <div class="lbl" style="margin-bottom:6px;">🔗 Shareable Dashboard Link</div>
+      <p style="font-size:11px; color:var(--muted); margin-bottom:8px; line-height:1.4;">Anyone utilizing this customized link will open this dashboard with your live sheet connected:</p>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <input type="text" id="shareableUrlInput" readonly style="flex:1; padding:7px 10px; background:var(--bg); border:1px solid var(--bdr); border-radius:6px; color:var(--teall); font-size:11px; font-family:monospace;" onclick="this.select()">
+        <button onclick="copyShareableUrl()" class="sort-btn" style="border:1px solid var(--teal); background:var(--teal)15; color:var(--teall); padding:7px 14px;">Copy</button>
+      </div>
+      <span id="copyFeedback" style="display:block; font-size:10px; color:var(--teall); margin-top:4px; text-align:right;"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIGURATION ───────────────────────────────────────────────────────────
+// Replace with your Google Sheets ID to load automatically
+const DEFAULT_SHEET_ID = '';
+
+// ─── SUBJECTS & CONSTANTS ────────────────────────────────────────────────────
+let SUBJECTS = []; // Automatically populated dynamically from Google Sheets
+const EXCLUDED_FROM_STATS = ['PJK'];
+
+// Rich Offline Demo Data covering multiple cohorts and classes
+const DEMO_SCHOOL_DATA = [
+  // Class 4A (High Performers)
+  { name:'Aerith Chia Zhee Thon', grade:'Form 4', class:'4A', s:{ BM:82,BI:98,SEJ:76,MATE:93,FIZIK:73,KIMIA:71,BIO:88,'ADD MAT':71,PSV:85,PJK:72 }},
+  { name:'Anselm Wong Jing Ern', grade:'Form 4', class:'4A', s:{ BM:72,BI:98,SEJ:91,MATE:94,FIZIK:79,KIMIA:74,BIO:71,'ADD MAT':81,AKAUN:70,PJK:72 }},
+  { name:'Austin Hii Ong Yew', grade:'Form 4', class:'4A', s:{ BM:79,BI:88,SEJ:92,MATE:99,FIZIK:91,KIMIA:94,BIO:86,'ADD MAT':91,PJK:86 }},
+  { name:'Elisha Chai You Jin', grade:'Form 4', class:'4A', s:{ BM:67,BI:96,SEJ:81,MATE:92,FIZIK:67,KIMIA:89,BIO:74,'ADD MAT':66,PJK:84 }},
+  { name:'Jaynerson Joelee', grade:'Form 4', class:'4A', s:{ BM:81,BI:98,SEJ:96,MATE:92,FIZIK:80,KIMIA:88,BIO:84,'ADD MAT':81,EKONOMI:96,AKAUN:74,PJK:86 }},
+  
+  // Class 4B (Moderate Performers)
+  { name:'Ashley Tu Weng Qi', grade:'Form 4', class:'4B', s:{ BM:54,BI:65,SEJ:71,MATE:86,FIZIK:74,KIMIA:74,BIO:57,'ADD MAT':70,PSV:72,PJK:80 }},
+  { name:'Catherine Tay Qing Chen', grade:'Form 4', class:'4B', s:{ BM:45,BI:61,SEJ:41,MATE:70,FIZIK:33,KIMIA:44,BIO:15,'ADD MAT':19,PSV:68 }},
+  { name:'Chloe Lu Sze Ning', grade:'Form 4', class:'4B', s:{ BM:50,BI:71,SEJ:69,MATE:70,FIZIK:41,KIMIA:56,BIO:31,'ADD MAT':57 }},
+  { name:'Darren Ling Sing Yao', grade:'Form 4', class:'4B', s:{ BM:55,BI:96,SEJ:86,MATE:74,FIZIK:66,KIMIA:71,BIO:75,'ADD MAT':46,PJK:78 }},
+  
+  // Class 4C
+  { name:'Bethany Chin Chiew Hui', grade:'Form 4', class:'4C', s:{ BM:50,BI:74,SEJ:44,MATE:83,FIZIK:52,KIMIA:62,BIO:34,'ADD MAT':48,AKAUN:46,PJK:74 }},
+  { name:'Doris Ting Wei Shi', grade:'Form 4', class:'4C', s:{ BM:48,BI:63,SEJ:63,MATE:85,FIZIK:69,KIMIA:54,BIO:56,'ADD MAT':61,PJK:60 }},
+  { name:'Enosh Hii Shang Ze', grade:'Form 4', class:'4C', s:{ BM:51,BI:78,SEJ:66,MATE:84,FIZIK:81,KIMIA:76,BIO:66,'ADD MAT':63,PJK:62 }},
+  
+  // Class 5A (High Performers)
+  { name:'Allyson Yot Linton', grade:'Form 5', class:'5A', s:{ BM:83,BI:99,SEJ:93,MATE:86,FIZIK:79,KIMIA:79,BIO:72,'ADD MAT':61,EKONOMI:65,PJK:86 }},
+  { name:'Farerra Patrisyia Chong You Kim', grade:'Form 5', class:'5A', s:{ BM:73,BI:90,SEJ:94,MATE:91,FIZIK:75,KIMIA:89,BIO:84,'ADD MAT':66,PJK:88 }},
+  { name:'Kimberly Bong Wan Chew', grade:'Form 5', class:'5A', s:{ BM:76,BI:95,SEJ:99,MATE:81,FIZIK:77,KIMIA:91,BIO:90,'ADD MAT':60,PJK:86 }},
+  { name:'Ling Wen Yi', grade:'Form 5', class:'5A', s:{ BM:67,BI:80,SEJ:79,MATE:98,FIZIK:79,KIMIA:91,BIO:74,'ADD MAT':80,PJK:88 }},
+  
+  // Class 5B (Moderate Performers)
+  { name:'Natania Ijah Samuel', grade:'Form 5', class:'5B', s:{ BM:57,BI:93,SEJ:74,MATE:73,FIZIK:58,KIMIA:44,BIO:68,'ADD MAT':25,PJK:86 }},
+  { name:'Nicole Ting Yi Jun', grade:'Form 5', class:'5B', s:{ BM:56,BI:75,SEJ:56,MATE:80,FIZIK:75,KIMIA:81,BIO:51,'ADD MAT':65,PJK:64 }},
+  { name:'Qarin Raef Bin Azman', grade:'Form 5', class:'5B', s:{ BM:67,BI:90,SEJ:67,MATE:75,FIZIK:58,KIMIA:67,BIO:71,'ADD MAT':36,PJK:84 }}
+];
+
+function gradePoint(score) {
+  if (score === 'TH') return 9;
+  if (score >= 90) return 0; if (score >= 80) return 1; if (score >= 70) return 2;
+  if (score >= 65) return 3; if (score >= 60) return 4; if (score >= 55) return 5;
+  if (score >= 50) return 6; if (score >= 45) return 7; if (score >= 40) return 8;
+  return 9;
+}
+function letterGrade(score) {
+  if (score === 'TH') return 'TH';
+  if (score >= 90) return 'A+'; if (score >= 80) return 'A'; if (score >= 70) return 'A-';
+  if (score >= 65) return 'B+'; if (score >= 60) return 'B'; if (score >= 55) return 'C+';
+  if (score >= 50) return 'C'; if (score >= 45) return 'D'; if (score >= 40) return 'E';
+  return 'F';
+}
+function gradeColor(score) {
+  if (score === 'TH') return '#ef4444'; // Red for Absent (TH)
+  if (score >= 90) return '#10b981'; if (score >= 80) return '#34d399'; if (score >= 70) return '#a3e635';
+  if (score >= 65) return '#facc15'; if (score >= 60) return '#fb923c'; if (score >= 55) return '#fbbf24';
+  if (score >= 50) return '#f97316'; if (score >= 45) return '#f87171'; if (score >= 40) return '#ef4444';
+  return '#dc2626';
+}
+function gradeColorByLetter(letter) {
+  if (letter === 'N/A' || letter === '-') return '#334155';
+  if (letter === 'TH') return '#ef4444';
+  const m = {'A+':'#10b981','A':'#34d399','A-':'#a3e635','B+':'#facc15','B':'#fb923c','C+':'#fbbf24','C':'#f97316','D':'#f87171','E':'#ef4444','F':'#dc2626'};
+  return m[letter] || '#64748b';
+}
+function medalColor(i) { return i===0?'#f59e0b':i===1?'#94a3b8':i===2?'#b45309':'#1e293b'; }
+function firstName(name) { return name.split(' ')[0]; }
+
+const BG = '#0a0f1e', CARD = '#111827', CARD2 = '#1a2235', BDR = '#1e3a5f';
+const TEAL = '#0d9488', TEALL = '#2dd4bf', TEXT = '#e2e8f0', MUTED = '#64748b', LITE = '#94a3b8';
+
+// ─── STATE MANAGEMENT & COMPUTED DATA ────────────────────────────────────────
+let state = {
+  tab: 'dashboard',
+  selStudent: 0,
+  selSubject: 'BM',
+  selClass: 'All Classes',
+  selCohort: 'All Cohorts',
+  sbSort: 'gpa',
+  sheetId: ''
+};
+
+// Global variables initialized correctly before reference
+let students = [];
+let ranked = [];
+let classesList = [];
+let cohortsList = [];
+let classPerformance = [];
+let cohortPerformance = [];
+let subStats = [];
+let gradeDist = [];
+let schoolAvg = 0;
+let schoolGpa = 0;
+let passCount = 0;
+let appLoadError = '';
+let chartInstances = [];
+let rankMap = {};
+
+// ─── DEBUG LOGGER ────────────────────────────────────────────────────────
+function logDebug(msg, isError = false) {
+  console[isError ? 'error' : 'log'](msg);
+  const content = document.getElementById('debugContent');
+  if (content) {
+    const time = new Date().toLocaleTimeString();
+    const color = isError ? '#f87171' : 'var(--lite)';
+    content.innerHTML += `<div style="color:${color}; margin-bottom:4px;">[${time}] ${msg}</div>`;
+    content.scrollTop = content.scrollHeight;
+  }
+}
+
+window.toggleDebug = () => {
+  const content = document.getElementById('debugContent');
+  const icon = document.getElementById('debugToggleIcon');
+  if (content.style.display === 'none') {
+    content.style.display = 'block';
+    icon.textContent = '▲ Collapse';
+  } else {
+    content.style.display = 'none';
+    icon.textContent = '▼ Expand';
+  }
+};
+
+function recalculateData(sourceData) {
+  if (!sourceData || sourceData.length === 0) {
+    students = []; ranked = []; classesList = []; cohortsList = [];
+    classPerformance = []; cohortPerformance = []; subStats = []; gradeDist = [];
+    schoolAvg = 0; schoolGpa = 0; passCount = 0;
+    SUBJECTS = [];
+    return;
+  }
+
+  // Dynamically extract SUBJECTS based on all unique subject keys in the source data
+  const subSet = new Set();
+  sourceData.forEach(r => {
+    if(r.s) Object.keys(r.s).forEach(k => subSet.add(k));
+  });
+  SUBJECTS = Array.from(subSet);
+
+  // Fallback selected subject if the previous one is no longer in the list
+  if (!SUBJECTS.includes(state.selSubject) && SUBJECTS.length > 0) {
+    state.selSubject = SUBJECTS[0];
+  }
+
+  // Map and calculate individual student stats
+  students = sourceData.map(r => {
+    const subs = Object.keys(r.s);
+    const countedSubs = subs.filter(sub => !EXCLUDED_FROM_STATS.includes(sub));
+    
+    // Map values for computations, converting "TH" to 0 marks
+    const numericValsCounted = countedSubs.map(sub => r.s[sub] === 'TH' ? 0 : r.s[sub]);
+    
+    // Flag to determine if they didn't attend any academic exams, or took no valid subjects
+    const allTHOrEmpty = countedSubs.length === 0 || countedSubs.every(sub => r.s[sub] === 'TH');
+    
+    let avg = 0, gpa = 9, grade = 'N/A';
+    if (countedSubs.length > 0) {
+      avg = numericValsCounted.reduce((a,b)=>a+b,0) / countedSubs.length;
+      gpa = countedSubs.map(sub => {
+        const val = r.s[sub];
+        return val === 'TH' ? 9 : gradePoint(val);
+      }).reduce((a,b)=>a+b,0) / countedSubs.length;
+      grade = letterGrade(avg);
+    }
+    
+    return { 
+      ...r, 
+      gradeCohort: r.grade || 'N/A', 
+      classId: r.class || 'N/A', 
+      subs, 
+      countedSubs, 
+      avg, 
+      gpa, 
+      grade,
+      allTHOrEmpty
+    };
+  });
+
+  // Calculate unique Classes and Cohorts
+  classesList = [...new Set(students.map(s => s.classId))].sort();
+  cohortsList = [...new Set(students.map(s => s.gradeCohort))].sort();
+
+  // Sort overall student ranking (School-wide) - Sending allTHOrEmpty students to the absolute bottom
+  ranked = [...students].sort((a,b) => {
+    if (a.allTHOrEmpty && !b.allTHOrEmpty) return 1;
+    if (!a.allTHOrEmpty && b.allTHOrEmpty) return -1;
+    return a.gpa - b.gpa || b.avg - a.avg;
+  }).map((s,i)=>({...s,rank:i+1}));
+  rankMap = Object.fromEntries(ranked.map(s=>[s.name,s.rank]));
+
+  // Recalculate Class Performance Averages
+  classPerformance = classesList.map(cId => {
+    const cStudents = students.filter(s => s.classId === cId);
+    const avg = cStudents.reduce((a,s)=>a+s.avg,0)/cStudents.length;
+    const gpa = cStudents.reduce((a,s)=>a+s.gpa,0)/cStudents.length;
+    return { classId: cId, count: cStudents.length, avg, gpa };
+  }).sort((a,b) => a.gpa - b.gpa);
+
+  // Recalculate Cohort Performance Averages
+  cohortPerformance = cohortsList.map(cohort => {
+    const cStudents = students.filter(s => s.gradeCohort === cohort);
+    const avg = cStudents.reduce((a,s)=>a+s.avg,0)/cStudents.length;
+    const gpa = cStudents.reduce((a,s)=>a+s.gpa,0)/cStudents.length;
+    return { cohort, count: cStudents.length, avg, gpa };
+  }).sort((a,b) => a.gpa - b.gpa);
+
+  // Recalculate School-wide Subject Statistics (treating TH as 0 marks for stats)
+  subStats = SUBJECTS.map(sub => {
+    const scrs = students.filter(s=>sub in s.s).map(s=> s.s[sub] === 'TH' ? 0 : s.s[sub]);
+    if (!scrs.length) return null;
+    const isExcluded = EXCLUDED_FROM_STATS.includes(sub);
+    
+    if (isExcluded) {
+      return { sub, n:scrs.length, avg: null, max: Math.max(...scrs), min: Math.min(...scrs), pass: null, passRate: null, isExcluded };
+    }
+    
+    const avg = scrs.reduce((a,b)=>a+b,0)/scrs.length;
+    const pass = scrs.filter(s=>s>=40).length;
+    return { sub, n:scrs.length, avg, max:Math.max(...scrs), min:Math.min(...scrs), pass, passRate:pass/scrs.length*100, isExcluded };
+  }).filter(Boolean);
+
+  // School Grade Distribution (excluding physical/non-academic PJK, evaluating TH as F equivalent)
+  gradeDist = (() => {
+    const gs = ['A+','A','A-','B+','B','C+','C','D','E','F','TH'];
+    const c = Object.fromEntries(gs.map(g=>[g,0]));
+    students.forEach(s => s.countedSubs.forEach(sub => { 
+      const val = s.s[sub];
+      c[letterGrade(val)]++; 
+    }));
+    return gs.map(g=>({ grade:g, count:c[g] })).filter(item => item.grade !== 'TH'); // map TH visually as F in chart, or separate? We keep gs standard.
+  })();
+
+  const validStudents = students.filter(s => s.countedSubs.length > 0);
+  if (validStudents.length > 0) {
+    schoolAvg = validStudents.reduce((a,s)=>a+s.avg,0)/validStudents.length;
+    schoolGpa = validStudents.reduce((a,s)=>a+s.gpa,0)/validStudents.length;
+    passCount = validStudents.filter(s=>s.countedSubs.every(sub=>{
+      const val = s.s[sub];
+      return val !== 'TH' && val >= 40;
+    })).length;
+  } else {
+    schoolAvg = 0; schoolGpa = 0; passCount = 0;
+  }
+
+  if (state.selStudent >= students.length) {
+    state.selStudent = 0;
+  }
+}
+
+// ─── ACTION HANDLERS ─────────────────────────────────────────────────────────
+window.setTab = (id) => { state.tab = id; render(); };
+window.setSelStudent = (e) => { state.selStudent = Number(e.target.value); render(); };
+window.setSelSubject = (sub) => { state.selSubject = sub; render(); };
+window.setSelClassFilter = (e) => { state.selClass = e.target.value; render(); };
+window.setSelCohortFilter = (e) => { state.selCohort = e.target.value; render(); };
+window.setSbSort = (sort) => { state.sbSort = sort; render(); };
+window.setRankFor = (sub) => { state.rankFor = sub; render(); }; // Added missing setRankFor handler
+
+// ─── RENDERING ENGINE ────────────────────────────────────────────────────────
+function render() {
+  chartInstances.forEach(c => c.destroy());
+  chartInstances = [];
+  
+  let html = `
+    <!-- HEADER -->
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="color:var(--teal);font-size:10px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;margin-bottom:3px;">Academic Year 2026</div>
+        <h1 style="margin:0;font-size:30px;font-weight:800;color:#f1f5f9;letter-spacing:-0.02em;">Whole School Grade Book</h1>
+        <div style="color:var(--muted);font-size:13px;margin-top:4px; display:flex; align-items:center; gap:8px;">
+          <span>${students.length} enrollment &nbsp;·&nbsp; ${cohortsList.length} cohorts &nbsp;·&nbsp; ${classesList.length} classes</span>
+          ${state.sheetId ? `<span style="background:var(--teal)20; color:var(--teall); font-size:10px; padding:2px 8px; border-radius:50px; font-weight:700;">🟢 School Sheet Connected</span>` : '<span style="background:#eab30820; color:#facc15; font-size:10px; padding:2px 8px; border-radius:50px; font-weight:700;">📂 Local Demo Mode</span>'}
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button onclick="openConfigModal()" class="tab-btn" style="border:1px solid ${state.sheetId ? 'var(--teal)' : 'var(--bdr)'}; background:var(--card); color:${state.sheetId ? 'var(--teall)' : 'var(--lite)'}; display:flex; align-items:center; gap:6px;">
+          <span>🔗</span> Sync Google Sheet
+        </button>
+        ${[{label:'School Avg',val:schoolAvg.toFixed(1)},{label:'School GPA',val:schoolGpa.toFixed(2)},{label:'All-Pass count',val:passCount}].map(x=>`
+          <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:8px 14px;text-align:center;">
+            <div class="lbl" style="margin-bottom:2px;">${x.label}</div>
+            <div style="font-size:18px;font-weight:800;color:var(--teall);">${x.val}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- ERROR WARNING BANNER -->
+    ${renderErrorBanner()}
+
+    <!-- TABS -->
+    <div style="display:flex;gap:6px;margin-bottom:22px;flex-wrap:wrap;">
+      ${TABS.map(t=>`
+        <button onclick="setTab('${t.id}')" class="tab-btn" style="
+          border: 1px solid ${state.tab===t.id ? TEAL : BDR};
+          background: ${state.tab===t.id ? TEAL : CARD};
+          color: ${state.tab===t.id ? '#0f1923' : LITE};
+        ">${t.icon} ${t.label}</button>
+      `).join('')}
+    </div>
+  `;
+
+  if (students.length === 0) {
+    html += renderEmptyState();
+  } else {
+    if (state.tab === 'dashboard') html += renderDashboard();
+    if (state.tab === 'scoreboard') html += renderScoreboard();
+    if (state.tab === 'student') html += renderStudent();
+    if (state.tab === 'subject') html += renderSubject();
+    if (state.tab === 'rankings') html += renderRankings();
+  }
+
+  html += `
+    <div style="margin-top:28px;color:var(--muted);font-size:10px;text-align:center;letter-spacing:0.05em; line-height: 1.5;">
+      Whole School Portal · Academic Year 2026 · GPA Scale: A+(0) to F(9) · Lower GPA = Better<br>
+      <span style="opacity:0.7;">Note: PJK scores are displayed but completely excluded from all statistical averages and school GPA metrics.</span>
+    </div>
+  `;
+
+  document.getElementById('root').innerHTML = html;
+  if (students.length > 0) {
+    setTimeout(initCharts, 0);
+  }
+}
+
+function renderErrorBanner() {
+  if (!appLoadError) return '';
+  return `
+    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-sizing: border-box;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 16px;">⚠️</span>
+        <span style="font-size: 13px; color: #f87171; font-weight: 600;">${appLoadError}</span>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button onclick="openConfigModal()" class="sort-btn" style="border:1px solid #ef4444; background:#ef444415; color:#f87171;">Review Connection</button>
+        <button onclick="dismissErrorBanner()" style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:18px; font-weight:700;">&times;</button>
+      </div>
+    </div>
+  `;
+}
+
+window.dismissErrorBanner = () => { appLoadError = ''; render(); };
+
+function renderEmptyState() {
+  return `
+    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:50vh; text-align:center; padding: 40px;" class="cs">
+      <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+      <h3 style="margin:0 0 10px; color:#f1f5f9; font-size: 20px;">No Active Grade Book Loaded</h3>
+      <p style="color:var(--muted); font-size:13px; max-width:440px; margin:0 0 24px; line-height:1.6;">
+        To activate the dashboard, please enter your Google Spreadsheet URL in the configuration settings.
+      </p>
+      <button onclick="openConfigModal()" class="tab-btn" style="border: 1px solid var(--teal); background: var(--teal); color: #0f1923; padding: 10px 24px;">
+        🔗 Connect Google Spreadsheet
+      </button>
+    </div>
+  `;
+}
+
+// ─── DASHBOARD TAB ───────────────────────────────────────────────────────────
+function renderDashboard() {
+  const academicTotal = students.reduce((a,s)=>a+s.countedSubs.length,0);
+  const academicPass = students.reduce((a,s)=>a+s.countedSubs.filter(sub=> {
+    const val = s.s[sub];
+    return val !== 'TH' && val >= 40;
+  }).length,0);
+  const passRate = academicTotal > 0 ? (academicPass/academicTotal*100) : 0;
+
+  return `
+    <div>
+      <!-- TOP METRIC CARDS -->
+      <div class="grid-4" style="margin-bottom:16px;">
+        <div class="cs">
+          <div class="lbl">Enrollment</div>
+          <div style="font-size:24px; font-weight:800; color:var(--teall); margin-top:4px;">${students.length} Students</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:2px;">Across ${classesList.length} distinct classes</div>
+        </div>
+        <div class="cs">
+          <div class="lbl">Top Performing Class</div>
+          <div style="font-size:24px; font-weight:800; color:var(--teall); margin-top:4px;">Class ${classPerformance[0]?.classId || '-'}</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:2px;">GPA: ${classPerformance[0]?.gpa.toFixed(2) || 'N/A'} (Avg: ${classPerformance[0]?.avg.toFixed(1) || 'N/A'})</div>
+        </div>
+        <div class="cs">
+          <div class="lbl">Academic Pass Rate</div>
+          <div style="font-size:24px; font-weight:800; color:var(--teall); margin-top:4px;">${passRate.toFixed(1)}%</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:2px;">${academicPass} passes of ${academicTotal} entries</div>
+        </div>
+        <div class="cs">
+          <div class="lbl">Top Cohort</div>
+          <div style="font-size:24px; font-weight:800; color:var(--teall); margin-top:4px;">${cohortPerformance[0]?.cohort || '-'}</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:2px;">GPA: ${cohortPerformance[0]?.gpa.toFixed(2) || 'N/A'}</div>
+        </div>
+      </div>
+
+      <!-- ANALYTICAL CHARTS -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; flex-wrap:wrap;">
+        <div class="cs">
+          <div class="lbl" style="margin-bottom:14px;">School Grade Distribution (Academic)</div>
+          <div class="chart-container"><canvas id="schoolGradeDist"></canvas></div>
+        </div>
+        <div class="cs">
+          <div class="lbl" style="margin-bottom:14px;">Subject Performance Analytics</div>
+          <div class="chart-container"><canvas id="schoolSubjectStats"></canvas></div>
+        </div>
+      </div>
+
+      <!-- BOTTOM SECTIONS -->
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; flex-wrap:wrap;">
+        <!-- CLASS LEAGUE TABLE -->
+        <div class="cs">
+          <div class="lbl" style="margin-bottom:14px;">🏫 Class Performance Ranking</div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th style="padding:8px 10px; color:var(--muted); font-weight:700; text-align:left;">Rank</th>
+                  <th style="padding:8px 10px; color:var(--muted); font-weight:700; text-align:left;">Class</th>
+                  <th style="padding:8px 10px; color:var(--muted); font-weight:700; text-align:center;">Students</th>
+                  <th style="padding:8px 10px; color:var(--muted); font-weight:700; text-align:center;">Average Score</th>
+                  <th style="padding:8px 10px; color:var(--muted); font-weight:700; text-align:center;">GPA Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${classPerformance.map((c, i) => `
+                  <tr style="background:${i%2===0?'transparent':'var(--card2)'}">
+                    <td style="padding:8px 10px;"><span style="color:var(--muted);font-weight:700;">#${i+1}</span></td>
+                    <td style="padding:8px 10px; font-weight:700; color:var(--teall);">${c.classId}</td>
+                    <td style="padding:8px 10px; text-align:center;">${c.count}</td>
+                    <td style="padding:8px 10px; text-align:center; font-weight:700;">${c.avg.toFixed(1)}</td>
+                    <td style="padding:8px 10px; text-align:center;"><span style="padding:2px 8px; border-radius:6px; background:${gradeColorByLetter(letterGrade(c.avg))}20; color:${gradeColorByLetter(letterGrade(c.avg))}; font-weight:800;">${c.gpa.toFixed(2)}</span></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- COHORT SUMMARY -->
+        <div class="cs">
+          <div class="lbl" style="margin-bottom:14px;">🎓 Cohort Comparison</div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th style="padding:8px 10px; color:var(--muted); font-weight:700; text-align:left;">Cohort/Grade</th>
+                  <th style="padding:8px 10px; color:var(--muted); font-weight:700; text-align:center;">Total Students</th>
+                  <th style="padding:8px 10px; color:var(--muted); font-weight:700; text-align:center;">Average Score</th>
+                  <th style="padding:8px 10px; color:var(--muted); font-weight:700; text-align:center;">School GPA</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${cohortPerformance.map((c, i) => `
+                  <tr style="background:${i%2===0?'transparent':'var(--card2)'}">
+                    <td style="padding:10px; font-weight:700; color:var(--teall);">${c.cohort}</td>
+                    <td style="padding:10px; text-align:center;">${c.count}</td>
+                    <td style="padding:10px; text-align:center; font-weight:700;">${c.avg.toFixed(1)}</td>
+                    <td style="padding:10px; text-align:center;"><span style="padding:2px 8px; border-radius:6px; background:${gradeColorByLetter(letterGrade(c.avg))}20; color:${gradeColorByLetter(letterGrade(c.avg))}; font-weight:800;">${c.gpa.toFixed(2)}</span></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ─── SCOREBOARD TAB ──────────────────────────────────────────────────────────
+function renderScoreboard() {
+  // Apply reactive filters
+  let filtered = [...ranked];
+  if (state.selClass !== 'All Classes') {
+    filtered = filtered.filter(s => s.classId === state.selClass);
+  }
+  if (state.selCohort !== 'All Cohorts') {
+    filtered = filtered.filter(s => s.gradeCohort === state.selCohort);
+  }
+
+  // Sorting
+  if (state.sbSort === 'name') filtered.sort((a,b)=>a.name.localeCompare(b.name));
+  else if (state.sbSort === 'avg') filtered.sort((a,b)=> {
+    if (a.allTHOrEmpty && !b.allTHOrEmpty) return 1;
+    if (!a.allTHOrEmpty && b.allTHOrEmpty) return -1;
+    return b.avg-a.avg;
+  });
+  else if (state.sbSort === 'gpa') filtered.sort((a,b)=> {
+    if (a.allTHOrEmpty && !b.allTHOrEmpty) return 1;
+    if (!a.allTHOrEmpty && b.allTHOrEmpty) return -1;
+    return a.gpa-b.gpa || b.avg-a.avg;
+  });
+
+  return `
+    <div class="cs">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+        <div class="lbl" style="margin:0;">School Scoreboard</div>
+        
+        <!-- Cohort Filter -->
+        <select onchange="setSelCohortFilter(event)" style="background:var(--bg); border:1px solid var(--bdr); color:var(--text); border-radius:6px; padding:6px 12px; font-size:12px;">
+          <option value="All Cohorts">All Cohorts</option>
+          ${cohortsList.map(c => `<option value="${c}" ${state.selCohort===c?'selected':''}>${c}</option>`).join('')}
+        </select>
+
+        <!-- Class Filter -->
+        <select onchange="setSelClassFilter(event)" style="background:var(--bg); border:1px solid var(--bdr); color:var(--text); border-radius:6px; padding:6px 12px; font-size:12px;">
+          <option value="All Classes">All Classes</option>
+          ${classesList.map(c => `<option value="${c}" ${state.selClass===c?'selected':''}>Class ${c}</option>`).join('')}
+        </select>
+
+        <div style="display:flex;gap:4px;margin-left:auto; flex-wrap:wrap;">
+          ${[['rank','By Rank'],['name','By Name'],['avg','By Avg'],['gpa','By GPA']].map(([v,l])=>`
+            <button onclick="setSbSort('${v}')" class="sort-btn" style="
+              border: 1px solid ${state.sbSort===v ? TEAL : BDR};
+              background: ${state.sbSort===v ? TEAL : CARD};
+              color: ${state.sbSort===v ? '#0f1923' : MUTED};
+            ">${l}</button>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="table-container" style="max-height: 60vh; overflow-y: auto;">
+        <table style="font-size:11px;">
+          <thead style="position:sticky;top:0;z-index:10;background:var(--card);">
+            <tr>
+              <th style="text-align:left;padding:8px 10px;color:var(--muted);border-bottom:2px solid var(--bdr);font-weight:700;white-space:nowrap;position:sticky;left:0;z-index:11;background:var(--card);">Rank · Student</th>
+              <th style="padding:8px 6px;color:var(--muted);border-bottom:2px solid var(--bdr);font-weight:700;text-align:center;">Class</th>
+              ${SUBJECTS.map(s=>`<th style="padding:8px 6px;color:var(--muted);border-bottom:2px solid var(--bdr);font-weight:700;white-space:nowrap;min-width:45px;">${s}</th>`).join('')}
+              <th style="padding:8px 6px;color:var(--teall);border-bottom:2px solid var(--bdr);font-weight:800;">Avg</th>
+              <th style="padding:8px 6px;color:var(--teall);border-bottom:2px solid var(--bdr);font-weight:800;">GPA</th>
+              <th style="padding:8px 6px;color:var(--teall);border-bottom:2px solid var(--bdr);font-weight:800;">Grade</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filtered.map((s,idx)=>`
+              <tr style="background:${idx%2===0?'transparent':'var(--card2)'}">
+                <td style="padding:6px 10px;font-weight:600;white-space:nowrap;position:sticky;left:0;background:${idx%2===0?'var(--card)':'var(--card2)'};z-index:1;">
+                  <span style="color:var(--muted);margin-right:6px;font-size:10px;">#${s.rank}</span>${s.name}
+                </td>
+                <td style="padding:6px; text-align:center; color:var(--lite); font-weight:700;">${s.classId}</td>
+                ${SUBJECTS.map(sub=>`
+                  <td style="padding:6px 5px;text-align:center;">
+                    ${s.s[sub] !== undefined 
+                      ? `<span style="display:inline-block;padding:2px 5px;border-radius:4px;background:${gradeColor(s.s[sub])}25;color:${gradeColor(s.s[sub])};font-weight:700;">${s.s[sub]}</span>` 
+                      : `<span style="color:var(--bdr);">—</span>`}
+                  </td>
+                `).join('')}
+                <td style="padding:6px;text-align:center;font-weight:800;color:var(--teall);">${s.allTHOrEmpty ? '0.0' : s.avg.toFixed(1)}</td>
+                <td style="padding:6px;text-align:center;font-weight:800;color:var(--teall);">${s.gpa.toFixed(2)}</td>
+                <td style="padding:6px;text-align:center;">
+                  <span style="padding:2px 8px;border-radius:5px;background:${gradeColorByLetter(s.grade)};color:#0f1923;font-weight:800;font-size:11px;">${s.grade}</span>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+// ─── STUDENT DETAIL VIEW ─────────────────────────────────────────────────────
+function renderStudent() {
+  const student = students[state.selStudent];
+  if (!student) return '';
+  const rank = rankMap[student.name] || '-';
+  const subEntries = SUBJECTS.filter(sub => sub in student.s);
+  
+  const countedScores = student.countedSubs.map(sub => student.s[sub] === 'TH' ? 0 : student.s[sub]);
+  const best = countedScores.length ? Math.max(...countedScores) : '-';
+  const worst = countedScores.length ? Math.min(...countedScores) : '-';
+
+  return `
+    <div>
+      <div style="margin-bottom:18px;">
+        <div class="lbl" style="margin-bottom:8px;">Search / Select Student</div>
+        <select onchange="setSelStudent(event)" style="background:var(--card);border:1px solid var(--bdr);color:var(--text);border-radius:9px;padding:9px 14px;font-size:13px;width:100%;max-width:400px;">
+          ${students.map((s,i)=>`<option value="${i}" ${state.selStudent===i?'selected':''}>${s.name} (${s.classId})</option>`).join('')}
+        </select>
+      </div>
+      
+      <div class="cs" style="margin-bottom:16px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+        <div style="width:64px;height:64px;border-radius:50%;background:${TEAL}22;border:2px solid ${TEAL};display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:${TEAL};flex-shrink:0;">
+          ${student.name.charAt(0)}
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:19px;font-weight:800;">${student.name}</div>
+          <div style="color:var(--muted);font-size:12px;margin-top:3px;">
+            Cohort: <b style="color:var(--lite);">${student.gradeCohort}</b> &nbsp;·&nbsp; 
+            Classroom: <b style="color:var(--teall);">${student.classId}</b> &nbsp;·&nbsp; 
+            School Rank: <b style="color:var(--teall);">#${rank}</b> of ${students.length}
+          </div>
+        </div>
+        ${[{l:'Avg Score',v:student.allTHOrEmpty ? '0.0' : student.avg.toFixed(1)},{l:'GPA',v:student.gpa.toFixed(2)},{l:'Grade',v:student.grade,isBadge:true}].map(x=>`
+          <div style="text-align:center;">
+            <div class="lbl">${x.l}</div>
+            ${x.isBadge
+              ? `<span style="display:inline-block;margin-top:4px;padding:5px 18px;border-radius:8px;background:${gradeColorByLetter(x.v)};color:#0f1923;font-size:24px;font-weight:800;">${x.v}</span>`
+              : `<div style="font-size:28px;font-weight:800;color:var(--teall);margin-top:4px;">${x.v}</div>`}
+          </div>
+        `).join('')}
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="cs">
+          <div class="lbl" style="margin-bottom:14px;">Subject Breakdown</div>
+          <div style="display:flex;flex-direction:column;gap:9px;">
+            ${subEntries.map(sub=>{
+              const score = student.s[sub];
+              const lg = letterGrade(score);
+              const gp = gradePoint(score);
+              const isExcluded = EXCLUDED_FROM_STATS.includes(sub);
+              const scorePct = score === 'TH' ? 0 : score;
+              return `
+                <div style="display:flex;align-items:center;gap:8px;opacity:${isExcluded ? '0.6':'1'};">
+                  <div style="width:68px;color:var(--muted);font-size:11px;font-weight:700;flex-shrink:0;">${sub}${isExcluded?'*':''}</div>
+                  <div style="flex:1;background:#0a0f1e;border-radius:4px;height:16px;overflow:hidden;">
+                    <div style="width:${scorePct}%;height:100%;background:${gradeColor(score)};border-radius:4px;transition:width 0.4s;"></div>
+                  </div>
+                  <div style="width:28px;text-align:right;font-weight:800;font-size:12px;color:${gradeColor(score)};">${score}</div>
+                  <span style="width:28px;text-align:center;padding:1px 5px;border-radius:4px;background:${isExcluded?'transparent':gradeColor(score)+'22'};color:${isExcluded?'var(--muted)':gradeColor(score)};font-size:10px;font-weight:800;">${isExcluded?'-':lg}</span>
+                  <span style="width:14px;text-align:center;color:var(--muted);font-size:10px;">${isExcluded?'-':gp}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;color:var(--muted);font-size:11px;">
+            <span>Best Academic: <b style="color:var(--teall);">${best}</b></span>
+            <span>Worst Academic: <b style="color:#f87171;">${worst}</b></span>
+            <span>GPA Score: <b style="color:var(--teall);">${student.gpa.toFixed(2)}</b></span>
+          </div>
+        </div>
+        <div class="cs">
+          <div class="lbl" style="margin-bottom:14px;">Subject Performance Radar</div>
+          <div class="chart-container large"><canvas id="stuRadar"></canvas></div>
+        </div>
+      </div>
+
+      <div class="cs" style="margin-top:16px;">
+        <div class="lbl" style="margin-bottom:14px;">Student Score vs Class Average vs School Average</div>
+        <div class="chart-container"><canvas id="stuSchoolVsClass"></canvas></div>
+      </div>
+    </div>
+  `;
+}
+
+// ─── SUBJECT TAB ─────────────────────────────────────────────────────────────
+function renderSubject() {
+  const stat = subStats.find(s => s.sub === state.selSubject);
+  
+  const headerHtml = `
+    <div style="margin-bottom:18px;">
+      <div class="lbl" style="margin-bottom:10px;">Select Subject</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${SUBJECTS.map(sub=>{
+          const hasSub = students.some(s=>sub in s.s);
+          if(!hasSub) return '';
+          return `<button onclick="setSelSubject('${sub}')" class="subj-btn" style="
+            border: 1px solid ${state.selSubject===sub ? TEAL : BDR};
+            background: ${state.selSubject===sub ? TEAL : CARD};
+            color: ${state.selSubject===sub ? '#0f1923' : LITE};
+          ">${sub}</button>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+
+  if (!stat) return headerHtml + `<div style="color:var(--muted);">No data.</div>`;
+
+  const subStudents = [...students.filter(s => state.selSubject in s.s)].sort((a,b) => {
+    const valA = a.s[state.selSubject] === 'TH' ? 0 : a.s[state.selSubject];
+    const valB = b.s[state.selSubject] === 'TH' ? 0 : b.s[state.selSubject];
+    return valB - valA;
+  });
+  
+  return headerHtml + `
+    <div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:16px;">
+        ${[
+          {l:'Students', v:stat.n},
+          {l:'Average', v:stat.avg !== null ? stat.avg.toFixed(1) : 'N/A'},
+          {l:'Highest', v:stat.max},
+          {l:'Lowest', v:stat.min},
+          {l:'Pass Count', v:stat.pass !== null ? stat.pass : 'N/A'},
+          {l:'Pass Rate', v:stat.passRate !== null ? stat.passRate.toFixed(0)+'%' : 'N/A'},
+          {l:'School Grade', v:stat.avg !== null ? letterGrade(stat.avg) : 'N/A', isBadge:true},
+        ].map(c=>`
+          <div class="cs">
+            <div class="lbl">${c.l}</div>
+            ${c.isBadge
+              ? `<span style="display:inline-block;margin-top:4px;padding:2px 12px;border-radius:6px;background:${gradeColorByLetter(c.v)};color:#0f1923;font-size:22px;font-weight:800;">${c.v}</span>`
+              : `<div style="font-size:22px;font-weight:800;color:var(--teall);margin-top:4px;">${c.v}</div>`}
+          </div>
+        `).join('')}
+      </div>
+
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;">
+        <div class="cs">
+          <div class="lbl" style="margin-bottom:14px;">Class Performance Comparison — ${state.selSubject}</div>
+          <div class="chart-container medium"><canvas id="subClassBar"></canvas></div>
+        </div>
+        <div class="cs">
+          <div class="lbl" style="margin-bottom:14px;">Grade Distribution — ${state.selSubject}</div>
+          ${stat.isExcluded 
+            ? `<div style="height:240px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;">Grades not applicable for ${stat.sub}</div>`
+            : `<div class="chart-container medium"><canvas id="subGradeDist"></canvas></div>`
+          }
+        </div>
+      </div>
+
+      <div class="cs">
+        <div class="lbl" style="margin-bottom:14px;">School rankings for ${state.selSubject}</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:6px;">
+          ${subStudents.slice(0, 15).map((s,i)=>{
+            const score = s.s[state.selSubject];
+            return `
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:${i%2===0?'transparent':'var(--card2)'};border-radius:8px;">
+                <div style="width:26px;height:26px;border-radius:50%;background:${medalColor(i)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:${i<3?'#0f1923':'var(--muted)'};flex-shrink:0;">${i+1}</div>
+                <div style="flex:1;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name} <span style="font-size:10px;color:var(--muted);">(${s.classId})</span></div>
+                <span style="padding:2px 7px;border-radius:4px;background:${gradeColor(score)}25;color:${gradeColor(score)};font-weight:800;font-size:12px;">${score}</span>
+                <span style="width:22px;text-align:center;color:${stat.isExcluded ? 'var(--muted)' : gradeColor(score)};font-size:10px;font-weight:800;">${stat.isExcluded ? '-' : letterGrade(score)}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ─── RANKINGS TAB ────────────────────────────────────────────────────────────
+function renderRankings() {
+  const rankingOptions = ['overall', ...SUBJECTS.filter(sub=>students.some(s=>sub in s.s))];
+  
+  let listHtml = '';
+  if (state.rankFor === 'overall') {
+    listHtml = `
+      <div class="lbl" style="margin-bottom:14px;">School-wide Student Standings (Ranked by School GPA, then Class Average)</div>
+      ${ranked.map((s,i)=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:${i<3?TEAL+'0d':'transparent'};border-radius:10px;border:1px solid ${i<3?TEAL+'33':'transparent'};margin-bottom:4px;">
+          <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;background:${medalColor(i)};color:${i<3?'#0f1923':'var(--muted)'};flex-shrink:0;">${i+1}</div>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:13px;">${s.name}</div>
+            <div style="color:var(--muted);font-size:10px;margin-top:2px;">Grade: ${s.gradeCohort} · Class: <span style="color:var(--teall); font-weight:700;">${s.classId}</span></div>
+          </div>
+          <div style="text-align:right;min-width:60px;">
+            <div style="color:var(--muted);font-size:10px;">Avg Score</div>
+            <div style="font-weight:800;color:var(--teall);">${s.allTHOrEmpty ? '0.0' : s.avg.toFixed(1)}</div>
+          </div>
+          <div style="text-align:right;min-width:50px;">
+            <div style="color:var(--muted);font-size:10px;">School GPA</div>
+            <div style="font-weight:800;color:var(--teall);">${s.gpa.toFixed(2)}</div>
+          </div>
+          <span style="padding:4px 12px;border-radius:7px;background:${gradeColorByLetter(s.grade)};color:#0f1923;font-weight:800;font-size:12px;">${s.grade}</span>
+        </div>
+      `).join('')}
+    `;
+  } else {
+    const isExcluded = EXCLUDED_FROM_STATS.includes(state.rankFor);
+    const list = [...students.filter(s=>state.rankFor in s.s)].sort((a,b)=> {
+      const scoreA = a.s[state.rankFor] === 'TH' ? 0 : a.s[state.rankFor];
+      const scoreB = b.s[state.rankFor] === 'TH' ? 0 : b.s[state.rankFor];
+      return scoreB - scoreA;
+    });
+    listHtml = `
+      <div class="lbl" style="margin-bottom:14px;">Rankings for ${state.rankFor} (highest score first)</div>
+      ${list.map((s,i)=>{
+        const score = s.s[state.rankFor];
+        const scorePct = score === 'TH' ? 0 : score;
+        return `
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:${i<3?TEAL+'0d':'transparent'};border-radius:10px;border:1px solid ${i<3?TEAL+'33':'transparent'};margin-bottom:4px;">
+            <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;background:${medalColor(i)};color:${i<3?'#0f1923':'var(--muted)'};flex-shrink:0;">${i+1}</div>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:13px;">${s.name}</div>
+              <div style="color:var(--muted);font-size:10px;margin-top:2px;">Cohort: ${s.gradeCohort} · Class: ${s.classId}</div>
+            </div>
+            <div style="width:140px;background:var(--bg);border-radius:4px;height:12px;overflow:hidden;">
+              <div style="width:${scorePct}%;height:100%;background:${gradeColor(score)};border-radius:4px;"></div>
+            </div>
+            <div style="font-weight:800;color:${gradeColor(score)};min-width:28px;text-align:right;">${score}</div>
+            <span style="padding:2px 10px;border-radius:6px;background:${isExcluded?'transparent':gradeColor(score)+'25'};color:${isExcluded?'var(--muted)':gradeColor(score)};font-weight:800;font-size:12px;">${isExcluded?'-':letterGrade(score)}</span>
+          </div>
+        `;
+      }).join('')}
+    `;
+  }
+
+  return `
+    <div>
+      <div style="margin-bottom:18px;">
+        <div class="lbl" style="margin-bottom:10px;">Select Ranking Target</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          ${rankingOptions.map(sub=>`
+            <button onclick="setRankFor('${sub}')" class="rank-btn" style="
+              border: 1px solid ${state.rankFor===sub ? TEAL : BDR};
+              background: ${state.rankFor===sub ? TEAL : CARD};
+              color: ${state.rankFor===sub ? '#0f1923' : LITE};
+            ">${sub==='overall'?'🏆 School overall':sub}</button>
+          `).join('')}
+        </div>
+      </div>
+      <div class="cs">${listHtml}</div>
+    </div>
+  `;
+}
+
+// ─── CHART INITIALIZATION ────────────────────────────────────────────────────
+function initCharts() {
+  if (students.length === 0) return;
+
+  if (state.tab === 'dashboard') {
+    // Grade Dist
+    const ctxGD = document.getElementById('schoolGradeDist');
+    if (ctxGD) {
+      chartInstances.push(new Chart(ctxGD, {
+        type: 'bar',
+        data: {
+          labels: gradeDist.map(d=>d.grade),
+          datasets: [{
+            data: gradeDist.map(d=>d.count),
+            backgroundColor: gradeDist.map(d=>gradeColorByLetter(d.grade)),
+            borderRadius: 5
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: BDR } }, x: { grid: { display: false } } } }
+      }));
+    }
+
+    // Subject Performance Analytics
+    const dashStats = subStats.filter(s => !s.isExcluded);
+    const ctxSS = document.getElementById('schoolSubjectStats');
+    if (ctxSS) {
+      chartInstances.push(new Chart(ctxSS, {
+        type: 'bar',
+        data: {
+          labels: dashStats.map(s=>s.sub),
+          datasets: [{
+            data: dashStats.map(s=>s.avg),
+            backgroundColor: dashStats.map(s=>gradeColor(s.avg)),
+            borderRadius: 5
+          }]
+        },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { max: 100, beginAtZero: true, grid: { color: BDR } }, y: { grid: { display: false } } } }
+      }));
+    }
+
+    // Pie chart
+    const ctxPie = document.getElementById('dashPie');
+    if (ctxPie) {
+      const total = students.reduce((a,s)=>a+s.countedSubs.length,0);
+      const pass = students.reduce((a,s)=>a+s.countedSubs.filter(sub=> {
+        const val = s.s[sub];
+        return val !== 'TH' && val >= 40;
+      }).length,0);
+      chartInstances.push(new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+          labels: ['Pass (≥40)', 'Fail (<40)'],
+          datasets: [{
+            data: [pass, total-pass],
+            backgroundColor: [TEAL, '#ef4444'],
+            borderWidth: 0
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } } }
+      }));
+    }
+  }
+
+  if (state.tab === 'student') {
+    const student = students[state.selStudent];
+    const chartSubEntries = SUBJECTS.filter(sub => sub in student.s && !EXCLUDED_FROM_STATS.includes(sub));
+    
+    const ctxRad = document.getElementById('stuRadar');
+    if (ctxRad) {
+      chartInstances.push(new Chart(ctxRad, {
+        type: 'radar',
+        data: {
+          labels: chartSubEntries,
+          datasets: [{
+            label: student.name,
+            data: chartSubEntries.map(sub=> student.s[sub] === 'TH' ? 0 : student.s[sub]),
+            backgroundColor: TEAL + '40',
+            borderColor: TEAL,
+            pointBackgroundColor: TEAL,
+            borderWidth: 2
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { r: { min: 0, max: 100, ticks: { maxTicksLimit: 5, backdropColor: 'transparent', color: MUTED }, grid: { color: BDR }, angleLines: { color: BDR }, pointLabels: { color: LITE, font: { size: 9 } } } } }
+      }));
+    }
+
+    const ctxVs = document.getElementById('stuSchoolVsClass');
+    if (ctxVs) {
+      chartInstances.push(new Chart(ctxVs, {
+        type: 'bar',
+        data: {
+          labels: chartSubEntries,
+          datasets: [
+            { label: student.name, data: chartSubEntries.map(sub=> student.s[sub] === 'TH' ? 0 : student.s[sub]), backgroundColor: TEAL, borderRadius: 4 },
+            { label: `Class ${student.classId} Avg`, data: chartSubEntries.map(sub=>{
+              const classStuds = students.filter(s => s.classId === student.classId && sub in s.s);
+              return classStuds.length ? classStuds.reduce((a,s)=> {
+                const val = s.s[sub];
+                return a + (val === 'TH' ? 0 : val);
+              },0)/classStuds.length : 0;
+            }), backgroundColor: '#475569', borderRadius: 4 },
+            { label: 'School Average', data: chartSubEntries.map(sub=>{
+              const sStat = subStats.find(s=>s.sub===sub);
+              return sStat && sStat.avg !== null ? sStat.avg : 0;
+            }), backgroundColor: '#1e293b', borderRadius: 4 }
+          ]
+          
+        },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { max: 100, beginAtZero: true, grid: { color: BDR } }, x: { grid: { display: false } } } }
+      }));
+    }
+  }
+
+  if (state.tab === 'subject') {
+    const stat = subStats.find(s => s.sub === state.selSubject);
+    if (!stat) return;
+    
+    // Class Performance for target Subject
+    const cAvgs = classesList.map(cId => {
+      const clsStuds = students.filter(s => s.classId === cId && state.selSubject in s.s);
+      const avg = clsStuds.length ? clsStuds.reduce((a,s)=> {
+        const val = s.s[state.selSubject];
+        return a + (val === 'TH' ? 0 : val);
+      },0)/clsStuds.length : 0;
+      return { classId: cId, avg };
+    });
+
+    const ctxBar = document.getElementById('subClassBar');
+    if (ctxBar) {
+      chartInstances.push(new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+          labels: cAvgs.map(c=>`Class ${c.classId}`),
+          datasets: [{
+            data: cAvgs.map(c=>c.avg),
+            backgroundColor: cAvgs.map(c=>gradeColor(c.avg)),
+            borderRadius: 4
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { max: 100, beginAtZero: true, grid: { color: BDR } }, x: { grid: { display: false } } } }
+      }));
+    }
+
+    const ctxDist = document.getElementById('subGradeDist');
+    if (ctxDist && !stat.isExcluded) {
+      const gs = ['A+','A','A-','B+','B','C+','C','D','E','F'];
+      const c = Object.fromEntries(gs.map(g=>[g,0]));
+      const subStudents = students.filter(s => state.selSubject in s.s);
+      subStudents.forEach(s=>{ 
+        const val = s.s[state.selSubject];
+        const gradeLetter = letterGrade(val);
+        // Map TH cases to F on this breakdown distribution
+        if (gradeLetter === 'TH') {
+          c['F']++;
+        } else {
+          c[gradeLetter]++; 
+        }
+      });
+      const dist = gs.filter(g=>c[g]>0).map(g=>({grade:g, count:c[g]}));
+
+      chartInstances.push(new Chart(ctxDist, {
+        type: 'bar',
+        data: {
+          labels: dist.map(d=>d.grade),
+          datasets: [{
+            data: dist.map(d=>d.count),
+            backgroundColor: dist.map(d=>gradeColorByLetter(d.grade)),
+            borderRadius: 4
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: BDR } }, x: { grid: { display: false } } } }
+      }));
+    }
+  }
+}
+
+// ─── GOOGLE SHEETS SYNC SYSTEM ───────────────────────────────────────────────
+window.openConfigModal = () => {
+  document.getElementById('configModal').style.display = 'flex';
+  document.getElementById('sheetUrlInput').value = state.sheetId && state.sheetId !== 'YOUR_GOOGLE_SHEET_ID_HERE' ? `https://docs.google.com/spreadsheets/d/${state.sheetId}/edit` : '';
+  updateShareableLinkUI();
+};
+
+window.closeConfigModal = () => {
+  document.getElementById('configModal').style.display = 'none';
+};
+
+function extractSheetId(input) {
+  const match = input.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  if (match) return match[1];
+  const clean = input.trim();
+  if (clean.length > 20 && !clean.includes('/')) return clean;
+  return null;
+}
+
+function updateShareableLinkUI() {
+  const container = document.getElementById('shareableLinkContainer');
+  const input = document.getElementById('shareableUrlInput');
+  if (state.sheetId) {
+    container.style.display = 'block';
+    const base = window.location.href.split('?')[0];
+    input.value = `${base}?sheetId=${state.sheetId}`;
+  } else {
+    container.style.display = 'none';
+  }
+}
+
+window.copyShareableUrl = () => {
+  const input = document.getElementById('shareableUrlInput');
+  input.select();
+  input.setSelectionRange(0, 99999);
+  try {
+    const success = document.execCommand('copy');
+    if (success) {
+      const fb = document.getElementById('copyFeedback');
+      fb.textContent = 'Copied shareable dashboard link!';
+      setTimeout(() => { fb.textContent = ''; }, 2000);
+    }
+  } catch (err) {
+    console.error('Copy failed', err);
+  }
+};
+
+window.connectGoogleSheet = async () => {
+  const inputVal = document.getElementById('sheetUrlInput').value;
+  const statusDiv = document.getElementById('connectionStatus');
+  
+  logDebug(`Attempting connection with input: "${inputVal}"`);
+  
+  if (!inputVal.trim()) {
+    state.sheetId = '';
+    recalculateData(DEMO_SCHOOL_DATA);
+    statusDiv.style.display = 'block';
+    statusDiv.style.background = 'rgba(13,148,136,0.1)';
+    statusDiv.style.color = 'var(--teall)';
+    statusDiv.style.border = '1px solid var(--teal)';
+    statusDiv.textContent = 'Disconnected. Returned back to offline school dataset.';
+    updateShareableLinkUI();
+    
+    // Clear URL params gracefully
+    const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+    
+    render();
+    return;
+  }
+  
+  const id = extractSheetId(inputVal);
+  if (!id) {
+    statusDiv.style.display = 'block';
+    statusDiv.style.background = 'rgba(239,68,68,0.1)';
+    statusDiv.style.color = '#f87171';
+    statusDiv.style.border = '1px solid #ef4444';
+    statusDiv.textContent = 'Invalid ID. Make sure it contains a valid spreadsheet URL.';
+    return;
+  }
+  
+  statusDiv.style.display = 'block';
+  statusDiv.style.background = 'rgba(250,204,21,0.1)';
+  statusDiv.style.color = '#facc15';
+  statusDiv.style.border = '1px solid #eab308';
+  statusDiv.textContent = 'Connecting and fetching tab "School Scores" starting from row 1...';
+  
+  try {
+    logDebug(`Initiating fetch for Sheet ID: ${id}...`);
+    const data = await fetchGoogleSheetData(id);
+    state.sheetId = id;
+    
+    logDebug(`Successfully mapped ${data.length} records. Updating UI...`);
+    recalculateData(data);
+    
+    statusDiv.style.background = 'rgba(16,185,129,0.1)';
+    statusDiv.style.color = '#34d399';
+    statusDiv.style.border = '1px solid #10b981';
+    statusDiv.textContent = `Success! Parsed ${data.length} student records from Google Sheet.`;
+    
+    const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?sheetId=${id}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+    
+    updateShareableLinkUI();
+    setTimeout(() => {
+      closeConfigModal();
+      render();
+    }, 1200);
+    
+  } catch (err) {
+    console.error(err);
+    logDebug(`Connection/Parse Error: ${err.message}`, true);
+    statusDiv.style.background = 'rgba(239,68,68,0.1)';
+    statusDiv.style.color = '#f87171';
+    statusDiv.style.border = '1px solid #ef4444';
+    statusDiv.textContent = `Sync failed: ${err.message || 'Make sure sheet is shared publicly.'}`;
+  }
+};
+
+async function fetchGoogleSheetData(sheetId) {
+  // Query "School Scores" tab explicitly parsing the first row as headers, reading all row data below it
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=School%20Scores&headers=1`;
+  logDebug(`Request URL: ${url}`);
+  
+  const res = await fetch(url);
+  if (!res.ok) {
+    logDebug(`Network response was not ok (Status: ${res.status})`, true);
+    throw new Error("Connection failed. Check Sheet ID and network status.");
+  }
+  
+  const text = await res.text();
+  logDebug(`Received response from Google API (${text.length} characters).`);
+  
+  const startIdx = text.indexOf('{');
+  const endIdx = text.lastIndexOf('}');
+  if (startIdx === -1 || endIdx === -1) {
+    logDebug(`Failed to locate JSON boundaries in response text.`, true);
+    throw new Error("Invalid response format.");
+  }
+  
+  const jsonStr = text.substring(startIdx, endIdx + 1);
+  const data = JSON.parse(jsonStr);
+  
+  if (data.status === 'error') {
+    logDebug(`Google API reported an error: ${JSON.stringify(data.errors)}`, true);
+    throw new Error(data.errors?.[0]?.detailed_message || "Google Sheets returned an error. Ensure a tab named 'School Scores' exists.");
+  }
+  
+  logDebug(`Successfully parsed raw data from Google API.`);
+  return mapGoogleSheetData(data.table.rows, data.table.cols);
+}
+
+function mapGoogleSheetData(rawRows, rawCols) {
+  const excludedNames = [
+    'gpa', 'average', 'avg', 'mean', 'total', 'class average', 'class avg', 'school average', 'school avg',
+    'max', 'min', 'highest', 'lowest', 'percentage', 'percent', 'stdev', 'standard deviation'
+  ];
+
+  // Extract raw column headers
+  const cleanedCols = rawCols.map(c => c && c.label ? String(c.label).trim() : '');
+  
+  const classColHeader = cleanedCols[0] || 'Column 1 (Class)';
+  const nameColHeader = cleanedCols[1] || 'Column 2 (Name)';
+
+  // Extract subject names dynamically from Column 3 onwards (index 2+)
+  const subjectsMap = [];
+  rawCols.forEach((col, index) => {
+    if (index >= 2 && col && col.label) {
+      const colName = String(col.label).trim();
+      if (colName && !excludedNames.includes(colName.toLowerCase())) {
+        subjectsMap.push({ index: index, name: colName });
+      }
+    }
+  });
+
+  logDebug(`Positional Mapping -> Index 0: Class [${classColHeader}], Index 1: Name [${nameColHeader}]`);
+  logDebug(`Dynamic Subjects -> ${subjectsMap.map(s => s.name).join(', ')}`);
+
+  return rawRows.map(r => {
+    if (!r || !r.c) return null;
+    
+    // Strict positional mapping based on array indices
+    const classCell = r.c[0];
+    const nameCell = r.c[1];
+    
+    const cl = classCell && classCell.v !== null ? String(classCell.v).trim() : 'Unknown';
+    const name = nameCell && nameCell.v !== null ? String(nameCell.v).trim() : 'Unknown';
+    
+    // Automatically parse the cohort from the first character of the Class (e.g., "4A" -> "Form 4", "5B" -> "Form 5")
+    let grade = 'Unknown';
+    if (cl && cl !== 'Unknown') {
+      const match = cl.match(/^\d+/); // Extract leading numeric digits
+      if (match) {
+        grade = `Form ${match[0]}`;
+      } else {
+        grade = 'Other';
+      }
+    }
+    
+    const s = {};
+    subjectsMap.forEach(sub => {
+      const cell = r.c[sub.index];
+      if (cell && cell.v !== null && cell.v !== '') {
+        const cellVal = String(cell.v).trim().toUpperCase();
+        if (cellVal === 'TH') {
+          s[sub.name] = 'TH';
+        } else {
+          const val = Number(cell.v);
+          if (!isNaN(val)) {
+            s[sub.name] = val;
+          }
+        }
+      }
+    });
+    
+    return { name, grade, class: cl, s };
+  }).filter(item => {
+    if (!item || !item.name || item.name === 'Unknown') return false;
+    
+    const lowerName = item.name.toLowerCase();
+    const isSummaryRow = excludedNames.some(ex => 
+      lowerName === ex || 
+      lowerName.startsWith(ex + ' ') || 
+      lowerName.endsWith(' ' + ex)
+    );
+    
+    return !isSummaryRow && Object.keys(item.s).length > 0;
+  });
+}
+
+// ─── INITIALIZATION ONPAGE LOAD ──────────────────────────────────────────────
+window.onload = async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get('sheetId') || DEFAULT_SHEET_ID;
+  
+  logDebug(`App initializing... Extracted Sheet ID: ${id || 'None'}`);
+  
+  if (id && id !== 'YOUR_GOOGLE_SHEET_ID_HERE') {
+    state.sheetId = id;
+    renderLoadingState("Syncing whole school dataset (School Scores)...");
+    try {
+      const data = await fetchGoogleSheetData(id);
+      recalculateData(data);
+      render();
+    } catch (err) {
+      console.error(err);
+      logDebug(`Onload Sync Error: ${err.message}`, true);
+      appLoadError = `Failed to sync school sheet: ${err.message || 'Check sharing permissions'}. Loaded offline school demo data instead.`;
+      recalculateData(DEMO_SCHOOL_DATA);
+      render();
+    }
+  } else {
+    logDebug(`No custom Sheet ID found. Loading default offline demo dataset.`);
+    // Load built-in offline school database
+    recalculateData(DEMO_SCHOOL_DATA);
+    render();
+  }
+};
+
+function renderLoadingState(msg) {
+  document.getElementById('root').innerHTML = `
+    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:60vh; text-align:center;">
+      <div style="border: 4px solid rgba(13,148,136,0.1); border-left-color: var(--teal); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+      <div style="font-size: 16px; font-weight:700; color:var(--text);">${msg}</div>
+      <div style="font-size: 12px; color:var(--muted); margin-top:8px;">Reading Sheet on "School Scores" tab...</div>
+    </div>
+    <style>
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+  `;
+}
+
+// State static tabs
+const TABS = [
+  {id:'dashboard',icon:'📊',label:'School Dashboard'},
+  {id:'scoreboard',icon:'📋',label:'Class Scores'},
+  {id:'student',icon:'🎓',label:'Student Lookup'},
+  {id:'subject',icon:'📚',label:'Subject Matrix'},
+  {id:'rankings',icon:'🏆',label:'School Rankings'},
+];
+
+</script>
+</body>
+</html>

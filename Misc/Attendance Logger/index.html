@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Meet Analytics Dashboard</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- PapaParse for CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: { primary: '#1a73e8' }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid #e2e8f0;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+
+<body class="text-slate-800 h-screen flex flex-col overflow-hidden">
+
+  <!-- Top Navigation -->
+  <header class="bg-white border-b border-slate-200 shadow-sm z-10 flex-shrink-0">
+    <div
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-0 sm:h-16 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-3 self-start sm:self-auto">
+        <div class="bg-blue-100 text-blue-600 p-2 rounded-lg">
+          <i class="ph ph-video-camera text-xl"></i>
+        </div>
+        <h1 class="font-semibold text-base sm:text-xl text-slate-900">Meet Analytics</h1>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+        <div
+          class="flex items-center bg-slate-100 rounded-md px-3 py-1.5 border border-slate-200 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all w-full sm:w-auto">
+          <i class="ph ph-table text-slate-400 mr-2 flex-shrink-0"></i>
+          <input type="text" id="sheetIdInput" value="1xbqfTP8pp0KEHnLzqeqdlKZSb4bumbV0Typodere0r0"
+            placeholder="Google Sheet ID"
+            class="bg-transparent border-none outline-none text-xs sm:text-sm w-full sm:w-48 lg:w-64 text-slate-700 min-w-0">
+        </div>
+        <button onclick="app.fetchLiveSheet()"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto">
+          <i class="ph ph-arrows-clockwise"></i>
+          <span>Sync Data</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8">
+    <div class="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+
+      <!-- Status & Filters Row -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div id="statusMessage" class="text-xs sm:text-sm text-slate-500 flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" id="statusIndicator"></div>
+          <span id="statusText">Waiting for data...</span>
+        </div>
+
+        <!-- Timeframe Toggle (3-in-1) -->
+        <div class="bg-slate-200 p-1 rounded-lg inline-flex w-full sm:w-auto justify-between" role="group">
+          <button onclick="app.setTimeframe('daily')" id="btn-daily"
+            class="flex-1 sm:flex-none text-center px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all text-slate-600 hover:text-slate-900">Daily</button>
+          <button onclick="app.setTimeframe('weekly')" id="btn-weekly"
+            class="flex-1 sm:flex-none text-center px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all bg-white text-blue-600 shadow-sm">Weekly</button>
+          <button onclick="app.setTimeframe('monthly')" id="btn-monthly"
+            class="flex-1 sm:flex-none text-center px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all text-slate-600 hover:text-slate-900">Monthly</button>
+        </div>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+        <!-- Unique Meeting Time -->
+        <div class="glass-card rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs sm:text-sm font-medium text-slate-500 mb-1">Total Meeting Time</p>
+              <h3 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800" id="kpi-unique-duration">0h 0m</h3>
+            </div>
+            <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg flex-shrink-0"><i
+                class="ph ph-hourglass-high text-lg sm:text-xl"></i></div>
+          </div>
+          <p class="text-[10px] sm:text-xs text-slate-400 mt-2 sm:mt-3" id="kpi-unique-duration-sub">Unique room
+            activity</p>
+        </div>
+
+        <!-- Combined Time -->
+        <div class="glass-card rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs sm:text-sm font-medium text-slate-500 mb-1">Participant Time</p>
+              <h3 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800" id="kpi-duration">0h 0m</h3>
+            </div>
+            <div class="p-2 bg-blue-50 text-blue-600 rounded-lg flex-shrink-0"><i
+                class="ph ph-clock text-lg sm:text-xl"></i></div>
+          </div>
+          <p class="text-[10px] sm:text-xs text-slate-400 mt-2 sm:mt-3" id="kpi-duration-sub">Sum of all attendees</p>
+        </div>
+
+        <!-- Unique Participants -->
+        <div class="glass-card rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs sm:text-sm font-medium text-slate-500 mb-1">Unique Participants</p>
+              <h3 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800" id="kpi-participants">0</h3>
+            </div>
+            <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg flex-shrink-0"><i
+                class="ph ph-users text-lg sm:text-xl"></i></div>
+          </div>
+          <p class="text-[10px] sm:text-xs text-slate-400 mt-2 sm:mt-3" id="kpi-participants-sub">In selected period</p>
+        </div>
+
+        <!-- Total Sessions -->
+        <div class="glass-card rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs sm:text-sm font-medium text-slate-500 mb-1">Total Meeting Instances</p>
+              <h3 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800" id="kpi-sessions">0</h3>
+            </div>
+            <div class="p-2 bg-teal-50 text-teal-600 rounded-lg flex-shrink-0"><i
+                class="ph ph-video-conference text-lg sm:text-xl"></i></div>
+          </div>
+          <p class="text-[10px] sm:text-xs text-slate-400 mt-2 sm:mt-3" id="kpi-sessions-sub">Unique meeting
+            links/sessions</p>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+        <!-- Trend Chart -->
+        <div class="glass-card rounded-xl p-4 sm:p-5 shadow-sm lg:col-span-2">
+          <h3 class="text-sm sm:text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="ph ph-trend-up text-blue-500"></i> Attendance Trend
+          </h3>
+          <div class="h-48 sm:h-64 w-full relative">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Top Participants Chart -->
+        <div class="glass-card rounded-xl p-4 sm:p-5 shadow-sm">
+          <h3 class="text-sm sm:text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="ph ph-chart-pie-slice text-indigo-500"></i> Top Participants
+          </h3>
+          <div class="h-48 sm:h-64 w-full relative flex items-center justify-center">
+            <canvas id="participantChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overall Heatmaps Section -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        <!-- Monthly Heatmap -->
+        <div class="glass-card rounded-xl p-4 sm:p-5 shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-sm sm:text-base font-semibold text-slate-800 flex items-center gap-1.5 sm:gap-2">
+              <i class="ph ph-calendar text-emerald-500"></i> Overall Monthly Activity
+            </h3>
+            <span class="text-[10px] sm:text-xs text-slate-400">Past 35 Days</span>
+          </div>
+          <div class="grid grid-cols-7 gap-1 sm:gap-2" id="mainMonthlyHeatmapGrid">
+            <!-- Filled dynamically via JS -->
+          </div>
+          <div class="flex items-center justify-end gap-1 mt-4 text-[9px] sm:text-[10px] text-slate-400 font-medium">
+            <span>Less</span>
+            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-slate-100 border border-slate-200"></div>
+            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-emerald-100"></div>
+            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-emerald-300"></div>
+            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-emerald-500"></div>
+            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-emerald-700"></div>
+            <span>More</span>
+          </div>
+        </div>
+
+        <!-- Daily Heatmap -->
+        <div class="glass-card rounded-xl p-4 sm:p-5 shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-sm sm:text-base font-semibold text-slate-800 flex items-center gap-1.5 sm:gap-2">
+              <i class="ph ph-clock text-indigo-500"></i> Overall Daily Patterns
+            </h3>
+            <span class="text-[10px] sm:text-xs text-slate-400">24-Hour Distribution</span>
+          </div>
+          <div class="flex flex-col gap-2">
+            <div class="grid grid-cols-12 gap-0.5 sm:gap-1" id="mainDailyHeatmapGrid">
+              <!-- Filled dynamically via JS -->
+            </div>
+            <div class="flex justify-between text-[8px] sm:text-[10px] text-slate-400 px-0.5 font-medium mt-1">
+              <span>12 AM</span>
+              <span>12 PM</span>
+              <span>11 PM</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-end gap-1 mt-4 text-[9px] sm:text-[10px] text-slate-400 font-medium">
+            <span>Never Joined</span>
+            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-slate-100 border border-slate-200"></div>
+            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-indigo-100"></div>
+            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-indigo-300"></div>
+            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-indigo-500"></div>
+            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-indigo-700"></div>
+            <span>Regular Hour</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Individual Participant Data Table -->
+      <div class="glass-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+        <div class="p-4 sm:p-5 border-b border-slate-100 bg-white">
+          <div class="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3 mb-4">
+            <div>
+              <h3 id="tableMainTitle" class="text-sm sm:text-base font-semibold text-slate-800 flex items-center gap-2">
+                <i class="ph ph-users text-teal-500"></i> Individual Participants
+              </h3>
+              <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Click a record to view detailed logs and analytics.
+              </p>
+            </div>
+            <!-- Search inside table -->
+            <div class="relative w-full md:w-auto">
+              <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+              <input type="text" id="tableSearch" placeholder="Search records..."
+                class="pl-9 pr-3 py-1.5 border border-slate-200 rounded-md text-xs sm:text-sm focus:ring-1 focus:ring-blue-500 outline-none w-full md:w-64">
+            </div>
+          </div>
+          <!-- Tabs -->
+          <div class="flex gap-4 sm:gap-6 border-b border-slate-200">
+            <button onclick="app.switchTab('participants')" id="tab-participants"
+              class="pb-2 text-xs sm:text-sm font-medium border-b-2 border-blue-600 text-blue-600 transition-colors">Participants</button>
+            <button onclick="app.switchTab('sessions')" id="tab-sessions"
+              class="pb-2 text-xs sm:text-sm font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700 transition-colors">Group
+              Sessions</button>
+          </div>
+        </div>
+        <div class="overflow-x-auto scrollbar-hide">
+          <table class="w-full text-left text-xs sm:text-sm text-slate-600 min-w-[500px]">
+            <thead id="mainTableHead" class="bg-slate-50 text-slate-500 uppercase text-[10px] sm:text-xs font-semibold">
+              <tr>
+                <th class="px-4 sm:px-6 py-3 cursor-pointer hover:bg-slate-100" onclick="app.sortTable('name')">
+                  Participant Name <i class="ph ph-caret-up-down inline"></i></th>
+                <th class="px-4 sm:px-6 py-3 cursor-pointer hover:bg-slate-100" onclick="app.sortTable('date')">Last
+                  Seen <i class="ph ph-caret-up-down inline"></i></th>
+                <th class="px-4 sm:px-6 py-3 cursor-pointer hover:bg-slate-100 text-right"
+                  onclick="app.sortTable('sessions')">Sessions Joined <i class="ph ph-caret-up-down inline"></i></th>
+                <th class="px-4 sm:px-6 py-3 cursor-pointer hover:bg-slate-100 text-right"
+                  onclick="app.sortTable('duration')">Total Duration <i class="ph ph-caret-up-down inline"></i></th>
+              </tr>
+            </thead>
+            <tbody id="participantTableBody" class="divide-y divide-slate-100 bg-white">
+              <!-- Rows injected via JS -->
+            </tbody>
+          </table>
+        </div>
+        <!-- Pagination / Limits -->
+        <div
+          class="p-4 bg-white border-t border-slate-100 text-[10px] sm:text-xs text-slate-500 flex justify-between items-center">
+          <span id="tableStatus">Showing top results</span>
+          <span class="inline-flex items-center gap-1 sm:hidden text-slate-400">
+            <i class="ph ph-arrow-left-right"></i> Swipe table to view
+          </span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Interactive Slide-over Details Drawer -->
+  <div id="detailsDrawer" class="fixed inset-0 z-50 pointer-events-none overflow-hidden"
+    aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+    <!-- Backdrop overlay -->
+    <div id="drawerOverlay"
+      class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300 cursor-pointer"
+      onclick="app.closeParticipantDetails()"></div>
+
+    <div class="absolute inset-y-0 right-0 pl-4 sm:pl-10 max-w-full flex w-full sm:w-auto">
+      <div id="drawerContent"
+        class="w-full sm:w-screen sm:max-w-md md:max-w-lg bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col h-full border-l border-slate-200">
+
+        <!-- Drawer Header -->
+        <div class="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+          <div class="min-w-0 flex-1 pr-4">
+            <span id="drawerSuperTitle"
+              class="text-[10px] sm:text-xs font-semibold text-blue-600 uppercase tracking-wider">Participant
+              Profile</span>
+            <h2 id="drawerTitle" class="text-base sm:text-xl font-bold text-slate-900 mt-1 truncate">Participant Name
+            </h2>
+          </div>
+          <button onclick="app.closeParticipantDetails()"
+            class="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all flex-shrink-0">
+            <i class="ph ph-x text-lg sm:text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Drawer Scrollable Body -->
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 relative bg-slate-50/50">
+          <!-- User Content View -->
+          <div id="drawerUserContent" class="space-y-4 sm:space-y-6">
+
+            <!-- Quick Metrics -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-4">
+              <div
+                class="bg-white border border-slate-200 p-2 sm:p-4 rounded-xl flex flex-col items-center justify-center text-center shadow-sm">
+                <span class="text-[10px] sm:text-xs text-slate-500 font-medium mb-1">Total Time</span>
+                <span id="drawerMetaTotalTime"
+                  class="text-xs sm:text-base md:text-xl font-bold text-slate-800">0m</span>
+              </div>
+              <div
+                class="bg-white border border-slate-200 p-2 sm:p-4 rounded-xl flex flex-col items-center justify-center text-center shadow-sm">
+                <span class="text-[10px] sm:text-xs text-slate-500 font-medium mb-1">Avg Stay</span>
+                <span id="drawerMetaAvgTime" class="text-xs sm:text-base md:text-xl font-bold text-slate-800">0m</span>
+              </div>
+              <div
+                class="bg-white border border-slate-200 p-2 sm:p-4 rounded-xl flex flex-col items-center justify-center text-center shadow-sm">
+                <span class="text-[10px] sm:text-xs text-slate-500 font-medium mb-1">Sessions</span>
+                <span id="drawerMetaSessions" class="text-xs sm:text-base md:text-xl font-bold text-slate-800">0</span>
+              </div>
+            </div>
+
+            <!-- Top Collaborators -->
+            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm">
+              <div class="mb-3 sm:mb-4">
+                <h3 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-2">
+                  <i class="ph ph-users-three text-pink-500 text-base"></i> Frequent Collaborators
+                </h3>
+                <p class="text-[10px] sm:text-xs text-slate-500 mt-1">Participants they spend the most time with across
+                  all sessions.</p>
+              </div>
+              <div class="space-y-3 sm:space-y-4 max-h-40 sm:max-h-48 overflow-y-auto pr-1"
+                id="drawerCollaboratorsList">
+                <!-- Populated dynamically via JS -->
+              </div>
+            </div>
+
+            <!-- Monthly Heatmap Calendar -->
+            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm">
+              <div class="mb-3 sm:mb-4 flex justify-between items-start">
+                <div>
+                  <h3 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5 sm:gap-2">
+                    <i class="ph ph-calendar text-emerald-500 text-base"></i> Monthly Activity Heatmap
+                  </h3>
+                  <p class="text-[10px] sm:text-xs text-slate-500 mt-1">Shading denotes daily call duration.</p>
+                </div>
+                <span
+                  class="text-[8px] sm:text-[10px] font-medium text-slate-500 uppercase tracking-wider bg-slate-100 px-1.5 py-0.5 rounded">35
+                  Days</span>
+              </div>
+
+              <!-- Heatmap Grid -->
+              <div class="grid grid-cols-7 gap-1 sm:gap-2" id="monthlyHeatmapGrid">
+                <!-- Filled dynamically via JS -->
+              </div>
+
+              <!-- Heatmap Legend -->
+              <div
+                class="flex items-center justify-end gap-1 mt-4 sm:mt-5 text-[8px] sm:text-[10px] text-slate-400 font-medium">
+                <span>Less</span>
+                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-slate-100 border border-slate-200"></div>
+                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-emerald-100"></div>
+                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-emerald-300"></div>
+                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-emerald-500"></div>
+                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-emerald-700"></div>
+                <span>More</span>
+              </div>
+            </div>
+
+            <!-- Daily Heatmap Calendar -->
+            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm">
+              <div class="mb-3 sm:mb-4 flex justify-between items-start">
+                <div>
+                  <h3 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5 sm:gap-2">
+                    <i class="ph ph-clock text-indigo-500 text-base"></i> Daily Join Patterns
+                  </h3>
+                  <p class="text-[10px] sm:text-xs text-slate-500 mt-1">Time blocks where they frequently join.</p>
+                </div>
+                <span
+                  class="text-[8px] sm:text-[10px] font-medium text-slate-500 uppercase tracking-wider bg-slate-100 px-1.5 py-0.5 rounded">24-Hour</span>
+              </div>
+
+              <!-- Heatmap Grid -->
+              <div class="flex flex-col gap-2">
+                <div class="grid grid-cols-12 gap-0.5 sm:gap-1" id="dailyHeatmapGrid">
+                  <!-- Filled dynamically via JS -->
+                </div>
+                <div class="flex justify-between text-[8px] sm:text-[10px] text-slate-400 px-0.5 font-medium mt-1">
+                  <span>12 AM</span>
+                  <span>12 PM</span>
+                  <span>11 PM</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Detailed Attendance Records List -->
+            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm">
+              <div class="mb-3 sm:mb-4">
+                <h3 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-2">
+                  <i class="ph ph-receipt text-amber-500 text-base"></i> Historical Session Logs
+                </h3>
+                <p class="text-[10px] sm:text-xs text-slate-500 mt-1">A detailed list of all joined meetings.</p>
+              </div>
+              <div
+                class="divide-y divide-slate-100 border border-slate-200 rounded-xl bg-slate-50/50 max-h-48 sm:max-h-64 overflow-y-auto"
+                id="drawerLogsList">
+                <!-- Populated dynamically via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Session Content View -->
+          <div id="drawerSessionContent" class="space-y-4 sm:space-y-6 hidden">
+            <!-- Session Metrics -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-4">
+              <div
+                class="bg-white border border-slate-200 p-2 sm:p-4 rounded-xl flex flex-col items-center justify-center text-center shadow-sm">
+                <span class="text-[10px] sm:text-xs text-slate-500 font-medium mb-1">Total Time</span>
+                <span id="drawerMetaSessionTime"
+                  class="text-xs sm:text-base md:text-xl font-bold text-slate-800">0m</span>
+              </div>
+              <div
+                class="bg-white border border-slate-200 p-2 sm:p-4 rounded-xl flex flex-col items-center justify-center text-center shadow-sm">
+                <span class="text-[10px] sm:text-xs text-slate-500 font-medium mb-1">Participants</span>
+                <span id="drawerMetaSessionParticipants"
+                  class="text-xs sm:text-base md:text-xl font-bold text-slate-800">0</span>
+              </div>
+              <div
+                class="bg-white border border-slate-200 p-2 sm:p-4 rounded-xl flex flex-col items-center justify-center text-center shadow-sm">
+                <span class="text-[10px] sm:text-xs text-slate-500 font-medium mb-1">Window</span>
+                <span id="drawerMetaSessionWindow"
+                  class="text-[9px] sm:text-xs md:text-sm font-bold text-slate-800 mt-1">00:00 - 00:00</span>
+              </div>
+            </div>
+
+            <!-- Timeline Chart -->
+            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm">
+              <div class="mb-4 sm:mb-5">
+                <h3 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-2">
+                  <i class="ph ph-chart-line-up text-blue-500 text-base"></i> Join & Leave Timeline
+                </h3>
+                <p class="text-[10px] sm:text-xs text-slate-500 mt-1">Visual breakdown of participant presence.</p>
+              </div>
+
+              <!-- Timeline container -->
+              <div class="flex flex-col mb-3 relative" id="timelineContainer">
+                <!-- Records injected via JS -->
+                <div id="sessionTimelineList" class="flex flex-col gap-2"></div>
+              </div>
+
+              <!-- Timeline Axis -->
+              <div
+                class="flex justify-between text-[8px] sm:text-[10px] text-slate-400 font-medium mt-3 pt-3 border-t border-slate-100 relative">
+                <span id="sessionTimelineStart">Start</span>
+                <span id="sessionTimelineEnd">End</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Toast Notification -->
+  <div id="toast"
+    class="fixed bottom-4 right-4 bg-slate-800 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+    <i id="toastIcon" class="ph ph-info text-xl"></i>
+    <span id="toastMessage" class="text-sm font-medium">Message</span>
+  </div>
+
+  <script>
+    /**
+     * Main Application Logic
+     */
+    const app = {
+      rawData: [],
+      filteredData: [],
+      currentDataView: [], // Aggregated table data
+      sessionDataView: [], // Aggregated session data
+      currentTab: 'participants', // 'participants' or 'sessions'
+      timeframe: 'weekly', // 'daily', 'weekly', 'monthly'
+      charts: {
+        trend: null,
+        participant: null
+      },
+      sortState: { column: 'duration', dir: 'desc' },
+
+      // Initialize app
+      init() {
+        this.setupEventListeners();
+        this.initCharts();
+
+        // Try fetching live sheet, if fails, fallback to mock after a prompt
+        this.fetchLiveSheet(true);
+      },
+
+      setupEventListeners() {
+        document.getElementById('tableSearch').addEventListener('input', (e) => {
+          this.renderTable(e.target.value);
+        });
+      },
+
+      showToast(message, type = 'info') {
+        const toast = document.getElementById('toast');
+        const msgEl = document.getElementById('toastMessage');
+        const icon = document.getElementById('toastIcon');
+
+        msgEl.textContent = message;
+
+        if (type === 'error') {
+          toast.classList.replace('bg-slate-800', 'bg-red-600');
+          icon.className = 'ph ph-warning-circle text-xl';
+        } else if (type === 'success') {
+          toast.classList.replace('bg-slate-800', 'bg-green-600');
+          icon.className = 'ph ph-check-circle text-xl';
+        } else {
+          toast.classList.replace('bg-red-600', 'bg-slate-800');
+          toast.classList.replace('bg-green-600', 'bg-slate-800');
+          icon.className = 'ph ph-info text-xl';
+        }
+
+        toast.classList.remove('translate-y-20', 'opacity-0');
+
+        setTimeout(() => {
+          toast.classList.add('translate-y-20', 'opacity-0');
+        }, 4000);
+      },
+
+      setStatus(msg, status = 'loading') {
+        document.getElementById('statusText').textContent = msg;
+        const indicator = document.getElementById('statusIndicator');
+
+        indicator.className = 'w-2 h-2 rounded-full ' +
+          (status === 'loading' ? 'bg-yellow-400 animate-pulse' :
+            status === 'error' ? 'bg-red-500' : 'bg-green-500');
+      },
+
+      async fetchLiveSheet(isInit = false) {
+        const sheetId = document.getElementById('sheetIdInput').value.trim();
+        if (!sheetId) {
+          this.showToast("Please enter a Google Sheet ID", "error");
+          return;
+        }
+
+        this.setStatus('Fetching data from Google Sheets...', 'loading');
+
+        // Public endpoint to get CSV data from a Google Sheet (Requires "Anyone with link" sharing)
+        const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Logs`;
+
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error('Network response was not ok');
+
+          const csvText = await response.text();
+
+          // Basic check to see if we got HTML (e.g. Google login page due to privacy) instead of CSV
+          if (csvText.toLowerCase().includes('<!doctype html>')) {
+            throw new Error('Access Denied. Sheet must be public.');
+          }
+
+          this.parseCSV(csvText);
+          this.setStatus('Live data synced successfully', 'success');
+          this.showToast('Data synced successfully!', 'success');
+
+        } catch (error) {
+          console.error("Fetch error:", error);
+          this.setStatus('Failed to read live sheet', 'error');
+
+          if (isInit) {
+            this.showToast("Couldn't read private sheet. Loading Demo Data.", "error");
+            // Fallback to mock data to show the UI works
+            setTimeout(() => this.loadMockData(), 1500);
+          } else {
+            this.showToast("Make sure sheet sharing is set to 'Anyone with link'", "error");
+          }
+        }
+      },
+
+      parseCSV(csvText) {
+        Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            // Standardize keys based on the Apps Script columns
+            this.rawData = results.data.map(row => {
+              // Extract numeric duration
+              let durStr = row['Duration (mins)'] || "0";
+              let duration = parseFloat(durStr);
+              if (isNaN(duration)) duration = 0;
+
+              // Parse date robustly
+              let rawDate = row['Date'];
+              let dateObj = new Date(rawDate);
+              if (isNaN(dateObj.getTime())) {
+                dateObj = new Date(); // fallback
+              }
+
+              let joinStr = row['Join Time'] || '';
+              let leaveStr = row['Leave Time'] || '';
+              let joinTs = null;
+              let leaveTs = null;
+
+              if (joinStr && joinStr !== 'N/A') {
+                let j = new Date(`${dateObj.toLocaleDateString()} ${joinStr}`);
+                if (!isNaN(j.getTime())) joinTs = j.getTime();
+              }
+              if (leaveStr) {
+                let l = leaveStr === 'N/A' ? new Date() : new Date(`${dateObj.toLocaleDateString()} ${leaveStr}`);
+                if (!isNaN(l.getTime())) {
+                  leaveTs = l.getTime();
+                  // Fix for midnight crossing: if leave time is earlier than join time, it's likely the next day
+                  if (joinTs && leaveTs < joinTs) {
+                    leaveTs += 24 * 60 * 60 * 1000;
+                  }
+                }
+              }
+
+              // Fallback if parsing failed
+              if (!joinTs) joinTs = dateObj.getTime();
+              if (!leaveTs) leaveTs = joinTs + (duration * 60000);
+
+              return {
+                sessionId: row['Session ID'] || 'Unknown',
+                dateObj: dateObj,
+                dateStr: dateObj.toLocaleDateString(),
+                name: row['Participant Name'] || 'Unknown',
+                join: joinStr,
+                leave: leaveStr,
+                joinTs: joinTs,
+                leaveTs: leaveTs,
+                duration: duration
+              };
+            }).filter(row => row.name !== 'Unknown'); // Filter out empty headers
+
+            this.processData();
+          },
+          error: (err) => {
+            this.showToast("Error parsing spreadsheet data.", "error");
+            console.error(err);
+          }
+        });
+      },
+
+      loadMockData() {
+        this.setStatus('Using Demo Data (Make sheet public for real data)', 'error');
+
+        // Generate a week of fake data
+        const names = ['Alice Johnson', 'Bob Smith', 'Charlie Davis', 'Diana Prince', 'Evan Wright'];
+        const data = [];
+        const now = new Date();
+
+        for (let i = 0; i < 80; i++) {
+          const daysAgo = Math.floor(Math.random() * 35);
+          const d = new Date();
+          d.setDate(now.getDate() - daysAgo);
+          d.setHours(8 + Math.floor(Math.random() * 8), Math.floor(Math.random() * 60), 0, 0); // Random start 8am-4pm
+
+          const durMins = Math.floor(Math.random() * 110) + 10;
+          const dLeave = new Date(d.getTime() + durMins * 60000);
+
+          data.push({
+            sessionId: `mock-sess-${Math.floor(Math.random() * 15)}`,
+            dateObj: d,
+            dateStr: d.toLocaleDateString(),
+            name: names[Math.floor(Math.random() * names.length)],
+            join: d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            leave: dLeave.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            joinTs: d.getTime(),
+            leaveTs: dLeave.getTime(),
+            duration: durMins
+          });
+        }
+        this.rawData = data;
+        this.processData();
+      },
+
+      setTimeframe(tf) {
+        this.timeframe = tf;
+
+        // Update button styles
+        ['daily', 'weekly', 'monthly'].forEach(period => {
+          const btn = document.getElementById(`btn-${period}`);
+          if (period === tf) {
+            btn.className = "px-4 py-1.5 text-sm font-medium rounded-md transition-all bg-white text-blue-600 shadow-sm";
+          } else {
+            btn.className = "px-4 py-1.5 text-sm font-medium rounded-md transition-all text-slate-600 hover:text-slate-900";
+          }
+        });
+
+        this.processData();
+      },
+
+      formatMins(mins) {
+        if (mins > 90) {
+          const h = Math.floor(mins / 60);
+          const m = Math.floor(mins % 60);
+          return `${h}h ${m}m`;
+        }
+        return `${Math.floor(mins)}m`;
+      },
+
+      processData() {
+        if (this.rawData.length === 0) return;
+
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        // Filter raw data based on timeframe
+        this.filteredData = this.rawData.filter(row => {
+          const diffTime = Math.abs(today - row.dateObj);
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+          if (this.timeframe === 'daily') return diffDays <= 1; // Today
+          if (this.timeframe === 'weekly') return diffDays <= 7; // Last 7 days
+          if (this.timeframe === 'monthly') return diffDays <= 30; // Last 30 days
+          return true;
+        });
+
+        this.updateKPIs();
+        this.updateTrendChart();
+        this.updateParticipantData();
+        this.updateSessionData();
+        this.renderMainHeatmaps();
+      },
+
+      updateSessionData() {
+        const sessionMap = {};
+        this.filteredData.forEach(row => {
+          if (!sessionMap[row.sessionId]) {
+            sessionMap[row.sessionId] = {
+              id: row.sessionId,
+              dateObj: row.dateObj,
+              dateStr: row.dateStr,
+              participants: new Set(),
+              minJoin: row.joinTs,
+              maxLeave: row.leaveTs,
+              records: []
+            };
+          }
+          sessionMap[row.sessionId].participants.add(row.name);
+          sessionMap[row.sessionId].records.push(row);
+          if (row.joinTs < sessionMap[row.sessionId].minJoin) sessionMap[row.sessionId].minJoin = row.joinTs;
+          if (row.leaveTs > sessionMap[row.sessionId].maxLeave) sessionMap[row.sessionId].maxLeave = row.leaveTs;
+        });
+
+        this.sessionDataView = Object.values(sessionMap).map(s => {
+          s.durationMins = (s.maxLeave - s.minJoin) / 60000;
+          if (s.durationMins < 0) s.durationMins = 0; // fallback
+          s.participantCount = s.participants.size;
+          return s;
+        });
+      },
+
+      switchTab(tab) {
+        this.currentTab = tab;
+        document.getElementById('tab-participants').className = tab === 'participants' ? 'pb-2 text-sm font-medium border-b-2 border-blue-600 text-blue-600 transition-colors' : 'pb-2 text-sm font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700 transition-colors';
+        document.getElementById('tab-sessions').className = tab === 'sessions' ? 'pb-2 text-sm font-medium border-b-2 border-blue-600 text-blue-600 transition-colors' : 'pb-2 text-sm font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700 transition-colors';
+
+        // Update table title
+        document.getElementById('tableMainTitle').innerHTML = tab === 'participants'
+          ? '<i class="ph ph-users text-teal-500"></i> Individual Participants'
+          : '<i class="ph ph-video-conference text-teal-500"></i> Group Sessions';
+
+        this.sortState = { column: tab === 'participants' ? 'duration' : 'dateObj', dir: 'desc' };
+
+        const thead = document.getElementById('mainTableHead');
+        if (tab === 'participants') {
+          thead.innerHTML = `
+                        <tr>
+                            <th class="px-6 py-3 cursor-pointer hover:bg-slate-100" onclick="app.sortTable('name')">Participant Name <i class="ph ph-caret-up-down inline"></i></th>
+                            <th class="px-6 py-3 cursor-pointer hover:bg-slate-100" onclick="app.sortTable('date')">Last Seen <i class="ph ph-caret-up-down inline"></i></th>
+                            <th class="px-6 py-3 cursor-pointer hover:bg-slate-100 text-right" onclick="app.sortTable('sessions')">Sessions Joined <i class="ph ph-caret-up-down inline"></i></th>
+                            <th class="px-6 py-3 cursor-pointer hover:bg-slate-100 text-right" onclick="app.sortTable('duration')">Total Duration <i class="ph ph-caret-up-down inline"></i></th>
+                        </tr>
+                    `;
+        } else {
+          thead.innerHTML = `
+                        <tr>
+                            <th class="px-6 py-3 cursor-pointer hover:bg-slate-100" onclick="app.sortTable('id')">Session ID <i class="ph ph-caret-up-down inline"></i></th>
+                            <th class="px-6 py-3 cursor-pointer hover:bg-slate-100" onclick="app.sortTable('dateObj')">Date <i class="ph ph-caret-up-down inline"></i></th>
+                            <th class="px-6 py-3 cursor-pointer hover:bg-slate-100 text-right" onclick="app.sortTable('participantCount')">Participants <i class="ph ph-caret-up-down inline"></i></th>
+                            <th class="px-6 py-3 cursor-pointer hover:bg-slate-100 text-right" onclick="app.sortTable('durationMins')">Session Duration <i class="ph ph-caret-up-down inline"></i></th>
+                        </tr>
+                    `;
+        }
+
+        this.sortTable(this.sortState.column, false);
+      },
+
+      updateKPIs() {
+        let totalMins = 0;
+        let uniqueUsers = new Set();
+        let uniqueSessions = new Set();
+        let events = [];
+
+        this.filteredData.forEach(row => {
+          totalMins += row.duration;
+          uniqueUsers.add(row.name);
+          uniqueSessions.add(row.sessionId);
+
+          // Add events for unique meeting duration calculation
+          if (row.joinTs && row.leaveTs) {
+            events.push({ time: row.joinTs, type: 'join' });
+            events.push({ time: row.leaveTs, type: 'leave' });
+          }
+        });
+
+        // Sweep line algorithm to detect unique duration (overlaps don't count)
+        events.sort((a, b) => a.time === b.time ? (a.type === 'leave' ? -1 : 1) : a.time - b.time);
+
+        let concurrent = 0;
+        let lastStart = 0;
+        let uniqueMeetingMs = 0;
+
+        events.forEach(ev => {
+          if (ev.type === 'join') {
+            if (concurrent === 0) lastStart = ev.time;
+            concurrent++;
+          } else {
+            concurrent--;
+            if (concurrent === 0) {
+              uniqueMeetingMs += (ev.time - lastStart);
+            }
+          }
+        });
+
+        // Format Combined Participant Duration
+        document.getElementById('kpi-duration').textContent = this.formatMins(totalMins);
+
+        // Format Unique Meeting Duration
+        const uniqueMinsTotal = Math.floor(uniqueMeetingMs / 60000);
+        document.getElementById('kpi-unique-duration').textContent = this.formatMins(uniqueMinsTotal);
+
+        document.getElementById('kpi-participants').textContent = uniqueUsers.size;
+        document.getElementById('kpi-sessions').textContent = uniqueSessions.size;
+
+        const tfLabels = { daily: 'Today', weekly: 'Last 7 Days', monthly: 'Last 30 Days' };
+        const label = tfLabels[this.timeframe];
+
+        document.getElementById('kpi-unique-duration-sub').textContent = label;
+        document.getElementById('kpi-duration-sub').textContent = label;
+        document.getElementById('kpi-participants-sub').textContent = label;
+        document.getElementById('kpi-sessions-sub').textContent = label;
+      },
+
+      initCharts() {
+        // Shared configuration
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#64748b';
+
+        // Trend Line/Bar Chart
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        this.charts.trend = new Chart(trendCtx, {
+          type: 'bar',
+          data: { labels: [], datasets: [] },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { beginAtZero: true, grid: { color: '#f1f5f9' }, title: { display: true, text: 'Hours' } },
+              x: { grid: { display: false } }
+            },
+            elements: { bar: { borderRadius: 4 } }
+          }
+        });
+
+        // Participant Doughnut Chart
+        const partCtx = document.getElementById('participantChart').getContext('2d');
+        this.charts.participant = new Chart(partCtx, {
+          type: 'doughnut',
+          data: { labels: [], datasets: [] },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'right', labels: { boxWidth: 12, padding: 15 } }
+            },
+            cutout: '65%'
+          }
+        });
+      },
+
+      updateTrendChart() {
+        const dateMap = {};
+        const now = new Date();
+        const days = this.timeframe === 'daily' ? 1 : (this.timeframe === 'weekly' ? 7 : 30);
+
+        for (let i = days - 1; i >= 0; i--) {
+          let d = new Date(now);
+          d.setDate(d.getDate() - i);
+          let dateStr = `${d.getMonth() + 1}/${d.getDate()}`;
+          dateMap[dateStr] = 0;
+        }
+
+        this.filteredData.forEach(row => {
+          let dateStr = `${row.dateObj.getMonth() + 1}/${row.dateObj.getDate()}`;
+          if (dateMap[dateStr] !== undefined) {
+            dateMap[dateStr] += row.duration;
+          } else if (this.timeframe === 'monthly') {
+            dateMap[dateStr] = row.duration; // catchall
+          }
+        });
+
+        const labels = Object.keys(dateMap);
+        const data = Object.values(dateMap).map(mins => Number((mins / 60).toFixed(2)));
+
+        this.charts.trend.data = {
+          labels: labels,
+          datasets: [{
+            label: 'Total Meeting Time (hours)',
+            data: data,
+            backgroundColor: '#3b82f6',
+            hoverBackgroundColor: '#2563eb'
+          }]
+        };
+        this.charts.trend.update();
+      },
+
+      updateParticipantData() {
+        const userMap = {};
+
+        this.filteredData.forEach(row => {
+          if (!userMap[row.name]) {
+            userMap[row.name] = {
+              name: row.name,
+              sessions: 0,
+              duration: 0,
+              lastSeen: row.dateObj
+            };
+          }
+          userMap[row.name].sessions += 1;
+          userMap[row.name].duration += row.duration;
+          if (row.dateObj > userMap[row.name].lastSeen) {
+            userMap[row.name].lastSeen = row.dateObj;
+          }
+        });
+
+        this.currentDataView = Object.values(userMap);
+
+        const sortedForChart = [...this.currentDataView].sort((a, b) => b.duration - a.duration).slice(0, 5);
+        this.charts.participant.data = {
+          labels: sortedForChart.map(u => u.name),
+          datasets: [{
+            data: sortedForChart.map(u => Number((u.duration / 60).toFixed(2))),
+            backgroundColor: ['#3b82f6', '#6366f1', '#8b5cf6', '#14b8a6', '#f59e0b'],
+            borderWidth: 0
+          }]
+        };
+        this.charts.participant.update();
+
+        // Check active tab and run sort to render
+        this.switchTab(this.currentTab);
+      },
+
+      sortTable(col, toggleDir = true) {
+        if (toggleDir && this.sortState.column === col) {
+          this.sortState.dir = this.sortState.dir === 'asc' ? 'desc' : 'asc';
+        } else if (toggleDir) {
+          this.sortState.column = col;
+          this.sortState.dir = 'desc';
+        }
+
+        const dataArr = this.currentTab === 'participants' ? this.currentDataView : this.sessionDataView;
+
+        dataArr.sort((a, b) => {
+          let valA = a[col];
+          let valB = b[col];
+
+          if (this.currentTab === 'participants' && col === 'date') {
+            valA = a.lastSeen.getTime();
+            valB = b.lastSeen.getTime();
+          }
+          if (this.currentTab === 'sessions' && col === 'dateObj') {
+            valA = a.dateObj.getTime();
+            valB = b.dateObj.getTime();
+          }
+
+          if (valA < valB) return this.sortState.dir === 'asc' ? -1 : 1;
+          if (valA > valB) return this.sortState.dir === 'asc' ? 1 : -1;
+          return 0;
+        });
+
+        this.renderTable(document.getElementById('tableSearch').value);
+      },
+
+      renderTable(searchQuery = '') {
+        const tbody = document.getElementById('participantTableBody');
+        tbody.innerHTML = '';
+
+        const q = searchQuery.toLowerCase();
+
+        if (this.currentTab === 'participants') {
+          const filtered = this.currentDataView.filter(u => u.name.toLowerCase().includes(q));
+
+          if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-500 italic">No participants found.</td></tr>`;
+            document.getElementById('tableStatus').textContent = 'Showing 0 participants';
+            return;
+          }
+
+          filtered.forEach(user => {
+            const row = document.createElement('tr');
+            row.className = "hover:bg-slate-50 transition-colors cursor-pointer";
+            row.setAttribute("onclick", `app.showParticipantDetails("${user.name}")`);
+
+            const durDisplay = this.formatMins(user.duration);
+            const dateDisplay = user.lastSeen.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+
+            row.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-slate-900">
+                                <span class="hover:text-blue-600 flex items-center gap-2">
+                                    <i class="ph ph-user-circle text-lg text-slate-400"></i> ${user.name}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">${dateDisplay}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right">${user.sessions}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right font-medium text-blue-600">${durDisplay}</td>
+                        `;
+            tbody.appendChild(row);
+          });
+
+          document.getElementById('tableStatus').textContent = `Showing ${filtered.length} participants`;
+        } else {
+          const filtered = this.sessionDataView.filter(s => s.id.toLowerCase().includes(q) || s.dateStr.toLowerCase().includes(q));
+
+          if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-500 italic">No sessions found.</td></tr>`;
+            document.getElementById('tableStatus').textContent = 'Showing 0 sessions';
+            return;
+          }
+
+          filtered.forEach(session => {
+            const row = document.createElement('tr');
+            row.className = "hover:bg-slate-50 transition-colors cursor-pointer";
+            row.setAttribute("onclick", `app.showSessionDetails("${session.id}")`);
+
+            const durDisplay = this.formatMins(session.durationMins);
+            const dateDisplay = session.dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+
+            row.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-slate-900">
+                                <span class="hover:text-blue-600 flex items-center gap-2">
+                                    <i class="ph ph-video-conference text-lg text-slate-400"></i> ${session.id}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">${dateDisplay}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right">${session.participantCount}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right font-medium text-blue-600">${durDisplay}</td>
+                        `;
+            tbody.appendChild(row);
+          });
+
+          document.getElementById('tableStatus').textContent = `Showing ${filtered.length} sessions`;
+        }
+      },
+
+      showParticipantDetails(name) {
+        const userRecords = this.rawData.filter(r => r.name === name);
+        if (userRecords.length === 0) return;
+
+        document.getElementById('drawerSuperTitle').textContent = 'Participant Profile';
+        document.getElementById('drawerTitle').textContent = name;
+
+        document.getElementById('drawerUserContent').classList.remove('hidden');
+        document.getElementById('drawerSessionContent').classList.add('hidden');
+
+        // Basic math values
+        let totalDuration = 0;
+        userRecords.forEach(r => totalDuration += r.duration);
+        const averageStay = (totalDuration / userRecords.length).toFixed(1);
+
+        document.getElementById('drawerMetaTotalTime').textContent = this.formatMins(totalDuration);
+        document.getElementById('drawerMetaAvgTime').textContent = this.formatMins(averageStay);
+        document.getElementById('drawerMetaSessions').textContent = userRecords.length;
+
+        // Render Logs List inside side-drawer
+        const logsContainer = document.getElementById('drawerLogsList');
+        logsContainer.innerHTML = '';
+        userRecords.sort((a, b) => b.dateObj - a.dateObj).forEach(rec => {
+          const block = document.createElement('div');
+          block.className = "p-3 hover:bg-slate-100 transition-colors flex justify-between items-center text-xs";
+          block.innerHTML = `
+                        <div>
+                            <span class="font-semibold text-slate-700 block">${rec.dateStr}</span>
+                            <span class="text-slate-400 text-[10px]">Session ID: ${rec.sessionId}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-medium text-slate-800 block">${rec.join} - ${rec.leave || 'N/A'}</span>
+                            <span class="text-blue-600 font-semibold text-[10px]">${this.formatMins(rec.duration)}</span>
+                        </div>
+                    `;
+          logsContainer.appendChild(block);
+        });
+
+        // Generate Monthly Activity Heatmap (Grid layout of past 35 days)
+        this.renderMonthlyHeatmap(userRecords, 'monthlyHeatmapGrid');
+
+        // Generate Daily Join Heatmap Strip (24 hour blocks)
+        this.renderDailyHeatmap(userRecords, 'dailyHeatmapGrid');
+
+        // Render Top Collaborators
+        this.renderTopCollaborators(name, userRecords);
+
+        // Animate Slide-over drawer into active viewport state
+        const drawer = document.getElementById('detailsDrawer');
+        const overlay = document.getElementById('drawerOverlay');
+        const content = document.getElementById('drawerContent');
+
+        drawer.classList.remove('pointer-events-none');
+        overlay.classList.replace('opacity-0', 'opacity-100');
+        content.classList.replace('translate-x-full', 'translate-x-0');
+      },
+
+      showSessionDetails(sessionId) {
+        const session = this.sessionDataView.find(s => s.id === sessionId);
+        if (!session) return;
+
+        document.getElementById('drawerSuperTitle').textContent = 'Group Session Analytics';
+        document.getElementById('drawerTitle').textContent = sessionId;
+
+        document.getElementById('drawerUserContent').classList.add('hidden');
+        document.getElementById('drawerSessionContent').classList.remove('hidden');
+
+        // Populate session metrics
+        document.getElementById('drawerMetaSessionTime').textContent = this.formatMins(session.durationMins);
+        document.getElementById('drawerMetaSessionParticipants').textContent = session.participantCount;
+
+        const start = new Date(session.minJoin).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const end = new Date(session.maxLeave).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('drawerMetaSessionWindow').textContent = `${start} - ${end}`;
+
+        // Render timeline
+        this.renderSessionTimeline(session);
+
+        // Open Drawer
+        const drawer = document.getElementById('detailsDrawer');
+        const overlay = document.getElementById('drawerOverlay');
+        const content = document.getElementById('drawerContent');
+
+        drawer.classList.remove('pointer-events-none');
+        overlay.classList.replace('opacity-0', 'opacity-100');
+        content.classList.replace('translate-x-full', 'translate-x-0');
+      },
+
+      renderSessionTimeline(session) {
+        const container = document.getElementById('sessionTimelineList');
+        const parentContainer = document.getElementById('timelineContainer');
+
+        // Clean up previous elements
+        container.innerHTML = '';
+        const oldTracker = document.getElementById('timelineTracker');
+        if (oldTracker) oldTracker.remove();
+
+        const totalMs = session.maxLeave - session.minJoin;
+
+        // Sort records by join time
+        const sortedRecords = [...session.records].sort((a, b) => a.joinTs - b.joinTs);
+
+        // 1. Build the Gantt Chart Rows
+        container.className = "flex flex-col border border-slate-200 rounded-sm overflow-hidden bg-slate-200 gap-px";
+
+        sortedRecords.forEach((rec, i) => {
+          const leftPct = totalMs === 0 ? 0 : ((rec.joinTs - session.minJoin) / totalMs) * 100;
+          let widthPct = totalMs === 0 ? 100 : ((rec.leaveTs - rec.joinTs) / totalMs) * 100;
+          if (widthPct < 0.5) widthPct = 0.5; // Ensure very short stays are visible
+          if (leftPct + widthPct > 100) widthPct = 100 - leftPct;
+
+          // Gantt style color palette similar to the reference image_9639e3.png
+          const colors = ['bg-cyan-400', 'bg-rose-500', 'bg-amber-500', 'bg-emerald-500', 'bg-yellow-400', 'bg-indigo-400'];
+          const colorClass = colors[i % colors.length];
+
+          // Alternating background for rows (stripes)
+          const rowBg = i % 2 === 0 ? 'bg-white' : 'bg-slate-50';
+
+          const row = document.createElement('div');
+          row.className = `flex items-center text-[9px] sm:text-xs h-8 sm:h-10 ${rowBg} relative group`;
+
+          row.innerHTML = `
+                        <!-- Fixed Name Column (Optimized responsiveness to match image_963567.png on small viewports) -->
+                        <div class="w-20 sm:w-32 px-1.5 sm:px-3 truncate font-medium text-slate-700 flex items-center gap-1 border-r border-slate-200 h-full bg-inherit z-10" title="${rec.name}">
+                            <i class="ph ph-user text-slate-400 hidden sm:inline"></i> ${rec.name}
+                        </div>
+                        
+                        <!-- Timeline Track Area -->
+                        <div class="flex-1 relative h-full flex items-center">
+                            <!-- Solid color block representing duration -->
+                            <div class="absolute h-full ${colorClass} opacity-90 group-hover:opacity-100 transition-opacity flex items-center justify-center min-w-[2px]" 
+                                 style="left: ${leftPct}%; width: ${widthPct}%;"
+                                 title="${rec.join} - ${rec.leave || 'N/A'} (${this.formatMins(rec.duration)})">
+                            </div>
+                        </div>
+                    `;
+          container.appendChild(row);
+        });
+
+        // 2. Inject Interactive Tracker
+        const trackerHtml = `
+                    <div id="timelineTracker" class="hidden absolute top-0 bottom-0 w-px bg-blue-600 z-20 pointer-events-none transition-opacity duration-150">
+                        <div id="timelineTrackerTime" class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full mb-1 bg-slate-900 text-white text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap font-medium">
+                            00:00
+                        </div>
+                        <!-- Little marker dot on the line -->
+                        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-blue-600 rounded-full shadow border border-white"></div>
+                    </div>
+                `;
+        parentContainer.insertAdjacentHTML('beforeend', trackerHtml);
+
+        // 3. Setup Interactive Mouse Listeners
+        const tracker = document.getElementById('timelineTracker');
+        const trackerTime = document.getElementById('timelineTrackerTime');
+        let nameLabelWidth = 0;
+
+        container.addEventListener('mouseenter', () => {
+          tracker.classList.remove('hidden');
+          // Calculate left column width once on enter to avoid layout thrashing
+          const firstRow = container.firstElementChild;
+          if (firstRow) {
+            nameLabelWidth = firstRow.firstElementChild.getBoundingClientRect().width;
+          }
+        });
+
+        container.addEventListener('mouseleave', () => {
+          tracker.classList.add('hidden');
+        });
+
+        container.addEventListener('mousemove', (e) => {
+          const rect = container.getBoundingClientRect();
+
+          // X position relative to the main container
+          let visualX = e.clientX - rect.left;
+
+          // Constrain visual line inside boundaries
+          if (visualX < 0) visualX = 0;
+          if (visualX > rect.width) visualX = rect.width;
+
+          tracker.style.left = `${visualX}px`;
+
+          // Calculate the time based on the active graphing area (ignoring the name column)
+          let trackWidth = rect.width - nameLabelWidth;
+          let trackX = visualX - nameLabelWidth;
+
+          // Clamp time calculation so hovering over names shows start time
+          if (trackX < 0) trackX = 0;
+          if (trackX > trackWidth) trackX = trackWidth;
+
+          let percentage = trackWidth === 0 ? 0 : trackX / trackWidth;
+          let hoverMs = session.minJoin + (percentage * totalMs);
+
+          const hoverDate = new Date(hoverMs);
+          trackerTime.textContent = hoverDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        });
+
+        // Add axis labels
+        document.getElementById('sessionTimelineStart').textContent = new Date(session.minJoin).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('sessionTimelineEnd').textContent = new Date(session.maxLeave).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      },
+
+      closeParticipantDetails() {
+        const drawer = document.getElementById('detailsDrawer');
+        const overlay = document.getElementById('drawerOverlay');
+        const content = document.getElementById('drawerContent');
+
+        overlay.classList.replace('opacity-100', 'opacity-0');
+        content.classList.replace('translate-x-0', 'translate-x-full');
+
+        setTimeout(() => {
+          drawer.classList.add('pointer-events-none');
+        }, 300);
+      },
+
+      renderMainHeatmaps() {
+        this.renderMonthlyHeatmap(this.rawData, 'mainMonthlyHeatmapGrid');
+        this.renderDailyHeatmap(this.rawData, 'mainDailyHeatmapGrid');
+      },
+
+      renderMonthlyHeatmap(records, gridId) {
+        const heatmapGrid = document.getElementById(gridId);
+        heatmapGrid.innerHTML = '';
+
+        // Generate last 35 days chronologically 
+        const now = new Date();
+        const days = [];
+        for (let i = 34; i >= 0; i--) {
+          const temp = new Date(now);
+          temp.setDate(temp.getDate() - i);
+          days.push(temp);
+        }
+
+        // Map durations by date strings
+        const dateDurMap = {};
+        records.forEach(rec => {
+          const dStr = rec.dateObj.toDateString();
+          dateDurMap[dStr] = (dateDurMap[dStr] || 0) + rec.duration;
+        });
+
+        // Calculate dynamically scaled threshold maximum for accurate heat intensity
+        const maxDuration = Math.max(...Object.values(dateDurMap), 90);
+
+        // Generate HTML divs for each block
+        days.forEach(day => {
+          const dStr = day.toDateString();
+          const duration = dateDurMap[dStr] || 0;
+
+          let bgColor = 'bg-slate-100 border border-slate-200';
+          if (duration > 0) {
+            const ratio = duration / maxDuration;
+            if (ratio <= 0.2) bgColor = 'bg-emerald-100 text-emerald-800';
+            else if (ratio <= 0.5) bgColor = 'bg-emerald-300 text-emerald-900';
+            else if (ratio <= 0.8) bgColor = 'bg-emerald-500 text-white';
+            else bgColor = 'bg-emerald-700 text-white';
+          }
+
+          const block = document.createElement('div');
+          block.className = `h-10 rounded-lg flex flex-col items-center justify-center text-[10px] font-semibold ${bgColor} transition-all duration-200 cursor-default group relative`;
+
+          const options = { month: 'short', day: 'numeric' };
+          block.innerHTML = `
+                        <span>${day.getDate()}</span>
+                        <!-- Custom Hover Tooltip -->
+                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1.5 hidden group-hover:block bg-slate-900 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 pointer-events-none">
+                            ${day.toLocaleDateString(undefined, options)}: ${this.formatMins(duration)}
+                        </div>
+                    `;
+          heatmapGrid.appendChild(block);
+        });
+      },
+
+      renderDailyHeatmap(records, gridId) {
+        const grid = document.getElementById(gridId);
+        grid.innerHTML = '';
+
+        // Aggregate joins into a 24-hour bracket map
+        const hourlyJoins = Array(24).fill(0);
+        records.forEach(rec => {
+          if (rec.joinTs) {
+            const date = new Date(rec.joinTs);
+            if (!isNaN(date.getTime())) {
+              const hr = date.getHours(); // 0-23
+              hourlyJoins[hr]++;
+            }
+          }
+        });
+
+        const maxJoins = Math.max(...hourlyJoins, 1);
+
+        for (let i = 0; i < 24; i++) {
+          const count = hourlyJoins[i];
+
+          // Assign proportional gradient color bracket based on joins
+          let bgColor = 'bg-slate-100 border border-slate-200';
+          if (count > 0) {
+            const ratio = count / maxJoins;
+            if (ratio <= 0.25) bgColor = 'bg-indigo-100 text-indigo-900';
+            else if (ratio <= 0.5) bgColor = 'bg-indigo-300 text-indigo-950';
+            else if (ratio <= 0.75) bgColor = 'bg-indigo-500 text-white';
+            else bgColor = 'bg-indigo-700 text-white';
+          }
+
+          // Format 12-hour tags for tooltips
+          const ampm = i >= 12 ? 'PM' : 'AM';
+          const labelHour = i % 12 || 12;
+
+          const block = document.createElement('div');
+          block.className = `h-9 rounded-md flex items-center justify-center text-[10px] font-semibold ${bgColor} transition-all duration-200 cursor-default group relative`;
+          block.innerHTML = `
+                        <span>${labelHour}</span>
+                        <!-- Custom Hover Tooltip -->
+                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1.5 hidden group-hover:block bg-slate-900 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 pointer-events-none">
+                            ${labelHour} ${ampm}: ${count} join(s)
+                        </div>
+                    `;
+          grid.appendChild(block);
+        }
+      },
+
+      renderTopCollaborators(targetName, userRecords) {
+        const collabs = {};
+
+        // Get all unique sessions this user was in
+        const sessionIds = [...new Set(userRecords.map(r => r.sessionId))];
+
+        // Filter raw data for these sessions, excluding the target user themselves
+        const relatedRecords = this.rawData.filter(r => sessionIds.includes(r.sessionId) && r.name !== targetName);
+
+        // Calculate precise overlapping time
+        userRecords.forEach(targetRec => {
+          const tJoin = targetRec.joinTs;
+          const tLeave = targetRec.leaveTs;
+          if (!tJoin || !tLeave) return;
+
+          // Find matching session records
+          const sessionPeers = relatedRecords.filter(r => r.sessionId === targetRec.sessionId);
+
+          sessionPeers.forEach(peerRec => {
+            const pJoin = peerRec.joinTs;
+            const pLeave = peerRec.leaveTs;
+            if (!pJoin || !pLeave) return;
+
+            // Calculate intersection of the two time periods
+            const overlapStart = Math.max(tJoin, pJoin);
+            const overlapEnd = Math.min(tLeave, pLeave);
+            const overlapMs = overlapEnd - overlapStart;
+
+            if (overlapMs > 0) {
+              const overlapMins = overlapMs / 60000;
+              collabs[peerRec.name] = (collabs[peerRec.name] || 0) + overlapMins;
+            }
+          });
+        });
+
+        const listContainer = document.getElementById('drawerCollaboratorsList');
+        listContainer.innerHTML = '';
+
+        // Sort by highest overlap duration (Uncapped)
+        const sortedCollabs = Object.entries(collabs)
+          .sort((a, b) => b[1] - a[1]);
+
+        if (sortedCollabs.length === 0) {
+          listContainer.innerHTML = `<p class="text-xs text-slate-500 italic py-2">No overlapping participants found.</p>`;
+          return;
+        }
+
+        const maxMins = sortedCollabs[0][1];
+
+        sortedCollabs.forEach(([peerName, mins]) => {
+          const durStr = this.formatMins(mins);
+
+          // Generate a progress bar width relative to the #1 collaborator
+          const widthPct = Math.max(5, (mins / maxMins) * 100);
+
+          const row = document.createElement('div');
+          row.className = 'flex flex-col gap-1.5';
+          row.innerHTML = `
+                        <div class="flex justify-between text-xs font-medium text-slate-700">
+                            <span class="flex items-center gap-1.5"><i class="ph ph-user text-slate-400"></i> ${peerName}</span>
+                            <span class="text-slate-500">${durStr}</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-pink-400 h-1.5 rounded-full" style="width: ${widthPct}%"></div>
+                        </div>
+                    `;
+          listContainer.appendChild(row);
+        });
+      }
+    };
+
+    // Boot up the application when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      app.init();
+    });
+  </script>
+</body>
+
+</html>

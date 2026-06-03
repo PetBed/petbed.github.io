@@ -81,34 +81,41 @@ const paths = {
 			"Study Companion": {
 				url: "https://petbed.github.io/Study%20Website/",
 			},
-      "Spotify Tracker": {
-        url: "https://petbed.github.io/Misc/Spotify%20Tracker/",
-      },
-      "World War Archive": {
-        url: "https://petbed.github.io/Misc/World%20Wars/",
-      },
+			"Spotify Tracker": {
+				url: "https://petbed.github.io/Misc/Spotify%20Tracker/",
+			},
+			"World War Archive": {
+				url: "https://petbed.github.io/Misc/World%20Wars/",
+			},
 			"Timeline Logger": {
-        url: "https://petbed.github.io/Misc/Timeline%20Logger/dashboard.html",
+				url: "https://petbed.github.io/Misc/Timeline%20Logger/dashboard.html",
 			},
 			"Etymology Learner": {
-        url: "https://petbed.github.io/Misc/Etymology/index.html",
+				url: "https://petbed.github.io/Misc/Etymology/index.html",
 			},
-      "Hamilton Ipsum": {
-        url: "https://petbed.github.io/Misc/Hamilton%20Ipsum/",
-      },
-      "Mood Tracker": {
-        url: "https://petbed.github.io/Misc/Mood%20Tracker/",
-      },
-      "French Cheat Sheet": {
-        url: "https://petbed.github.io/Misc/French%20Cheat%20Sheet/",
-      },
-      "💭": {
-        contents: {
-          "Midnight Thoughts": {
-            url: "https://petbed.github.io/Misc/Midnight%20Thoughts/",
-          },
-        }
-      }
+			"French Cheat Sheet": {
+				url: "https://petbed.github.io/Misc/French%20Cheat%20Sheet/",
+			},
+			"💭": {
+				contents: {
+					"Midnight Thoughts": {
+						url: "https://petbed.github.io/Misc/Midnight%20Thoughts/",
+					},
+				},
+			},
+		},
+	},
+	Misc: {
+		contents: {
+			"Hamilton Ipsum": {
+				url: "https://petbed.github.io/Misc/Hamilton%20Ipsum/",
+			},
+			"Mood Tracker": {
+				url: "https://petbed.github.io/Misc/Mood%20Tracker/",
+			},
+			"Attendance Logger": {
+				url: "https://petbed.github.io/Misc/Attendance%20Logger/",
+			},
 		},
 	},
 	Credits: {

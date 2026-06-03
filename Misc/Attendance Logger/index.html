@@ -22,7 +22,10 @@
       theme: {
         extend: {
           fontFamily: { sans: ['Inter', 'sans-serif'] },
-          colors: { primary: '#1a73e8' }
+          colors: { primary: '#1a73e8' },
+          gridTemplateColumns: {
+            '24': 'repeat(24, minmax(0, 1fr))',
+          }
         }
       }
     }
@@ -182,55 +185,85 @@
         </div>
       </div>
 
-      <!-- Overall Heatmaps Section -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+      <!-- Overall Heatmaps Section (Stacked vertically on desktop) -->
+      <div class="grid grid-cols-1 gap-4 lg:gap-6">
         <!-- Monthly Heatmap -->
         <div class="glass-card rounded-xl p-4 sm:p-5 shadow-sm">
-          <div class="flex justify-between items-center mb-4">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
             <h3 class="text-sm sm:text-base font-semibold text-slate-800 flex items-center gap-1.5 sm:gap-2">
               <i class="ph ph-calendar text-emerald-500"></i> Overall Monthly Activity
             </h3>
-            <span class="text-[10px] sm:text-xs text-slate-400">Past 35 Days</span>
+            <!-- Month Switcher Controls -->
+            <div
+              class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg p-2 w-full md:w-auto md:min-w-[300px]">
+              <button onclick="app.navigateOverallCalendar(-1)"
+                class="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded text-xs font-semibold text-slate-600 flex items-center gap-1 shadow-sm">
+                <i class="ph ph-arrow-left"></i> Previous
+              </button>
+              <span id="overallCalendarMonthTitle"
+                class="text-sm sm:text-base font-bold text-slate-900 tracking-wide px-4">June 2026</span>
+              <button onclick="app.navigateOverallCalendar(1)"
+                class="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded text-xs font-semibold text-slate-600 flex items-center gap-1 shadow-sm">
+                Next <i class="ph ph-arrow-right"></i>
+              </button>
+            </div>
           </div>
-          <div class="grid grid-cols-7 gap-1 sm:gap-2" id="mainMonthlyHeatmapGrid">
-            <!-- Filled dynamically via JS -->
+
+          <div class="border border-slate-200 rounded-xl p-3 sm:p-4 bg-slate-50">
+            <!-- Grid Layout for Weekday Labels -->
+            <div class="grid grid-cols-7 gap-1 text-center text-[10px] sm:text-xs font-semibold text-slate-400 mb-2">
+              <div>Sun</div>
+              <div>Mon</div>
+              <div>Tue</div>
+              <div>Wed</div>
+              <div>Thu</div>
+              <div>Fri</div>
+              <div>Sat</div>
+            </div>
+            <!-- Dynamic Calendar Days Grid -->
+            <div class="grid grid-cols-7 gap-1 sm:gap-2" id="mainMonthlyHeatmapGrid">
+              <!-- Filled dynamically via JS -->
+            </div>
           </div>
+
           <div class="flex items-center justify-end gap-1 mt-4 text-[9px] sm:text-[10px] text-slate-400 font-medium">
             <span>Less</span>
-            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-slate-100 border border-slate-200"></div>
-            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-emerald-100"></div>
-            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-emerald-300"></div>
-            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-emerald-500"></div>
-            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-emerald-700"></div>
+            <div class="w-3 h-3 rounded-sm bg-slate-100 border border-slate-200"></div>
+            <div class="w-3 h-3 rounded-sm bg-emerald-100"></div>
+            <div class="w-3 h-3 rounded-sm bg-emerald-300"></div>
+            <div class="w-3 h-3 rounded-sm bg-emerald-500"></div>
+            <div class="w-3 h-3 rounded-sm bg-emerald-700"></div>
             <span>More</span>
           </div>
         </div>
 
         <!-- Daily Heatmap -->
         <div class="glass-card rounded-xl p-4 sm:p-5 shadow-sm">
-          <div class="flex justify-between items-center mb-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
             <h3 class="text-sm sm:text-base font-semibold text-slate-800 flex items-center gap-1.5 sm:gap-2">
               <i class="ph ph-clock text-indigo-500"></i> Overall Daily Patterns
             </h3>
-            <span class="text-[10px] sm:text-xs text-slate-400">24-Hour Distribution</span>
+            <span
+              class="text-[10px] sm:text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-md self-start sm:self-auto border border-slate-200">24-Hour
+              Distribution</span>
           </div>
-          <div class="flex flex-col gap-2">
-            <div class="grid grid-cols-12 gap-0.5 sm:gap-1" id="mainDailyHeatmapGrid">
+
+          <!-- Responsive Grid Container (Dynamically wraps into rows based on screen width) -->
+          <div class="pt-6 pb-2">
+            <div class="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-12 xl:grid-cols-24 gap-3 sm:gap-4 lg:gap-5"
+              id="mainDailyHeatmapGrid">
               <!-- Filled dynamically via JS -->
             </div>
-            <div class="flex justify-between text-[8px] sm:text-[10px] text-slate-400 px-0.5 font-medium mt-1">
-              <span>12 AM</span>
-              <span>12 PM</span>
-              <span>11 PM</span>
-            </div>
           </div>
-          <div class="flex items-center justify-end gap-1 mt-4 text-[9px] sm:text-[10px] text-slate-400 font-medium">
+
+          <div
+            class="flex items-center justify-end gap-1 mt-6 border-t border-slate-100 pt-4 text-[9px] sm:text-[10px] text-slate-400 font-medium">
             <span>Never Joined</span>
             <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-slate-100 border border-slate-200"></div>
-            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-indigo-100"></div>
-            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-indigo-300"></div>
-            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-indigo-500"></div>
-            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-indigo-700"></div>
+            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-indigo-100 border border-indigo-200"></div>
+            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-indigo-300 border border-indigo-400"></div>
+            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-indigo-500 border border-indigo-600"></div>
+            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm bg-indigo-700 border border-indigo-800"></div>
             <span>Regular Hour</span>
           </div>
         </div>
@@ -363,21 +396,44 @@
 
             <!-- Monthly Heatmap Calendar -->
             <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm">
-              <div class="mb-3 sm:mb-4 flex justify-between items-start">
-                <div>
-                  <h3 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5 sm:gap-2">
-                    <i class="ph ph-calendar text-emerald-500 text-base"></i> Monthly Activity Heatmap
-                  </h3>
-                  <p class="text-[10px] sm:text-xs text-slate-500 mt-1">Shading denotes daily call duration.</p>
-                </div>
-                <span
-                  class="text-[8px] sm:text-[10px] font-medium text-slate-500 uppercase tracking-wider bg-slate-100 px-1.5 py-0.5 rounded">35
-                  Days</span>
+              <div class="mb-3 sm:mb-4">
+                <h3 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5 sm:gap-2">
+                  <i class="ph ph-calendar text-emerald-500 text-base"></i> Monthly Activity Heatmap
+                </h3>
+                <p class="text-[10px] sm:text-xs text-slate-500 mt-1">Use the controls below to toggle calendar months.
+                </p>
               </div>
 
-              <!-- Heatmap Grid -->
-              <div class="grid grid-cols-7 gap-1 sm:gap-2" id="monthlyHeatmapGrid">
-                <!-- Filled dynamically via JS -->
+              <!-- Drawer Month Switcher Controls -->
+              <div class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg p-2 mb-3">
+                <button onclick="app.navigateDrawerCalendar(-1)"
+                  class="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded text-[10px] font-semibold text-slate-600 flex items-center gap-0.5 shadow-sm">
+                  <i class="ph ph-arrow-left"></i> Prev
+                </button>
+                <span id="drawerCalendarMonthTitle"
+                  class="text-xs sm:text-sm font-bold text-slate-900 tracking-wide">June 2026</span>
+                <button onclick="app.navigateDrawerCalendar(1)"
+                  class="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded text-[10px] font-semibold text-slate-600 flex items-center gap-0.5 shadow-sm">
+                  Next <i class="ph ph-arrow-right"></i>
+                </button>
+              </div>
+
+              <div class="border border-slate-200 rounded-xl p-3 bg-slate-50">
+                <!-- Grid Layout for Weekday Labels -->
+                <div
+                  class="grid grid-cols-7 gap-1 text-center text-[9px] sm:text-[10px] font-semibold text-slate-400 mb-2">
+                  <div>Sun</div>
+                  <div>Mon</div>
+                  <div>Tue</div>
+                  <div>Wed</div>
+                  <div>Thu</div>
+                  <div>Fri</div>
+                  <div>Sat</div>
+                </div>
+                <!-- Heatmap Grid -->
+                <div class="grid grid-cols-7 gap-1 sm:gap-2" id="monthlyHeatmapGrid">
+                  <!-- Filled dynamically via JS -->
+                </div>
               </div>
 
               <!-- Heatmap Legend -->
@@ -395,26 +451,18 @@
 
             <!-- Daily Heatmap Calendar -->
             <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm">
-              <div class="mb-3 sm:mb-4 flex justify-between items-start">
-                <div>
-                  <h3 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5 sm:gap-2">
-                    <i class="ph ph-clock text-indigo-500 text-base"></i> Daily Join Patterns
-                  </h3>
-                  <p class="text-[10px] sm:text-xs text-slate-500 mt-1">Time blocks where they frequently join.</p>
-                </div>
-                <span
-                  class="text-[8px] sm:text-[10px] font-medium text-slate-500 uppercase tracking-wider bg-slate-100 px-1.5 py-0.5 rounded">24-Hour</span>
+              <div class="mb-3 sm:mb-4">
+                <h3 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5 sm:gap-2">
+                  <i class="ph ph-clock text-indigo-500 text-base"></i> Daily Join Patterns
+                </h3>
+                <p class="text-[10px] sm:text-xs text-slate-500 mt-1">Time blocks where they frequently join.</p>
               </div>
 
-              <!-- Heatmap Grid -->
-              <div class="flex flex-col gap-2">
-                <div class="grid grid-cols-12 gap-0.5 sm:gap-1" id="dailyHeatmapGrid">
+              <!-- Responsive Grid Heatmap (Dynamically wraps) -->
+              <div class="pt-6 pb-2">
+                <div class="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-12 gap-2 sm:gap-3 lg:gap-4"
+                  id="dailyHeatmapGrid">
                   <!-- Filled dynamically via JS -->
-                </div>
-                <div class="flex justify-between text-[8px] sm:text-[10px] text-slate-400 px-0.5 font-medium mt-1">
-                  <span>12 AM</span>
-                  <span>12 PM</span>
-                  <span>11 PM</span>
                 </div>
               </div>
             </div>
@@ -510,6 +558,11 @@
         participant: null
       },
       sortState: { column: 'duration', dir: 'desc' },
+
+      // Calendar Navigation State (Context year/month is June 2026)
+      overallCalendarDate: new Date(2026, 5, 1), // June 2026
+      drawerCalendarDate: new Date(2026, 5, 1),  // June 2026
+      activeDrawerParticipantName: '',           // Track which participant is currently selected
 
       // Initialize app
       init() {
@@ -670,27 +723,27 @@
       loadMockData() {
         this.setStatus('Using Demo Data (Make sheet public for real data)', 'error');
 
-        // Generate a week of fake data
-        const names = ['Alice Johnson', 'Bob Smith', 'Charlie Davis', 'Diana Prince', 'Evan Wright'];
+        // Generate data centered in June 2026
+        const names = ['Alice Johnson', 'Bob Smith', 'Charlie Davis', 'Diana Prince', 'Evan Wright', 'Frank Miller'];
         const data = [];
-        const now = new Date();
+        const baselineDate = new Date(2026, 5, 4); // June 4, 2026
 
-        for (let i = 0; i < 80; i++) {
-          const daysAgo = Math.floor(Math.random() * 35);
-          const d = new Date();
-          d.setDate(now.getDate() - daysAgo);
-          d.setHours(8 + Math.floor(Math.random() * 8), Math.floor(Math.random() * 60), 0, 0); // Random start 8am-4pm
+        for (let i = 0; i < 150; i++) {
+          const daysOffset = Math.floor(Math.random() * 45) - 25; // Shifts days around June 2026
+          const d = new Date(2026, 5, 4);
+          d.setDate(baselineDate.getDate() + daysOffset);
+          d.setHours(8 + Math.floor(Math.random() * 12), Math.floor(Math.random() * 60), 0, 0); // Random start
 
-          const durMins = Math.floor(Math.random() * 110) + 10;
+          const durMins = Math.floor(Math.random() * 120) + 15;
           const dLeave = new Date(d.getTime() + durMins * 60000);
 
           data.push({
-            sessionId: `mock-sess-${Math.floor(Math.random() * 15)}`,
+            sessionId: `meet-sess-${Math.floor(Math.random() * 20)}`,
             dateObj: d,
             dateStr: d.toLocaleDateString(),
             name: names[Math.floor(Math.random() * names.length)],
-            join: d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            leave: dLeave.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            join: d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+            leave: dLeave.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
             joinTs: d.getTime(),
             leaveTs: dLeave.getTime(),
             duration: durMins
@@ -728,8 +781,8 @@
       processData() {
         if (this.rawData.length === 0) return;
 
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        // Base today's context as June 4, 2026 (matching system context)
+        const today = new Date(2026, 5, 4);
 
         // Filter raw data based on timeframe
         this.filteredData = this.rawData.filter(row => {
@@ -909,11 +962,12 @@
 
       updateTrendChart() {
         const dateMap = {};
-        const now = new Date();
+        // Display trend scaling depending on system context date
+        const baselineDate = new Date(2026, 5, 4);
         const days = this.timeframe === 'daily' ? 1 : (this.timeframe === 'weekly' ? 7 : 30);
 
         for (let i = days - 1; i >= 0; i--) {
-          let d = new Date(now);
+          let d = new Date(baselineDate);
           d.setDate(d.getDate() - i);
           let dateStr = `${d.getMonth() + 1}/${d.getDate()}`;
           dateMap[dateStr] = 0;
@@ -1082,6 +1136,7 @@
       },
 
       showParticipantDetails(name) {
+        this.activeDrawerParticipantName = name;
         const userRecords = this.rawData.filter(r => r.name === name);
         if (userRecords.length === 0) return;
 
@@ -1119,10 +1174,10 @@
           logsContainer.appendChild(block);
         });
 
-        // Generate Monthly Activity Heatmap (Grid layout of past 35 days)
-        this.renderMonthlyHeatmap(userRecords, 'monthlyHeatmapGrid');
+        // Generate Monthly Calendar Grid Heatmap for selected participant
+        this.renderMonthlyCalendar(userRecords, 'monthlyHeatmapGrid', 'drawerCalendarMonthTitle', this.drawerCalendarDate);
 
-        // Generate Daily Join Heatmap Strip (24 hour blocks)
+        // Generate Daily Join Heatmap Strip (with labels below as image_95ba02.png)
         this.renderDailyHeatmap(userRecords, 'dailyHeatmapGrid');
 
         // Render Top Collaborators
@@ -1152,8 +1207,8 @@
         document.getElementById('drawerMetaSessionTime').textContent = this.formatMins(session.durationMins);
         document.getElementById('drawerMetaSessionParticipants').textContent = session.participantCount;
 
-        const start = new Date(session.minJoin).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const end = new Date(session.maxLeave).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const start = new Date(session.minJoin).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        const end = new Date(session.maxLeave).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
         document.getElementById('drawerMetaSessionWindow').textContent = `${start} - ${end}`;
 
         // Render timeline
@@ -1274,12 +1329,12 @@
           let hoverMs = session.minJoin + (percentage * totalMs);
 
           const hoverDate = new Date(hoverMs);
-          trackerTime.textContent = hoverDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          trackerTime.textContent = hoverDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
         });
 
         // Add axis labels
-        document.getElementById('sessionTimelineStart').textContent = new Date(session.minJoin).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        document.getElementById('sessionTimelineEnd').textContent = new Date(session.maxLeave).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('sessionTimelineStart').textContent = new Date(session.minJoin).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        document.getElementById('sessionTimelineEnd').textContent = new Date(session.maxLeave).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
       },
 
       closeParticipantDetails() {
@@ -1296,60 +1351,85 @@
       },
 
       renderMainHeatmaps() {
-        this.renderMonthlyHeatmap(this.rawData, 'mainMonthlyHeatmapGrid');
+        this.renderMonthlyCalendar(this.rawData, 'mainMonthlyHeatmapGrid', 'overallCalendarMonthTitle', this.overallCalendarDate);
         this.renderDailyHeatmap(this.rawData, 'mainDailyHeatmapGrid');
       },
 
-      renderMonthlyHeatmap(records, gridId) {
+      navigateOverallCalendar(direction) {
+        // Change date by offset months
+        this.overallCalendarDate.setMonth(this.overallCalendarDate.getMonth() + direction);
+        this.renderMonthlyCalendar(this.rawData, 'mainMonthlyHeatmapGrid', 'overallCalendarMonthTitle', this.overallCalendarDate);
+      },
+
+      navigateDrawerCalendar(direction) {
+        this.drawerCalendarDate.setMonth(this.drawerCalendarDate.getMonth() + direction);
+        const userRecords = this.rawData.filter(r => r.name === this.activeDrawerParticipantName);
+        this.renderMonthlyCalendar(userRecords, 'monthlyHeatmapGrid', 'drawerCalendarMonthTitle', this.drawerCalendarDate);
+      },
+
+      renderMonthlyCalendar(records, gridId, titleId, calendarDate) {
         const heatmapGrid = document.getElementById(gridId);
+        const titleElement = document.getElementById(titleId);
+
         heatmapGrid.innerHTML = '';
 
-        // Generate last 35 days chronologically 
-        const now = new Date();
-        const days = [];
-        for (let i = 34; i >= 0; i--) {
-          const temp = new Date(now);
-          temp.setDate(temp.getDate() - i);
-          days.push(temp);
-        }
+        const year = calendarDate.getFullYear();
+        const month = calendarDate.getMonth();
 
-        // Map durations by date strings
-        const dateDurMap = {};
+        // Format Calendar Month Title Label (e.g. "June 2026")
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        titleElement.textContent = `${monthNames[month]} ${year}`;
+
+        // Calculate first weekday of the selected month
+        const firstDayInstance = new Date(year, month, 1);
+        const startWeekday = firstDayInstance.getDay(); // 0 (Sun) to 6 (Sat)
+
+        // Calculate total days in the selected month
+        const totalDays = new Date(year, month + 1, 0).getDate();
+
+        // Map durations by day number (1-indexed)
+        const dayDurations = Array(totalDays + 1).fill(0);
         records.forEach(rec => {
-          const dStr = rec.dateObj.toDateString();
-          dateDurMap[dStr] = (dateDurMap[dStr] || 0) + rec.duration;
+          const recDate = rec.dateObj;
+          if (recDate.getFullYear() === year && recDate.getMonth() === month) {
+            dayDurations[recDate.getDate()] += rec.duration;
+          }
         });
 
-        // Calculate dynamically scaled threshold maximum for accurate heat intensity
-        const maxDuration = Math.max(...Object.values(dateDurMap), 90);
+        const maxDuration = Math.max(...dayDurations, 90);
 
-        // Generate HTML divs for each block
-        days.forEach(day => {
-          const dStr = day.toDateString();
-          const duration = dateDurMap[dStr] || 0;
+        // 1. Append padding placeholders for weekdays before the 1st of the month
+        for (let i = 0; i < startWeekday; i++) {
+          const emptyCell = document.createElement('div');
+          emptyCell.className = "h-8 sm:h-10 bg-transparent";
+          heatmapGrid.appendChild(emptyCell);
+        }
 
-          let bgColor = 'bg-slate-100 border border-slate-200';
+        // 2. Append actual days of the month with styled calendar indicators matching image_95b9a5.png
+        for (let day = 1; day <= totalDays; day++) {
+          const duration = dayDurations[day];
+          let bgColor = 'bg-slate-100 text-slate-400 border border-slate-200'; // Default gray for zero activity
+
           if (duration > 0) {
             const ratio = duration / maxDuration;
-            if (ratio <= 0.2) bgColor = 'bg-emerald-100 text-emerald-800';
-            else if (ratio <= 0.5) bgColor = 'bg-emerald-300 text-emerald-900';
-            else if (ratio <= 0.8) bgColor = 'bg-emerald-500 text-white';
-            else bgColor = 'bg-emerald-700 text-white';
+            if (ratio <= 0.2) bgColor = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+            else if (ratio <= 0.5) bgColor = 'bg-emerald-300 text-emerald-900 border-emerald-400';
+            else if (ratio <= 0.8) bgColor = 'bg-emerald-500 text-white border-emerald-600';
+            else bgColor = 'bg-emerald-700 text-white border-emerald-800';
           }
 
           const block = document.createElement('div');
-          block.className = `h-10 rounded-lg flex flex-col items-center justify-center text-[10px] font-semibold ${bgColor} transition-all duration-200 cursor-default group relative`;
+          block.className = `h-8 sm:h-10 rounded-lg flex items-center justify-center text-[10px] sm:text-xs font-bold ${bgColor} shadow-sm transition-all duration-200 cursor-default group relative`;
 
-          const options = { month: 'short', day: 'numeric' };
           block.innerHTML = `
-                        <span>${day.getDate()}</span>
+                        <span>${day}</span>
                         <!-- Custom Hover Tooltip -->
-                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1.5 hidden group-hover:block bg-slate-900 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 pointer-events-none">
-                            ${day.toLocaleDateString(undefined, options)}: ${this.formatMins(duration)}
+                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1.5 hidden group-hover:block bg-slate-900 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 pointer-events-none font-medium">
+                            ${monthNames[month].slice(0, 3)} ${day}: ${this.formatMins(duration)}
                         </div>
                     `;
           heatmapGrid.appendChild(block);
-        });
+        }
       },
 
       renderDailyHeatmap(records, gridId) {
@@ -1370,33 +1450,37 @@
 
         const maxJoins = Math.max(...hourlyJoins, 1);
 
+        // Build a continuous layout mimicking image_95ba02.png & image_95a75b.png exactly
         for (let i = 0; i < 24; i++) {
           const count = hourlyJoins[i];
 
           // Assign proportional gradient color bracket based on joins
-          let bgColor = 'bg-slate-100 border border-slate-200';
+          let bgColor = 'bg-slate-100 border border-slate-200/50';
           if (count > 0) {
             const ratio = count / maxJoins;
-            if (ratio <= 0.25) bgColor = 'bg-indigo-100 text-indigo-900';
-            else if (ratio <= 0.5) bgColor = 'bg-indigo-300 text-indigo-950';
-            else if (ratio <= 0.75) bgColor = 'bg-indigo-500 text-white';
-            else bgColor = 'bg-indigo-700 text-white';
+            if (ratio <= 0.25) bgColor = 'bg-indigo-100 border-indigo-200';
+            else if (ratio <= 0.5) bgColor = 'bg-indigo-300 border-indigo-400';
+            else if (ratio <= 0.75) bgColor = 'bg-indigo-500 border-indigo-600';
+            else bgColor = 'bg-indigo-700 border-indigo-800';
           }
 
-          // Format 12-hour tags for tooltips
-          const ampm = i >= 12 ? 'PM' : 'AM';
-          const labelHour = i % 12 || 12;
+          // Format 12-hour or 24-hour labels below the squares
+          const labelHour = `${i}:00`;
 
-          const block = document.createElement('div');
-          block.className = `h-9 rounded-md flex items-center justify-center text-[10px] font-semibold ${bgColor} transition-all duration-200 cursor-default group relative`;
-          block.innerHTML = `
-                        <span>${labelHour}</span>
+          const blockContainer = document.createElement('div');
+          // Removed fixed max widths to let CSS Grid naturally handle responsiveness
+          blockContainer.className = "flex flex-col items-center gap-1 sm:gap-1.5 group relative";
+          blockContainer.innerHTML = `
+                        <!-- Colored Heat Node (Rounded squares reflecting design reference) -->
+                        <div class="w-full aspect-square rounded-lg sm:rounded-xl ${bgColor} transition-all duration-200 cursor-default shadow-sm"></div>
+                        <!-- Hourly Label Below Square -->
+                        <span class="text-[9px] sm:text-[10px] font-semibold text-slate-500 tracking-tighter">${labelHour}</span>
                         <!-- Custom Hover Tooltip -->
-                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1.5 hidden group-hover:block bg-slate-900 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 pointer-events-none">
-                            ${labelHour} ${ampm}: ${count} join(s)
+                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-slate-900 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-50 pointer-events-none font-medium">
+                            ${labelHour}: ${count} join(s)
                         </div>
                     `;
-          grid.appendChild(block);
+          grid.appendChild(blockContainer);
         }
       },
 

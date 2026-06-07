@@ -196,10 +196,9 @@ export function renderCellarUI() {
 			contentHTML = `<i data-lucide="loader-2" class="w-10 h-10 text-amber-300 animate-spin mb-1"></i><span class="text-[10px] font-black text-amber-200 uppercase">Fermenting</span>`;
 			instructions = `Fermenting (${barrel.fermentTime}s)`;
 		} else if (barrel.state === "aging") {
-			isUrgent = barrel.ageProgress > 90;
-			bBtnClasses += isUrgent ? "border-red-600 bg-red-950 animate-pulse" : "border-amber-950 bg-[#6b2c21]";
-			contentHTML = `<div class="w-14 h-14 animate-pulse">${getWineIcon(barrel.recipeKey, "s")}</div><span class="text-[9px] font-black text-purple-300 uppercase mt-1">${isUrgent ? "SPOILING!" : "Aging"}</span>`;
-			instructions = isUrgent ? "⚠️ BOTTLE IMMEDIATELY!" : `Aging safely into: ${RECIPES[barrel.recipeKey].name}`;
+			bBtnClasses += "border-amber-950 bg-[#6b2c21]";
+			contentHTML = `<div class="w-14 h-14 animate-pulse">${getWineIcon(barrel.recipeKey, "s")}</div><span class="text-[9px] font-black text-purple-300 uppercase mt-1">Aging</span>`;
+			instructions = `Aging safely into: ${RECIPES[barrel.recipeKey].name}`;
 		}
 
 		wrapper.innerHTML = `
@@ -218,15 +217,20 @@ export function renderCellarUI() {
 
 		const btn = document.getElementById(`barrel-btn-${barrel.id}`);
 		if (barrel.state === "empty" || barrel.state === "crushing") btn.onclick = () => handleBarrelClick(barrel.id);
-		if (barrel.state === "aging") document.getElementById(`bottle-now-btn-${barrel.id}`).onclick = () => handleBottleAction(barrel.id);
+		if (barrel.state === "aging") {
+			document.getElementById(`bottle-now-btn-${barrel.id}`).onclick = () => handleBottleAction(barrel.id);
+			if (barrel.ageProgress >= 100) {
+				const vinegarBtn = document.getElementById(`vinegar-btn-${barrel.id}`);
+				if (vinegarBtn) vinegarBtn.onclick = () => window.bottleAsVinegar(barrel.id);
+			}
+		}
 	});
 	if (window.lucide) window.lucide.createIcons();
 }
 
 export function generateAgingBarHTML(barrel) {
 	const progress = barrel.ageProgress;
-	let barGlow = progress >= 80 && progress < 90 ? "sweet-spot-glow" : "";
-	let btnAlert = progress >= 90 ? "urgency-alert" : "";
+	let barGlow = progress >= 80 ? "sweet-spot-glow" : "";
 
 	let tierText = "";
 	let tierVal = 0;
@@ -240,25 +244,24 @@ export function generateAgingBarHTML(barrel) {
 	} else if (progress < 80) {
 		tierText = "A-Tier Premium";
 		tierVal = Math.round(liveBaseVal * TIERS.a.mult);
-	} else if (progress < 90) {
+	} else {
 		tierText = "★ S-Tier Reserve ★";
 		tierVal = Math.round(liveBaseVal * TIERS.s.mult);
-	} else {
-		tierText = "Vinegar Decay!";
-		tierVal = Math.round(liveBaseVal * TIERS.vinegar.mult);
 	}
 
 	return `
             <div class="w-full mt-4 flex-col bg-white p-3 rounded-xl border border-amber-900/10 shadow-sm ${barGlow}">
                 <div class="relative h-4 w-full rounded-full bg-gray-200 overflow-hidden flex border border-gray-300">
                     <div class="h-full bg-stone-400" style="width: 30%"></div><div class="h-full bg-orange-300" style="width: 30%"></div>
-                    <div class="h-full bg-yellow-400" style="width: 20%"></div><div class="h-full bg-purple-500" style="width: 10%"></div>
-                    <div class="h-full bg-yellow-800" style="width: 10%"></div>
+                    <div class="h-full bg-yellow-400" style="width: 20%"></div><div class="h-full bg-purple-500" style="width: 20%"></div>
                     <div class="absolute top-0 bottom-0 w-2.5 bg-red-600 border border-white shadow-md transition-all duration-100" style="left: ${progress}%;"></div>
                 </div>
                 <div class="flex justify-between items-center mt-3">
                     <div class="text-[10px] font-semibold text-amber-900/80 uppercase">Est: <span class="font-extrabold text-amber-950">${tierText} ($${tierVal})</span></div>
-                    <button id="bottle-now-btn-${barrel.id}" class="px-3 py-1.5 bg-rose-700 text-white font-extrabold text-[10px] rounded-lg shadow hover:bg-rose-600 transition-all flex items-center gap-1 ${btnAlert}"><i data-lucide="wine" class="w-3 h-3"></i> BOTTLE</button>
+                    <div class="flex items-center gap-2">
+                        ${progress >= 100 ? `<button id="vinegar-btn-${barrel.id}" class="px-3 py-1.5 bg-yellow-800 text-white font-extrabold text-[10px] rounded-lg shadow hover:bg-yellow-700 transition-all flex items-center gap-1"><i data-lucide="flask-conical" class="w-3 h-3"></i> VINEGAR</button>` : ""}
+                        <button id="bottle-now-btn-${barrel.id}" class="px-3 py-1.5 bg-rose-700 text-white font-extrabold text-[10px] rounded-lg shadow hover:bg-rose-600 transition-all flex items-center gap-1"><i data-lucide="wine" class="w-3 h-3"></i> BOTTLE</button>
+                    </div>
                 </div>
             </div>
         `;
@@ -290,32 +293,43 @@ export function renderRacks() {
 
 	state.wineRacks.forEach((bottle, slotId) => {
 		const cell = document.createElement("div");
-		cell.className = "relative w-full aspect-square bg-[#bda180]/15 border-4 border-[#8B5A2B]/40 rounded-xl shadow-md flex flex-col items-center justify-center gap-1 overflow-hidden transition-all duration-350 hover:scale-[1.02]";
+		cell.className = "relative w-full h-28 bg-[#a67c52] border-t-8 border-b-4 border-t-[#c48d53] border-b-[#593d1f] flex items-center justify-center p-2 transition-all duration-350";
 
 		if (bottle === null) {
-			cell.innerHTML = `<i data-lucide="plus" class="w-6 h-6 text-[#8B5A2B]/55"></i><span class="text-[8px] font-black tracking-wide text-[#8B5A2B]/70 uppercase">Slot 0${slotId + 1}</span>`;
+			cell.className += " cursor-pointer group hover:bg-[#b58c62]";
+			cell.innerHTML = `
+                    <div class="text-center text-[#593d1f]/70 group-hover:text-[#442d17] transition-colors">
+                        <svg viewBox="0 0 64 64" class="w-12 h-12 mx-auto opacity-60">
+                            <path d="M12,40 Q32,28 52,40" stroke="currentColor" stroke-width="7" fill="none" stroke-linecap="round"/>
+                        </svg>
+                        <span class="text-[9px] font-black uppercase tracking-wider">Empty Slot</span>
+                    </div>
+                `;
 			cell.onclick = () => openRackSelectModal(slotId);
 			cell.onmouseenter = null;
 			cell.onmouseleave = null;
 		} else {
 			const recipe = RECIPES[bottle.recipeKey];
 			const rank = VINTAGE_RANKS[bottle.rankIndex];
-			let bottleScaleClass = "w-10 h-10";
-			if (bottle.rankIndex === 1) bottleScaleClass = "w-11 h-11 transition-all";
-			else if (bottle.rankIndex === 2) bottleScaleClass = "w-12 h-12 shadow-lg animate-pulse";
-			else if (bottle.rankIndex === 3) bottleScaleClass = "w-13 h-13 shadow-2xl animate-pulse font-bold";
+			let bottleSizeClass = "h-16 w-16";
+			if (bottle.rankIndex === 1) bottleSizeClass = "h-18 w-18";
+			else if (bottle.rankIndex === 2) bottleSizeClass = "h-20 w-20 shadow-lg animate-pulse";
+			else if (bottle.rankIndex === 3) bottleSizeClass = "h-22 w-22 shadow-2xl animate-pulse font-bold";
 
 			const displayTitle = bottle.customLabel ? bottle.customLabel.title : recipe.name;
 
-			cell.innerHTML = `<div class="absolute inset-1 bg-amber-950/5 rounded-lg flex flex-col items-center justify-center p-1 relative"><div class="${bottleScaleClass}">${getWineIcon(bottle.recipeKey, bottle.qualityKey, bottle.customLabel)}</div><span class="text-[8px] font-black text-amber-950 leading-tight truncate text-center max-w-full px-0.5 mt-1">${displayTitle}</span><span class="text-[7px] font-bold px-1 py-0.5 rounded leading-none mt-1 ${rank.color}">${rank.name}</span></div>`;
+			cell.className += " cursor-pointer group";
+			cell.innerHTML = `
+                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-20">
+                        <div class="text-center text-white"><i data-lucide="trash-2" class="w-8 h-8 mx-auto"></i><span class="text-xs font-bold">Remove</span></div>
+                    </div>
+                    <div class="${bottleSizeClass} -rotate-90 transition-transform duration-300 group-hover:scale-95 z-10">${getWineIcon(bottle.recipeKey, bottle.qualityKey, bottle.customLabel)}</div>
+                    <div class="absolute bottom-1.5 text-center w-full px-2 z-0"><span class="text-[8px] font-black text-white/90 bg-black/40 px-2 py-0.5 rounded-md leading-tight truncate inline-block max-w-full">${displayTitle}</span></div>
+                `;
 			cell.onclick = () => window.removeWineFromRack(slotId);
 
 			cell.onmouseenter = (e) => showRackTooltip(e, slotId);
-			cell.onmousemove = (e) => {
-				const tooltip = document.getElementById("rack-tooltip");
-				tooltip.style.left = e.pageX + 15 + "px";
-				tooltip.style.top = e.pageY + 15 + "px";
-			};
+			cell.onmousemove = (e) => { const tooltip = document.getElementById("rack-tooltip"); tooltip.style.left = e.pageX + 15 + "px"; tooltip.style.top = e.pageY + 15 + "px"; };
 			cell.onmouseleave = hideRackTooltip;
 		}
 		grid.appendChild(cell);
@@ -1084,7 +1098,8 @@ export function closeModal() {
 
 	// If an S-Tier pop modal was just closed, check if a labeler sequence should trigger
 	if (globals.labeling.id) {
-		openLabelerModal(globals.labeling.id, "wine");
-		globals.labeling.id = null; // Clear so it only fires once
+		const bottleIdToLabel = globals.labeling.id;
+		globals.labeling.id = null; // Clear the temporary ID immediately
+		openLabelerModal(bottleIdToLabel, "wine"); // Then open the modal with the stored ID
 	}
 }

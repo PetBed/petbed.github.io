@@ -143,8 +143,7 @@ export function handleBottleAction(id) {
 
 	if (progress >= 30 && progress < 60) finalTier = "b";
 	else if (progress >= 60 && progress < 80) finalTier = "a";
-	else if (progress >= 80 && progress < 90) finalTier = "s";
-	else if (progress >= 90) finalTier = "vinegar";
+	else if (progress >= 80) finalTier = "s";
 
 	const bottle = {
 		id: "wine_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
@@ -180,9 +179,9 @@ export function handleBottleAction(id) {
 	triggerAutoSave();
 }
 
-export function autoDeclineToVinegar(id) {
+export function bottleAsVinegar(id) {
 	const barrel = state.barrels.find((b) => b.id === id);
-	if (!barrel) return;
+	if (!barrel || barrel.state !== "aging") return;
 
 	const bottle = {
 		id: "wine_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
@@ -193,10 +192,11 @@ export function autoDeclineToVinegar(id) {
 	};
 	state.wines.push(bottle);
 	playSound("pop");
-	showToast(`⚠️ Barrel 0${id + 1} over-aged and spoiled to Vinegar.`);
+	showToast(`Barrel 0${barrel.id + 1} batch was converted to Vinegar.`);
 
 	barrel.state = "empty";
 	barrel.ageProgress = 0;
+	barrel.crushProgress = 0;
 	barrel.recipeKey = null;
 
 	updateHeaderUI();
@@ -579,8 +579,8 @@ export function buyOakConditioning() {
 	}
 }
 
-export function startLoop() {
-	setInterval(() => {
+export function startLoop(multiplier = 1) {
+	return setInterval(() => {
 		// Auto-resume minigame physics if loaded from a cloud save mid-brew
 		if (state.kettle.state === "brewing" && !globals.kettlePhysicsInterval) {
 			startKettlePhysics();
@@ -613,14 +613,13 @@ export function startLoop() {
 				}
 			} else if (barrel.state === "aging") {
 				cellarChanged = true;
-				if (barrel.ageProgress >= 78 && barrel.ageProgress <= 90) {
+				if (barrel.ageProgress >= 78 && barrel.ageProgress < 100) {
 					if (Math.random() < 0.5) playSound("tick");
 				}
 				const speedFactor = state.shop.oakBuffOwned ? 2.6 : 2.0;
 				barrel.ageProgress += speedFactor;
 				if (barrel.ageProgress > 100) {
 					barrel.ageProgress = 100;
-					autoDeclineToVinegar(barrel.id);
 				}
 			}
 		});
@@ -657,7 +656,7 @@ export function startLoop() {
 			updateMarketPrices();
 			showToast("📈 Market prices have shifted!");
 		}
-	}, 1000);
+	}, 1000 / multiplier);
 }
 
 export function updateMarketPrices() {

@@ -168,6 +168,8 @@ export const state = {
 
 // Extracted global tracking variables required by multiple files
 export const globals = {
+	gameLoopInterval: null,
+	isPaused: false,
 	loadedPressIngredients: [],
 	loadedKettleIngredients: [],
 	activePressBarrelId: null,

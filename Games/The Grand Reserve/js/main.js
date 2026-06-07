@@ -1,7 +1,9 @@
 // --- MODULE ENTRY POINT ---
 import {initFirebase, openSyncModal, closeSyncModal, copySyncCode, loadRemoteSyncCode, triggerManualSync} from "./firebase-sync.js";
-import {startLoop, plantSeed, addToPress, removeFromPress, placeWineOnRack, removeWineFromRack, addToKettle, removeFromKettle, startKettlePhysics, adjustKettleHeat, clearFinishedKettle, sellWineQualityGroup, sellBeerGroup, buySeed, buyPantryItem, buyPlot, buyBarrel, buyKettle, buyOakConditioning, saveCustomLabel} from "./engine.js";
+import {startLoop, plantSeed, addToPress, removeFromPress, placeWineOnRack, removeWineFromRack, addToKettle, removeFromKettle, startKettlePhysics, adjustKettleHeat, clearFinishedKettle, sellWineQualityGroup, sellBeerGroup, buySeed, buyPantryItem, buyPlot, buyBarrel, buyKettle, buyOakConditioning, saveCustomLabel, bottleAsVinegar} from "./engine.js";
 import {initSound, switchReserveTab, switchShopTab, switchTab, updateHeaderUI, renderPlots, closePlotSelector, renderCellarUI, openPressModal, closePressModal, renderWarehouse, renderMarket, openSellModal, openSellBeerModal, closeSellModal, renderShop, renderBreweryUI, renderRacks, openRackSelectModal, closeRackSelectModal, openKettleModal, closeKettleModal, closeModal, openLabelerModal, closeLabelerModal, updateLabelDraft} from "./ui.js";
+import { initPlaytest } from "./playtest.js";
+import { globals } from "./state.js";
 
 // Expose DOM interaction functions to the global window context
 window.switchReserveTab = switchReserveTab;
@@ -34,6 +36,7 @@ window.openRackSelectModal = openRackSelectModal;
 window.closeRackSelectModal = closeRackSelectModal;
 window.placeWineOnRack = placeWineOnRack;
 window.removeWineFromRack = removeWineFromRack;
+window.bottleAsVinegar = bottleAsVinegar;
 
 window.openLabelerModal = openLabelerModal;
 window.closeLabelerModal = closeLabelerModal;
@@ -47,7 +50,6 @@ window.loadRemoteSyncCode = loadRemoteSyncCode;
 window.triggerManualSync = triggerManualSync;
 window.openPressModal = openPressModal;
 window.startKettlePhysics = startKettlePhysics;
-
 window.onload = () => {
 	initSound();
 	if (window.lucide) window.lucide.createIcons();
@@ -61,6 +63,8 @@ window.onload = () => {
 	renderBreweryUI();
 	renderRacks();
 
-	startLoop();
+	globals.gameLoopInterval = startLoop();
 	initFirebase();
+	initPlaytest();
+	console.log("Game initialized");
 };

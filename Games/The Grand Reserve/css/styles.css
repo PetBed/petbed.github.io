@@ -1,0 +1,91 @@
+/* Custom Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-spin-slow {
+  animation: spin 4s linear infinite;
+}
+
+@keyframes barrelShake {
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(-3deg) scale(1.02);
+  }
+
+  75% {
+    transform: rotate(3deg) scale(1.02);
+  }
+}
+
+.animate-shake {
+  animation: barrelShake 0.15s ease-in-out;
+}
+
+@keyframes pulseGlow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(168, 85, 247, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
+  }
+}
+
+.sweet-spot-glow {
+  animation: pulseGlow 1s infinite;
+}
+
+@keyframes urgencyFlash {
+
+  0%,
+  100% {
+    background-color: rgb(254, 242, 242);
+    border-color: rgb(239, 68, 68);
+  }
+
+  50% {
+    background-color: rgb(220, 38, 38);
+    border-color: rgb(153, 27, 27);
+    color: white;
+  }
+}
+
+.urgency-alert {
+  animation: urgencyFlash 0.8s infinite;
+}
+
+body {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  background-color: #fdf6e2;
+  /* cottagecore soft cream */
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: flex;
+}

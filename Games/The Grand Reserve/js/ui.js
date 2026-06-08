@@ -1,8 +1,21 @@
 import {state, globals} from "./state.js";
 import {SHORT_NAMES, INGREDIENTS_DATA, SEEDS_DATA, PANTRY_DATA, RECIPES, BEER_RECIPES, TIERS, VINTAGE_RANKS} from "./data.js";
+import {WEATHER_DATA} from "./weather.js";
 import {getSeedIcon, getCropIcon, getWineIcon, getBeerIcon} from "./graphics.js";
 import {toggleAudio} from "./audio.js";
 import {handlePlotClick, getRecipePrediction, handleBarrelClick, handleBottleAction, getKettleRecipePrediction} from "./engine.js";
+
+export function renderWeather() {
+	const weather = WEATHER_DATA[state.currentWeather];
+	const weatherDisplay = document.getElementById("weather-display");
+	if (weatherDisplay) {
+		weatherDisplay.innerHTML = `
+			<i data-lucide="${weather.icon}" class="w-4 h-4 ${weather.color}"></i>
+			<span class="${weather.color}">${weather.name}</span>
+		`;
+		if (window.lucide) window.lucide.createIcons();
+	}
+}
 
 export function switchReserveTab(tabId) {
 	globals.currentReserveTab = tabId;
@@ -109,12 +122,34 @@ export function renderPressModal() {
 	for (let i = 0; i < 3; i++) {
 		const slot = document.getElementById(`press-slot-${i}`);
 		if (i < globals.loadedPressIngredients.length) {
-			const ingKey = globals.loadedPressIngredients[i];
-			slot.className = "w-14 h-14 bg-white rounded-xl border-2 border-amber-950 flex flex-col items-center justify-center text-xs font-extrabold cursor-pointer hover:border-red-500 transition-all p-1";
-			slot.innerHTML = `<div class="w-8 h-8">${getCropIcon(ingKey)}</div><span class="text-[8px] text-amber-900 leading-none mt-1 truncate max-w-full px-1">${SHORT_NAMES[ingKey] || ingKey}</span>`;
+			const ingId = globals.loadedPressIngredients[i];
+			const ing = state.ingredients.find((i) => i.id === ingId);
+			if (ing) {
+				const ingKey = ing.key;
+				slot.className = "w-14 h-14 bg-white rounded-xl border-2 border-amber-950 flex flex-col items-center justify-center text-xs font-extrabold cursor-pointer hover:border-red-500 transition-all p-1";
+				slot.innerHTML = `<div class="w-8 h-8">${getCropIcon(ingKey)}</div><span class="text-[8px] text-amber-900 leading-none mt-1 truncate max-w-full px-1">${SHORT_NAMES[ingKey] || ingKey}</span>`;
+				const flavour = ing.flavour;
+				if (flavour) {
+					slot.onmouseenter = (e) => showFlavourTooltip(e, flavour, ing.weather);
+					slot.onmousemove = (e) => {
+						const tooltip = document.getElementById("flavour-tooltip");
+						tooltip.style.left = e.pageX + 15 + "px";
+						tooltip.style.top = e.pageY + 15 + "px";
+					};
+					slot.onmouseleave = hideFlavourTooltip;
+				}
+			} else {
+				// Should not happen, but as a fallback
+				slot.className = "w-14 h-14 bg-white rounded-xl border-2 border-dashed border-stone-300 flex items-center justify-center text-xs font-extrabold cursor-pointer hover:text-stone-500 transition-all";
+				slot.innerHTML = "+";
+				slot.onmouseenter = null;
+				slot.onmouseleave = null;
+			}
 		} else {
 			slot.className = "w-14 h-14 bg-white rounded-xl border-2 border-dashed border-stone-300 flex items-center justify-center text-xs font-extrabold cursor-pointer hover:text-stone-500 transition-all";
 			slot.innerHTML = "+";
+			slot.onmouseenter = null;
+			slot.onmouseleave = null;
 		}
 	}
 
@@ -133,6 +168,7 @@ export function renderPressModal() {
 				barrel.state = "crushing";
 				barrel.crushProgress = 0;
 				barrel.recipeKey = pred.key;
+				barrel.ingredients = [...globals.loadedPressIngredients];
 				globals.loadedPressIngredients = [];
 				globals.activePressBarrelId = null;
 				document.getElementById("press-modal").classList.add("hidden");
@@ -152,20 +188,39 @@ export function renderPressModal() {
 	const invList = document.getElementById("press-inventory-list");
 	invList.innerHTML = "";
 	let hasIngredients = false;
-	const wineIngredients = ["pinot_noir", "chardonnay", "cabernet", "muscat", "blackberry", "raspberry", "blueberry", "strawberry", "elderberry"];
-	wineIngredients.forEach((key) => {
-		const count = state.ingredients[key] || 0;
-		if (count > 0) {
+	const wineIngredientKeys = ["pinot_noir", "chardonnay", "cabernet", "muscat", "blackberry", "raspberry", "blueberry", "strawberry", "elderberry"];
+
+	state.ingredients.forEach((ing) => {
+		if (ing.count > 0 && wineIngredientKeys.includes(ing.key)) {
 			hasIngredients = true;
-			const ingData = INGREDIENTS_DATA[key];
+			const ingData = INGREDIENTS_DATA[ing.key];
 			const item = document.createElement("button");
+			item.dataset.weather = ing.weather;
 			item.className = "w-full flex items-center justify-between p-2 bg-amber-50 hover:bg-amber-100 border border-amber-950/10 rounded-lg text-xs font-bold transition-all text-left";
-			item.onclick = () => window.addToPress(key);
-			item.innerHTML = `<span class="flex items-center gap-1.5 font-black text-amber-950"><span class="w-6 h-6 inline-block shrink-0">${getCropIcon(key)}</span>${ingData.name}</span><span class="bg-amber-950/10 px-2 py-0.5 rounded text-[10px] font-black">Stock: ${count}</span>`;
+			item.onclick = () => window.addToPress(ing.id);
+			let weatherIcon = "";
+			if (ing.weather) {
+				const weather = WEATHER_DATA[ing.weather];
+				if (weather) {
+					weatherIcon = `<i data-lucide="${weather.icon}" class="w-3.5 h-3.5 ${weather.color}" title="Harvested in ${weather.name} weather"></i>`;
+				}
+			}
+			item.innerHTML = `<span class="flex items-center gap-1.5 font-black text-amber-950"><span class="w-6 h-6 inline-block shrink-0">${getCropIcon(ing.key)}</span>${ingData.name}${weatherIcon}</span><span class="bg-amber-950/10 px-2 py-0.5 rounded text-[10px] font-black">Stock: ${ing.count}</span>`;
+			const flavour = ing.flavour;
+			if (flavour) {
+				item.onmouseenter = (e) => showFlavourTooltip(e, flavour, ing.weather);
+				item.onmousemove = (e) => {
+					const tooltip = document.getElementById("flavour-tooltip");
+					tooltip.style.left = e.pageX + 15 + "px";
+					tooltip.style.top = e.pageY + 15 + "px";
+				};
+				item.onmouseleave = hideFlavourTooltip;
+			}
 			invList.appendChild(item);
 		}
 	});
 	if (!hasIngredients) invList.innerHTML = `<div class="py-4 text-center text-[10px] text-stone-400 font-bold">No harvested stock available.</div>`;
+	if (window.lucide) window.lucide.createIcons();
 }
 
 export function renderCellarUI() {
@@ -286,6 +341,57 @@ export function hideRackTooltip() {
 	document.getElementById("rack-tooltip").classList.add("hidden");
 }
 
+export function showFlavourTooltip(e, flavour, weatherKey) {
+	const tooltip = document.getElementById("flavour-tooltip");
+	if (!flavour) return;
+
+	let weatherHtml = "";
+	if (weatherKey && weatherKey !== "null") {
+		const weather = WEATHER_DATA[weatherKey];
+		const mod = weather.modifier;
+		if (weather && mod) {
+			const mods = [
+				mod.sw !== 0 ? `<span>Sweetness</span><span class="text-right">${mod.sw > 0 ? "+" : ""}${mod.sw}</span>` : "",
+				mod.ac !== 0 ? `<span>Acidity</span><span class="text-right">${mod.ac > 0 ? "+" : ""}${mod.ac}</span>` : "",
+				mod.tn !== 0 ? `<span>Tannin</span><span class="text-right">${mod.tn > 0 ? "+" : ""}${mod.tn}</span>` : "",
+				mod.bd !== 0 ? `<span>Body</span><span class="text-right">${mod.bd > 0 ? "+" : ""}${mod.bd}</span>` : "",
+			]
+				.filter(Boolean)
+				.join("");
+
+			if (mods) {
+				weatherHtml = `<div class="border-t border-amber-900/50 pt-1 mt-1 text-[10px] font-bold">
+                    <div class="flex justify-between items-center text-amber-200">
+                        <span>Harvest Weather</span>
+                        <span class="flex items-center gap-1 ${weather.color}"><i data-lucide="${weather.icon}" class="w-3 h-3"></i>${weather.name}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-x-2 text-amber-400/80 font-normal">${mods}</div>
+                </div>`;
+			}
+		}
+	}
+
+	tooltip.innerHTML = `
+		<div class="text-[11px] font-black uppercase tracking-wider text-amber-100 border-b border-amber-900/50 pb-1 mb-1">Flavour Profile</div>
+		<div class="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] font-bold text-amber-400">
+			<span>Sweetness</span><span class="text-right">${Math.round(flavour.sw)}</span>
+			<span>Acidity</span><span class="text-right">${Math.round(flavour.ac)}</span>
+			<span>Tannin</span><span class="text-right">${Math.round(flavour.tn)}</span>
+			<span>Body</span><span class="text-right">${Math.round(flavour.bd)}</span>
+		</div>
+		${weatherHtml}
+	`;
+
+	tooltip.classList.remove("hidden");
+	tooltip.style.left = e.pageX + 15 + "px";
+	tooltip.style.top = e.pageY + 15 + "px";
+	if (window.lucide) window.lucide.createIcons();
+}
+
+export function hideFlavourTooltip() {
+	document.getElementById("flavour-tooltip").classList.add("hidden");
+}
+
 export function renderRacks() {
 	const grid = document.getElementById("rack-grid");
 	if (!grid) return;
@@ -329,7 +435,11 @@ export function renderRacks() {
 			cell.onclick = () => window.removeWineFromRack(slotId);
 
 			cell.onmouseenter = (e) => showRackTooltip(e, slotId);
-			cell.onmousemove = (e) => { const tooltip = document.getElementById("rack-tooltip"); tooltip.style.left = e.pageX + 15 + "px"; tooltip.style.top = e.pageY + 15 + "px"; };
+			cell.onmousemove = (e) => {
+				const tooltip = document.getElementById("rack-tooltip");
+				tooltip.style.left = e.pageX + 15 + "px";
+				tooltip.style.top = e.pageY + 15 + "px";
+			};
 			cell.onmouseleave = hideRackTooltip;
 		}
 		grid.appendChild(cell);
@@ -542,17 +652,38 @@ export function renderWarehouse() {
 		agContainer.innerHTML = `<h3 class="text-xs font-black uppercase tracking-wider text-amber-900 border-b border-amber-900/10 pb-1 flex items-center gap-1"><i data-lucide="sprout" class="w-4 h-4"></i> Grains & Crops</h3>`;
 
 		let agEmpty = true;
-		agriculturalKeys.forEach((key) => {
-			const count = state.ingredients[key] || 0;
-			if (count > 0) {
+		state.ingredients.forEach((ing) => {
+			if (ing.count > 0 && agriculturalKeys.includes(ing.key)) {
 				agEmpty = false;
 				const row = document.createElement("div");
+				row.dataset.weather = ing.weather;
 				row.className = "flex justify-between items-center p-3 bg-white border border-stone-200/50 rounded-xl shadow-sm animate-fade-in";
-				row.innerHTML = `<span class="text-xs font-black flex items-center gap-2"><div class="w-6 h-6 shrink-0">${getCropIcon(key)}</div>${INGREDIENTS_DATA[key].name}</span><span class="text-[10px] bg-amber-100 text-amber-950 font-black px-2.5 py-1 rounded-full border border-amber-200/50">Stock: ${count}</span>`;
+				let weatherIcon = "";
+				if (ing.weather) {
+					const weather = WEATHER_DATA[ing.weather];
+					if (weather) {
+						weatherIcon = `<i data-lucide="${weather.icon}" class="w-3.5 h-3.5 ${weather.color} ml-1.5" title="Harvested in ${weather.name} weather"></i>`;
+					}
+				}
+				row.innerHTML = `<span class="text-xs font-black flex items-center gap-2"><div class="w-6 h-6 shrink-0">${getCropIcon(ing.key)}</div>${INGREDIENTS_DATA[ing.key].name}${weatherIcon}</span><span class="text-[10px] bg-amber-100 text-amber-950 font-black px-2.5 py-1 rounded-full border border-amber-200/50">Stock: ${ing.count}</span>`;
+				const flavour = ing.flavour;
+				if (flavour) {
+					row.onmouseenter = (e) => showFlavourTooltip(e, flavour, ing.weather);
+					row.onmousemove = (e) => {
+						const tooltip = document.getElementById("flavour-tooltip");
+						tooltip.style.left = e.pageX + 15 + "px";
+						tooltip.style.top = e.pageY + 15 + "px";
+					};
+					row.onmouseleave = hideFlavourTooltip;
+				}
 				agContainer.appendChild(row);
 			}
 		});
-		if (agEmpty) agContainer.innerHTML += `<div class="py-4 text-center text-[10px] text-stone-400 font-bold">No agricultural crops stored.</div>`;
+
+		if (agEmpty) {
+			agContainer.innerHTML += `<div class="py-4 text-center text-[10px] text-stone-400 font-bold">No agricultural crops stored.</div>`;
+		}
+		if (window.lucide) window.lucide.createIcons();
 		list.appendChild(agContainer);
 
 		const pantryContainer = document.createElement("div");
@@ -560,16 +691,16 @@ export function renderWarehouse() {
 		pantryContainer.innerHTML = `<h3 class="text-xs font-black uppercase tracking-wider text-amber-900 border-b border-amber-900/10 pb-1 flex items-center gap-1"><i data-lucide="shopping-cart" class="w-4 h-4"></i> Pantry shelf Stock</h3>`;
 
 		let pantryEmpty = true;
-		pantryKeys.forEach((key) => {
-			const count = state.ingredients[key] || 0;
-			if (count > 0) {
+		state.ingredients.forEach((ing) => {
+			if (ing.count > 0 && pantryKeys.includes(ing.key)) {
 				pantryEmpty = false;
 				const row = document.createElement("div");
 				row.className = "flex justify-between items-center p-3 bg-white border border-stone-200/50 rounded-xl shadow-sm animate-fade-in";
-				row.innerHTML = `<span class="text-xs font-black flex items-center gap-2"><div class="w-6 h-6 shrink-0">${getCropIcon(key)}</div>${INGREDIENTS_DATA[key].name}</span><span class="text-[10px] bg-indigo-100 text-indigo-950 font-black px-2.5 py-1 rounded-full border border-indigo-200/50">Stock: ${count}</span>`;
+				row.innerHTML = `<span class="text-xs font-black flex items-center gap-2"><div class="w-6 h-6 shrink-0">${getCropIcon(ing.key)}</div>${INGREDIENTS_DATA[ing.key].name}</span><span class="text-[10px] bg-indigo-100 text-indigo-950 font-black px-2.5 py-1 rounded-full border border-indigo-200/50">Stock: ${ing.count}</span>`;
 				pantryContainer.appendChild(row);
 			}
 		});
+
 		if (pantryEmpty) pantryContainer.innerHTML += `<div class="py-4 text-center text-[10px] text-stone-400 font-bold">No pantry additives direct-purchased yet.</div>`;
 		list.appendChild(pantryContainer);
 	} else if (globals.currentReserveTab === "wines") {
@@ -585,12 +716,8 @@ export function renderWarehouse() {
 			const groupKey = `${bottle.recipeKey}_${bottle.qualityKey}_${bottle.rankIndex}_${title}`;
 			if (!grouped[groupKey]) {
 				grouped[groupKey] = {
-					recipeKey: bottle.recipeKey,
-					qualityKey: bottle.qualityKey,
-					rankIndex: bottle.rankIndex,
+					...bottle,
 					title: title,
-					customLabel: bottle.customLabel,
-					sampleId: bottle.id,
 					count: 0,
 				};
 			}
@@ -617,11 +744,20 @@ export function renderWarehouse() {
                                 <span class="text-[8px] font-black px-2 py-1 rounded tracking-wider ${rank.color}">${rank.name}</span>
                             </div>
                         </div>
-                        <button onclick="openLabelerModal('${g.sampleId}', 'wine')" class="text-[9px] font-black uppercase text-amber-700 bg-amber-100 hover:bg-amber-200 px-2 py-1.5 rounded transition-all active:scale-95 whitespace-nowrap border border-amber-900/10">
+                        <button onclick="openLabelerModal('${g.id}', 'wine')" class="text-[9px] font-black uppercase text-amber-700 bg-amber-100 hover:bg-amber-200 px-2 py-1.5 rounded transition-all active:scale-95 whitespace-nowrap border border-amber-900/10">
                             ${hasLabel ? "Edit Label" : "+ Label"}
                         </button>
                     </div>
                 `;
+			if (g.flavour) {
+				card.onmouseenter = (e) => showFlavourTooltip(e, g.flavour, null);
+				card.onmousemove = (e) => {
+					const tooltip = document.getElementById("flavour-tooltip");
+					tooltip.style.left = e.pageX + 15 + "px";
+					tooltip.style.top = e.pageY + 15 + "px";
+				};
+				card.onmouseleave = hideFlavourTooltip;
+			}
 			list.appendChild(card);
 		});
 

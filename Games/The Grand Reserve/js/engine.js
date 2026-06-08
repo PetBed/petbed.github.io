@@ -1,8 +1,34 @@
 import {state, globals} from "./state.js";
 import {SHORT_NAMES, INGREDIENTS_DATA, SEEDS_DATA, PANTRY_DATA, RECIPES, BEER_RECIPES, TIERS, VINTAGE_RANKS} from "./data.js";
+import {WEATHER_DATA} from "./weather.js";
 import {playSound} from "./audio.js";
 import {triggerAutoSave} from "./firebase-sync.js";
 import {renderPlots, renderCellarUI, showToast, updateHeaderUI, renderWarehouse, renderPressModal, renderMarket, renderRacks, renderShop, renderBreweryUI, renderKettleModal, renderMarketTimer, openSellModal, openSellBeerModal, openLabelerModal} from "./ui.js";
+
+export function setWeather(weatherKey) {
+	state.currentWeather = weatherKey;
+	renderWeather();
+}
+
+export function startWeatherSystem() {
+	setInterval(() => {
+		const weatherKeys = Object.keys(WEATHER_DATA);
+		const newWeather = weatherKeys[Math.floor(Math.random() * weatherKeys.length)];
+		setWeather(newWeather);
+	}, 180000); // 3 minutes
+}
+
+export function renderWeather() {
+	const weather = WEATHER_DATA[state.currentWeather];
+	const weatherDisplay = document.getElementById("weather-display");
+	if (weatherDisplay) {
+		weatherDisplay.innerHTML = `
+			<i data-lucide="${weather.icon}" class="w-4 h-4 ${weather.color}"></i>
+			<span class="${weather.color}">${weather.name}</span>
+		`;
+		if (window.lucide) window.lucide.createIcons();
+	}
+}
 
 export function handlePlotClick(id) {
 	const plot = state.plots[id];
@@ -11,7 +37,30 @@ export function handlePlotClick(id) {
 		renderPlots();
 	} else if (plot.state === "ready") {
 		const seedKey = plot.cropType;
-		state.ingredients[seedKey]++;
+		const ingData = INGREDIENTS_DATA[seedKey];
+		const flavour = JSON.parse(JSON.stringify(ingData.flavour)); // Deep copy to prevent mutation of base data
+		const harvestWeatherKey = state.currentWeather;
+		const weather = WEATHER_DATA[harvestWeatherKey];
+		if (weather && weather.modifier) {
+			flavour.sw = Math.max(0, Math.min(100, flavour.sw + weather.modifier.sw));
+			flavour.ac = Math.max(0, Math.min(100, flavour.ac + weather.modifier.ac));
+			flavour.tn = Math.max(0, Math.min(100, flavour.tn + weather.modifier.tn));
+			flavour.bd = Math.max(0, Math.min(100, flavour.bd + weather.modifier.bd));
+		}
+
+		const existingIngredient = state.ingredients.find(ing => ing.key === seedKey && JSON.stringify(ing.flavour) === JSON.stringify(flavour));
+		if (existingIngredient) {
+			existingIngredient.count++;
+		} else {
+			state.ingredients.push({
+				id: `${seedKey}_${Date.now()}`,
+				key: seedKey,
+				count: 1,
+				flavour: flavour,
+				weather: harvestWeatherKey,
+			});
+		}
+
 		plot.state = "empty";
 		plot.cropType = null;
 		playSound("pluck");
@@ -40,18 +89,19 @@ export function plantSeed(id, seedKey) {
 	}
 }
 
-export function addToPress(ingredientKey) {
+export function addToPress(ingredientId) {
 	if (globals.loadedPressIngredients.length >= 3) {
 		showToast("Press is fully loaded! (Max 3 slots)");
 		return;
 	}
-	if (state.ingredients[ingredientKey] <= 0) {
+	const ingredient = state.ingredients.find(ing => ing.id === ingredientId);
+	if (!ingredient || ingredient.count <= 0) {
 		showToast("Not enough stock!");
 		return;
 	}
 
-	state.ingredients[ingredientKey]--;
-	globals.loadedPressIngredients.push(ingredientKey);
+	ingredient.count--;
+	globals.loadedPressIngredients.push(ingredientId);
 
 	playSound("pluck");
 	renderPressModal();
@@ -62,8 +112,11 @@ export function addToPress(ingredientKey) {
 export function removeFromPress(slotIndex) {
 	if (slotIndex >= globals.loadedPressIngredients.length) return;
 
-	const ing = globals.loadedPressIngredients[slotIndex];
-	state.ingredients[ing]++;
+	const ingredientId = globals.loadedPressIngredients[slotIndex];
+	const ingredient = state.ingredients.find(ing => ing.id === ingredientId);
+	if (ingredient) {
+		ingredient.count++;
+	}
 	globals.loadedPressIngredients.splice(slotIndex, 1);
 
 	playSound("pluck");
@@ -74,11 +127,24 @@ export function removeFromPress(slotIndex) {
 
 export function getRecipePrediction() {
 	if (globals.loadedPressIngredients.length === 0) {
-		return {key: null, name: "Empty Press", desc: "Load ingredients to preview."};
+		return {key: null, name: "Empty Press", desc: "Load ingredients to preview.", flavour: {sw: 0, ac: 0, tn: 0, bd: 0}};
 	}
 
+	const flavour = {sw: 0, ac: 0, tn: 0, bd: 0};
+	const ingredientKeys = [];
+	globals.loadedPressIngredients.forEach((ingId) => {
+		const ing = state.ingredients.find(i => i.id === ingId);
+		if (ing && ing.flavour) {
+			flavour.sw += ing.flavour.sw;
+			flavour.ac += ing.flavour.ac;
+			flavour.tn += ing.flavour.tn;
+			flavour.bd += ing.flavour.bd;
+			ingredientKeys.push(ing.key);
+		}
+	});
+
 	const counts = {};
-	globals.loadedPressIngredients.forEach((ing) => {
+	ingredientKeys.forEach((ing) => {
 		counts[ing] = (counts[ing] || 0) + 1;
 	});
 
@@ -93,22 +159,22 @@ export function getRecipePrediction() {
 	for (const [key, recipe] of Object.entries(RECIPES)) {
 		if (key === "fruit_cider" || key === "house_red") continue;
 		if (matches(recipe.req)) {
-			return {key, name: recipe.name, desc: recipe.desc};
+			return {key, name: recipe.name, desc: recipe.desc, flavour};
 		}
 	}
 
 	if (globals.loadedPressIngredients.length >= 2) {
 		const berriesList = ["blackberry", "raspberry", "blueberry", "strawberry", "elderberry"];
-		const allBerries = globals.loadedPressIngredients.every((ing) => berriesList.includes(ing));
+		const allBerries = ingredientKeys.every((ing) => berriesList.includes(ing));
 
 		if (allBerries) {
-			return {key: "fruit_cider", name: RECIPES.fruit_cider.name, desc: RECIPES.fruit_cider.desc};
+			return {key: "fruit_cider", name: RECIPES.fruit_cider.name, desc: RECIPES.fruit_cider.desc, flavour};
 		} else {
-			return {key: "house_red", name: RECIPES.house_red.name, desc: RECIPES.house_red.desc};
+			return {key: "house_red", name: RECIPES.house_red.name, desc: RECIPES.house_red.desc, flavour};
 		}
 	}
 
-	return {key: null, name: "Incomplete Recipe", desc: "Add more ingredients to form a valid recipe."};
+	return {key: null, name: "Incomplete Recipe", desc: "Add more ingredients to form a valid recipe.", flavour};
 }
 
 export function handleBarrelClick(id) {
@@ -145,12 +211,24 @@ export function handleBottleAction(id) {
 	else if (progress >= 60 && progress < 80) finalTier = "a";
 	else if (progress >= 80) finalTier = "s";
 
+	const flavour = {sw: 0, ac: 0, tn: 0, bd: 0};
+	barrel.ingredients.forEach((ingId) => {
+		const ing = state.ingredients.find(i => i.id === ingId);
+		if (ing && ing.flavour) {
+			flavour.sw += ing.flavour.sw;
+			flavour.ac += ing.flavour.ac;
+			flavour.tn += ing.flavour.tn;
+			flavour.bd += ing.flavour.bd;
+		}
+	});
+
 	const bottle = {
 		id: "wine_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
 		recipeKey: barrel.recipeKey,
 		qualityKey: finalTier,
 		age: 0,
 		rankIndex: 0,
+		flavour: flavour,
 		// customLabel property appended later inside labeler
 	};
 
@@ -171,6 +249,7 @@ export function handleBottleAction(id) {
 	barrel.ageProgress = 0;
 	barrel.crushProgress = 0;
 	barrel.recipeKey = null;
+	barrel.ingredients = [];
 
 	updateHeaderUI();
 	renderCellarUI();
@@ -504,7 +583,20 @@ export function buyPantryItem(pantryKey) {
 	const item = PANTRY_DATA[pantryKey];
 	if (item && state.gold >= item.cost) {
 		state.gold -= item.cost;
-		state.ingredients[pantryKey]++;
+
+		// Pantry items don't have flavour variations, so we can group them by key
+		const existingIngredient = state.ingredients.find((ing) => ing.key === pantryKey);
+		if (existingIngredient) {
+			existingIngredient.count++;
+		} else {
+			state.ingredients.push({
+				id: `${pantryKey}_${Date.now()}`,
+				key: pantryKey,
+				count: 1,
+				flavour: INGREDIENTS_DATA[pantryKey]?.flavour || null,
+			});
+		}
+
 		playSound("clink");
 		showToast(`Direct-purchased 1x ${item.name}! Added to Pantry.`);
 		updateHeaderUI();
@@ -543,6 +635,7 @@ export function buyBarrel() {
 			ageProgress: 0,
 			qualityMultiplier: 1.0,
 			recipeKey: null,
+			ingredients: [],
 		});
 		state.shop.barrelCost = Math.round(state.shop.barrelCost * 2.5);
 		playSound("clink");

@@ -1,6 +1,7 @@
 // --- CORE GAME STATE & GLOBALS ---
 export const state = {
 	gold: 150,
+	currentWeather: "temperate",
 
 	seeds: {
 		pinot_noir: 2,
@@ -19,27 +20,7 @@ export const state = {
 		elderberry: 0,
 	},
 
-	ingredients: {
-		pinot_noir: 0,
-		chardonnay: 0,
-		cabernet: 0,
-		muscat: 0,
-		hops: 0,
-		barley: 0,
-		wheat: 0,
-		rye: 0,
-		pumpkin: 0,
-		blackberry: 0,
-		raspberry: 0,
-		blueberry: 0,
-		strawberry: 0,
-		elderberry: 0,
-		wild_yeast: 0,
-		cacao_nibs: 0,
-		coffee_beans: 0,
-		pure_honey: 0,
-		coriander_peel: 0,
-	},
+	ingredients: [],
 
 	wines: [],
 	wineRacks: Array(9).fill(null),
@@ -67,6 +48,7 @@ export const state = {
 			ageProgress: 0,
 			qualityMultiplier: 1.0,
 			recipeKey: null,
+			ingredients: [],
 		},
 	],
 

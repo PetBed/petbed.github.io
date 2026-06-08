@@ -27,6 +27,10 @@
         <h1 class="text-xl font-black text-amber-950 tracking-tight flex items-center gap-1.5">
           <i data-lucide="wine" class="text-rose-800 w-6 h-6"></i> THE GRAND RESERVE
         </h1>
+        <div id="weather-display" class="flex items-center gap-1 text-xs font-bold text-amber-800">
+          <i data-lucide="cloud" class="w-4 h-4"></i>
+          <span>Temperate</span>
+        </div>
         <div class="flex gap-1.5">
           <button id="sync-btn" type="button" aria-label="Cloud Sync" onclick="openSyncModal()"
             class="p-2 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg transition-colors shadow-sm relative">
@@ -324,6 +328,11 @@
         class="text-[11px] font-black uppercase tracking-wider text-amber-100 border-b border-amber-900/50 pb-1 mb-1">
         Estate Title</div>
       <div id="tooltip-age" class="text-[10px] font-bold text-amber-400">Vintage Status</div>
+    </div>
+
+    <!-- FLAVOUR TOOLTIP -->
+    <div id="flavour-tooltip"
+      class="fixed hidden z-[100] pointer-events-none bg-amber-950/95 backdrop-blur border border-amber-800 text-white p-2.5 rounded-xl shadow-2xl transition-opacity animate-fade-in">
     </div>
 
     <!-- MULTI-INGREDIENT PRESS DIALOGUE / MODAL -->

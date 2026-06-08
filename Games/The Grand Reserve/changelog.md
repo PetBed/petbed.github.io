@@ -1,5 +1,25 @@
 # The Grand Reserve - Changelog
 
+## Version 0.1.0 - The Flavour & Terroir Update
+
+This update introduces a complete overhaul of the winemaking system, moving from a deterministic recipe model to a dynamic, customizable flavour-based system. The introduction of weather and terroir now makes every harvest a unique strategic decision.
+
+### New Features
+
+*   **Four-Point Flavour Spectrum:** Every wine and ingredient is now defined by four core flavour attributes:
+    *   **Sweetness (SW):** Measures residual sugars.
+    *   **Acidity (AC):** Measures tartness and brightness.
+    *   **Tannin (TN):** Measures mouth-drying astringency.
+    *   **Body (BD):** Measures physical weight and mouthfeel.
+*   **Dynamic Weather System:** The weather now changes every 3 minutes between **Sunny, Rain, Mist, and Temperate**. The weather at the moment of **harvest** applies a unique modifier to the crop's base flavour profile, adding a layer of strategic timing to your agricultural planning. The current weather is now displayed on the main UI.
+*   **Raw Materials Overhaul:** All grapes and berries now have their own unique base flavour values. Ingredients with different flavour profiles (due to harvest weather) are now stored in separate stacks in your inventory. The base flavour of a wine is now calculated by summing the flavour profiles of all its ingredients.
+*   **Enhanced UI & Tooltips:** Hovering over any ingredient or finished wine now displays a detailed tooltip with its full Four-Point Flavour Spectrum. Tooltips for harvested crops will also show the specific weather modifiers that were applied.
+
+### Developer & Playtesting
+*   **Weather Controls:** The playtest sidebar now includes buttons to manually set the weather, allowing for easy testing of the new flavour modification system.
+
+---
+
 ## Version 0.0.1 - Initial Release (Alpha)
 
 This marks the first public alpha release of The Grand Reserve! This version establishes the core gameplay loop, from planting your first grape seed to selling your first artisan vintage.

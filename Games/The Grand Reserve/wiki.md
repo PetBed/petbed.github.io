@@ -8,24 +8,24 @@ Your vineyard and pantry shelf form the foundation of your estate's supply chain
 
 ### 1.1 Crop & Seed Catalog (Vineyard Crops)
 
-All crops in this registry are grapes, berries, or grains that grow in standard Vineyard plots. Each seed packet is consumed instantly upon planting.
+All crops in this registry are grapes, berries, or grains that grow in standard Vineyard plots. Each seed packet is consumed instantly upon planting. Grapes and berries have a base flavour profile that is modified by the weather upon harvesting.
 
-| Crop Name | Seed Cost | Grow Time | SVG Color Profile | Primary Blend/Brew Role |
+| Crop Name | Seed Cost | Grow Time | Base Flavour (SW/AC/TN/BD) | Primary Blend/Brew Role |
 | :--- | :--- | :--- | :--- | :--- |
-| Pinot Noir Grapes | $15\text{ Gold}$ | $6\text{ seconds}$ | Dark Ruby Red | Light/medium-bodied red wine bases |
-| Chardonnay Grapes | $20\text{ Gold}$ | $8\text{ seconds}$ | Soft Golden-Green | Crisp white wine bases |
-| Cabernet Grapes | $30\text{ Gold}$ | $12\text{ seconds}$ | Deep Ink-Purple | Bold, heavy tannic red wine bases |
-| Muscat Grapes | $45\text{ Gold}$ | $15\text{ seconds}$ | Bright Amber-Yellow | Highly sweet dessert wine bases |
-| Wild Blackberry | $12\text{ Gold}$ | $5\text{ seconds}$ | Midnight Blue | Heavy berry tannins / Stout additive |
-| Golden Raspberry | $18\text{ Gold}$ | $7\text{ seconds}$ | Soft Rose-Red | Delicate floral wine notes |
-| Forest Blueberry | $25\text{ Gold}$ | $10\text{ seconds}$ | Steel Blue | Indigo wine complexity / Wild Sour Ale |
-| Sweet Strawberry | $35\text{ Gold}$ | $11\text{ seconds}$ | Vibrant Red | Fresh summer fruit wine sweetness |
-| Bitter Elderberry | $50\text{ Gold}$ | $18\text{ seconds}$ | Dark Aubergine | High-value bitter complexity |
-| Fresh Hops | $15\text{ Gold}$ | $8\text{ seconds}$ | Sage Green | Brewing bitter and aroma agent |
-| Craft Barley | $10\text{ Gold}$ | $6\text{ seconds}$ | Harvest Gold | Standard malty brewing grain base |
-| Malt Wheat | $8\text{ Gold}$ | $5\text{ seconds}$ | Pale Yellow | Soft, cloudy, and crisp brewing grain base |
-| Spicy Rye | $14\text{ Gold}$ | $7\text{ seconds}$ | Red-Gold | Dry, spicy, and earthy brewing grain base |
-| Sugar Pumpkin | $22\text{ Gold}$ | $14\text{ seconds}$ | Vibrant Orange | Heavy, sweet seasonal brewing adjunct |
+| Pinot Noir Grapes | $15\text{ Gold}$ | $6\text{ seconds}$ | `15 / 25 / 15 / 20` | Light/medium-bodied red wine bases |
+| Chardonnay Grapes | $20\text{ Gold}$ | $8\text{ seconds}$ | `10 / 35 / 0 / 15` | Crisp white wine bases |
+| Cabernet Grapes | $30\text{ Gold}$ | $12\text{ seconds}$ | `5 / 15 / 40 / 35` | Bold, heavy tannic red wine bases |
+| Muscat Grapes | $45\text{ Gold}$ | $15\text{ seconds}$ | `45 / 10 / 5 / 20` | Highly sweet dessert wine bases |
+| Wild Blackberry | $12\text{ Gold}$ | $5\text{ seconds}$ | `15 / 15 / 30 / 25` | Heavy berry tannins / Stout additive |
+| Golden Raspberry | $18\text{ Gold}$ | $7\text{ seconds}$ | `20 / 25 / 5 / 10` | Delicate floral wine notes |
+| Forest Blueberry | $25\text{ Gold}$ | $10\text{ seconds}$ | `15 / 20 / 15 / 20` | Indigo wine complexity / Wild Sour Ale |
+| Sweet Strawberry | $35\text{ Gold}$ | $11\text{ seconds}$ | `35 / 15 / 0 / 10` | Fresh summer fruit wine sweetness |
+| Bitter Elderberry | $50\text{ Gold}$ | $18\text{ seconds}$ | `5 / 20 / 35 / 25` | High-value bitter complexity |
+| Fresh Hops | $15\text{ Gold}$ | $8\text{ seconds}$ | `N/A` | Brewing bitter and aroma agent |
+| Craft Barley | $10\text{ Gold}$ | $6\text{ seconds}$ | `N/A` | Standard malty brewing grain base |
+| Malt Wheat | $8\text{ Gold}$ | $5\text{ seconds}$ | `N/A` | Soft, cloudy, and crisp brewing grain base |
+| Spicy Rye | $14\text{ Gold}$ | $7\text{ seconds}$ | `N/A` | Dry, spicy, and earthy brewing grain base |
+| Sugar Pumpkin | $22\text{ Gold}$ | $14\text{ seconds}$ | `N/A` | Heavy, sweet seasonal brewing adjunct |
 
 ### 1.2 Pantry Shelf Additives (Direct Purchase)
 
@@ -39,14 +39,38 @@ Unlike agricultural crops, pantry items are bought directly from the Merchant Sh
 | Pure Honey | $20\text{ Gold}$ | Highly fermentable sweet braggot/pumpkin sugar boost |
 | Coriander & Peel | $8\text{ Gold}$ | Citrus aromatics and light herbal spiciness in witbiers |
 
+### 1.3 Dynamic Weather & Terroir
+
+The estate's weather is no longer just cosmetic. It changes every 3 minutes and directly impacts the chemical composition of your crops, a concept known as *terroir*. The weather at the **moment of harvest** applies a modifier to the crop's base flavour profile.
+
+| Weather | Icon | Modifier | Effect Description |
+| :--- | :--- | :--- | :--- |
+| Sunny | `sun` | `SW +20`, `AC -10` | Intense sun boosts sugar development but reduces sharp acids. |
+| Rain | `cloud-rain` | `SW -10`, `AC +20` | Rain dilutes sugars but encourages bright, acidic growth. |
+| Mist | `cloud-fog` | `BD +10` | Humid, misty air leads to plumper, heavier fruit with more body. |
+| Temperate | `cloud` | None | A balanced, neutral day with no significant impact on flavour. |
+
+[!tip] Strategic Harvesting
+Timing your harvest to coincide with specific weather patterns is a key strategy for advanced winemakers. A Cabernet harvested in the rain will have a much different profile than one harvested in the sun, allowing you to create truly unique vintages.
+
 ## 2. Cellar Mechanics (Winemaking)
 
-Winemaking is a slow, methodical art of patience. Once you have harvested ingredients, they must be combined and processed through three active stages.
+Winemaking is a slow, methodical art of patience. Once you have harvested ingredients, they must be combined to create a wine with a unique flavour profile, then processed through three active stages.
 
 [LOAD PRESS] ──> [MANUAL CRUSH] ──> [FERMENT] ──> [ACTIVE AGING] ──> [CELLAR RACKING]
 
+### 2.1 The Four-Point Flavour Spectrum
 
-### 2.1 The Multi-Ingredient Press & Recipe Book
+Every wine you create is now defined by a dynamic, four-point flavour profile. The final profile of a bottled wine is determined by the sum of the flavour values from each ingredient used in the press.
+
+*   **Sweetness (SW):** Measures residual fruit sugars and unfermentable additives.
+*   **Acidity (AC):** Measures tartness and bright, mouth-watering acids.
+*   **Tannin (TN):** Measures mouth-drying astringency from skins, seeds, and wood.
+*   **Body (BD):** Measures physical density, weight, and viscous mouthfeel.
+
+Hovering over any ingredient or finished wine in your reserve will show a detailed tooltip with its exact flavour values.
+
+### 2.2 The Multi-Ingredient Press & Recipe Book
 
 To start a batch, click any empty Oak Barrel in your Cellar to open the Ingredient Press. You can load up to $3$ harvested ingredients. The Press automatically evaluates your loaded items against the Recipe Book.
 
@@ -79,7 +103,7 @@ Ratios below represent the exact integer count of ingredients required in the Pr
 | Generic Fruit Cider | Any combination consisting purely of $\ge 2$ berries. | $25\text{ Gold}$ |
 | House Red Blend | Any invalid grape-based combination of $\ge 2$ ingredients. | $30\text{ Gold}$ |
 
-### 2.2 Processing Stages
+### 2.3 Processing Stages
 
 Crushing (Active Tapping): You must click the barrel manually $5\text{ times}$ to crush the grapes. Each squish deforms the barrel container with physical visual shaking.
 
@@ -87,7 +111,7 @@ Fermentation (Passive, $5\text{s}$): The mash sits in a closed barrel to ferment
 
 Aging (Passive, Variable Speed): The aging indicator marker slides along a visual timeline towards the S-Tier peak.
 
-### 2.3 The Aging Timeline & Quality Multipliers
+### 2.4 The Aging Timeline & Quality Multipliers
 
 When a barrel transitions to the Aging phase, its value multiplier $M_{\text{tier}}$ climbs as the slider moves toward the S-Tier sweet spot. The batch will remain at peak S-Tier quality even if it reaches 100% progress, giving you a wide window to bottle your best vintages.
 

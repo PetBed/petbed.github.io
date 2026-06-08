@@ -1,6 +1,6 @@
 import { state, globals } from './state.js';
 import { updateHeaderUI } from './ui.js';
-import { startLoop } from './engine.js';
+import { startLoop, setWeather } from './engine.js';
 import { initKonamiCode } from './konami.js';
 
 function togglePlaytestSidebar() {
@@ -43,6 +43,15 @@ export function initPlaytest() {
         <button data-speed="2" class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded">2x</button>
         <button data-speed="3" class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded">3x</button>
       </div>
+      <div class="mt-4">
+        <h4 class="font-bold mb-2">Weather Control</h4>
+        <div class="grid grid-cols-2 gap-2">
+            <button data-weather="sunny" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2 px-4 rounded">Sunny</button>
+            <button data-weather="rain" class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded">Rain</button>
+            <button data-weather="mist" class="bg-gray-500 hover:bg-gray-400 text-white font-bold py-2 px-4 rounded">Mist</button>
+            <button data-weather="temperate" class="bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 rounded">Temperate</button>
+        </div>
+      </div>
     </div>
   `;
 
@@ -61,6 +70,12 @@ export function initPlaytest() {
       } else {
         setGameSpeed(speed);
       }
+    });
+  });
+
+  sidebar.querySelectorAll('[data-weather]').forEach(button => {
+    button.addEventListener('click', () => {
+        setWeather(button.dataset.weather);
     });
   });
 }

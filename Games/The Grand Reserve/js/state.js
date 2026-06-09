@@ -40,6 +40,7 @@ export const state = {
 	barrels: [
 		{
 			id: 0,
+			type: "french_oak", // Default barrel type
 			state: "empty",
 			crushProgress: 0,
 			maxCrush: 5,
@@ -49,6 +50,9 @@ export const state = {
 			qualityMultiplier: 1.0,
 			recipeKey: null,
 			ingredients: [],
+			pantryAdditiveId: null, // New: Stores the ID of the single pantry additive used
+			baseWineFlavour: null, // New: Flavour before aging modifiers
+			flavour: null, // New: Current flavour including aging modifiers
 		},
 	],
 
@@ -138,10 +142,17 @@ export const state = {
 
 	shop: {
 		plotCost: 50,
-		barrelCost: 300,
+		// Individual barrel costs are now defined in BARREL_TYPES and tracked in barrelsOwned
+		// The old generic barrelCost is removed.
 		kettleCost: 150,
 		oakBuffCost: 250,
 		oakBuffOwned: false,
+		barrelsOwned: { // Initialize barrelsOwned here
+			french_oak: 1, // Start with one French Oak
+			american_oak: 0,
+			chestnut_wood: 0,
+			old_bourbon: 0,
+		}
 	},
 
 	activeSelectorPlotId: null,
@@ -153,6 +164,7 @@ export const globals = {
 	gameLoopInterval: null,
 	isPaused: false,
 	loadedPressIngredients: [],
+  loadedPantryAdditiveId: null, // For the single pantry additive
 	loadedKettleIngredients: [],
 	activePressBarrelId: null,
 	activeSellingWineKey: null,

@@ -1,5 +1,28 @@
 # The Grand Reserve - Changelog
 
+## Version 0.1.1 - Cellar Refinement & Flavour Depth
+
+This update significantly enhances the winemaking experience by introducing new layers of customization and strategic depth in the cellar.
+
+### New Features
+
+*   **Flavour-Modifying Pantry Additives:** Introduced "Wild Yeast" and "Pure Honey" as pantry additives that can be added to the press, each with unique flavour modifiers (AC +25, BD +15, SW -20 for Yeast; SW +30, BD +5, AC -15 for Honey).
+*   **Dedicated Additive Slot:** A new, separate slot in the ingredient press allows for the addition of one pantry additive per barrel, independent of the 3 main ingredient slots.
+*   **Dynamic Barrel Aging:** Different barrel types (French Oak, American Oak, Chestnut Wood, Old Bourbon) now impart unique flavour modifiers to wine during the aging process, changing the wine's profile per percentage of aging progress.
+*   **Expanded Barrel Capacity:** Players can now purchase up to two of each new barrel type from the shop, in addition to the default French Oak barrel.
+*   **Enhanced Aging Feedback:** The aging process in barrels now takes 100 seconds, and a percentage progress is displayed directly under the progress bar.
+*   **Consolidated Item Tooltips:** All relevant item details (flavour profile, vintage age, harvest weather modifiers, etc.) are now displayed in a single, dynamic tooltip when hovering over ingredients, wines in reserve, or aging barrels.
+*   **Unique Wine Stacking:** Wines in the cellar reserve (warehouse) now only stack if they have identical metadata, including their full flavour profile and custom labels, ensuring each unique vintage is distinct.
+
+### Bug Fixes
+
+*   Resolved an issue where pantry items purchased from the shop were not appearing in the ingredients reserve.
+*   Fixed "Owned: undefined" display bug for pantry items in the shop.
+*   Corrected an issue preventing ingredients from appearing in the press modal's inventory list.
+*   Addressed multiple `TypeError` and `ReferenceError` issues related to UI rendering and barrel type initialization.
+
+---
+
 ## Version 0.1.0 - The Flavour & Terroir Update
 
 This update introduces a complete overhaul of the winemaking system, moving from a deterministic recipe model to a dynamic, customizable flavour-based system. The introduction of weather and terroir now makes every harvest a unique strategic decision.
@@ -19,7 +42,6 @@ This update introduces a complete overhaul of the winemaking system, moving from
 *   **Weather Controls:** The playtest sidebar now includes buttons to manually set the weather, allowing for easy testing of the new flavour modification system.
 
 ---
-
 ## Version 0.0.1 - Initial Release (Alpha)
 
 This marks the first public alpha release of The Grand Reserve! This version establishes the core gameplay loop, from planting your first grape seed to selling your first artisan vintage.

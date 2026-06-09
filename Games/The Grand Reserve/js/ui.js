@@ -1,6 +1,6 @@
 import {state, globals} from "./state.js";
-import {SHORT_NAMES, INGREDIENTS_DATA, SEEDS_DATA, PANTRY_DATA, RECIPES, BEER_RECIPES, TIERS, VINTAGE_RANKS} from "./data.js";
-import {WEATHER_DATA} from "./weather.js";
+import {SHORT_NAMES, INGREDIENTS_DATA, SEEDS_DATA, PANTRY_DATA, RECIPES, BEER_RECIPES, TIERS, VINTAGE_RANKS, BARREL_TYPES} from "./data.js";
+import {WEATHER_DATA} from "./weather.js"; // Ensure BARREL_TYPES is imported
 import {getSeedIcon, getCropIcon, getWineIcon, getBeerIcon} from "./graphics.js";
 import {toggleAudio} from "./audio.js";
 import {handlePlotClick, getRecipePrediction, handleBarrelClick, handleBottleAction, getKettleRecipePrediction} from "./engine.js";
@@ -107,18 +107,51 @@ export function openPressModal(barrelId) {
 	renderPressModal();
 }
 
-export function closePressModal() {
-	globals.loadedPressIngredients.forEach((ing) => {
-		state.ingredients[ing]++;
-	});
+export function closePressModal(returnIngredients = true) { // Added parameter
+	if (returnIngredients) {
+		globals.loadedPressIngredients.forEach((ingId) => {
+			const ing = state.ingredients.find(i => i.id === ingId);
+			if (ing) ing.count++;
+		});
+		if (globals.loadedPantryAdditiveId) { // Return pantry additive too
+			const pantryIng = state.ingredients.find(ing => ing.id === globals.loadedPantryAdditiveId);
+			if (pantryIng) pantryIng.count++;
+		}
+	}
 	globals.loadedPressIngredients = [];
 	globals.activePressBarrelId = null;
+	globals.loadedPantryAdditiveId = null; // Clear global pantry additive
 	document.getElementById("press-modal").classList.add("hidden");
 	updateHeaderUI();
 	renderWarehouse();
 }
 
 export function renderPressModal() {
+	// Pantry Additive Slot
+	const pantrySlot = document.getElementById("press-pantry-slot");
+	if (globals.loadedPantryAdditiveId) {
+		const ing = state.ingredients.find((i) => i.id === globals.loadedPantryAdditiveId);
+		if (ing) {
+			const ingKey = ing.key;
+			pantrySlot.className = "w-14 h-14 bg-white rounded-xl border-2 border-amber-950 flex flex-col items-center justify-center text-xs font-extrabold cursor-pointer hover:border-red-500 transition-all p-1 group";
+			pantrySlot.innerHTML = `<div class="w-8 h-8">${getCropIcon(ingKey)}</div><span class="text-[8px] text-amber-900 leading-none mt-1 truncate max-w-full px-1">${SHORT_NAMES[ingKey] || ingKey}</span>`;
+			if (ing.flavour) {
+				pantrySlot.onmouseenter = (e) => showItemTooltip(e, {title: INGREDIENTS_DATA[ing.key].name, flavour: ing.flavour, type: 'pantry'});
+				pantrySlot.onmousemove = (e) => { const tooltip = document.getElementById("flavour-tooltip"); tooltip.style.left = e.pageX + 15 + "px"; tooltip.style.top = e.pageY + 15 + "px"; };
+				pantrySlot.onmouseleave = hideItemTooltip;
+			}
+			pantrySlot.onclick = () => window.removeFromPress(globals.loadedPantryAdditiveId); // Allow removing by clicking the slot
+		} else {
+			pantrySlot.className = "w-14 h-14 bg-white rounded-xl border-2 border-dashed border-stone-300 flex items-center justify-center text-xs font-extrabold cursor-pointer hover:text-stone-500 transition-all";
+			pantrySlot.innerHTML = `<i data-lucide="plus" class="w-6 h-6 text-stone-400"></i>`;
+			pantrySlot.onmouseenter = null; pantrySlot.onmouseleave = null; pantrySlot.onclick = null;
+		}
+	} else {
+		pantrySlot.className = "w-14 h-14 bg-white rounded-xl border-2 border-dashed border-stone-300 flex items-center justify-center text-xs font-extrabold cursor-pointer hover:text-stone-500 transition-all";
+		pantrySlot.innerHTML = `<i data-lucide="plus" class="w-6 h-6 text-stone-400"></i>`;
+		pantrySlot.onmouseenter = null; pantrySlot.onmouseleave = null; pantrySlot.onclick = null;
+	}
+
 	for (let i = 0; i < 3; i++) {
 		const slot = document.getElementById(`press-slot-${i}`);
 		if (i < globals.loadedPressIngredients.length) {
@@ -126,19 +159,20 @@ export function renderPressModal() {
 			const ing = state.ingredients.find((i) => i.id === ingId);
 			if (ing) {
 				const ingKey = ing.key;
-				slot.className = "w-14 h-14 bg-white rounded-xl border-2 border-amber-950 flex flex-col items-center justify-center text-xs font-extrabold cursor-pointer hover:border-red-500 transition-all p-1";
+				slot.className = "w-14 h-14 bg-white rounded-xl border-2 border-amber-950 flex flex-col items-center justify-center text-xs font-extrabold cursor-pointer hover:border-red-500 transition-all p-1 group";
 				slot.innerHTML = `<div class="w-8 h-8">${getCropIcon(ingKey)}</div><span class="text-[8px] text-amber-900 leading-none mt-1 truncate max-w-full px-1">${SHORT_NAMES[ingKey] || ingKey}</span>`;
 				const flavour = ing.flavour;
 				if (flavour) {
-					slot.onmouseenter = (e) => showFlavourTooltip(e, flavour, ing.weather);
+					slot.onmouseenter = (e) => showItemTooltip(e, {title: INGREDIENTS_DATA[ing.key].name, flavour: ing.flavour, weather: ing.weather, type: 'ingredient'});
 					slot.onmousemove = (e) => {
 						const tooltip = document.getElementById("flavour-tooltip");
 						tooltip.style.left = e.pageX + 15 + "px";
 						tooltip.style.top = e.pageY + 15 + "px";
 					};
-					slot.onmouseleave = hideFlavourTooltip;
+					slot.onmouseleave = hideItemTooltip;
 				}
-			} else {
+				slot.onclick = () => window.removeFromPress(ingId); // Allow removing by clicking the slot
+			} else { // Fallback for regular ingredient slot
 				// Should not happen, but as a fallback
 				slot.className = "w-14 h-14 bg-white rounded-xl border-2 border-dashed border-stone-300 flex items-center justify-center text-xs font-extrabold cursor-pointer hover:text-stone-500 transition-all";
 				slot.innerHTML = "+";
@@ -147,7 +181,7 @@ export function renderPressModal() {
 			}
 		} else {
 			slot.className = "w-14 h-14 bg-white rounded-xl border-2 border-dashed border-stone-300 flex items-center justify-center text-xs font-extrabold cursor-pointer hover:text-stone-500 transition-all";
-			slot.innerHTML = "+";
+			slot.innerHTML = `<i data-lucide="plus" class="w-6 h-6 text-stone-400"></i>`;
 			slot.onmouseenter = null;
 			slot.onmouseleave = null;
 		}
@@ -167,14 +201,18 @@ export function renderPressModal() {
 			if (barrel) {
 				barrel.state = "crushing";
 				barrel.crushProgress = 0;
+				barrel.pantryAdditiveId = globals.loadedPantryAdditiveId; // Store the pantry additive ID
 				barrel.recipeKey = pred.key;
 				barrel.ingredients = [...globals.loadedPressIngredients];
 				globals.loadedPressIngredients = [];
+        barrel.baseWineFlavour = JSON.parse(JSON.stringify(pred.flavour)); // Store initial flavour
+				barrel.flavour = JSON.parse(JSON.stringify(pred.flavour)); // Initialize current flavour
 				globals.activePressBarrelId = null;
 				document.getElementById("press-modal").classList.add("hidden");
 				if (window.playSound) window.playSound("pop");
 				showToast(`Ingredients loaded! Tap barrel to start squishing.`);
 				renderCellarUI();
+				closePressModal(false); // Close without returning ingredients, as they are now in the barrel
 				updateHeaderUI();
 				renderWarehouse();
 			}
@@ -187,12 +225,18 @@ export function renderPressModal() {
 
 	const invList = document.getElementById("press-inventory-list");
 	invList.innerHTML = "";
-	let hasIngredients = false;
+	let hasRegularIngredients = false;
+	let hasPantryAdditives = false;
 	const wineIngredientKeys = ["pinot_noir", "chardonnay", "cabernet", "muscat", "blackberry", "raspberry", "blueberry", "strawberry", "elderberry"];
+	const pantryAdditiveKeys = ["wild_yeast", "pure_honey"];
 
-	state.ingredients.forEach((ing) => {
-		if (ing.count > 0 && wineIngredientKeys.includes(ing.key)) {
-			hasIngredients = true;
+	const regularIngredientsContainer = document.createElement("div");
+	regularIngredientsContainer.className = "w-full flex flex-col gap-2";
+	regularIngredientsContainer.innerHTML = `<h3 class="text-xs font-black uppercase tracking-wider text-amber-900 border-b border-amber-900/10 pb-1 flex items-center gap-1"><i data-lucide="sprout" class="w-4 h-4"></i> Grapes & Berries</h3>`;
+
+	state.ingredients.filter(ing => wineIngredientKeys.includes(ing.key)).forEach((ing) => {
+		if (ing.count > 0) { // Removed redundant 'wineIngredientKeys.includes(ing.key)' check as it's already filtered
+			hasRegularIngredients = true;
 			const ingData = INGREDIENTS_DATA[ing.key];
 			const item = document.createElement("button");
 			item.dataset.weather = ing.weather;
@@ -206,20 +250,50 @@ export function renderPressModal() {
 				}
 			}
 			item.innerHTML = `<span class="flex items-center gap-1.5 font-black text-amber-950"><span class="w-6 h-6 inline-block shrink-0">${getCropIcon(ing.key)}</span>${ingData.name}${weatherIcon}</span><span class="bg-amber-950/10 px-2 py-0.5 rounded text-[10px] font-black">Stock: ${ing.count}</span>`;
-			const flavour = ing.flavour;
-			if (flavour) {
-				item.onmouseenter = (e) => showFlavourTooltip(e, flavour, ing.weather);
+			if (ing.flavour) {
+				item.onmouseenter = (e) => showItemTooltip(e, {title: ingData.name, flavour: ing.flavour, weather: ing.weather, type: 'ingredient'});
 				item.onmousemove = (e) => {
 					const tooltip = document.getElementById("flavour-tooltip");
 					tooltip.style.left = e.pageX + 15 + "px";
 					tooltip.style.top = e.pageY + 15 + "px";
 				};
-				item.onmouseleave = hideFlavourTooltip;
+				item.onmouseleave = hideItemTooltip;
 			}
-			invList.appendChild(item);
+			regularIngredientsContainer.appendChild(item);
 		}
 	});
-	if (!hasIngredients) invList.innerHTML = `<div class="py-4 text-center text-[10px] text-stone-400 font-bold">No harvested stock available.</div>`;
+	if (!hasRegularIngredients) regularIngredientsContainer.innerHTML += `<div class="py-4 text-center text-[10px] text-stone-400 font-bold">No harvested grapes or berries available.</div>`;
+	invList.appendChild(regularIngredientsContainer);
+
+	// Render pantry additives
+	const pantryAdditivesContainer = document.createElement("div");
+	pantryAdditivesContainer.className = "w-full flex flex-col gap-2 mt-4";
+	pantryAdditivesContainer.innerHTML = `<h3 class="text-xs font-black uppercase tracking-wider text-amber-900 border-b border-amber-900/10 pb-1 flex items-center gap-1"><i data-lucide="flask-conical" class="w-4 h-4"></i> Pantry Additives</h3>`;
+
+	state.ingredients.filter(ing => pantryAdditiveKeys.includes(ing.key)).forEach((ing) => {
+		if (ing.count > 0) {
+			hasPantryAdditives = true;
+			const ingData = INGREDIENTS_DATA[ing.key];
+			const item = document.createElement("button");
+			// Disable if a pantry additive is already loaded
+			item.className = `w-full flex items-center justify-between p-2 bg-amber-50 hover:bg-amber-100 border border-amber-950/10 rounded-lg text-xs font-bold transition-all text-left ${globals.loadedPantryAdditiveId ? 'opacity-50 cursor-not-allowed' : ''}`;
+			item.onclick = globals.loadedPantryAdditiveId ? null : () => window.addToPress(ing.id);
+			item.innerHTML = `<span class="flex items-center gap-1.5 font-black text-amber-950"><span class="w-6 h-6 inline-block shrink-0">${getCropIcon(ing.key)}</span>${ingData.name}</span><span class="bg-amber-950/10 px-2 py-0.5 rounded text-[10px] font-black">Stock: ${ing.count}</span>`;
+			if (ing.flavour) {
+				item.onmouseenter = (e) => showItemTooltip(e, {title: ingData.name, flavour: ing.flavour, type: 'pantry'});
+				item.onmousemove = (e) => {
+					const tooltip = document.getElementById("flavour-tooltip");
+					tooltip.style.left = e.pageX + 15 + "px";
+					tooltip.style.top = e.pageY + 15 + "px";
+				};
+				item.onmouseleave = hideItemTooltip;
+			}
+			pantryAdditivesContainer.appendChild(item);
+		}
+	});
+	if (!hasPantryAdditives) pantryAdditivesContainer.innerHTML += `<div class="py-4 text-center text-[10px] text-stone-400 font-bold">No special pantry additives available.</div>`;
+	invList.appendChild(pantryAdditivesContainer);
+
 	if (window.lucide) window.lucide.createIcons();
 }
 
@@ -236,6 +310,7 @@ export function renderCellarUI() {
 		let contentHTML = "";
 		let instructions = "";
 		let isUrgent = false;
+		const barrelTypeData = BARREL_TYPES[barrel.type]; // Get barrel type data
 
 		if (barrel.state === "empty") {
 			bBtnClasses += "border-amber-950 bg-[#c48d53] cursor-pointer hover:scale-105";
@@ -254,11 +329,25 @@ export function renderCellarUI() {
 			bBtnClasses += "border-amber-950 bg-[#6b2c21]";
 			contentHTML = `<div class="w-14 h-14 animate-pulse">${getWineIcon(barrel.recipeKey, "s")}</div><span class="text-[9px] font-black text-purple-300 uppercase mt-1">Aging</span>`;
 			instructions = `Aging safely into: ${RECIPES[barrel.recipeKey].name}`;
+
+			if (barrel.flavour) {
+				const recipeName = RECIPES[barrel.recipeKey].name;
+				wrapper.onmouseenter = (e) => showItemTooltip(e, {
+					title: recipeName,
+					flavour: barrel.flavour
+				});
+				wrapper.onmousemove = (e) => {
+					const tooltip = document.getElementById("flavour-tooltip");
+					tooltip.style.left = e.pageX + 15 + "px";
+					tooltip.style.top = e.pageY + 15 + "px";
+				};
+				wrapper.onmouseleave = hideItemTooltip;
+			}
 		}
 
 		wrapper.innerHTML = `
-                <div class="flex w-full items-center justify-between mb-3 px-1">
-                    <span class="text-xs font-black text-amber-950 bg-white/50 px-2 py-0.5 rounded-md border border-amber-900/10">Barrel 0${index + 1}</span>
+                <div class="flex w-full items-center justify-between mb-3 px-1 group">
+                    <span class="text-xs font-black text-amber-950 bg-white/50 px-2 py-0.5 rounded-md border border-amber-900/10">${barrelTypeData.name}</span>
                     <span class="text-[10px] font-bold text-amber-800/80 bg-white/50 px-2 py-0.5 rounded-md border border-amber-900/10">${instructions}</span>
                 </div>
                 <button id="barrel-btn-${barrel.id}" class="${bBtnClasses}" ${barrel.state === "fermenting" || barrel.state === "aging" ? "disabled" : ""}>
@@ -311,7 +400,8 @@ export function generateAgingBarHTML(barrel) {
                     <div class="h-full bg-yellow-400" style="width: 20%"></div><div class="h-full bg-purple-500" style="width: 20%"></div>
                     <div class="absolute top-0 bottom-0 w-2.5 bg-red-600 border border-white shadow-md transition-all duration-100" style="left: ${progress}%;"></div>
                 </div>
-                <div class="flex justify-between items-center mt-3">
+                <div class="text-center text-[10px] font-bold text-amber-900/60 mt-1.5">${Math.round(progress)}% Aged</div>
+                <div class="flex justify-between items-center mt-2">
                     <div class="text-[10px] font-semibold text-amber-900/80 uppercase">Est: <span class="font-extrabold text-amber-950">${tierText} ($${tierVal})</span></div>
                     <div class="flex items-center gap-2">
                         ${progress >= 100 ? `<button id="vinegar-btn-${barrel.id}" class="px-3 py-1.5 bg-yellow-800 text-white font-extrabold text-[10px] rounded-lg shadow hover:bg-yellow-700 transition-all flex items-center gap-1"><i data-lucide="flask-conical" class="w-3 h-3"></i> VINEGAR</button>` : ""}
@@ -322,65 +412,74 @@ export function generateAgingBarHTML(barrel) {
         `;
 }
 
-export function showRackTooltip(e, slotId) {
-	const bottle = state.wineRacks[slotId];
-	if (!bottle) return;
-	const tooltip = document.getElementById("rack-tooltip");
-	const title = bottle.customLabel ? bottle.customLabel.title : RECIPES[bottle.recipeKey].name;
-	const vintageRankName = VINTAGE_RANKS[bottle.rankIndex].name;
-
-	document.getElementById("tooltip-title").textContent = title;
-	document.getElementById("tooltip-age").textContent = `${vintageRankName} (${bottle.age} Years Old)`;
-
-	tooltip.classList.remove("hidden");
-	tooltip.style.left = e.pageX + 15 + "px";
-	tooltip.style.top = e.pageY + 15 + "px";
-}
-
-export function hideRackTooltip() {
-	document.getElementById("rack-tooltip").classList.add("hidden");
-}
-
-export function showFlavourTooltip(e, flavour, weatherKey) {
+export function showItemTooltip(e, data) {
 	const tooltip = document.getElementById("flavour-tooltip");
-	if (!flavour) return;
+	if (!data) return;
 
-	let weatherHtml = "";
-	if (weatherKey && weatherKey !== "null") {
-		const weather = WEATHER_DATA[weatherKey];
-		const mod = weather.modifier;
-		if (weather && mod) {
-			const mods = [
-				mod.sw !== 0 ? `<span>Sweetness</span><span class="text-right">${mod.sw > 0 ? "+" : ""}${mod.sw}</span>` : "",
-				mod.ac !== 0 ? `<span>Acidity</span><span class="text-right">${mod.ac > 0 ? "+" : ""}${mod.ac}</span>` : "",
-				mod.tn !== 0 ? `<span>Tannin</span><span class="text-right">${mod.tn > 0 ? "+" : ""}${mod.tn}</span>` : "",
-				mod.bd !== 0 ? `<span>Body</span><span class="text-right">${mod.bd > 0 ? "+" : ""}${mod.bd}</span>` : "",
-			]
-				.filter(Boolean)
-				.join("");
+	let html = "";
 
-			if (mods) {
-				weatherHtml = `<div class="border-t border-amber-900/50 pt-1 mt-1 text-[10px] font-bold">
+	// Part 1: Title and Vintage Info (for wines)
+	let vintageHtml = "";
+	if (data.title) {
+		vintageHtml += `<h4 class="font-black text-amber-200 border-b border-amber-800 pb-1 mb-1">${data.title}</h4>`;
+	}
+	if (data.age !== undefined && data.rankName) {
+		vintageHtml += `<p class="text-amber-400 font-bold">${data.rankName} (${data.age} Years Old)</p>`;
+	}
+
+	// Part 2: Flavour Profile
+	let flavourHtml = "";
+	if (data.flavour) {
+		flavourHtml += `
+			<div class="text-[11px] font-black uppercase tracking-wider text-amber-100 border-b border-amber-900/50 pb-1 mb-1">Flavour Profile</div>
+			<div class="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] font-bold text-amber-400">
+				<span>Sweetness</span><span class="text-right">${Math.round(data.flavour.sw)}</span>
+				<span>Acidity</span><span class="text-right">${Math.round(data.flavour.ac)}</span>
+				<span>Tannin</span><span class="text-right">${Math.round(data.flavour.tn)}</span>
+				<span>Body</span><span class="text-right">${Math.round(data.flavour.bd)}</span>
+			</div>
+		`;
+
+		// Part 3: Weather Modifier (appended to flavour)
+		if (data.weather && data.weather !== "null" && data.type === 'ingredient') { // Only show weather for ingredients
+			const weather = WEATHER_DATA[data.weather];
+			const mod = weather.modifier;
+			if (weather && mod) {
+				const mods = [
+					mod.sw !== 0 ? `<span>Sweetness</span><span class="text-right">${mod.sw > 0 ? "+" : ""}${mod.sw}</span>` : "",
+					mod.ac !== 0 ? `<span>Acidity</span><span class="text-right">${mod.ac > 0 ? "+" : ""}${mod.ac}</span>` : "",
+					mod.tn !== 0 ? `<span>Tannin</span><span class="text-right">${mod.tn > 0 ? "+" : ""}${mod.tn}</span>` : "",
+					mod.bd !== 0 ? `<span>Body</span><span class="text-right">${mod.bd > 0 ? "+" : ""}${mod.bd}</span>` : "",
+				]
+					.filter(Boolean)
+					.join("");
+
+				if (mods) {
+					flavourHtml += `<div class="border-t border-amber-900/50 pt-1 mt-1 text-[10px] font-bold">
                     <div class="flex justify-between items-center text-amber-200">
                         <span>Harvest Weather</span>
                         <span class="flex items-center gap-1 ${weather.color}"><i data-lucide="${weather.icon}" class="w-3 h-3"></i>${weather.name}</span>
                     </div>
                     <div class="grid grid-cols-2 gap-x-2 text-amber-400/80 font-normal">${mods}</div>
                 </div>`;
+				}
 			}
 		}
 	}
 
-	tooltip.innerHTML = `
-		<div class="text-[11px] font-black uppercase tracking-wider text-amber-100 border-b border-amber-900/50 pb-1 mb-1">Flavour Profile</div>
-		<div class="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] font-bold text-amber-400">
-			<span>Sweetness</span><span class="text-right">${Math.round(flavour.sw)}</span>
-			<span>Acidity</span><span class="text-right">${Math.round(flavour.ac)}</span>
-			<span>Tannin</span><span class="text-right">${Math.round(flavour.tn)}</span>
-			<span>Body</span><span class="text-right">${Math.round(flavour.bd)}</span>
-		</div>
-		${weatherHtml}
-	`;
+	// Combine parts with a separator
+	html = vintageHtml;
+	if (vintageHtml && flavourHtml) {
+		html += `<div class="my-2 border-t border-amber-800"></div>`;
+	}
+	html += flavourHtml;
+
+	if (!html) {
+		tooltip.classList.add("hidden");
+		return;
+	}
+
+	tooltip.innerHTML = html;
 
 	tooltip.classList.remove("hidden");
 	tooltip.style.left = e.pageX + 15 + "px";
@@ -388,7 +487,7 @@ export function showFlavourTooltip(e, flavour, weatherKey) {
 	if (window.lucide) window.lucide.createIcons();
 }
 
-export function hideFlavourTooltip() {
+export function hideItemTooltip() {
 	document.getElementById("flavour-tooltip").classList.add("hidden");
 }
 
@@ -434,13 +533,19 @@ export function renderRacks() {
                 `;
 			cell.onclick = () => window.removeWineFromRack(slotId);
 
-			cell.onmouseenter = (e) => showRackTooltip(e, slotId);
+			cell.onmouseenter = (e) =>
+				showItemTooltip(e, {
+					title: displayTitle,
+					flavour: bottle.flavour, // Wine flavour is already combined
+					age: bottle.age,
+					rankName: rank.name,
+				});
 			cell.onmousemove = (e) => {
-				const tooltip = document.getElementById("rack-tooltip");
+				const tooltip = document.getElementById("flavour-tooltip");
 				tooltip.style.left = e.pageX + 15 + "px";
 				tooltip.style.top = e.pageY + 15 + "px";
 			};
-			cell.onmouseleave = hideRackTooltip;
+			cell.onmouseleave = hideItemTooltip;
 		}
 		grid.appendChild(cell);
 	});
@@ -668,13 +773,13 @@ export function renderWarehouse() {
 				row.innerHTML = `<span class="text-xs font-black flex items-center gap-2"><div class="w-6 h-6 shrink-0">${getCropIcon(ing.key)}</div>${INGREDIENTS_DATA[ing.key].name}${weatherIcon}</span><span class="text-[10px] bg-amber-100 text-amber-950 font-black px-2.5 py-1 rounded-full border border-amber-200/50">Stock: ${ing.count}</span>`;
 				const flavour = ing.flavour;
 				if (flavour) {
-					row.onmouseenter = (e) => showFlavourTooltip(e, flavour, ing.weather);
+					row.onmouseenter = (e) => showItemTooltip(e, {title: INGREDIENTS_DATA[ing.key].name, flavour: ing.flavour, weather: ing.weather, type: 'ingredient'});
 					row.onmousemove = (e) => {
 						const tooltip = document.getElementById("flavour-tooltip");
 						tooltip.style.left = e.pageX + 15 + "px";
 						tooltip.style.top = e.pageY + 15 + "px";
 					};
-					row.onmouseleave = hideFlavourTooltip;
+					row.onmouseleave = hideItemTooltip;
 				}
 				agContainer.appendChild(row);
 			}
@@ -698,6 +803,13 @@ export function renderWarehouse() {
 				row.className = "flex justify-between items-center p-3 bg-white border border-stone-200/50 rounded-xl shadow-sm animate-fade-in";
 				row.innerHTML = `<span class="text-xs font-black flex items-center gap-2"><div class="w-6 h-6 shrink-0">${getCropIcon(ing.key)}</div>${INGREDIENTS_DATA[ing.key].name}</span><span class="text-[10px] bg-indigo-100 text-indigo-950 font-black px-2.5 py-1 rounded-full border border-indigo-200/50">Stock: ${ing.count}</span>`;
 				pantryContainer.appendChild(row);
+			
+				// Add tooltip for pantry items in warehouse
+				if (INGREDIENTS_DATA[ing.key].flavour) {
+					row.onmouseenter = (e) => showItemTooltip(e, {title: INGREDIENTS_DATA[ing.key].name, flavour: INGREDIENTS_DATA[ing.key].flavour, type: 'pantry'});
+					row.onmousemove = (e) => { const tooltip = document.getElementById("flavour-tooltip"); tooltip.style.left = e.pageX + 15 + "px"; tooltip.style.top = e.pageY + 15 + "px"; };
+					row.onmouseleave = hideItemTooltip;
+				}
 			}
 		});
 
@@ -713,7 +825,7 @@ export function renderWarehouse() {
 		state.wines.forEach((bottle) => {
 			empty = false;
 			const title = bottle.customLabel ? bottle.customLabel.title : RECIPES[bottle.recipeKey].name;
-			const groupKey = `${bottle.recipeKey}_${bottle.qualityKey}_${bottle.rankIndex}_${title}`;
+			const groupKey = `${bottle.recipeKey}_${bottle.qualityKey}_${bottle.rankIndex}_${title}_${JSON.stringify(bottle.flavour)}`;
 			if (!grouped[groupKey]) {
 				grouped[groupKey] = {
 					...bottle,
@@ -750,13 +862,19 @@ export function renderWarehouse() {
                     </div>
                 `;
 			if (g.flavour) {
-				card.onmouseenter = (e) => showFlavourTooltip(e, g.flavour, null);
+				card.onmouseenter = (e) =>
+					showItemTooltip(e, {
+						title: g.title,
+						flavour: g.flavour, // Wine flavour is already combined
+						age: g.age,
+						rankName: rank.name,
+					});
 				card.onmousemove = (e) => {
 					const tooltip = document.getElementById("flavour-tooltip");
 					tooltip.style.left = e.pageX + 15 + "px";
 					tooltip.style.top = e.pageY + 15 + "px";
 				};
-				card.onmouseleave = hideFlavourTooltip;
+				card.onmouseleave = hideItemTooltip;
 			}
 			list.appendChild(card);
 		});
@@ -1015,13 +1133,14 @@ export function openSellModal(wineKey) {
 	const groups = {};
 	filteredWines.forEach((bottle) => {
 		const title = bottle.customLabel ? bottle.customLabel.title : recipe.name;
-		const groupKey = `${bottle.qualityKey}_${bottle.rankIndex}_${title}`;
+		const groupKey = `${bottle.qualityKey}_${bottle.rankIndex}_${title}_${JSON.stringify(bottle.flavour)}`;
 		if (!groups[groupKey]) {
 			groups[groupKey] = {
 				qualityKey: bottle.qualityKey,
 				rankIndex: bottle.rankIndex,
 				title: title,
 				customLabel: bottle.customLabel,
+				flavour: bottle.flavour,
 				bottles: [],
 			};
 		}
@@ -1041,11 +1160,9 @@ export function openSellModal(wineKey) {
 			const vintageName = VINTAGE_RANKS[g.rankIndex].name;
 			const qualityName = TIERS[g.qualityKey].name;
 
-			const safeTitle = g.title.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-
 			const btn = document.createElement("button");
 			btn.className = "w-full flex items-center justify-between p-3 border rounded-2xl bg-amber-50 border-amber-950/20 hover:bg-amber-100 active:scale-95 transition-all font-bold text-left mb-2";
-			btn.onclick = () => window.sellWineQualityGroup(g.qualityKey, g.rankIndex, safeTitle);
+			btn.onclick = () => window.sellWineQualityGroup(g.qualityKey, g.rankIndex, g.title, JSON.stringify(g.flavour));
 
 			btn.innerHTML = `
                     <div class="flex items-center gap-3 w-3/4">
@@ -1146,11 +1263,16 @@ export function renderShop() {
 		const list = document.getElementById("shop-pantry-content");
 		if (!list) return;
 		list.innerHTML = "";
+		
 		Object.keys(PANTRY_DATA).forEach((key) => {
 			const item = PANTRY_DATA[key];
 			const itemDiv = document.createElement("div");
 			itemDiv.className = "flex items-center justify-between bg-white p-4 rounded-xl border border-stone-200/50 shadow-sm animate-fade-in";
-			itemDiv.innerHTML = `<div class="flex items-center gap-3"><div class="w-10 h-10 shrink-0">${getCropIcon(key)}</div><div><h4 class="font-black text-xs text-amber-950">${item.name}</h4><p class="text-[10px] text-amber-800/60 font-bold">Instant pantry shelf addition (Owned: ${state.ingredients[key]})</p></div></div><button onclick="buyPantryItem('${key}')" class="${state.gold >= item.cost ? "bg-indigo-600 hover:bg-indigo-500 text-white active:scale-95 cursor-pointer" : "bg-gray-100 text-gray-400 cursor-not-allowed"} px-3 py-2 text-[10px] font-black rounded-lg shadow-sm tracking-wide transition-all uppercase flex items-center gap-1" ${state.gold < item.cost ? "disabled" : ""}><i data-lucide="coins" class="w-3.5 h-3.5"></i> ${item.cost}</button>`;
+			
+			// Calculate the total count for this pantry item from the state.ingredients array
+			const ownedCount = state.ingredients.reduce((sum, ing) => (ing.key === key ? sum + ing.count : sum), 0);
+
+			itemDiv.innerHTML = `<div class="flex items-center gap-3"><div class="w-10 h-10 shrink-0">${getCropIcon(key)}</div><div><h4 class="font-black text-xs text-amber-950">${item.name}</h4><p class="text-[10px] text-amber-800/60 font-bold">Instant pantry shelf addition (Owned: ${ownedCount})</p></div></div><button onclick="buyPantryItem('${key}')" class="${state.gold >= item.cost ? "bg-indigo-600 hover:bg-indigo-500 text-white active:scale-95 cursor-pointer" : "bg-gray-100 text-gray-400 cursor-not-allowed"} px-3 py-2 text-[10px] font-black rounded-lg shadow-sm tracking-wide transition-all uppercase flex items-center gap-1" ${state.gold < item.cost ? "disabled" : ""}><i data-lucide="coins" class="w-3.5 h-3.5"></i> ${item.cost}</button>`;
 			list.appendChild(itemDiv);
 		});
 	} else if (globals.currentShopTab === "upgrades") {
@@ -1166,9 +1288,40 @@ export function renderShop() {
 		list.appendChild(plotRow);
 
 		const barrelRow = document.createElement("div");
-		barrelRow.className = "flex items-center justify-between bg-white p-4 rounded-xl border border-stone-200/50 shadow-sm mt-3 animate-fade-in w-full";
-		barrelRow.innerHTML = `<div class="flex items-center gap-3"><div class="p-2 bg-amber-50 rounded-lg"><i data-lucide="database" class="w-6 h-6 text-amber-800"></i></div><div><h4 class="font-black text-xs text-amber-950">Oak Barrel Slot</h4><p class="text-[10px] text-amber-800/60 font-bold">${barrelsCount < 3 ? `Increase capacity: ${barrelsCount}/3 barrels` : "Cellar full!"}</p></div></div>${barrelsCount < 3 ? `<button onclick="buyBarrel()" class="${state.gold >= state.shop.barrelCost ? "bg-yellow-500 hover:bg-yellow-400 text-amber-950 active:scale-95 cursor-pointer" : "bg-gray-100 text-gray-400 cursor-not-allowed"} px-3 py-2 text-[10px] font-black rounded-lg shadow-sm tracking-wide transition-all uppercase flex items-center gap-1" ${state.gold < state.shop.barrelCost ? "disabled" : ""}><i data-lucide="coins" class="w-3.5 h-3.5"></i> ${state.shop.barrelCost}</button>` : `<span class="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-md">MAXED</span>`}`;
-		list.appendChild(barrelRow);
+		// The old generic barrel purchase row is removed, replaced by type-specific rows below.
+		// list.appendChild(barrelRow);
+
+		// French Oak Barrel
+		const frenchOakData = BARREL_TYPES.french_oak;
+		const frenchOakOwned = state.shop.barrelsOwned.french_oak || 0;
+		const frenchOakRow = document.createElement("div");
+		frenchOakRow.className = "flex items-center justify-between bg-white p-4 rounded-xl border border-stone-200/50 shadow-sm mt-3 animate-fade-in w-full";
+		frenchOakRow.innerHTML = `<div class="flex items-center gap-3"><div class="p-2 bg-amber-50 rounded-lg"><i data-lucide="database" class="w-6 h-6 text-amber-800"></i></div><div><h4 class="font-black text-xs text-amber-950">${frenchOakData.name}</h4><p class="text-[10px] text-amber-800/60 font-bold">${frenchOakOwned < frenchOakData.maxOwned ? `Increase capacity: ${frenchOakOwned}/${frenchOakData.maxOwned} barrels` : "Maximum owned!"}</p></div></div>${frenchOakOwned < frenchOakData.maxOwned ? `<button onclick="buyBarrelType('french_oak')" class="${state.gold >= frenchOakData.cost ? "bg-yellow-500 hover:bg-yellow-400 text-amber-950 active:scale-95 cursor-pointer" : "bg-gray-100 text-gray-400 cursor-not-allowed"} px-3 py-2 text-[10px] font-black rounded-lg shadow-sm tracking-wide transition-all uppercase flex items-center gap-1" ${state.gold < frenchOakData.cost ? "disabled" : ""}><i data-lucide="coins" class="w-3.5 h-3.5"></i> ${frenchOakData.cost}</button>` : `<span class="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-md">MAXED</span>`}`;
+		list.appendChild(frenchOakRow);
+
+		// American Oak Barrel
+		const americanOakData = BARREL_TYPES.american_oak;
+		const americanOakOwned = state.shop.barrelsOwned.american_oak || 0;
+		const americanOakRow = document.createElement("div");
+		americanOakRow.className = "flex items-center justify-between bg-white p-4 rounded-xl border border-stone-200/50 shadow-sm mt-3 animate-fade-in w-full";
+		americanOakRow.innerHTML = `<div class="flex items-center gap-3"><div class="p-2 bg-amber-50 rounded-lg"><i data-lucide="database" class="w-6 h-6 text-amber-800"></i></div><div><h4 class="font-black text-xs text-amber-950">${americanOakData.name}</h4><p class="text-[10px] text-amber-800/60 font-bold">${americanOakOwned < americanOakData.maxOwned ? `Increase capacity: ${americanOakOwned}/${americanOakData.maxOwned} barrels` : "Maximum owned!"}</p></div></div>${americanOakOwned < americanOakData.maxOwned ? `<button onclick="buyBarrelType('american_oak')" class="${state.gold >= americanOakData.cost ? "bg-yellow-500 hover:bg-yellow-400 text-amber-950 active:scale-95 cursor-pointer" : "bg-gray-100 text-gray-400 cursor-not-allowed"} px-3 py-2 text-[10px] font-black rounded-lg shadow-sm tracking-wide transition-all uppercase flex items-center gap-1" ${state.gold < americanOakData.cost ? "disabled" : ""}><i data-lucide="coins" class="w-3.5 h-3.5"></i> ${americanOakData.cost}</button>` : `<span class="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-md">MAXED</span>`}`;
+		list.appendChild(americanOakRow);
+
+		// Chestnut Wood Barrel
+		const chestnutWoodData = BARREL_TYPES.chestnut_wood;
+		const chestnutWoodOwned = state.shop.barrelsOwned.chestnut_wood || 0;
+		const chestnutWoodRow = document.createElement("div");
+		chestnutWoodRow.className = "flex items-center justify-between bg-white p-4 rounded-xl border border-stone-200/50 shadow-sm mt-3 animate-fade-in w-full";
+		chestnutWoodRow.innerHTML = `<div class="flex items-center gap-3"><div class="p-2 bg-amber-50 rounded-lg"><i data-lucide="database" class="w-6 h-6 text-amber-800"></i></div><div><h4 class="font-black text-xs text-amber-950">${chestnutWoodData.name}</h4><p class="text-[10px] text-amber-800/60 font-bold">${chestnutWoodOwned < chestnutWoodData.maxOwned ? `Increase capacity: ${chestnutWoodOwned}/${chestnutWoodData.maxOwned} barrels` : "Maximum owned!"}</p></div></div>${chestnutWoodOwned < chestnutWoodData.maxOwned ? `<button onclick="buyBarrelType('chestnut_wood')" class="${state.gold >= chestnutWoodData.cost ? "bg-yellow-500 hover:bg-yellow-400 text-amber-950 active:scale-95 cursor-pointer" : "bg-gray-100 text-gray-400 cursor-not-allowed"} px-3 py-2 text-[10px] font-black rounded-lg shadow-sm tracking-wide transition-all uppercase flex items-center gap-1" ${state.gold < chestnutWoodData.cost ? "disabled" : ""}><i data-lucide="coins" class="w-3.5 h-3.5"></i> ${chestnutWoodData.cost}</button>` : `<span class="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-md">MAXED</span>`}`;
+		list.appendChild(chestnutWoodRow);
+
+		// Old Bourbon Barrel
+		const oldBourbonData = BARREL_TYPES.old_bourbon;
+		const oldBourbonOwned = state.shop.barrelsOwned.old_bourbon || 0;
+		const oldBourbonRow = document.createElement("div");
+		oldBourbonRow.className = "flex items-center justify-between bg-white p-4 rounded-xl border border-stone-200/50 shadow-sm mt-3 animate-fade-in w-full";
+		oldBourbonRow.innerHTML = `<div class="flex items-center gap-3"><div class="p-2 bg-amber-50 rounded-lg"><i data-lucide="database" class="w-6 h-6 text-amber-800"></i></div><div><h4 class="font-black text-xs text-amber-950">${oldBourbonData.name}</h4><p class="text-[10px] text-amber-800/60 font-bold">${oldBourbonOwned < oldBourbonData.maxOwned ? `Increase capacity: ${oldBourbonOwned}/${oldBourbonData.maxOwned} barrels` : "Maximum owned!"}</p></div></div>${oldBourbonOwned < oldBourbonData.maxOwned ? `<button onclick="buyBarrelType('old_bourbon')" class="${state.gold >= oldBourbonData.cost ? "bg-yellow-500 hover:bg-yellow-400 text-amber-950 active:scale-95 cursor-pointer" : "bg-gray-100 text-gray-400 cursor-not-allowed"} px-3 py-2 text-[10px] font-black rounded-lg shadow-sm tracking-wide transition-all uppercase flex items-center gap-1" ${state.gold < oldBourbonData.cost ? "disabled" : ""}><i data-lucide="coins" class="w-3.5 h-3.5"></i> ${oldBourbonData.cost}</button>` : `<span class="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-md">MAXED</span>`}`;
+		list.appendChild(oldBourbonRow);
 
 		const kettleRow = document.createElement("div");
 		kettleRow.className = "flex items-center justify-between bg-white p-4 rounded-xl border border-stone-200/50 shadow-sm mt-3 animate-fade-in w-full";

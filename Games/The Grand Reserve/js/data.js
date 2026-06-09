@@ -36,10 +36,10 @@ export const INGREDIENTS_DATA = {
 	wheat: {name: "Malt Wheat"},
 	rye: {name: "Spicy Rye"},
 	pumpkin: {name: "Sugar Pumpkin"},
-	wild_yeast: {name: "Wild Yeast"},
+	wild_yeast: {name: "Wild Yeast", flavour: {sw: -20, ac: 25, tn: 0, bd: 15}},
 	cacao_nibs: {name: "Cacao Nibs"},
 	coffee_beans: {name: "Coffee Beans"},
-	pure_honey: {name: "Pure Honey"},
+	pure_honey: {name: "Pure Honey", flavour: {sw: 30, ac: -15, tn: 0, bd: 5}},
 	coriander_peel: {name: "Coriander & Peel"},
 };
 
@@ -67,6 +67,34 @@ export const PANTRY_DATA = {
 	pure_honey: {name: "Pure Honey", cost: 20},
 	coriander_peel: {name: "Coriander & Peel", cost: 8},
 };
+
+export const BARREL_TYPES = {
+    french_oak: {
+        name: "French Oak Barrel",
+        cost: 300,
+        maxOwned: 2,
+        flavourModifier: { sw: -0.2, ac: 0, tn: 0.5, bd: 0.3 } // per % progress
+    },
+    american_oak: {
+        name: "American Oak Barrel",
+        cost: 200,
+        maxOwned: 2,
+        flavourModifier: { sw: 0, ac: -0.3, tn: 0.2, bd: 0.6 }
+    },
+    chestnut_wood: {
+        name: "Chestnut Wood Barrel",
+        cost: 300,
+        maxOwned: 2,
+        flavourModifier: { sw: -0.2, ac: 0.4, tn: 1.2, bd: 0 }
+    },
+    old_bourbon: {
+        name: "Old Bourbon Barrel",
+        cost: 500,
+        maxOwned: 2,
+        flavourModifier: { sw: 0.6, ac: -0.4, tn: 0, bd: 0.8 }
+    }
+};
+
 
 export const RECIPES = {
 	chardonnay: {name: "Chardonnay Dry White", baseVal: 45, req: {chardonnay: 2}, bg: "bg-yellow-50", desc: "A classic, crisp white wine with clean, buttery notes."},

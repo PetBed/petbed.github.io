@@ -89,12 +89,19 @@ function serializeSaveState() {
 		ingredients: state.ingredients,
 		wines: state.wines,
 		wineRacks: state.wineRacks,
-		beers: state.beers,
-		plots: state.plots,
-		barrels: state.barrels,
+		beers: state.beers, // Assuming beers don't have complex flavour states in barrels
+		plots: state.plots, // Assuming plots don't have complex flavour states in barrels
+		barrels: state.barrels.map(b => ({ // Ensure all barrel properties are serialized
+			...b,
+			baseWineFlavour: b.baseWineFlavour,
+			flavour: b.flavour,
+		})),
 		kettleUnlocked: state.kettleUnlocked,
 		kettle: state.kettle,
-		shop: state.shop,
+		shop: { // Ensure shop properties are serialized, especially barrelsOwned
+			...state.shop,
+			barrelsOwned: state.shop.barrelsOwned,
+		},
 	};
 }
 
@@ -106,8 +113,15 @@ function applySaveState(serializedData) {
 		state.ingredients = serializedData.ingredients ?? state.ingredients;
 		state.wines = serializedData.wines ?? state.wines;
 		state.wineRacks = serializedData.wineRacks ?? state.wineRacks;
-		state.plots = serializedData.plots ?? state.plots;
-		state.barrels = serializedData.barrels ?? state.barrels;
+		state.plots = serializedData.plots ?? state.plots; // Assuming plots don't have complex flavour states in barrels
+		state.barrels = serializedData.barrels ?? state.barrels; // Restore barrels array
+		// Ensure new flavour properties are correctly merged for existing barrels
+		state.barrels.forEach((barrel, index) => {
+			if (serializedData.barrels && serializedData.barrels[index]) {
+				barrel.baseWineFlavour = serializedData.barrels[index].baseWineFlavour ?? barrel.baseWineFlavour;
+				barrel.flavour = serializedData.barrels[index].flavour ?? barrel.flavour;
+			}
+		});
 		state.kettleUnlocked = serializedData.kettleUnlocked ?? state.kettleUnlocked;
 		state.kettle = serializedData.kettle ?? state.kettle;
 		state.shop = serializedData.shop ?? state.shop;

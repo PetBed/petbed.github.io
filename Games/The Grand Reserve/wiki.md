@@ -31,12 +31,12 @@ All crops in this registry are grapes, berries, or grains that grow in standard 
 
 Unlike agricultural crops, pantry items are bought directly from the Merchant Shop for flat gold costs and are deposited instantly into your pantry shelf inventory.
 
-| Pantry Additive | Unit Cost | Primary Recipe Utility |
-| :--- | :--- | :--- |
-| Wild Yeast | $15\text{ Gold}$ | Unleashes complex, tart, sour wild fermentations |
+| Pantry Additive | Unit Cost | Description | Wine Flavour Modifiers
+| :--- | :--- | :--- | :--- |
+| Wild Yeast | $15\text{ Gold}$ | Unleashes complex, tart, sour wild fermentations | `AC +25`, `BD +15`, `SW -20` |
 | Cacao Nibs | $10\text{ Gold}$ | Rich chocolate bitterness and smooth stout mouthfeel |
 | Coffee Beans | $12\text{ Gold}$ | Intensely roasted dark chocolate and espresso notes |
-| Pure Honey | $20\text{ Gold}$ | Highly fermentable sweet braggot/pumpkin sugar boost |
+| Pure Honey | $20\text{ Gold}$ | Highly fermentable sweet braggot/pumpkin sugar boost | `SW +30`, `BD +5`, `AC -15` |
 | Coriander & Peel | $8\text{ Gold}$ | Citrus aromatics and light herbal spiciness in witbiers |
 
 ### 1.3 Dynamic Weather & Terroir
@@ -59,10 +59,24 @@ Winemaking is a slow, methodical art of patience. Once you have harvested ingred
 
 [LOAD PRESS] ──> [MANUAL CRUSH] ──> [FERMENT] ──> [ACTIVE AGING] ──> [CELLAR RACKING]
 
+### 2.1.1 Barrel Types & Aging Effects
+
+The type of barrel you use for aging significantly impacts the final flavour profile of your wine. Each barrel type imparts unique flavour modifiers per percentage of aging progress. These modifiers are applied continuously throughout the aging phase.
+
+| Barrel Type | Cost | Max Owned | Flavour Modifier (per % progress) | Primary Effect |
+| :--- | :--- | :--- | :--- | :--- |
+| French Oak | $300\text{ Gold}$ | 2 | `TN +0.5`, `BD +0.3`, `SW -0.2` | Adds complex tannins and body, reduces sweetness. |
+| American Oak | $200\text{ Gold}$ | 2 | `TN +0.2`, `BD +0.6`, `AC -0.3` | Boosts body and subtle tannins, mellows acidity. |
+| Chestnut Wood | $300\text{ Gold}$ | 2 | `TN +1.2`, `AC +0.4`, `SW -0.2` | Imparts strong tannins and bright acidity, reduces sweetness. |
+| Old Bourbon | $500\text{ Gold}$ | 2 | `BD +0.8`, `SW +0.6`, `AC -0.4` | Adds significant body and sweetness, softens acidity. |
+
+[!tip] Strategic Barrel Selection
+Choosing the right barrel is crucial for crafting your desired wine profile. For example, a wine high in natural acidity might benefit from an American Oak barrel to mellow it out, while a light-bodied wine could gain structure from a French Oak.
+
 ### 2.1 The Four-Point Flavour Spectrum
 
 Every wine you create is now defined by a dynamic, four-point flavour profile. The final profile of a bottled wine is determined by the sum of the flavour values from each ingredient used in the press.
-
+further modified by the barrel type and duration of the aging process.
 *   **Sweetness (SW):** Measures residual fruit sugars and unfermentable additives.
 *   **Acidity (AC):** Measures tartness and bright, mouth-watering acids.
 *   **Tannin (TN):** Measures mouth-drying astringency from skins, seeds, and wood.
@@ -71,6 +85,10 @@ Every wine you create is now defined by a dynamic, four-point flavour profile. T
 Hovering over any ingredient or finished wine in your reserve will show a detailed tooltip with its exact flavour values.
 
 ### 2.2 The Multi-Ingredient Press & Recipe Book
+
+To start a batch, click any empty Oak Barrel in your Cellar to open the Ingredient Press. You can load up to $3$ harvested ingredients. The Press automatically evaluates your loaded items against the Recipe Book.
+
+
 
 To start a batch, click any empty Oak Barrel in your Cellar to open the Ingredient Press. You can load up to $3$ harvested ingredients. The Press automatically evaluates your loaded items against the Recipe Book.
 
@@ -109,7 +127,7 @@ Crushing (Active Tapping): You must click the barrel manually $5\text{ times}$ t
 
 Fermentation (Passive, $5\text{s}$): The mash sits in a closed barrel to ferment. You will occasionally hear gurgling bubbles.
 
-Aging (Passive, Variable Speed): The aging indicator marker slides along a visual timeline towards the S-Tier peak.
+Aging (Passive, Variable Speed): The aging indicator marker slides along a visual timeline towards the S-Tier peak. During this phase, the barrel's wood type will impart flavour changes to the wine. The aging process takes 100 seconds, with progress displayed as a percentage.
 
 ### 2.4 The Aging Timeline & Quality Multipliers
 

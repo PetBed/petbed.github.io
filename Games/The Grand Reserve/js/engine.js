@@ -1,5 +1,5 @@
 import {state, globals} from "./state.js";
-import {SHORT_NAMES, INGREDIENTS_DATA, SEEDS_DATA, PANTRY_DATA, RECIPES, BEER_RECIPES, TIERS, VINTAGE_RANKS} from "./data.js";
+import {SHORT_NAMES, INGREDIENTS_DATA, SEEDS_DATA, PANTRY_DATA, RECIPES, BEER_RECIPES, TIERS, VINTAGE_RANKS, BARREL_TYPES} from "./data.js";
 import {WEATHER_DATA} from "./weather.js";
 import {playSound} from "./audio.js";
 import {triggerAutoSave} from "./firebase-sync.js";
@@ -90,19 +90,27 @@ export function plantSeed(id, seedKey) {
 }
 
 export function addToPress(ingredientId) {
-	if (globals.loadedPressIngredients.length >= 3) {
-		showToast("Press is fully loaded! (Max 3 slots)");
-		return;
-	}
 	const ingredient = state.ingredients.find(ing => ing.id === ingredientId);
-	if (!ingredient || ingredient.count <= 0) {
+	if (!ingredient || ingredient.count <= 0 || !ingredient.flavour) { // Ensure ingredient has flavour data
 		showToast("Not enough stock!");
 		return;
 	}
-
+	
+	const isPantryAdditive = ingredient.key === "wild_yeast" || ingredient.key === "pure_honey";
+	
+	if (isPantryAdditive) {
+		if (globals.loadedPantryAdditiveId) {
+			showToast("Only one pantry additive can be used per barrel!");
+			return;
+		}
+		globals.loadedPantryAdditiveId = ingredientId;
+	} else {
+		// Existing logic for regular ingredients
+		globals.loadedPressIngredients.push(ingredientId);
+	}
+	
 	ingredient.count--;
-	globals.loadedPressIngredients.push(ingredientId);
-
+	
 	playSound("pluck");
 	renderPressModal();
 	updateHeaderUI();
@@ -110,14 +118,28 @@ export function addToPress(ingredientId) {
 }
 
 export function removeFromPress(slotIndex) {
-	if (slotIndex >= globals.loadedPressIngredients.length) return;
+	// This function now expects the actual ingredient ID to remove, not a slot index.
+	// The UI will be updated to pass the ID.
+	const ingredientIdToRemove = slotIndex; // Renaming for clarity based on UI change
 
-	const ingredientId = globals.loadedPressIngredients[slotIndex];
-	const ingredient = state.ingredients.find(ing => ing.id === ingredientId);
-	if (ingredient) {
-		ingredient.count++;
+	// Check if it's the pantry additive
+	if (globals.loadedPantryAdditiveId === ingredientIdToRemove) {
+		const ingredient = state.ingredients.find(ing => ing.id === globals.loadedPantryAdditiveId);
+		if (ingredient) {
+			ingredient.count++;
+		}
+		globals.loadedPantryAdditiveId = null;
+	} else {
+		// Check if it's a regular ingredient
+		const index = globals.loadedPressIngredients.indexOf(ingredientIdToRemove);
+		if (index === -1) return; // Not found in regular ingredients
+
+		const ingredient = state.ingredients.find(ing => ing.id === ingredientIdToRemove);
+		if (ingredient) {
+			ingredient.count++;
+		}
+		globals.loadedPressIngredients.splice(index, 1);
 	}
-	globals.loadedPressIngredients.splice(slotIndex, 1);
 
 	playSound("pluck");
 	renderPressModal();
@@ -133,15 +155,26 @@ export function getRecipePrediction() {
 	const flavour = {sw: 0, ac: 0, tn: 0, bd: 0};
 	const ingredientKeys = [];
 	globals.loadedPressIngredients.forEach((ingId) => {
-		const ing = state.ingredients.find(i => i.id === ingId);
+		const ing = state.ingredients.find(i => i.id === ingId); // Find the actual ingredient object
 		if (ing && ing.flavour) {
-			flavour.sw += ing.flavour.sw;
-			flavour.ac += ing.flavour.ac;
-			flavour.tn += ing.flavour.tn;
-			flavour.bd += ing.flavour.bd;
+			flavour.sw = Math.max(0, Math.min(100, flavour.sw + ing.flavour.sw));
+			flavour.ac = Math.max(0, Math.min(100, flavour.ac + ing.flavour.ac));
+			flavour.tn = Math.max(0, Math.min(100, flavour.tn + ing.flavour.tn));
+			flavour.bd = Math.max(0, Math.min(100, flavour.bd + ing.flavour.bd));
 			ingredientKeys.push(ing.key);
 		}
 	});
+
+	// Add flavour from pantry additive, if present
+	if (globals.loadedPantryAdditiveId) {
+		const pantryIng = state.ingredients.find(i => i.id === globals.loadedPantryAdditiveId);
+		if (pantryIng && pantryIng.flavour) {
+			flavour.sw = Math.max(0, Math.min(100, flavour.sw + pantryIng.flavour.sw));
+			flavour.ac = Math.max(0, Math.min(100, flavour.ac + pantryIng.flavour.ac));
+			flavour.tn = Math.max(0, Math.min(100, flavour.tn + pantryIng.flavour.tn));
+			flavour.bd = Math.max(0, Math.min(100, flavour.bd + pantryIng.flavour.bd));
+		}
+	};
 
 	const counts = {};
 	ingredientKeys.forEach((ing) => {
@@ -205,22 +238,29 @@ export function handleBottleAction(id) {
 	if (!barrel || barrel.state !== "aging") return;
 
 	const progress = barrel.ageProgress;
-	let finalTier = "c";
+  let finalTier = (progress < 30) ? "c" : (progress < 60) ? "b" : (progress < 80) ? "a" : "s";
 
-	if (progress >= 30 && progress < 60) finalTier = "b";
-	else if (progress >= 60 && progress < 80) finalTier = "a";
-	else if (progress >= 80) finalTier = "s";
+	// const flavour = {sw: 0, ac: 0, tn: 0, bd: 0};
+	// barrel.ingredients.forEach((ingId) => {
+	// 	const ing = state.ingredients.find(i => i.id === ingId);
+	// 	if (ing && ing.flavour) { // Ensure ingredient has flavour data
+	// 		flavour.sw = Math.max(0, Math.min(100, flavour.sw + ing.flavour.sw));
+	// 		flavour.ac = Math.max(0, Math.min(100, flavour.ac + ing.flavour.ac));
+	// 		flavour.tn = Math.max(0, Math.min(100, flavour.tn + ing.flavour.tn));
+	// 		flavour.bd = Math.max(0, Math.min(100, flavour.bd + ing.flavour.bd));
+	// 	}
+	// });
 
-	const flavour = {sw: 0, ac: 0, tn: 0, bd: 0};
-	barrel.ingredients.forEach((ingId) => {
-		const ing = state.ingredients.find(i => i.id === ingId);
-		if (ing && ing.flavour) {
-			flavour.sw += ing.flavour.sw;
-			flavour.ac += ing.flavour.ac;
-			flavour.tn += ing.flavour.tn;
-			flavour.bd += ing.flavour.bd;
-		}
-	});
+	// // Add flavour from pantry additive, if present in the barrel
+	// if (barrel.pantryAdditiveId) {
+	// 	const pantryIng = state.ingredients.find(i => i.id === barrel.pantryAdditiveId);
+	// 	if (pantryIng && pantryIng.flavour) { // Ensure pantry additive has flavour data
+	// 		flavour.sw = Math.max(0, Math.min(100, flavour.sw + pantryIng.flavour.sw));
+	// 		flavour.ac = Math.max(0, Math.min(100, flavour.ac + pantryIng.flavour.ac));
+	// 		flavour.tn = Math.max(0, Math.min(100, flavour.tn + pantryIng.flavour.tn));
+	// 		flavour.bd = Math.max(0, Math.min(100, flavour.bd + pantryIng.flavour.bd));
+	// 	}
+	// }
 
 	const bottle = {
 		id: "wine_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
@@ -228,7 +268,7 @@ export function handleBottleAction(id) {
 		qualityKey: finalTier,
 		age: 0,
 		rankIndex: 0,
-		flavour: flavour,
+		flavour: JSON.parse(JSON.stringify(barrel.flavour)),
 		// customLabel property appended later inside labeler
 	};
 
@@ -250,6 +290,9 @@ export function handleBottleAction(id) {
 	barrel.crushProgress = 0;
 	barrel.recipeKey = null;
 	barrel.ingredients = [];
+	barrel.baseWineFlavour = null; // Clear base flavour
+	barrel.flavour = null; // Clear current flavour
+	barrel.pantryAdditiveId = null; // Clear pantry additive from barrel
 
 	updateHeaderUI();
 	renderCellarUI();
@@ -276,6 +319,9 @@ export function bottleAsVinegar(id) {
 	barrel.state = "empty";
 	barrel.ageProgress = 0;
 	barrel.crushProgress = 0;
+	barrel.pantryAdditiveId = null; // Clear pantry additive from barrel
+	barrel.baseWineFlavour = null; // Clear base flavour
+	barrel.flavour = null; // Clear current flavour
 	barrel.recipeKey = null;
 
 	updateHeaderUI();
@@ -428,7 +474,7 @@ export function addToKettle(ingredientKey) {
 	state.ingredients[ingredientKey]--;
 	globals.loadedKettleIngredients.push(ingredientKey);
 	playSound("pluck");
-	renderKettleModal();
+			renderKettleModal(); // This will re-render the inventory, showing returned items
 	updateHeaderUI();
 	renderWarehouse();
 }
@@ -501,7 +547,7 @@ export function saveCustomLabel() {
 	triggerAutoSave();
 }
 
-export function sellWineQualityGroup(qualityKey, rankIndex, customTitleStr) {
+export function sellWineQualityGroup(qualityKey, rankIndex, customTitleStr, flavourStr) {
 	if (!globals.activeSellingWineKey) return;
 
 	// Find all bottles matching criteria including exact custom titles to empty the group
@@ -509,7 +555,8 @@ export function sellWineQualityGroup(qualityKey, rankIndex, customTitleStr) {
 	state.wines.forEach((w, idx) => {
 		const matchKey = w.recipeKey === globals.activeSellingWineKey && w.qualityKey === qualityKey && w.rankIndex === rankIndex;
 		const title = w.customLabel ? w.customLabel.title : RECIPES[globals.activeSellingWineKey].name;
-		if (matchKey && title === customTitleStr) {
+		const matchFlavour = JSON.stringify(w.flavour) === flavourStr;
+		if (matchKey && title === customTitleStr && matchFlavour) {
 			indexesToRemove.push(idx);
 		}
 	});
@@ -622,11 +669,24 @@ export function buyPlot() {
 	}
 }
 
-export function buyBarrel() {
-	if (state.gold >= state.shop.barrelCost && state.barrels.length < 3) {
-		state.gold -= state.shop.barrelCost;
+export function buyBarrelType(barrelTypeKey) { // Renamed from buyBarrel
+	const barrelTypeData = BARREL_TYPES[barrelTypeKey];
+	if (!barrelTypeData) {
+		console.error("Invalid barrel type:", barrelTypeKey);
+		return;
+	}
+
+	const currentOwned = state.shop.barrelsOwned[barrelTypeKey] || 0;
+	if (currentOwned >= barrelTypeData.maxOwned) {
+		showToast(`Already own maximum ${barrelTypeData.name} barrels!`);
+		return;
+	}
+
+	if (state.gold >= barrelTypeData.cost) {
+		state.gold -= barrelTypeData.cost;
 		state.barrels.push({
-			id: state.barrels.length,
+			id: state.barrels.length, // Assign a new unique ID
+			type: barrelTypeKey,
 			state: "empty",
 			crushProgress: 0,
 			maxCrush: 5,
@@ -636,14 +696,20 @@ export function buyBarrel() {
 			qualityMultiplier: 1.0,
 			recipeKey: null,
 			ingredients: [],
+			pantryAdditiveId: null,
+			baseWineFlavour: null,
+			flavour: null,
 		});
-		state.shop.barrelCost = Math.round(state.shop.barrelCost * 2.5);
+		state.shop.barrelsOwned[barrelTypeKey] = currentOwned + 1; // Increment count
 		playSound("clink");
-		showToast("New aging barrel installed!");
+		showToast(`New ${barrelTypeData.name} installed!`);
 		updateHeaderUI();
 		renderCellarUI();
 		renderShop();
 		triggerAutoSave();
+	}
+	else {
+		showToast("Not enough gold to buy this barrel!");
 	}
 }
 
@@ -674,6 +740,8 @@ export function buyOakConditioning() {
 
 export function startLoop(multiplier = 1) {
 	return setInterval(() => {
+		const speedFactor = state.shop.oakBuffOwned ? 1.3 : 1.0;
+
 		// Auto-resume minigame physics if loaded from a cloud save mid-brew
 		if (state.kettle.state === "brewing" && !globals.kettlePhysicsInterval) {
 			startKettlePhysics();
@@ -705,11 +773,22 @@ export function startLoop(multiplier = 1) {
 					showToast(`Fermentation completed inside Barrel 0${barrel.id + 1}!`);
 				}
 			} else if (barrel.state === "aging") {
+				// Apply barrel flavour modifiers during aging
+				const barrelTypeData = BARREL_TYPES[barrel.type];
+				if (barrelTypeData && barrelTypeData.flavourModifier && barrel.flavour) {
+					const modifier = barrelTypeData.flavourModifier;
+					const actualSpeedFactor = speedFactor;
+
+					barrel.flavour.sw = Math.max(0, Math.min(100, barrel.flavour.sw + modifier.sw * actualSpeedFactor));
+					barrel.flavour.ac = Math.max(0, Math.min(100, barrel.flavour.ac + modifier.ac * actualSpeedFactor));
+					barrel.flavour.tn = Math.max(0, Math.min(100, barrel.flavour.tn + modifier.tn * actualSpeedFactor));
+					barrel.flavour.bd = Math.max(0, Math.min(100, barrel.flavour.bd + modifier.bd * actualSpeedFactor));
+				}
+
 				cellarChanged = true;
 				if (barrel.ageProgress >= 78 && barrel.ageProgress < 100) {
 					if (Math.random() < 0.5) playSound("tick");
 				}
-				const speedFactor = state.shop.oakBuffOwned ? 2.6 : 2.0;
 				barrel.ageProgress += speedFactor;
 				if (barrel.ageProgress > 100) {
 					barrel.ageProgress = 100;

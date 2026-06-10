@@ -23,6 +23,8 @@ export const state = {
 	ingredients: [],
 
 	wines: [],
+	contracts: [],
+
 	wineRacks: Array(9).fill(null),
 
 	// Migrated to an array to support individual custom labels

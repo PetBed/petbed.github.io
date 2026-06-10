@@ -2,8 +2,9 @@ import {state, globals} from "./state.js";
 import {SHORT_NAMES, INGREDIENTS_DATA, SEEDS_DATA, PANTRY_DATA, RECIPES, BEER_RECIPES, TIERS, VINTAGE_RANKS, BARREL_TYPES} from "./data.js";
 import {WEATHER_DATA} from "./weather.js";
 import {playSound} from "./audio.js";
-import {triggerAutoSave} from "./firebase-sync.js";
-import {renderPlots, renderCellarUI, showToast, updateHeaderUI, renderWarehouse, renderPressModal, renderMarket, renderRacks, renderShop, renderBreweryUI, renderKettleModal, renderMarketTimer, openSellModal, openSellBeerModal, openLabelerModal} from "./ui.js";
+import {saveGameState} from "./storage.js";
+import {renderPlots, renderCellarUI, showToast, updateHeaderUI, renderWarehouse, renderPressModal, renderMarket, renderRacks, renderShop, renderBreweryUI, renderKettleModal, renderMarketTimer, openSellModal, openSellBeerModal, openLabelerModal, renderWeather, hideItemTooltip, renderContractsBoard, openContractDetailModal} from "./ui.js";
+import { generateSolvableContract, checkContractCompletion } from "./contracts.js";
 
 export function setWeather(weatherKey) {
 	state.currentWeather = weatherKey;
@@ -18,16 +19,19 @@ export function startWeatherSystem() {
 	}, 180000); // 3 minutes
 }
 
-export function renderWeather() {
-	const weather = WEATHER_DATA[state.currentWeather];
-	const weatherDisplay = document.getElementById("weather-display");
-	if (weatherDisplay) {
-		weatherDisplay.innerHTML = `
-			<i data-lucide="${weather.icon}" class="w-4 h-4 ${weather.color}"></i>
-			<span class="${weather.color}">${weather.name}</span>
-		`;
-		if (window.lucide) window.lucide.createIcons();
-	}
+export function startContractSystem() {
+    // Attempt to generate a new contract periodically
+    setInterval(() => {
+        if (state.contracts.filter(c => c.status === 'available').length < 10) {
+            const newContract = generateSolvableContract();
+            if (newContract) {
+                state.contracts.push(newContract);
+                renderContractsBoard();
+                showToast("A new customer order has been posted!");
+                playSound("clink");
+            }
+        }
+    }, (10 + Math.random() * 5) * 60000); // 10-15 minutes
 }
 
 export function handlePlotClick(id) {
@@ -38,14 +42,19 @@ export function handlePlotClick(id) {
 	} else if (plot.state === "ready") {
 		const seedKey = plot.cropType;
 		const ingData = INGREDIENTS_DATA[seedKey];
-		const flavour = JSON.parse(JSON.stringify(ingData.flavour)); // Deep copy to prevent mutation of base data
-		const harvestWeatherKey = state.currentWeather;
-		const weather = WEATHER_DATA[harvestWeatherKey];
-		if (weather && weather.modifier) {
-			flavour.sw = Math.max(0, Math.min(100, flavour.sw + weather.modifier.sw));
-			flavour.ac = Math.max(0, Math.min(100, flavour.ac + weather.modifier.ac));
-			flavour.tn = Math.max(0, Math.min(100, flavour.tn + weather.modifier.tn));
-			flavour.bd = Math.max(0, Math.min(100, flavour.bd + weather.modifier.bd));
+		let flavour = null;
+		let harvestWeatherKey = null;
+
+		if (ingData.flavour) {
+			flavour = JSON.parse(JSON.stringify(ingData.flavour)); // Deep copy to prevent mutation of base data
+			harvestWeatherKey = state.currentWeather;
+			const weather = WEATHER_DATA[harvestWeatherKey];
+			if (weather && weather.modifier) {
+				flavour.sw = Math.max(0, Math.min(100, flavour.sw + weather.modifier.sw));
+				flavour.ac = Math.max(0, Math.min(100, flavour.ac + weather.modifier.ac));
+				flavour.tn = Math.max(0, Math.min(100, flavour.tn + weather.modifier.tn));
+				flavour.bd = Math.max(0, Math.min(100, flavour.bd + weather.modifier.bd));
+			}
 		}
 
 		const existingIngredient = state.ingredients.find(ing => ing.key === seedKey && JSON.stringify(ing.flavour) === JSON.stringify(flavour));
@@ -56,8 +65,8 @@ export function handlePlotClick(id) {
 				id: `${seedKey}_${Date.now()}`,
 				key: seedKey,
 				count: 1,
-				flavour: flavour,
-				weather: harvestWeatherKey,
+				flavour: flavour, // This will be null for non-flavour crops
+				weather: harvestWeatherKey, // This will be null for non-flavour crops
 			});
 		}
 
@@ -66,9 +75,8 @@ export function handlePlotClick(id) {
 		playSound("pluck");
 		showToast(`Harvested ${INGREDIENTS_DATA[seedKey].name}!`);
 		renderPlots();
-		updateHeaderUI();
 		renderWarehouse();
-		triggerAutoSave();
+		saveGameState();
 	}
 }
 
@@ -83,13 +91,13 @@ export function plantSeed(id, seedKey) {
 		playSound("pluck");
 		showToast(`Planted ${SHORT_NAMES[seedKey]}!`);
 		renderPlots();
-		updateHeaderUI();
 		renderShop();
-		triggerAutoSave();
+		saveGameState();
 	}
 }
 
 export function addToPress(ingredientId) {
+	hideItemTooltip();
 	const ingredient = state.ingredients.find(ing => ing.id === ingredientId);
 	if (!ingredient || ingredient.count <= 0 || !ingredient.flavour) { // Ensure ingredient has flavour data
 		showToast("Not enough stock!");
@@ -113,12 +121,12 @@ export function addToPress(ingredientId) {
 	
 	playSound("pluck");
 	renderPressModal();
-	updateHeaderUI();
 	renderWarehouse();
 }
 
 export function removeFromPress(slotIndex) {
 	// This function now expects the actual ingredient ID to remove, not a slot index.
+	hideItemTooltip();
 	// The UI will be updated to pass the ID.
 	const ingredientIdToRemove = slotIndex; // Renaming for clarity based on UI change
 
@@ -143,7 +151,6 @@ export function removeFromPress(slotIndex) {
 
 	playSound("pluck");
 	renderPressModal();
-	updateHeaderUI();
 	renderWarehouse();
 }
 
@@ -229,7 +236,6 @@ export function handleBarrelClick(id) {
 			showToast(`Barrel 0${id + 1} squished! Fermentation starting...`);
 		}
 		renderCellarUI();
-		triggerAutoSave();
 	}
 }
 
@@ -298,7 +304,6 @@ export function handleBottleAction(id) {
 	renderCellarUI();
 	renderWarehouse();
 	renderMarket();
-	triggerAutoSave();
 }
 
 export function bottleAsVinegar(id) {
@@ -328,10 +333,10 @@ export function bottleAsVinegar(id) {
 	renderCellarUI();
 	renderWarehouse();
 	renderMarket();
-	triggerAutoSave();
 }
 
 export function placeWineOnRack(bottleId) {
+	hideItemTooltip();
 	const index = state.wines.findIndex((w) => w.id === bottleId);
 	if (index === -1 || state.activeRackSlotId === null) return;
 
@@ -344,12 +349,12 @@ export function placeWineOnRack(bottleId) {
 	showToast(`Placed ${title} on rack slot 0${state.activeRackSlotId + 1}!`);
 	window.closeRackSelectModal();
 	renderRacks();
-	updateHeaderUI();
 	renderWarehouse();
-	triggerAutoSave();
+	saveGameState();
 }
 
 export function removeWineFromRack(slotId) {
+	hideItemTooltip();
 	const bottle = state.wineRacks[slotId];
 	if (!bottle) return;
 
@@ -360,9 +365,8 @@ export function removeWineFromRack(slotId) {
 	const title = bottle.customLabel ? bottle.customLabel.title : RECIPES[bottle.recipeKey].name;
 	showToast(`Removed ${title} from rack back to reserve vault!`);
 	renderRacks();
-	updateHeaderUI();
 	renderWarehouse();
-	triggerAutoSave();
+	saveGameState();
 }
 
 export function startKettlePhysics() {
@@ -454,7 +458,6 @@ export function startKettlePhysics() {
 			showToast(`Brewed a ${BEER_RECIPES[kettle.recipeKey].name}! Prepare label design.`);
 			playSound("pop");
 			renderBreweryUI();
-			triggerAutoSave();
 
 			openLabelerModal(newBeerId, "beer");
 		}
@@ -462,6 +465,7 @@ export function startKettlePhysics() {
 }
 
 export function addToKettle(ingredientKey) {
+	hideItemTooltip();
 	if (globals.loadedKettleIngredients.length >= 3) {
 		showToast("Kettle is fully loaded! (Max 3 slots)");
 		return;
@@ -475,18 +479,18 @@ export function addToKettle(ingredientKey) {
 	globals.loadedKettleIngredients.push(ingredientKey);
 	playSound("pluck");
 			renderKettleModal(); // This will re-render the inventory, showing returned items
-	updateHeaderUI();
 	renderWarehouse();
+	updateHeaderUI();
 }
 
 export function removeFromKettle(slotIndex) {
+	hideItemTooltip();
 	if (slotIndex >= globals.loadedKettleIngredients.length) return;
 	const ing = globals.loadedKettleIngredients[slotIndex];
 	state.ingredients[ing]++;
 	globals.loadedKettleIngredients.splice(slotIndex, 1);
 	playSound("pluck");
 	renderKettleModal();
-	updateHeaderUI();
 	renderWarehouse();
 }
 
@@ -543,11 +547,11 @@ export function saveCustomLabel() {
 	window.closeLabelerModal();
 	renderWarehouse();
 	renderRacks();
-	renderMarket();
-	triggerAutoSave();
+	saveGameState();
 }
 
 export function sellWineQualityGroup(qualityKey, rankIndex, customTitleStr, flavourStr) {
+	hideItemTooltip();
 	if (!globals.activeSellingWineKey) return;
 
 	// Find all bottles matching criteria including exact custom titles to empty the group
@@ -576,16 +580,17 @@ export function sellWineQualityGroup(qualityKey, rankIndex, customTitleStr, flav
 	state.market.oversupply[globals.activeSellingWineKey]++;
 
 	playSound("clink");
-	showToast(`Sold 1 bottle of "${customTitleStr}" for $${earnings}!`);
+	showToast(`Sold 1 bottle of "${customTitleStr}" for +$${earnings}!`, "success");
 
 	updateHeaderUI();
 	renderWarehouse();
 	renderMarket();
 	openSellModal(globals.activeSellingWineKey);
-	triggerAutoSave();
+	saveGameState();
 }
 
 export function sellBeerGroup(customTitleStr) {
+	hideItemTooltip();
 	if (!globals.activeSellingBeerKey) return;
 
 	const indexesToRemove = [];
@@ -604,13 +609,13 @@ export function sellBeerGroup(customTitleStr) {
 	state.market.oversupply[globals.activeSellingBeerKey]++;
 
 	playSound("clink");
-	showToast(`Sold 1 pint of "${customTitleStr}" for $${earnings}!`);
+	showToast(`Sold 1 pint of "${customTitleStr}" for +$${earnings}!`, "success");
 
 	updateHeaderUI();
 	renderWarehouse();
 	renderMarket();
 	openSellBeerModal(globals.activeSellingBeerKey);
-	triggerAutoSave();
+	saveGameState();
 }
 
 export function buySeed(seedKey) {
@@ -622,7 +627,7 @@ export function buySeed(seedKey) {
 		showToast(`Bought 1x ${seed.name}!`);
 		updateHeaderUI();
 		renderShop();
-		triggerAutoSave();
+		saveGameState();
 	}
 }
 
@@ -648,7 +653,7 @@ export function buyPantryItem(pantryKey) {
 		showToast(`Direct-purchased 1x ${item.name}! Added to Pantry.`);
 		updateHeaderUI();
 		renderShop();
-		triggerAutoSave();
+		saveGameState();
 	}
 }
 
@@ -660,11 +665,10 @@ export function buyPlot() {
 			firstLocked.state = "empty";
 			state.shop.plotCost = Math.round(state.shop.plotCost * 1.5);
 			playSound("clink");
-			showToast("Vineyard Plot unlocked!");
 			updateHeaderUI();
 			renderPlots();
 			renderShop();
-			triggerAutoSave();
+			saveGameState();
 		}
 	}
 }
@@ -706,7 +710,7 @@ export function buyBarrelType(barrelTypeKey) { // Renamed from buyBarrel
 		updateHeaderUI();
 		renderCellarUI();
 		renderShop();
-		triggerAutoSave();
+		saveGameState();
 	}
 	else {
 		showToast("Not enough gold to buy this barrel!");
@@ -722,7 +726,7 @@ export function buyKettle() {
 		updateHeaderUI();
 		renderBreweryUI();
 		renderShop();
-		triggerAutoSave();
+		saveGameState();
 	}
 }
 
@@ -731,11 +735,72 @@ export function buyOakConditioning() {
 		state.gold -= state.shop.oakBuffCost;
 		state.shop.oakBuffOwned = true;
 		playSound("clink");
-		showToast("Installed Oak Conditioning! Aging speed +30%.");
 		updateHeaderUI();
 		renderShop();
-		triggerAutoSave();
+		saveGameState();
 	}
+}
+
+export function acceptContract(contractId) {
+    const contract = state.contracts.find(c => c.id === contractId);
+    if (!contract || contract.status !== 'available') return;
+
+    if (state.contracts.filter(c => c.status === 'active').length >= 3) {
+        showToast("You can only have 3 active orders at a time!");
+        return;
+    }
+
+    contract.status = 'active';
+    contract.timeRemaining = undefined; // Active contracts don't expire
+    playSound("pluck");
+    showToast("Order accepted! Check the board for details.");
+    renderContractsBoard();
+}
+
+export function fulfillContract(contractId, wineId) {
+    const contract = state.contracts.find(c => c.id === contractId);
+    const wineIndex = state.wines.findIndex(w => w.id === wineId);
+    if (!contract || wineIndex === -1) {
+        showToast("Error: Could not find order or wine.");
+        return;
+    }
+
+    const wine = state.wines[wineIndex];
+    const result = checkContractCompletion(wine, contract);
+
+    if (result.success) {
+        const marketValue = state.market.current[wine.recipeKey] || RECIPES[wine.recipeKey].baseVal;
+        const tierMultiplier = TIERS[wine.qualityKey].mult;
+        const effectiveTierMultiplier = Math.max(1, tierMultiplier); // Tier multiplier is at least 1x for contracts
+        const vintageMultiplier = VINTAGE_RANKS[wine.rankIndex].mult;
+
+        const earnings = Math.round(marketValue * effectiveTierMultiplier * vintageMultiplier * contract.multiplier);
+        state.gold += earnings;
+        
+        state.wines.splice(wineIndex, 1); // Remove the wine
+        state.contracts = state.contracts.filter(c => c.id !== contractId); // Remove the contract
+
+        showToast(`Order complete! +${earnings} Gold!`, "success");
+        playSound("clink");
+        window.closeContractDetailModal();
+        renderContractsBoard();
+        renderWarehouse();
+    } else {
+        showToast(`Submission rejected: ${result.reason}`, "error");
+    }
+}
+
+export function cancelContract(contractId) {
+    const contractIndex = state.contracts.findIndex(c => c.id === contractId);
+    if (contractIndex === -1) return;
+
+    state.contracts.splice(contractIndex, 1);
+    
+    playSound("pop");
+    showToast("Order cancelled.");
+    window.closeContractDetailModal();
+    renderContractsBoard();
+    saveGameState();
 }
 
 export function startLoop(multiplier = 1) {
@@ -757,7 +822,7 @@ export function startLoop(multiplier = 1) {
 		});
 		if (plotsChanged) {
 			renderPlots();
-			triggerAutoSave();
+			saveGameState();
 		}
 
 		let cellarChanged = false;
@@ -819,8 +884,19 @@ export function startLoop(multiplier = 1) {
 			}
 		});
 		if (racksChanged && globals.currentTab === "racks") renderRacks();
-
 		state.market.tickCurrent--;
+
+        // Contract expiration
+        let contractsChanged = false;
+        state.contracts.forEach(c => {
+            if (c.status === 'available' && c.timeRemaining > 0) {
+                c.timeRemaining -= (1 * multiplier);
+                if (c.timeRemaining <= 0) contractsChanged = true;
+            }
+        });
+        if (contractsChanged) state.contracts = state.contracts.filter(c => c.timeRemaining > 0 || c.status !== 'available');
+        if (contractsChanged && globals.currentTab === 'orders') renderContractsBoard();
+
 		renderMarketTimer();
 
 		if (state.market.tickCurrent <= 0) {

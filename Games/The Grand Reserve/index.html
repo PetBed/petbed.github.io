@@ -31,13 +31,7 @@
           <i data-lucide="cloud" class="w-4 h-4"></i>
           <span>Temperate</span>
         </div>
-        <div class="flex gap-1.5">
-          <button id="sync-btn" type="button" aria-label="Cloud Sync" onclick="openSyncModal()"
-            class="p-2 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg transition-colors shadow-sm relative">
-            <i data-lucide="cloud" class="w-4 h-4"></i>
-            <span id="sync-indicator" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-yellow-500 rounded-full"></span>
-          </button>
-          <button id="sound-toggle" type="button" aria-label="Toggle Sound"
+        <div class="flex gap-1.5"><button id="sound-toggle" type="button" aria-label="Toggle Sound"
             class="p-2 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg transition-colors shadow-sm">
             <i data-lucide="volume-x" class="w-4 h-4" id="sound-icon"></i>
           </button>
@@ -68,6 +62,21 @@
         <div
           class="grid grid-cols-3 gap-3 p-4 bg-amber-950/5 rounded-2xl border border-amber-950/10 w-full max-w-xl mx-auto shadow-inner"
           id="plot-grid"></div>
+      </div>
+
+      <!-- ORDERS/CONTRACTS TAB -->
+      <div id="tab-orders" class="tab-content flex-col items-center animate-fade-in w-full">
+        <div class="text-center mb-4">
+          <h2 class="text-2xl font-extrabold text-amber-950 flex items-center justify-center gap-2">
+            <i data-lucide="scroll-text" class="text-amber-700"></i> Customer Order Board
+          </h2>
+          <p class="text-amber-800/80 text-xs mt-1">Accept contracts from locals to craft wines with precise flavour profiles for a premium payout.</p>
+        </div>
+        <div id="active-contracts-container" class="w-full mb-4"></div>
+        <div class="w-full text-center mb-2 border-t border-amber-900/10 pt-4">
+            <h3 class="text-sm font-black text-amber-900/60 uppercase tracking-wider">Available Orders</h3>
+        </div>
+        <div id="available-contracts-container" class="w-full grid grid-cols-1 md:grid-cols-2 gap-4"></div>
       </div>
 
       <!-- CELLAR TAB -->
@@ -321,15 +330,6 @@
       </div>
     </div>
 
-    <!-- RACK HOVER TOOLTIP -->
-    <div id="rack-tooltip"
-      class="fixed hidden z-[100] pointer-events-none bg-amber-950/95 backdrop-blur border border-amber-800 text-white p-2.5 rounded-xl shadow-2xl transition-opacity animate-fade-in">
-      <div id="tooltip-title"
-        class="text-[11px] font-black uppercase tracking-wider text-amber-100 border-b border-amber-900/50 pb-1 mb-1">
-        Estate Title</div>
-      <div id="tooltip-age" class="text-[10px] font-bold text-amber-400">Vintage Status</div>
-    </div>
-
     <!-- FLAVOUR TOOLTIP -->
     <div id="flavour-tooltip"
       class="fixed hidden z-[100] pointer-events-none bg-amber-950/95 backdrop-blur border border-amber-800 text-white p-2.5 rounded-xl shadow-2xl transition-opacity animate-fade-in">
@@ -489,53 +489,32 @@
       </div>
     </div>
 
-    <!-- CLOUD SYNC & BACKUP MODAL -->
-    <div id="sync-modal"
-      class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div
-        class="bg-white p-5 rounded-3xl border-2 border-amber-950 shadow-2xl w-full max-w-sm animate-fade-in flex flex-col">
+    <!-- CONTRACT DETAIL MODAL -->
+    <div id="contract-detail-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white p-5 rounded-3xl border-2 border-amber-950 shadow-2xl w-full max-w-md animate-fade-in flex flex-col">
         <div class="flex justify-between items-center mb-3">
-          <h3 class="text-md font-black text-amber-950 flex items-center gap-1.5"><i data-lucide="cloud"
-              class="text-blue-600"></i> Estate Cloud Sync</h3>
-          <button type="button" aria-label="Close Modal" onclick="closeSyncModal()"
-            class="text-stone-400 hover:text-stone-600 font-extrabold flex items-center justify-center p-1">✕</button>
+          <h3 id="contract-modal-title" class="text-md font-black text-amber-950 flex items-center gap-1.5"><i data-lucide="file-check-2" class="text-amber-700"></i> Active Order Details</h3>
+          <button type="button" aria-label="Close Modal" onclick="closeContractDetailModal()" class="text-stone-400 hover:text-stone-600 font-extrabold flex items-center justify-center p-1">✕</button>
         </div>
-        <p class="text-[10px] text-stone-500 leading-tight mb-4">Progress is synchronized dynamically to your secure
-          profile. Share or input your sync code to resume on other devices.</p>
+        
+        <div id="contract-modal-content" class="mb-4">
+          <!-- Contract details will be rendered here -->
+        </div>
 
-        <div class="bg-amber-50 border border-amber-900/10 p-3 rounded-2xl mb-4">
-          <span class="text-[9px] font-black uppercase text-amber-800 tracking-wider">Your Unique Sync Code</span>
-          <div class="flex items-center gap-2 mt-1">
-            <input id="sync-code-display" readonly aria-label="Your Sync Code"
-              class="flex-1 bg-white border border-amber-950/20 rounded-lg text-xs p-2 text-stone-700 font-mono select-all focus:outline-none"
-              value="Connecting...">
-            <button type="button" aria-label="Copy Sync Code" onclick="copySyncCode()"
-              class="p-2 bg-amber-200 hover:bg-amber-300 rounded-lg text-amber-900 transition-colors"><i
-                data-lucide="copy" class="w-4.5 h-4.5"></i></button>
+        <div class="border-t border-amber-900/10 pt-4">
+          <h4 class="text-[10px] font-black uppercase text-stone-400 tracking-wider mb-2">Submit Matching Wine from Reserve</h4>
+          <div id="contract-submission-list" class="space-y-2 overflow-y-auto max-h-48 pr-1">
+            <div class="py-4 text-center text-[10px] text-stone-400 font-bold">No matching wine types in your reserve.</div>
           </div>
         </div>
 
-        <div class="border-t border-amber-900/10 pt-4 mb-4">
-          <span class="text-[9px] font-black uppercase text-amber-800 tracking-wider block mb-1">Connect Existing Device
-            Profile</span>
-          <p class="text-[9px] text-stone-400 leading-tight mb-2">Warning: Syncing a new profile will completely
-            overwrite this device's current estate progress!</p>
-          <div class="flex gap-2">
-            <input id="sync-code-input" placeholder="Paste Sync Code..." aria-label="Input Sync Code"
-              class="flex-1 bg-amber-50 border border-amber-900/10 rounded-lg text-xs p-2 focus:outline-none focus:ring-1 focus:ring-amber-500">
-            <button type="button" onclick="loadRemoteSyncCode()"
-              class="px-3.5 py-2 bg-blue-600 text-white font-extrabold text-xs rounded-lg shadow hover:bg-blue-500 transition-all active:scale-95">SYNC</button>
-          </div>
+        <div id="contract-modal-footer" class="mt-4 pt-4 border-t border-amber-900/10 flex justify-end">
+          <!-- Cancel button will be rendered here -->
         </div>
 
-        <div
-          class="flex justify-between items-center text-[10px] text-stone-500 font-bold bg-stone-50 p-2.5 rounded-xl border border-stone-200">
-          <span class="flex items-center gap-1.5"><span id="sync-status-dot"
-              class="w-2 h-2 rounded-full bg-yellow-500"></span> <span id="sync-status-text">Connecting...</span></span>
-          <button type="button" onclick="triggerManualSync()" class="text-blue-600 hover:underline">Force Sync</button>
-        </div>
       </div>
     </div>
+
 
     <!-- BOTTOM NAVIGATION BAR -->
     <nav class="bg-white border-t border-amber-200 sticky bottom-0 z-10 w-full text-[9px]">
@@ -563,6 +542,12 @@
           data-target="racks">
           <i data-lucide="layers" class="w-4 h-4 mb-0.5"></i>
           <span class="font-black uppercase text-center leading-none">Racks</span>
+        </button>
+        <button type="button" onclick="switchTab('orders')"
+          class="nav-btn flex flex-col items-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100"
+          data-target="orders">
+          <i data-lucide="scroll-text" class="w-4 h-4 mb-0.5"></i>
+          <span class="font-black uppercase text-center leading-none">Orders</span>
         </button>
         <button type="button" onclick="switchTab('inventory')"
           class="nav-btn flex flex-col items-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100 relative"

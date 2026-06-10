@@ -1,5 +1,52 @@
 # The Grand Reserve - Changelog
 
+## Version 0.2.0 - Flavours and Requests Update
+
+This major update introduces the Customer Order Board, a dynamic contract system that challenges players to become true artisans of winemaking by fulfilling precise flavour requests for premium rewards.
+
+### New Features & Gameplay Mechanics
+
+*   **Customer Order Board:** A new "Orders" tab is now available, where local townspeople, critics, and merchants post specific requests for wines.
+*   **Precision Winemaking:** Contracts require wines of a specific variety (e.g., Pinot Noir) that meet precise flavour ranges (e.g., Sweetness between 40-50%).
+*   **The Solvability Engine:** Behind the scenes, a powerful new engine runs simulations to ensure every contract posted on the board is mathematically possible to create, preventing player frustration from impossible requests.
+*   **Dynamic Contract Lifecycle:** New orders appear on the board every 10-15 minutes and expire if not accepted. Players can manage up to 3 active orders at a time, which do not expire.
+*   **Enhanced Reward System:** Fulfilling contracts offers significant payout multipliers. The final reward is calculated as: `Market Value * (Tier Multiplier >= 1) * Vintage Multiplier * Order Multiplier`.
+    *   **Order Multipliers:** `2x` for 1 flavour range, `2.5x` for 2, `3x` for 3, and `4x` for 4.
+
+### UI & UX Improvements
+
+*   **Styled Notifications:** Toast notifications are now color-coded: green for successful sales, red for errors, and the classic brown for general information.
+
+### Bug Fixes
+
+*   Resolved a visual bug where a wine's SVG image would remain on a rack slot after being removed.
+*   Fixed an issue where newly purchased barrels would not appear in the cellar until the page was refreshed.
+*   Restored missing UI update calls to ensure the player's gold total updates immediately after transactions.
+
+---
+
+## Version 0.1.2 - The Local Estate Update
+
+This version overhauls the game's save system, moving from a cloud-based model to a more robust and reliable local storage system.
+
+### New Features & System Changes
+
+*   **Local Storage Saving:** Game progress is now saved directly to the browser's local storage. This removes the need for an internet connection or cloud sync codes and provides a more stable save experience.
+*   **Automatic Saving:** The game now automatically saves progress every 10 seconds, ensuring player data is consistently backed up.
+*   **Manual Save Hotkey:** Players can now manually save the game at any time by pressing `Ctrl + S`, which is confirmed by a "Game Saved!" notification.
+
+### Developer & Playtesting
+
+*   **Reset Game State:** A "Reset Game" button has been added to the playtest sidebar, allowing for a complete wipe of local storage data for fresh testing sessions.
+
+### Bug Fixes
+
+*   Fixed a critical bug where harvesting non-wine crops (e.g., Hops, Barley) would cause the game to crash.
+*   Resolved an issue where tooltips would remain "stuck" on the screen after the associated item was moved or used.
+*   Removed leftover code from the old cloud save system that could cause errors.
+
+---
+
 ## Version 0.1.1 - Cellar Refinement & Flavour Depth
 
 This update significantly enhances the winemaking experience by introducing new layers of customization and strategic depth in the cellar.

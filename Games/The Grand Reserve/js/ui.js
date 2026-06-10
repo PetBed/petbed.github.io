@@ -4,6 +4,7 @@ import {WEATHER_DATA} from "./weather.js"; // Ensure BARREL_TYPES is imported
 import {getSeedIcon, getCropIcon, getWineIcon, getBeerIcon} from "./graphics.js";
 import {toggleAudio} from "./audio.js";
 import {handlePlotClick, getRecipePrediction, handleBarrelClick, handleBottleAction, getKettleRecipePrediction} from "./engine.js";
+import { checkContractCompletion } from "./contracts.js";
 
 export function renderWeather() {
 	const weather = WEATHER_DATA[state.currentWeather];
@@ -108,6 +109,7 @@ export function openPressModal(barrelId) {
 }
 
 export function closePressModal(returnIngredients = true) { // Added parameter
+	hideItemTooltip();
 	if (returnIngredients) {
 		globals.loadedPressIngredients.forEach((ingId) => {
 			const ing = state.ingredients.find(i => i.id === ingId);
@@ -577,6 +579,7 @@ export function openRackSelectModal(slotId) {
 }
 
 export function closeRackSelectModal() {
+	hideItemTooltip();
 	state.activeRackSlotId = null;
 	document.getElementById("rack-select-modal").classList.add("hidden");
 }
@@ -669,6 +672,7 @@ export function openKettleModal() {
 }
 
 export function closeKettleModal() {
+	hideItemTooltip();
 	globals.loadedKettleIngredients.forEach((ing) => {
 		state.ingredients[ing]++;
 	});
@@ -1008,6 +1012,7 @@ export function renderLabelerPreview() {
 }
 
 export function closeLabelerModal() {
+	hideItemTooltip();
 	globals.labeling = {id: null, type: null, draft: {}};
 	document.getElementById("labeler-modal").classList.add("hidden");
 }
@@ -1242,6 +1247,7 @@ export function openSellBeerModal(beerKey) {
 }
 
 export function closeSellModal() {
+	hideItemTooltip();
 	document.getElementById("sell-overlay-modal").classList.add("hidden");
 	globals.activeSellingWineKey = null;
 	globals.activeSellingBeerKey = null;
@@ -1336,6 +1342,131 @@ export function renderShop() {
 	if (window.lucide) window.lucide.createIcons();
 }
 
+export function renderContractsBoard() {
+    const activeContainer = document.getElementById("active-contracts-container");
+    const availableContainer = document.getElementById("available-contracts-container");
+    if (!activeContainer || !availableContainer) return;
+
+    activeContainer.innerHTML = '';
+    availableContainer.innerHTML = '';
+
+    const activeContracts = state.contracts.filter(c => c.status === 'active');
+    const availableContracts = state.contracts.filter(c => c.status === 'available');
+
+    if (activeContracts.length > 0) {
+        activeContainer.innerHTML = `<div class="w-full text-center mb-2"><h3 class="text-sm font-black text-amber-900/60 uppercase tracking-wider">Active Orders</h3></div>`;
+        const grid = document.createElement('div');
+        grid.className = "w-full grid grid-cols-1 md:grid-cols-3 gap-4";
+        activeContracts.forEach(c => {
+            const card = document.createElement('div');
+            card.className = "bg-white border-2 border-amber-500 p-4 rounded-xl shadow-lg flex flex-col gap-2 cursor-pointer hover:bg-amber-50 transition-all";
+            card.onclick = () => openContractDetailModal(c.id);
+            card.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-black text-amber-950">${c.npc.name}</span>
+                    <span class="text-2xl">${c.npc.avatar}</span>
+                </div>
+                <div class="text-xs font-bold text-amber-800/80">Wants: <span class="font-extrabold text-amber-900">${RECIPES[c.recipeKey].name}</span></div>
+                <div class="text-center mt-1"><button class="w-full py-1 bg-amber-500 text-white text-[10px] font-black rounded-lg uppercase">View Details</button></div>
+            `;
+            grid.appendChild(card);
+        });
+        activeContainer.appendChild(grid);
+    }
+
+    if (availableContracts.length === 0) {
+        availableContainer.innerHTML = `<div class="col-span-1 md:col-span-2 text-center text-xs text-stone-400 py-8">No new orders at the moment. Check back later!</div>`;
+    } else {
+        availableContracts.forEach(c => {
+            const card = document.createElement('div');
+            card.className = "bg-white border border-stone-200/50 p-4 rounded-xl shadow-sm flex flex-col gap-2";
+            const timeMins = Math.floor(c.timeRemaining / 60);
+            card.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl">${c.npc.avatar}</span>
+                        <div>
+                            <div class="text-xs font-black text-amber-950">${c.npc.name}</div>
+                            <div class="text-[10px] font-bold text-stone-500">${c.npc.title}</div>
+                        </div>
+                    </div>
+                    <div class="text-[10px] font-bold text-red-600 bg-red-100 px-2 py-1 rounded-full flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> ${timeMins}m left</div>
+                </div>
+                <div class="text-xs font-bold text-amber-800/80 mt-1">Wants: <span class="font-extrabold text-amber-900">${RECIPES[c.recipeKey].name}</span></div>
+                <div class="text-[10px] text-stone-600 font-semibold pl-2 border-l-2 border-stone-200">
+                    ${Object.entries(c.targets).map(([key, val]) => `<div><span class="font-bold">${{sw:'Sweet',ac:'Acid',tn:'Tannin',bd:'Body'}[key]}:</span> ${val.min}-${val.max}%</div>`).join('')}
+                </div>
+                <button onclick="acceptContract('${c.id}')" class="w-full mt-2 py-1.5 bg-green-600 hover:bg-green-500 text-white text-xs font-black rounded-lg uppercase shadow-md transition-all">Accept Order (x${c.multiplier} Payout)</button>
+            `;
+            availableContainer.appendChild(card);
+        });
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+}
+
+export function openContractDetailModal(contractId) {
+    const contract = state.contracts.find(c => c.id === contractId);
+    if (!contract) return;
+
+    globals.activeContractId = contractId;
+    const modal = document.getElementById("contract-detail-modal");
+    const content = document.getElementById("contract-modal-content");
+    const submissionList = document.getElementById("contract-submission-list");
+
+    content.innerHTML = `
+        <div class="flex items-center gap-3 mb-3">
+            <span class="text-4xl">${contract.npc.avatar}</span>
+            <div>
+                <h4 class="font-black text-amber-950">${contract.npc.name}</h4>
+                <p class="text-xs text-stone-500 font-bold">${contract.npc.title}</p>
+            </div>
+        </div>
+        <p class="text-sm italic text-stone-700 bg-stone-50 p-3 rounded-lg border border-stone-200">"I require a special batch of <span class="font-bold">${RECIPES[contract.recipeKey].name}</span> for a client. The flavour profile must be precise."</p>
+        <div class="mt-3 space-y-2">
+            ${Object.entries(contract.targets).map(([key, val]) => `
+                <div class="flex justify-between items-center text-xs bg-amber-50 border border-amber-200 p-2 rounded-lg">
+                    <span class="font-semibold text-amber-800">${{sw:'Sweetness',ac:'Acidity',tn:'Tannin',bd:'Body'}[key]}</span>
+                    <span class="font-mono font-bold text-amber-950">${val.min} - ${val.max}%</span>
+                </div>
+            `).join('')}
+        </div>
+        <div class="text-center text-xs font-bold text-green-700 bg-green-50 border border-green-200 p-2 rounded-lg mt-3">Payout: ${contract.multiplier}x Market Value</div>
+    `;
+
+    const matchingWines = state.wines.filter(w => w.recipeKey === contract.recipeKey);
+    submissionList.innerHTML = '';
+    if (matchingWines.length === 0) {
+        submissionList.innerHTML = `<div class="py-4 text-center text-[10px] text-stone-400 font-bold">No matching wine types in your reserve.</div>`;
+    } else {
+        matchingWines.forEach(wine => {
+            const result = checkContractCompletion(wine, contract);
+            const title = wine.customLabel ? wine.customLabel.title : RECIPES[wine.recipeKey].name;
+            const item = document.createElement("div");
+            item.className = "w-full flex items-center justify-between p-2 bg-amber-50 border border-amber-950/10 rounded-lg text-xs font-bold text-left";
+            item.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 shrink-0">${getWineIcon(wine.recipeKey, wine.qualityKey, wine.customLabel)}</div>
+                    <div class="min-w-0"><h4 class="font-black text-amber-950 text-xs truncate">${title}</h4></div>
+                </div>
+                <button onclick="fulfillContract('${contract.id}', '${wine.id}')" class="px-3 py-1.5 text-[10px] font-black rounded-lg shadow-sm uppercase ${result.success ? 'bg-green-600 text-white hover:bg-green-500' : 'bg-stone-200 text-stone-500 cursor-not-allowed'}" ${!result.success ? 'disabled' : ''}>Submit</button>
+            `;
+            submissionList.appendChild(item);
+        });
+    }
+
+    const footer = document.getElementById("contract-modal-footer");
+    footer.innerHTML = `<button onclick="cancelContract('${contract.id}')" class="px-4 py-2 bg-red-600 text-white text-xs font-bold uppercase rounded-lg shadow-md hover:bg-red-700 transition-all">Cancel Order</button>`;
+
+    modal.classList.remove("hidden");
+}
+
+export function closeContractDetailModal() {
+    hideItemTooltip();
+    globals.activeContractId = null;
+    document.getElementById("contract-detail-modal").classList.add("hidden");
+}
+
 export function switchTab(targetId) {
 	globals.currentTab = targetId;
 	document.querySelectorAll(".tab-content").forEach((el) => el.classList.remove("active"));
@@ -1349,13 +1480,23 @@ export function switchTab(targetId) {
 	if (targetId === "shop") renderShop();
 	if (targetId === "brewery") renderBreweryUI();
 	if (targetId === "racks") renderRacks();
+	if (targetId === "orders") renderContractsBoard();
 }
 
-export function showToast(text) {
+export function showToast(text, type = 'default') {
 	const container = document.getElementById("toast-container");
 	if (!container) return;
 	const toast = document.createElement("div");
-	toast.className = "bg-amber-950 text-amber-50 px-4 py-2.5 rounded-xl text-xs font-bold shadow-lg flex items-center justify-between border border-amber-800/50 animate-fade-in";
+
+	let baseClasses = "px-4 py-2.5 rounded-xl text-xs font-bold shadow-lg flex items-center justify-between border animate-fade-in";
+	if (type === 'success') {
+		toast.className = `${baseClasses} bg-green-600 text-white border-green-700`;
+	} else if (type === 'error') {
+		toast.className = `${baseClasses} bg-red-600 text-white border-red-700`;
+	} else {
+		toast.className = `${baseClasses} bg-amber-950 text-amber-50 border-amber-800/50`;
+	}
+
 	toast.innerHTML = `<span>${text}</span>`;
 	if (container.firstChild) container.insertBefore(toast, container.firstChild);
 	else container.appendChild(toast);
@@ -1383,6 +1524,7 @@ export function initSound() {
 }
 
 export function closeModal() {
+	hideItemTooltip();
 	document.getElementById("pop-modal").classList.add("hidden");
 
 	// If an S-Tier pop modal was just closed, check if a labeler sequence should trigger

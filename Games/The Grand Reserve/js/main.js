@@ -1,9 +1,9 @@
 // --- MODULE ENTRY POINT ---
-import {initFirebase, openSyncModal, closeSyncModal, copySyncCode, loadRemoteSyncCode, triggerManualSync} from "./firebase-sync.js";
-import {startLoop, plantSeed, addToPress, removeFromPress, placeWineOnRack, removeWineFromRack, addToKettle, removeFromKettle, startKettlePhysics, adjustKettleHeat, clearFinishedKettle, sellWineQualityGroup, sellBeerGroup, buySeed, buyPantryItem, buyPlot, buyBarrelType, buyKettle, buyOakConditioning, saveCustomLabel, bottleAsVinegar, setWeather, startWeatherSystem} from "./engine.js";
-import {initSound, switchReserveTab, switchShopTab, switchTab, updateHeaderUI, renderPlots, closePlotSelector, renderCellarUI, openPressModal, closePressModal, renderWarehouse, renderMarket, openSellModal, openSellBeerModal, closeSellModal, renderShop, renderBreweryUI, renderRacks, openRackSelectModal, closeRackSelectModal, openKettleModal, closeKettleModal, closeModal, openLabelerModal, closeLabelerModal, updateLabelDraft, renderWeather} from "./ui.js";
+import {startLoop, plantSeed, addToPress, removeFromPress, placeWineOnRack, removeWineFromRack, addToKettle, removeFromKettle, startKettlePhysics, adjustKettleHeat, clearFinishedKettle, sellWineQualityGroup, sellBeerGroup, buySeed, buyPantryItem, buyPlot, buyBarrelType, buyKettle, buyOakConditioning, saveCustomLabel, bottleAsVinegar, setWeather, startWeatherSystem, startContractSystem, acceptContract, fulfillContract, cancelContract} from "./engine.js";
+import {initSound, switchReserveTab, switchShopTab, switchTab, updateHeaderUI, renderPlots, closePlotSelector, renderCellarUI, openPressModal, closePressModal, renderWarehouse, renderMarket, openSellModal, openSellBeerModal, closeSellModal, renderShop, renderBreweryUI, renderRacks, openRackSelectModal, closeRackSelectModal, openKettleModal, closeKettleModal, closeModal, openLabelerModal, closeLabelerModal, updateLabelDraft, renderWeather, showToast, openContractDetailModal, closeContractDetailModal} from "./ui.js";
 import { initPlaytest } from "./playtest.js";
 import { globals } from "./state.js";
+import { loadGameState, saveGameState } from "./storage.js";
 
 // Expose DOM interaction functions to the global window context
 window.switchReserveTab = switchReserveTab;
@@ -42,21 +42,24 @@ window.openLabelerModal = openLabelerModal;
 window.closeLabelerModal = closeLabelerModal;
 window.updateLabelDraft = updateLabelDraft;
 window.saveCustomLabel = saveCustomLabel;
-
-window.openSyncModal = openSyncModal;
-window.closeSyncModal = closeSyncModal;
-window.copySyncCode = copySyncCode;
-window.loadRemoteSyncCode = loadRemoteSyncCode;
-window.triggerManualSync = triggerManualSync;
 window.openPressModal = openPressModal;
 window.setWeather = setWeather;
 window.startKettlePhysics = startKettlePhysics;
+window.acceptContract = acceptContract;
+window.fulfillContract = fulfillContract;
+window.cancelContract = cancelContract;
+window.openContractDetailModal = openContractDetailModal;
+window.closeContractDetailModal = closeContractDetailModal;
+
 window.onload = () => {
 	initSound();
 	if (window.lucide) window.lucide.createIcons();
 
+	loadGameState();
+
 	renderWeather();
 	startWeatherSystem();
+	startContractSystem();
 
 	renderPlots();
 	renderCellarUI();
@@ -68,7 +71,24 @@ window.onload = () => {
 	renderRacks();
 
 	globals.gameLoopInterval = startLoop();
-	initFirebase();
 	initPlaytest();
 	console.log("Game initialized");
+
+	// Autosave every 10 seconds
+	setInterval(saveGameState, 10000);
+
+		function handleManualSaveHotkey(e) {
+			if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+
+			const isSaveShortcut = e.key?.toLowerCase() === 's' || e.code === 'KeyS';
+			if (!isSaveShortcut) return;
+
+			e.preventDefault();
+			e.stopPropagation();
+			saveGameState();
+			showToast("Game Saved!");
+		}
+
+	// Manual Save Hotkey
+		window.addEventListener('keydown', handleManualSaveHotkey, true);
 };

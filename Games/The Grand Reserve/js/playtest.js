@@ -1,7 +1,11 @@
 import { state, globals } from './state.js';
-import { updateHeaderUI } from './ui.js';
+import { updateHeaderUI, renderContractsBoard, showToast } from './ui.js';
 import { startLoop, setWeather } from './engine.js';
+import { resetGameState } from './storage.js';
 import { initKonamiCode } from './konami.js';
+import { generateSolvableContract } from './contracts.js';
+import { playSound } from './audio.js';
+
 
 function togglePlaytestSidebar() {
   const sidebar = document.getElementById('playtest-sidebar');
@@ -20,6 +24,24 @@ function setGameSpeed(multiplier) {
         clearInterval(globals.gameLoopInterval);
     }
     globals.gameLoopInterval = startLoop(multiplier);
+}
+
+function addOrder() {
+  const newContract = generateSolvableContract();
+  if (newContract) {
+      state.contracts.push(newContract);
+      renderContractsBoard();
+      showToast("Playtest: New order generated!");
+      playSound("clink");
+  } else {
+      showToast("Playtest: Failed to generate a solvable order.", "error");
+  }
+}
+
+function clearOrders() {
+  state.contracts = [];
+  renderContractsBoard();
+  showToast("Playtest: All orders cleared.");
 }
 
 export function initPlaytest() {
@@ -43,6 +65,9 @@ export function initPlaytest() {
         <button data-speed="2" class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded">2x</button>
         <button data-speed="3" class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded">3x</button>
       </div>
+      <button id="reset-game-btn" class="mt-4 bg-red-700 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
+        Reset Game State
+      </button>
       <div class="mt-4">
         <h4 class="font-bold mb-2">Weather Control</h4>
         <div class="grid grid-cols-2 gap-2">
@@ -52,12 +77,22 @@ export function initPlaytest() {
             <button data-weather="temperate" class="bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 rounded">Temperate</button>
         </div>
       </div>
+      <div class="mt-4">
+        <h4 class="font-bold mb-2">Order Board Control</h4>
+        <div class="grid grid-cols-2 gap-2">
+            <button id="add-order-btn" class="bg-purple-500 hover:bg-purple-400 text-white font-bold py-2 px-4 rounded">Add Order</button>
+            <button id="clear-orders-btn" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded">Clear Orders</button>
+        </div>
+      </div>
     </div>
   `;
 
   document.body.appendChild(sidebar);
 
   document.getElementById('add-money-btn').addEventListener('click', addMoney);
+  document.getElementById('reset-game-btn').addEventListener('click', resetGameState);
+  document.getElementById('add-order-btn').addEventListener('click', addOrder);
+  document.getElementById('clear-orders-btn').addEventListener('click', clearOrders);
 
   sidebar.querySelectorAll('[data-speed]').forEach(button => {
     button.addEventListener('click', () => {

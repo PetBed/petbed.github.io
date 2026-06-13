@@ -1359,15 +1359,22 @@ export function renderContractsBoard() {
         grid.className = "w-full grid grid-cols-1 md:grid-cols-3 gap-4";
         activeContracts.forEach(c => {
             const card = document.createElement('div');
-            card.className = "bg-white border-2 border-amber-500 p-4 rounded-xl shadow-lg flex flex-col gap-2 cursor-pointer hover:bg-amber-50 transition-all";
+            card.className = "bg-white border-2 border-amber-500 p-4 rounded-xl shadow-lg flex flex-col gap-1 cursor-pointer hover:bg-amber-50 transition-all";
             card.onclick = () => openContractDetailModal(c.id);
+            const rangesHTML = globals.showContractRanges ? `
+                <div class="text-[9px] font-mono text-amber-600 bg-amber-50 border border-amber-200 rounded p-1 mt-1 space-y-0.5">
+                    ${Object.entries(c.targets).map(([key, val]) => `<div><span class="font-bold">${{sw:'SW',ac:'AC',tn:'TN',bd:'BD'}[key]}:</span> ${val.min}-${val.max}%</div>`).join('')}
+                </div>
+            ` : '';
             card.innerHTML = `
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-black text-amber-950">${c.npc.name}</span>
                     <span class="text-2xl">${c.npc.avatar}</span>
                 </div>
                 <div class="text-xs font-bold text-amber-800/80">Wants: <span class="font-extrabold text-amber-900">${RECIPES[c.recipeKey].name}</span></div>
-                <div class="text-center mt-1"><button class="w-full py-1 bg-amber-500 text-white text-[10px] font-black rounded-lg uppercase">View Details</button></div>
+                <p class="text-xs italic text-stone-700 bg-stone-50 p-3 rounded-lg border border-stone-200/50 mt-2">"${c.flavorText ?? 'A classic numerical request...'}"</p>
+                ${rangesHTML}
+                <div class="text-center mt-auto pt-2"><button class="w-full py-1 bg-amber-500 text-white text-[10px] font-black rounded-lg uppercase">View Details</button></div>
             `;
             grid.appendChild(card);
         });
@@ -1381,6 +1388,11 @@ export function renderContractsBoard() {
             const card = document.createElement('div');
             card.className = "bg-white border border-stone-200/50 p-4 rounded-xl shadow-sm flex flex-col gap-2";
             const timeMins = Math.floor(c.timeRemaining / 60);
+            const rangesHTML = globals.showContractRanges ? `
+                <div class="text-[10px] font-mono text-amber-700 bg-amber-50 border border-amber-200 rounded p-1.5 mt-2 space-y-0.5">
+                    ${Object.entries(c.targets).map(([key, val]) => `<div><span class="font-bold">${{sw:'SW',ac:'AC',tn:'TN',bd:'BD'}[key]}:</span> ${val.min}-${val.max}%</div>`).join('')}
+                </div>
+            ` : '';
             card.innerHTML = `
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
@@ -1393,10 +1405,9 @@ export function renderContractsBoard() {
                     <div class="text-[10px] font-bold text-red-600 bg-red-100 px-2 py-1 rounded-full flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> ${timeMins}m left</div>
                 </div>
                 <div class="text-xs font-bold text-amber-800/80 mt-1">Wants: <span class="font-extrabold text-amber-900">${RECIPES[c.recipeKey].name}</span></div>
-                <div class="text-[10px] text-stone-600 font-semibold pl-2 border-l-2 border-stone-200">
-                    ${Object.entries(c.targets).map(([key, val]) => `<div><span class="font-bold">${{sw:'Sweet',ac:'Acid',tn:'Tannin',bd:'Body'}[key]}:</span> ${val.min}-${val.max}%</div>`).join('')}
-                </div>
-                <button onclick="acceptContract('${c.id}')" class="w-full mt-2 py-1.5 bg-green-600 hover:bg-green-500 text-white text-xs font-black rounded-lg uppercase shadow-md transition-all">Accept Order (x${c.multiplier} Payout)</button>
+                <p class="text-xs italic text-stone-700 bg-stone-50 p-3 rounded-lg border border-stone-200/50 mt-2">"${c.flavorText ?? 'A classic numerical request...'}"</p>
+                ${rangesHTML}
+                <button onclick="acceptContract('${c.id}')" class="w-full mt-2 py-1.5 bg-green-600 hover:bg-green-500 text-white text-xs font-black rounded-lg uppercase shadow-md transition-all">Accept Order (up to x${c.multiplierRange.max.toFixed(2)} Payout)</button>
             `;
             availableContainer.appendChild(card);
         });
@@ -1414,15 +1425,7 @@ export function openContractDetailModal(contractId) {
     const content = document.getElementById("contract-modal-content");
     const submissionList = document.getElementById("contract-submission-list");
 
-    content.innerHTML = `
-        <div class="flex items-center gap-3 mb-3">
-            <span class="text-4xl">${contract.npc.avatar}</span>
-            <div>
-                <h4 class="font-black text-amber-950">${contract.npc.name}</h4>
-                <p class="text-xs text-stone-500 font-bold">${contract.npc.title}</p>
-            </div>
-        </div>
-        <p class="text-sm italic text-stone-700 bg-stone-50 p-3 rounded-lg border border-stone-200">"I require a special batch of <span class="font-bold">${RECIPES[contract.recipeKey].name}</span> for a client. The flavour profile must be precise."</p>
+    const rangesHTML = globals.showContractRanges ? `
         <div class="mt-3 space-y-2">
             ${Object.entries(contract.targets).map(([key, val]) => `
                 <div class="flex justify-between items-center text-xs bg-amber-50 border border-amber-200 p-2 rounded-lg">
@@ -1431,7 +1434,19 @@ export function openContractDetailModal(contractId) {
                 </div>
             `).join('')}
         </div>
-        <div class="text-center text-xs font-bold text-green-700 bg-green-50 border border-green-200 p-2 rounded-lg mt-3">Payout: ${contract.multiplier}x Market Value</div>
+    ` : '';
+
+    content.innerHTML = `
+        <div class="flex items-center gap-3 mb-3">
+            <span class="text-4xl">${contract.npc.avatar}</span>
+            <div>
+                <h4 class="font-black text-amber-950">${contract.npc.name}</h4>
+                <p class="text-xs text-stone-500 font-bold">${contract.npc.title}</p>
+            </div>
+        </div>
+        <p class="text-sm italic text-stone-700 bg-stone-50 p-3 rounded-lg border border-stone-200">"${contract.flavorText ?? 'This client has not provided a descriptive request.'}"</p>
+        ${rangesHTML}
+        <div class="text-center text-xs font-bold text-green-700 bg-green-50 border border-green-200 p-2 rounded-lg mt-3">Payout: ${contract.multiplierRange.min.toFixed(2)}x - ${contract.multiplierRange.max.toFixed(2)}x Market Value</div>
     `;
 
     const matchingWines = state.wines.filter(w => w.recipeKey === contract.recipeKey);
@@ -1444,12 +1459,50 @@ export function openContractDetailModal(contractId) {
             const title = wine.customLabel ? wine.customLabel.title : RECIPES[wine.recipeKey].name;
             const item = document.createElement("div");
             item.className = "w-full flex items-center justify-between p-2 bg-amber-50 border border-amber-950/10 rounded-lg text-xs font-bold text-left";
+            
+            let buttonHTML;
+            if (result.success) {
+                const marketValue = state.market.current[wine.recipeKey] || RECIPES[wine.recipeKey].baseVal;
+                const tierMultiplier = Math.max(1, TIERS[wine.qualityKey].mult);
+                const vintageMultiplier = VINTAGE_RANKS[wine.rankIndex].mult;
+                const finalPayout = Math.round(marketValue * tierMultiplier * vintageMultiplier * result.multiplier);
+
+                let ratingText = '';
+                let ratingColor = '';
+
+                if (result.precision === 1) {
+                    ratingText = "A Perfect Match!";
+                    ratingColor = "text-emerald-500"; // Vibrant green
+                } else if (result.precision >= 0.75) { // 5% dev or less
+                    ratingText = "An Excellent Offer";
+                    ratingColor = "text-green-600"; // Green
+                } else if (result.precision >= 0.40) { // 12% dev or less
+                    ratingText = "A Good Fit";
+                    ratingColor = "text-lime-600"; // Light green
+                } else { // more than 12% dev
+                    ratingText = "An Acceptable Offer";
+                    ratingColor = "text-amber-600"; // Yellow/orange
+                }
+
+                buttonHTML = `
+                    <div class="text-right">
+                        <button onclick="fulfillContract('${contract.id}', '${wine.id}')" class="px-3 py-1.5 text-[10px] font-black rounded-lg shadow-sm uppercase bg-green-600 text-white hover:bg-green-500">Submit for +$${finalPayout}</button>
+                        <div class="text-[9px] ${ratingColor} font-semibold mt-0.5">${ratingText}</div>
+                    </div>`;
+            } else {
+                buttonHTML = `
+                    <div class="text-right">
+                        <button class="px-3 py-1.5 text-[10px] font-black rounded-lg shadow-sm uppercase bg-stone-200 text-stone-500 cursor-not-allowed" disabled title="${result.reason}">Submit</button>
+                        <div class="text-[9px] text-red-600 font-semibold mt-0.5">Out of Range</div>
+                    </div>`;
+            }
+
             item.innerHTML = `
                 <div class="flex items-center gap-2">
                     <div class="w-10 h-10 shrink-0">${getWineIcon(wine.recipeKey, wine.qualityKey, wine.customLabel)}</div>
                     <div class="min-w-0"><h4 class="font-black text-amber-950 text-xs truncate">${title}</h4></div>
                 </div>
-                <button onclick="fulfillContract('${contract.id}', '${wine.id}')" class="px-3 py-1.5 text-[10px] font-black rounded-lg shadow-sm uppercase ${result.success ? 'bg-green-600 text-white hover:bg-green-500' : 'bg-stone-200 text-stone-500 cursor-not-allowed'}" ${!result.success ? 'disabled' : ''}>Submit</button>
+                ${buttonHTML}
             `;
             submissionList.appendChild(item);
         });
@@ -1465,6 +1518,90 @@ export function closeContractDetailModal() {
     hideItemTooltip();
     globals.activeContractId = null;
     document.getElementById("contract-detail-modal").classList.add("hidden");
+}
+
+export function openOrderBreakdownModal(data) {
+    const { contract, wine, result, marketValue, tierMultiplier, vintageMultiplier, earnings } = data;
+    const modal = document.getElementById("order-breakdown-modal");
+    const content = document.getElementById("order-breakdown-content");
+    if (!modal || !content) return;
+
+    let totalDeviation = 0;
+    const targetAttributes = Object.keys(contract.targets);
+
+    const attributesHTML = targetAttributes.map(attr => {
+        const targetRange = contract.targets[attr];
+        const wineValue = wine.flavour[attr];
+        let deviation = 0;
+        let deviationText = 'Perfect';
+        let deviationColor = 'text-green-600';
+
+        if (wineValue < targetRange.min) {
+            deviation = wineValue - targetRange.min; // Negative
+            deviationText = `${deviation.toFixed(1)}%`;
+            deviationColor = 'text-red-500';
+        } else if (wineValue > targetRange.max) {
+            deviation = wineValue - targetRange.max; // Positive
+            deviationText = `+${deviation.toFixed(1)}%`;
+            deviationColor = 'text-red-500';
+        }
+        totalDeviation += Math.abs(deviation);
+
+        const attrName = {sw:'Sweetness', ac:'Acidity', tn:'Tannin', bd:'Body'}[attr];
+
+        return `
+            <div class="grid grid-cols-4 gap-2 text-xs items-center">
+                <span class="font-bold text-amber-900 col-span-1">${attrName}</span>
+                <span class="font-mono text-center bg-stone-100 p-1 rounded">${targetRange.min}-${targetRange.max}%</span>
+                <span class="font-mono text-center bg-amber-50 p-1 rounded">${Math.round(wineValue)}%</span>
+                <span class="font-mono text-center font-bold ${deviationColor}">${deviationText}</span>
+            </div>
+        `;
+    }).join('');
+
+    const avgDeviation = totalDeviation / targetAttributes.length;
+
+    const payoutHTML = `
+        <div class="space-y-1 text-xs">
+            <div class="flex justify-between"><span class="text-stone-600">Base Market Value</span><span class="font-bold">$${marketValue.toFixed(2)}</span></div>
+            <div class="flex justify-between"><span class="text-stone-600">Quality Tier Multiplier</span><span class="font-bold">x${tierMultiplier.toFixed(2)}</span></div>
+            <div class="flex justify-between"><span class="text-stone-600">Vintage Rank Multiplier</span><span class="font-bold">x${vintageMultiplier.toFixed(2)}</span></div>
+            <div class="flex justify-between text-green-700"><span class="font-bold">Precision Payout Multiplier</span><span class="font-extrabold">x${result.multiplier.toFixed(2)}</span></div>
+        </div>
+    `;
+
+    content.innerHTML = `
+        <div class="bg-stone-50 border border-stone-200 p-3 rounded-xl">
+            <div class="grid grid-cols-4 gap-2 text-[10px] font-black text-stone-500 uppercase mb-2">
+                <span class="col-span-1">Attribute</span>
+                <span class="text-center">Requested</span>
+                <span class="text-center">Submitted</span>
+                <span class="text-center">Deviation</span>
+            </div>
+            ${attributesHTML}
+            <div class="border-t border-stone-200 mt-2 pt-2 grid grid-cols-4 gap-2 text-xs items-center">
+                <span class="font-bold text-amber-950 col-span-3">Average Deviation</span>
+                <span class="font-mono text-center font-bold text-red-500">${avgDeviation.toFixed(1)}%</span>
+            </div>
+        </div>
+
+        <div class="bg-green-50 border border-green-200 p-3 rounded-xl">
+            <h4 class="text-[10px] font-black uppercase text-green-800 tracking-wider mb-2">Payout Calculation</h4>
+            ${payoutHTML}
+            <div class="border-t border-green-200 mt-2 pt-2 flex justify-between items-center">
+                <span class="text-sm font-black text-green-800">Final Payout</span>
+                <span class="text-lg font-extrabold text-green-800 bg-green-100 px-2 py-0.5 rounded-lg">+$${earnings}</span>
+            </div>
+        </div>
+    `;
+
+    modal.classList.remove("hidden");
+    if (window.lucide) window.lucide.createIcons();
+}
+
+export function closeOrderBreakdownModal() {
+    const modal = document.getElementById("order-breakdown-modal");
+    if (modal) modal.classList.add("hidden");
 }
 
 export function switchTab(targetId) {

@@ -1,6 +1,6 @@
 // --- MODULE ENTRY POINT ---
 import {startLoop, plantSeed, addToPress, removeFromPress, placeWineOnRack, removeWineFromRack, addToKettle, removeFromKettle, startKettlePhysics, adjustKettleHeat, clearFinishedKettle, sellWineQualityGroup, sellBeerGroup, buySeed, buyPantryItem, buyPlot, buyBarrelType, buyKettle, buyOakConditioning, saveCustomLabel, bottleAsVinegar, setWeather, startWeatherSystem, startContractSystem, acceptContract, fulfillContract, cancelContract} from "./engine.js";
-import {initSound, switchReserveTab, switchShopTab, switchTab, updateHeaderUI, renderPlots, closePlotSelector, renderCellarUI, openPressModal, closePressModal, renderWarehouse, renderMarket, openSellModal, openSellBeerModal, closeSellModal, renderShop, renderBreweryUI, renderRacks, openRackSelectModal, closeRackSelectModal, openKettleModal, closeKettleModal, closeModal, openLabelerModal, closeLabelerModal, updateLabelDraft, renderWeather, showToast, openContractDetailModal, closeContractDetailModal} from "./ui.js";
+import {initSound, switchReserveTab, switchShopTab, switchTab, updateHeaderUI, renderPlots, closePlotSelector, renderCellarUI, openPressModal, closePressModal, renderWarehouse, renderMarket, openSellModal, openSellBeerModal, closeSellModal, renderShop, renderBreweryUI, renderRacks, openRackSelectModal, closeRackSelectModal, openKettleModal, closeKettleModal, closeModal, openLabelerModal, closeLabelerModal, updateLabelDraft, renderWeather, showToast, openContractDetailModal, closeContractDetailModal, openOrderBreakdownModal, closeOrderBreakdownModal} from "./ui.js";
 import { initPlaytest } from "./playtest.js";
 import { globals } from "./state.js";
 import { loadGameState, saveGameState } from "./storage.js";
@@ -50,6 +50,8 @@ window.fulfillContract = fulfillContract;
 window.cancelContract = cancelContract;
 window.openContractDetailModal = openContractDetailModal;
 window.closeContractDetailModal = closeContractDetailModal;
+window.openOrderBreakdownModal = openOrderBreakdownModal;
+window.closeOrderBreakdownModal = closeOrderBreakdownModal;
 
 window.onload = () => {
 	initSound();

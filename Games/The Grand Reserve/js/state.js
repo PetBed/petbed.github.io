@@ -1,6 +1,7 @@
 // --- CORE GAME STATE & GLOBALS ---
 export const state = {
 	gold: 150,
+	dialogueDifficulty: 'beginner',
 	currentWeather: "temperate",
 
 	seeds: {
@@ -182,4 +183,7 @@ export const globals = {
 		type: null,
 		draft: {},
 	},
+
+	// Playtest Toggles
+	showContractRanges: false,
 };

@@ -4,9 +4,11 @@ import { updateHeaderUI, renderPlots, renderCellarUI, renderWarehouse, renderMar
 function serializeSaveState() {
 	return {
 		gold: state.gold,
+		dialogueDifficulty: state.dialogueDifficulty,
 		currentWeather: state.currentWeather,
 		seeds: state.seeds,
 		ingredients: state.ingredients,
+		contracts: state.contracts,
 		wines: state.wines,
 		wineRacks: state.wineRacks,
 		beers: state.beers,
@@ -22,9 +24,29 @@ function applySaveState(serializedData) {
 	if (!serializedData) return;
 	try {
 		state.gold = serializedData.gold ?? state.gold;
+		state.dialogueDifficulty = serializedData.dialogueDifficulty ?? 'beginner';
 		state.currentWeather = serializedData.currentWeather ?? state.currentWeather;
 		state.seeds = serializedData.seeds ?? state.seeds;
-		state.ingredients = serializedData.ingredients ?? state.ingredients;
+		state.ingredients = serializedData.ingredients ?? [];
+		state.contracts = serializedData.contracts ?? [];
+
+		// MIGRATION: Convert old contracts with `multiplier` to new `multiplierRange`
+		if (state.contracts && Array.isArray(state.contracts)) {
+			state.contracts.forEach(contract => {
+				if (contract && contract.multiplier && !contract.multiplierRange) {
+					const attributeCount = (contract.targets && Object.keys(contract.targets).length) || 1;
+					const multipliers = {
+						1: { min: 1.5, max: 2.35 },
+						2: { min: 2.2, max: 2.85 },
+						3: { min: 2.7, max: 3.7 },
+						4: { min: 3.45, max: 5.0 }
+					};
+					contract.multiplierRange = multipliers[attributeCount];
+					delete contract.multiplier;
+				}
+			});
+		}
+
 		state.wines = serializedData.wines ?? state.wines;
 		state.wineRacks = serializedData.wineRacks ?? state.wineRacks;
 		state.beers = serializedData.beers ?? state.beers;

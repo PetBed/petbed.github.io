@@ -1,5 +1,6 @@
 import { RECIPES, INGREDIENTS_DATA, BARREL_TYPES } from "./data.js";
 import { WEATHER_DATA } from "./weather.js";
+import { generateContractFlavorText } from "./flavor-text.js";
 
 const YEASTS = {
     none: { id: 'none', name: "No Additive", flavour: { sw: 0, ac: 0, tn: 0, bd: 0 } },
@@ -121,17 +122,26 @@ export function generateSolvableContract() {
         if (solutions.length > 0) {
             // 5. If solvable, create the contract object
             const npc = NPC_ARCHETYPES[Math.floor(Math.random() * NPC_ARCHETYPES.length)];
-            const multipliers = { 1: 2.0, 2: 2.5, 3: 3.0, 4: 4.0 };
+            const multipliers = {
+                1: { min: 1.5, max: 2.35 },
+                2: { min: 2.2, max: 2.85 },
+                3: { min: 2.7, max: 3.7 },
+                4: { min: 3.45, max: 5.0 }
+            };
 
-            return {
+            const contract = {
                 id: `contract_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
                 npc: npc,
                 recipeKey: recipeKey,
                 targets: targets,
-                multiplier: multipliers[attributeCount],
+                // Replaced 'multiplier' with 'multiplierRange'
+                multiplierRange: multipliers[attributeCount],
                 status: 'available',
                 timeRemaining: (20 + Math.random() * 10) * 60, // 20-30 minutes in seconds
             };
+
+            contract.flavorText = generateContractFlavorText(contract);
+            return contract;
         }
     }
 
@@ -143,20 +153,40 @@ export function checkContractCompletion(wine, contract) {
     if (wine.recipeKey !== contract.recipeKey) {
         return { success: false, reason: "Incorrect wine type." };
     }
+    
+    const REJECTION_THRESHOLD = 20; // Max average deviation allowed
+    let totalDeviation = 0;
+    const targetAttributes = Object.keys(contract.targets);
 
-    for (const attr in contract.targets) {
+    for (const attr of targetAttributes) {
         const targetRange = contract.targets[attr];
         const wineValue = wine.flavour[attr];
+        let deviation = 0;
 
-        if (wineValue < targetRange.min || wineValue > targetRange.max) {
-            const attrName = {sw: "Sweetness", ac: "Acidity", tn: "Tannin", bd: "Body"}[attr];
-            const issue = wineValue < targetRange.min ? "too low" : "too high";
-            return {
-                success: false,
-                reason: `${attrName} is ${issue}. (${Math.round(wineValue)}% vs target of ${targetRange.min}-${targetRange.max}%)`
-            };
+        if (wineValue < targetRange.min) {
+            deviation = targetRange.min - wineValue;
+        } else if (wineValue > targetRange.max) {
+            deviation = wineValue - targetRange.max;
         }
+        totalDeviation += deviation;
     }
 
-    return { success: true };
+    const averageDeviation = totalDeviation / targetAttributes.length;
+
+    if (averageDeviation > REJECTION_THRESHOLD) {
+        return {
+            success: false,
+            reason: `Flavor profile is too far off (Avg. Deviation: ${averageDeviation.toFixed(1)}% > ${REJECTION_THRESHOLD}%)`
+        };
+    }
+
+    // Calculate precision (0.0 to 1.0) where 1.0 is a perfect match
+    const linearPrecision = 1 - (averageDeviation / REJECTION_THRESHOLD);
+    const exponentialPrecision = linearPrecision ** 2;
+
+    // Linearly interpolate the multiplier based on precision
+    const { min, max } = contract.multiplierRange;
+    const finalMultiplier = min + (max - min) * exponentialPrecision;
+
+    return { success: true, multiplier: finalMultiplier, precision: linearPrecision };
 }

@@ -29,14 +29,14 @@ All crops in this registry are grapes, berries, or grains that grow in standard 
 
 ### 1.2 Pantry Shelf Additives (Direct Purchase)
 
-Unlike agricultural crops, pantry items are bought directly from the Merchant Shop for flat gold costs and are deposited instantly into your pantry shelf inventory.
+Unlike agricultural crops, pantry items are bought directly from the Merchant Shop for flat gold costs and are deposited instantly into your pantry shelf inventory. They can be added to the press to significantly alter a wine's final flavour profile.
 
-| Pantry Additive | Unit Cost | Description | Wine Flavour Modifiers
+| Pantry Additive | Unit Cost | Description | Wine Flavour Modifiers |
 | :--- | :--- | :--- | :--- |
-| Wild Yeast | $15\text{ Gold}$ | Unleashes complex, tart, sour wild fermentations | `AC +25`, `BD +15`, `SW -20` |
+| Wild Yeast | $15\text{ Gold}$ | Unleashes complex, tart, sour wild fermentations. | `AC +25`, `BD +15`, `SW -20` |
 | Cacao Nibs | $10\text{ Gold}$ | Rich chocolate bitterness and smooth stout mouthfeel |
 | Coffee Beans | $12\text{ Gold}$ | Intensely roasted dark chocolate and espresso notes |
-| Pure Honey | $20\text{ Gold}$ | Highly fermentable sweet braggot/pumpkin sugar boost | `SW +30`, `BD +5`, `AC -15` |
+| Pure Honey | $20\text{ Gold}$ | Highly fermentable sweet braggot/pumpkin sugar boost. | `SW +30`, `BD +5`, `AC -15` |
 | Coriander & Peel | $8\text{ Gold}$ | Citrus aromatics and light herbal spiciness in witbiers |
 
 ### 1.3 Dynamic Weather & Terroir
@@ -75,8 +75,7 @@ Choosing the right barrel is crucial for crafting your desired wine profile. For
 
 ### 2.1 The Four-Point Flavour Spectrum
 
-Every wine you create is now defined by a dynamic, four-point flavour profile. The final profile of a bottled wine is determined by the sum of the flavour values from each ingredient used in the press.
-further modified by the barrel type and duration of the aging process.
+Every wine you create is now defined by a dynamic, four-point flavour profile. The final profile of a bottled wine is determined by the sum of the flavour values from its base ingredients, which is then modified by the harvest weather, any pantry additives used in the press, and finally the type of barrel and duration of the aging process.
 *   **Sweetness (SW):** Measures residual fruit sugars and unfermentable additives.
 *   **Acidity (AC):** Measures tartness and bright, mouth-watering acids.
 *   **Tannin (TN):** Measures mouth-drying astringency from skins, seeds, and wood.
@@ -86,11 +85,10 @@ Hovering over any ingredient or finished wine in your reserve will show a detail
 
 ### 2.2 The Multi-Ingredient Press & Recipe Book
 
-To start a batch, click any empty Oak Barrel in your Cellar to open the Ingredient Press. You can load up to $3$ harvested ingredients. The Press automatically evaluates your loaded items against the Recipe Book.
+To start a batch, click any empty Oak Barrel in your Cellar to open the Ingredient Press. You can load up to $3$ harvested ingredients (grapes and berries) and one pantry additive. The Press automatically evaluates your loaded items against the Recipe Book.
 
-
-
-To start a batch, click any empty Oak Barrel in your Cellar to open the Ingredient Press. You can load up to $3$ harvested ingredients. The Press automatically evaluates your loaded items against the Recipe Book.
+[!tip] Pantry Additives
+In addition to the three main ingredient slots, a single pantry additive (like Wild Yeast or Pure Honey) can be added to a batch. This provides a powerful way to fine-tune a wine's flavour profile to meet specific contract demands.
 
 [!info] Ratio Standard
 Ratios below represent the exact integer count of ingredients required in the Press.
@@ -248,34 +246,61 @@ The Market interface renders SVG Sparklines displaying the pricing trend over th
 
 The Customer Order Board, accessible via the "Orders" tab, is a dynamic contract system where NPCs request wines with specific characteristics. Fulfilling these contracts offers premium payouts and provides a directed challenge for master winemakers.
 
-### 6.1 Contract Mechanics
+### 6.1 Dialogue Difficulty
+
+To accommodate all players, NPC requests can be interpreted at different difficulty levels, which can be changed at any time.
+
+*   **Beginner Mode:** NPCs use simple, literal words like "unsweetened," "tart," and "thin."
+*   **Sommelier Mode:** NPCs use evocative, professional terms like "austere," "enamel-stripping," and "cigar-box."
+*   **Intermediate Mode:** A 50/50 blend of both, helping players naturally learn advanced terminology.
+
+### 6.2 Contract Mechanics
 
 *   **Requests:** An NPC will request a specific wine variety (e.g., Cabernet Bold Red) with one to four flavour attributes falling within a target range (e.g., Tannin between 75-85%).
 *   **The Solvability Engine:** To ensure fairness, every contract is pre-validated by a background simulation engine. This engine confirms that a valid combination of weather, additives, and barrel aging exists to create the requested wine, making every order achievable.
 *   **Lifecycle:** New orders are posted every 10-15 minutes. Available orders expire after 20-30 minutes if not accepted. A player can have up to 3 active orders, which do not expire.
-*   **Fulfillment:** From the contract detail screen, you can see a list of all wines in your reserve that match the required variety. A "Submit" button will be enabled for any wine that meets all the flavour criteria.
+*   **Fulfillment:** From the contract detail screen, you can submit any wine from your reserve that matches the required variety. The system then calculates the wine's precision.
+    *   If the wine's average flavour deviation is within a **20% tolerance** of the requested ranges, the customer will accept it.
+    *   If the deviation is greater than 20%, the customer will refuse the wine, but the order will not be canceled, allowing you to try again with a different bottle.
 *   **Cancellation:** If you no longer wish to complete an active order, you can open its detail screen and select "Cancel Order".
 
-### 6.2 Payout Calculation
+### 6.3 Precision Payouts & Rewards
 
 The reward for a successful contract delivery is significantly higher than a standard market sale. The formula is:
 
-$$\text{Contract Payout} = \text{Market Value} \times \max(1, M_{\text{tier}}) \times V_{\text{rank}} \times M_{\text{order}}$$
+$$\text{Contract Payout} = \text{Market Value} \times \max(1, M_{\text{tier}}) \times V_{\text{rank}} \times M_{\text{precision}}$$
 
 *   **Market Value:** The current market price of the wine.
 *   **$M_{\text{tier}}$ (Tier Multiplier):** The multiplier from the wine's quality (C, B, A, S). For contracts, this is floored at a minimum of `1.0x`, meaning even a C-Tier wine won't penalize your payout.
 *   **$V_{\text{rank}}$ (Vintage Multiplier):** The multiplier from the wine's maturation rank.
-*   **$M_{\text{order}}$ (Order Multiplier):** A bonus based on the contract's difficulty (number of flavour constraints).
+|   **$M_{\text{precision}}$ (Precision Multiplier):** A dynamic bonus based on how closely your wine matches the request and the contract's difficulty. The reward scales **exponentially**, meaning small deviations have minor penalties, but the penalty grows significantly as you approach the 20% deviation limit. This makes achieving a perfect match highly rewarding.
 
-| Flavour Constraints | Order Multiplier ($M_{\text{order}}$) |
+| Flavour Constraints | Payout Multiplier Range ($M_{\text{precision}}$) |
 | :--- | :--- |
-| 1 | $2.0\times$ |
-| 2 | $2.5\times$ |
-| 3 | $3.0\times$ |
-| 4 | $4.0\times$ |
+| 1 | `1.50x` - `2.35x` |
+| 2 | `2.20x` - `2.85x` |
+| 3 | `2.70x` - `3.70x` |
+| 4 | `3.45x` - `5.00x` |
+
+When submitting a wine, you will see a qualitative rating to help you gauge its value for the order.
+
+| Precision (from perfect) | Qualitative Rating |
+| :--- | :--- |
+| 100% (0% deviation) | "A Perfect Match!" |
+| >75% (<5% avg. deviation) | "An Excellent Offer" |
+| >40% (<12% avg. deviation) | "A Good Fit" |
+| <40% (>12% avg. deviation) | "An Acceptable Offer" |
+
+### 6.4 The Fulfillment Report
+
+After a successful sale, a detailed **Order Fulfillment Report** will appear. This modal provides a complete breakdown of the transaction, helping you learn and improve. It includes:
+*   A side-by-side comparison of the requested flavour ranges versus your submitted wine's stats.
+*   The precise deviation for each attribute, color-coded for clarity.
+*   The final average deviation score.
+*   A full breakdown of how the final payout was calculated, listing the base value and every multiplier that was applied.
 
 [!tip] Maximizing Profit
-Fulfilling a 4-constraint contract with an S-Tier, Centennial Vintage wine will yield the highest possible payout in the game, combining all available multipliers for a massive reward.
+Fulfilling a 4-constraint contract with a perfectly crafted, S-Tier, Centennial Vintage wine will yield the highest possible payout in the game, combining all available multipliers for a massive reward.
 
 ## 7. Saving Your Progress
 

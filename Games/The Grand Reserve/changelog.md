@@ -1,5 +1,32 @@
 # The Grand Reserve - Changelog
 
+## Version 0.3.0 - The Precision & Feedback Update
+
+This update focuses on adding significant depth and skill expression to the contract system, rewarding precision and providing players with detailed feedback to help them master the art of winemaking.
+
+### New Features & Gameplay Mechanics
+
+*   **Precision-Based Payouts:** The contract system has been completely overhauled. Instead of a pass/fail system, payouts are now calculated based on how precisely your wine matches the customer's request.
+    *   **20% Tolerance Window:** Customers will accept wines with an average flavour deviation of up to 20% from the target ranges.
+    *   **Exponential Reward Curve:** The payout multiplier now scales exponentially. Perfect matches receive the maximum reward, while the penalty for inaccuracy grows significantly as you approach the 20% deviation limit.
+    *   **Updated Multiplier Ranges:** Payout multipliers have been re-balanced to support the new precision system (e.g., 4-flavour contracts now range from `3.45x` to `5.00x`).
+*   **Dialogue Difficulty Settings:** Players can now choose their preferred level of NPC dialogue complexity: **Beginner** (simple terms), **Sommelier** (professional vocabulary), and **Intermediate** (a 50/50 blend).
+*   **Enhanced Flavor Text Engine:** The NPC request generator is now more dynamic, with varied sentence structures and improved grammar to make each request feel more unique.
+
+### UI & UX Improvements
+
+*   **Order Fulfillment Report:** After a successful contract sale, a new detailed report modal appears. It provides a side-by-side breakdown of the requested vs. submitted stats, individual flavour deviations, and a full calculation of the final payout.
+*   **Qualitative Submission Feedback:** When submitting a wine for a contract, the UI now displays a qualitative rating (e.g., "A Perfect Match!", "An Excellent Offer") to give players immediate, intuitive feedback on their wine's suitability.
+*   **Expanded Order Cards:** Contract cards on the order board now dynamically expand to show the full, untruncated text of the NPC's request.
+
+### Developer & Playtesting
+
+*   **Playtest Wine Spawner:** A new "Wine Spawner" has been added to the playtest sidebar, allowing developers to instantly create a wine of any recipe with specific, user-defined flavour values.
+*   **UI Toggles:** The playtest sidebar now includes a toggle to show/hide the exact numerical target ranges on all contract cards.
+*   **Collapsible Sidebar:** The playtest sidebar has been refactored with a clean, collapsible accordion layout for better organization.
+
+---
+
 ## Version 0.2.0 - Flavours and Requests Update
 
 This major update introduces the Customer Order Board, a dynamic contract system that challenges players to become true artisans of winemaking by fulfilling precise flavour requests for premium rewards.

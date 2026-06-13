@@ -4,7 +4,8 @@ import {WEATHER_DATA} from "./weather.js";
 import {playSound} from "./audio.js";
 import {saveGameState} from "./storage.js";
 import {renderPlots, renderCellarUI, showToast, updateHeaderUI, renderWarehouse, renderPressModal, renderMarket, renderRacks, renderShop, renderBreweryUI, renderKettleModal, renderMarketTimer, openSellModal, openSellBeerModal, openLabelerModal, renderWeather, hideItemTooltip, renderContractsBoard, openContractDetailModal} from "./ui.js";
-import { generateSolvableContract, checkContractCompletion } from "./contracts.js";
+import {generateSolvableContract, checkContractCompletion} from "./contracts.js";
+import {generateContractFlavorText} from "./flavor-text.js";
 
 export function setWeather(weatherKey) {
 	state.currentWeather = weatherKey;
@@ -774,17 +775,31 @@ export function fulfillContract(contractId, wineId) {
         const effectiveTierMultiplier = Math.max(1, tierMultiplier); // Tier multiplier is at least 1x for contracts
         const vintageMultiplier = VINTAGE_RANKS[wine.rankIndex].mult;
 
-        const earnings = Math.round(marketValue * effectiveTierMultiplier * vintageMultiplier * contract.multiplier);
-        state.gold += earnings;
-        
-        state.wines.splice(wineIndex, 1); // Remove the wine
-        state.contracts = state.contracts.filter(c => c.id !== contractId); // Remove the contract
+        const finalMultiplier = result.multiplier;
+        const earnings = Math.round(marketValue * effectiveTierMultiplier * vintageMultiplier * finalMultiplier);
 
-        showToast(`Order complete! +${earnings} Gold!`, "success");
+        const breakdownData = {
+            contract,
+            wine,
+            result,
+            marketValue,
+            tierMultiplier: effectiveTierMultiplier,
+            vintageMultiplier,
+            earnings
+        };
+
+        window.openOrderBreakdownModal(breakdownData);
+
+        state.gold += earnings;
+
+        state.wines.splice(wineIndex, 1);
+        state.contracts = state.contracts.filter(c => c.id !== contractId);
+
         playSound("clink");
         window.closeContractDetailModal();
         renderContractsBoard();
         renderWarehouse();
+        saveGameState();
     } else {
         showToast(`Submission rejected: ${result.reason}`, "error");
     }
@@ -801,6 +816,20 @@ export function cancelContract(contractId) {
     window.closeContractDetailModal();
     renderContractsBoard();
     saveGameState();
+}
+
+export function setDialogueDifficulty(difficulty) {
+    if (!['beginner', 'intermediate', 'sommelier'].includes(difficulty)) return;
+    state.dialogueDifficulty = difficulty;
+    showToast(`Dialogue difficulty set to: ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`);
+
+    // Regenerate flavor text for existing contracts to reflect the change immediately
+    state.contracts.forEach(contract => {
+        if (contract) { // Ensure contract exists
+            contract.flavorText = generateContractFlavorText(contract);
+        }
+    });
+    renderContractsBoard();
 }
 
 export function startLoop(multiplier = 1) {

@@ -17,6 +17,7 @@ function serializeSaveState() {
 		kettleUnlocked: state.kettleUnlocked,
 		kettle: state.kettle,
 		shop: state.shop,
+		tutorial: state.tutorial,
 	};
 }
 
@@ -55,6 +56,7 @@ function applySaveState(serializedData) {
 		state.kettleUnlocked = serializedData.kettleUnlocked ?? state.kettleUnlocked;
 		state.kettle = serializedData.kettle ?? state.kettle;
 		state.shop = serializedData.shop ?? state.shop;
+		state.tutorial = serializedData.tutorial ?? { active: false, step: 0 };
 
 		updateHeaderUI();
 		renderPlots();
@@ -84,12 +86,14 @@ export function loadGameState() {
         const savedStateJSON = localStorage.getItem('grand_reserve_save');
         if (savedStateJSON) {
             const savedState = JSON.parse(savedStateJSON);
-            applySaveState(savedState);
             console.log("Game state loaded from local storage.");
+            applySaveState(savedState);
+            return true; // Game was loaded
         }
     } catch (err) {
         console.error("Failed to load game from local storage:", err);
     }
+    return false; // No game was loaded
 }
 
 export function resetGameState() {

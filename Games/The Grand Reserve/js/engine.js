@@ -122,6 +122,16 @@ export function addToPress(ingredientId) {
 	
 	playSound("pluck");
 	renderPressModal();
+
+	if (state.tutorial.active && state.tutorial.step === 9) {
+        const pinotCount = globals.loadedPressIngredients.filter(id => {
+            const ing = state.ingredients.find(i => i.id === id);
+            return ing && ing.key === 'pinot_noir';
+        }).length;
+        if (pinotCount === 2) {
+            window.advanceTutorial(10);
+        }
+    }
 	renderWarehouse();
 }
 
@@ -234,6 +244,9 @@ export function handleBarrelClick(id) {
 		if (barrel.crushProgress >= barrel.maxCrush) {
 			barrel.state = "fermenting";
 			barrel.fermentTime = barrel.maxFerment;
+			if (state.tutorial.active && state.tutorial.step === 12) {
+                window.advanceTutorial(13);
+            }
 			showToast(`Barrel 0${id + 1} squished! Fermentation starting...`);
 		}
 		renderCellarUI();
@@ -280,6 +293,11 @@ export function handleBottleAction(id) {
 	};
 
 	state.wines.push(bottle);
+
+	if (state.tutorial.active && state.tutorial.step === 15) {
+        window.advanceTutorial(16);
+    }
+
 	playSound("pop");
 
 	if (finalTier === "s") {
@@ -541,6 +559,10 @@ export function saveCustomLabel() {
 		let item = state.beers.find((b) => b.id === id);
 		if (item) item.customLabel = {...draft};
 	}
+
+	if (state.tutorial.active && state.tutorial.step === 19) {
+        window.advanceTutorial(20);
+    }
 
 	playSound("clink");
 	showToast(`Custom label applied: "${draft.title}"`);
@@ -864,6 +886,9 @@ export function startLoop(multiplier = 1) {
 					barrel.state = "aging";
 					barrel.ageProgress = 0;
 					barrel.qualityMultiplier = 1.0;
+					if (state.tutorial.active && state.tutorial.step === 13) {
+                        window.advanceTutorial(14);
+                    }
 					showToast(`Fermentation completed inside Barrel 0${barrel.id + 1}!`);
 				}
 			} else if (barrel.state === "aging") {

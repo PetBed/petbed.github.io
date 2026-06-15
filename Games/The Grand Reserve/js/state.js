@@ -160,6 +160,12 @@ export const state = {
 
 	activeSelectorPlotId: null,
 	activeRackSlotId: null,
+
+	// Tutorial State
+	tutorial: {
+		active: false,
+		step: 0,
+	}
 };
 
 // Extracted global tracking variables required by multiple files

@@ -1,8 +1,9 @@
 // --- MODULE ENTRY POINT ---
 import {startLoop, plantSeed, addToPress, removeFromPress, placeWineOnRack, removeWineFromRack, addToKettle, removeFromKettle, startKettlePhysics, adjustKettleHeat, clearFinishedKettle, sellWineQualityGroup, sellBeerGroup, buySeed, buyPantryItem, buyPlot, buyBarrelType, buyKettle, buyOakConditioning, saveCustomLabel, bottleAsVinegar, setWeather, startWeatherSystem, startContractSystem, acceptContract, fulfillContract, cancelContract} from "./engine.js";
 import {initSound, switchReserveTab, switchShopTab, switchTab, updateHeaderUI, renderPlots, closePlotSelector, renderCellarUI, openPressModal, closePressModal, renderWarehouse, renderMarket, openSellModal, openSellBeerModal, closeSellModal, renderShop, renderBreweryUI, renderRacks, openRackSelectModal, closeRackSelectModal, openKettleModal, closeKettleModal, closeModal, openLabelerModal, closeLabelerModal, updateLabelDraft, renderWeather, showToast, openContractDetailModal, closeContractDetailModal, openOrderBreakdownModal, closeOrderBreakdownModal} from "./ui.js";
+import { startTutorial, advanceTutorial, resumeTutorial } from "./tutorial.js";
 import { initPlaytest } from "./playtest.js";
-import { globals } from "./state.js";
+import { state, globals } from "./state.js";
 import { loadGameState, saveGameState } from "./storage.js";
 
 // Expose DOM interaction functions to the global window context
@@ -52,12 +53,13 @@ window.openContractDetailModal = openContractDetailModal;
 window.closeContractDetailModal = closeContractDetailModal;
 window.openOrderBreakdownModal = openOrderBreakdownModal;
 window.closeOrderBreakdownModal = closeOrderBreakdownModal;
+window.advanceTutorial = advanceTutorial; // Expose for UI interaction
 
 window.onload = () => {
 	initSound();
 	if (window.lucide) window.lucide.createIcons();
 
-	loadGameState();
+	const gameWasLoaded = loadGameState();
 
 	renderWeather();
 	startWeatherSystem();
@@ -74,6 +76,12 @@ window.onload = () => {
 
 	globals.gameLoopInterval = startLoop();
 	initPlaytest();
+
+	if (!gameWasLoaded) {
+		startTutorial();
+	} else if (state.tutorial.active) {
+		resumeTutorial();
+	}
 	console.log("Game initialized");
 
 	// Autosave every 10 seconds

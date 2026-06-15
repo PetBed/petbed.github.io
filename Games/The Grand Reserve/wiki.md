@@ -2,11 +2,20 @@
 
 Welcome to the official strategy, mechanics, and design guide for The Grand Reserve. This vault guide is optimized for Obsidian, utilizing internal linking, clear data formatting, and visual callouts to help you master estate management, crop cultivation, cellar maturation, and copper brewery thermodynamics.
 
-## 1. Agricultural & Pantry Registry
+## 1. Getting Started: The Tutorial
+
+For new players, the game begins with a hands-on tutorial designed to introduce the core mechanics of winemaking. This guided experience will walk you through:
+*   **Phase 1: The First Harvest:** Learn how to plant seeds in the vineyard, wait for them to grow, and harvest your first batch of grapes.
+*   **Phase 2: The First Vintage:** Take your harvested grapes to the cellar, use the ingredient press, and learn the process of crushing, fermenting, and bottling a wine. This phase also introduces the **Label Architect**, allowing you to create a custom name and design for your first bottle.
+*   **Phase 3: The First Sale:** The tutorial concludes by guiding you to the **Market**, where you can sell your freshly made wine for a profit.
+
+The tutorial includes a checkpoint system, so if you need to leave and come back, you can resume from the start of your current phase.
+
+## 2. Agricultural & Pantry Registry
 
 Your vineyard and pantry shelf form the foundation of your estate's supply chain. To grow crops, you must purchase seed packets from the Merchant Shop. Planting a crop consumes the seed packet.
 
-### 1.1 Crop & Seed Catalog (Vineyard Crops)
+### 2.1 Crop & Seed Catalog (Vineyard Crops)
 
 All crops in this registry are grapes, berries, or grains that grow in standard Vineyard plots. Each seed packet is consumed instantly upon planting. Grapes and berries have a base flavour profile that is modified by the weather upon harvesting.
 
@@ -27,7 +36,7 @@ All crops in this registry are grapes, berries, or grains that grow in standard 
 | Spicy Rye | $14\text{ Gold}$ | $7\text{ seconds}$ | `N/A` | Dry, spicy, and earthy brewing grain base |
 | Sugar Pumpkin | $22\text{ Gold}$ | $14\text{ seconds}$ | `N/A` | Heavy, sweet seasonal brewing adjunct |
 
-### 1.2 Pantry Shelf Additives (Direct Purchase)
+### 2.2 Pantry Shelf Additives (Direct Purchase)
 
 Unlike agricultural crops, pantry items are bought directly from the Merchant Shop for flat gold costs and are deposited instantly into your pantry shelf inventory. They can be added to the press to significantly alter a wine's final flavour profile.
 
@@ -39,7 +48,7 @@ Unlike agricultural crops, pantry items are bought directly from the Merchant Sh
 | Pure Honey | $20\text{ Gold}$ | Highly fermentable sweet braggot/pumpkin sugar boost. | `SW +30`, `BD +5`, `AC -15` |
 | Coriander & Peel | $8\text{ Gold}$ | Citrus aromatics and light herbal spiciness in witbiers |
 
-### 1.3 Dynamic Weather & Terroir
+### 2.3 Dynamic Weather & Terroir
 
 The estate's weather is no longer just cosmetic. It changes every 3 minutes and directly impacts the chemical composition of your crops, a concept known as *terroir*. The weather at the **moment of harvest** applies a modifier to the crop's base flavour profile.
 
@@ -53,13 +62,13 @@ The estate's weather is no longer just cosmetic. It changes every 3 minutes and 
 [!tip] Strategic Harvesting
 Timing your harvest to coincide with specific weather patterns is a key strategy for advanced winemakers. A Cabernet harvested in the rain will have a much different profile than one harvested in the sun, allowing you to create truly unique vintages.
 
-## 2. Cellar Mechanics (Winemaking)
+## 3. Cellar Mechanics (Winemaking)
 
 Winemaking is a slow, methodical art of patience. Once you have harvested ingredients, they must be combined to create a wine with a unique flavour profile, then processed through three active stages.
 
 [LOAD PRESS] ──> [MANUAL CRUSH] ──> [FERMENT] ──> [ACTIVE AGING] ──> [CELLAR RACKING]
 
-### 2.1.1 Barrel Types & Aging Effects
+### 3.1.1 Barrel Types & Aging Effects
 
 The type of barrel you use for aging significantly impacts the final flavour profile of your wine. Each barrel type imparts unique flavour modifiers per percentage of aging progress. These modifiers are applied continuously throughout the aging phase.
 
@@ -73,7 +82,7 @@ The type of barrel you use for aging significantly impacts the final flavour pro
 [!tip] Strategic Barrel Selection
 Choosing the right barrel is crucial for crafting your desired wine profile. For example, a wine high in natural acidity might benefit from an American Oak barrel to mellow it out, while a light-bodied wine could gain structure from a French Oak.
 
-### 2.1 The Four-Point Flavour Spectrum
+### 3.1 The Four-Point Flavour Spectrum
 
 Every wine you create is now defined by a dynamic, four-point flavour profile. The final profile of a bottled wine is determined by the sum of the flavour values from its base ingredients, which is then modified by the harvest weather, any pantry additives used in the press, and finally the type of barrel and duration of the aging process.
 *   **Sweetness (SW):** Measures residual fruit sugars and unfermentable additives.
@@ -81,9 +90,13 @@ Every wine you create is now defined by a dynamic, four-point flavour profile. T
 *   **Tannin (TN):** Measures mouth-drying astringency from skins, seeds, and wood.
 *   **Body (BD):** Measures physical density, weight, and viscous mouthfeel.
 
-Hovering over any ingredient or finished wine in your reserve will show a detailed tooltip with its exact flavour values.
+[!tip] Informative Tooltips
+Hovering over almost any item or UI element in the game will display a detailed tooltip. This includes:
+*   **Crops & Ingredients:** See their base flavour, any active weather modifiers, and the final resulting flavour profile.
+*   **Barrels & Additives:** See the exact flavour modifiers they apply.
+*   **Weather Display:** See the active modifiers for the current weather.
 
-### 2.2 The Multi-Ingredient Press & Recipe Book
+### 3.2 The Multi-Ingredient Press & Recipe Book
 
 To start a batch, click any empty Oak Barrel in your Cellar to open the Ingredient Press. You can load up to $3$ harvested ingredients (grapes and berries) and one pantry additive. The Press automatically evaluates your loaded items against the Recipe Book.
 
@@ -119,7 +132,7 @@ Ratios below represent the exact integer count of ingredients required in the Pr
 | Generic Fruit Cider | Any combination consisting purely of $\ge 2$ berries. | $25\text{ Gold}$ |
 | House Red Blend | Any invalid grape-based combination of $\ge 2$ ingredients. | $30\text{ Gold}$ |
 
-### 2.3 Processing Stages
+### 3.3 Processing Stages
 
 Crushing (Active Tapping): You must click the barrel manually $5\text{ times}$ to crush the grapes. Each squish deforms the barrel container with physical visual shaking.
 
@@ -127,7 +140,7 @@ Fermentation (Passive, $5\text{s}$): The mash sits in a closed barrel to ferment
 
 Aging (Passive, Variable Speed): The aging indicator marker slides along a visual timeline towards the S-Tier peak. During this phase, the barrel's wood type will impart flavour changes to the wine. The aging process takes 100 seconds, with progress displayed as a percentage.
 
-### 2.4 The Aging Timeline & Quality Multipliers
+### 3.4 The Aging Timeline & Quality Multipliers
 
 When a barrel transitions to the Aging phase, its value multiplier $M_{\text{tier}}$ climbs as the slider moves toward the S-Tier sweet spot. The batch will remain at peak S-Tier quality even if it reaches 100% progress, giving you a wide window to bottle your best vintages.
 
@@ -146,7 +159,7 @@ When a barrel transitions to the Aging phase, its value multiplier $M_{\text{tie
 [!info] The Vinegar Option
 Once a batch reaches 100% aging progress, it will stop aging and remain at S-Tier quality indefinitely. A new button will appear, giving you the choice to convert the entire batch into low-value Vinegar. While not profitable, Vinegar may have niche uses in future updates.
 
-## 3. Maturation Racks & Vintage Ranks
+## 4. Maturation Racks & Vintage Ranks
 
 Unlike active fermentation, matured wines can be stored in the Cellar Maturation Racks to age over long cycles, yielding exponential price gains based on in-game shelf-maturation age.
 
@@ -156,7 +169,7 @@ Unlike active fermentation, matured wines can be stored in the Cellar Maturation
 
 Maturation Racks contain a $3 \times 3$ display grid ($9$ slots total). Players can load bottled wines from their reserve inventory directly into any empty slot.
 
-### 3.1 Vintage Ranks & Multipliers
+### 4.1 Vintage Ranks & Multipliers
 
 Maturation age increments by $+1$ year every second the bottle remains racked.
 
@@ -169,11 +182,11 @@ $$\text{Final Market Value} = \text{Base Price} \times M_{\text{tier}} \times V_
 | Fine Aged | $\ge 15\text{ Years}$ | $1.5\times$ | Softened acidity, smooth rounded profiles. |
 | Freshly Bottled | $\ge 0\text{ Years}$ | $1.0\times$ | Just bottled, raw youth with young notes. |
 
-## 4. Active Brewing (The Copper Kettle)
+## 5. Active Brewing (The Copper Kettle)
 
 Once you purchase the Copper Kettle upgrade from the Merchant Shop for $150\text{ Gold}$, the Brewery tab unlocks. This active minigame represents a physics-based, interactive temperature tracking stabilization system.
 
-### 4.1 Beer Recipe Registry
+### 5.1 Beer Recipe Registry
 
 All beers use processed grain and hops. Unlike wines, beers do not age; their value is determined instantly upon successful brew completion.
 
@@ -189,17 +202,17 @@ All beers use processed grain and hops. Unlike wines, beers do not age; their va
 | Imperial Honey Braggot | $1\text{ Barley} + 2\text{ Pure Honey}$ | $110\text{ Gold}$ |
 | Double Espresso Stout | $1\text{ Barley} + 1\text{ Coffee Beans} + 1\text{ Cacao Nibs}$ | $130\text{ Gold}$ |
 
-### 4.2 Kettle Temperature Mini-Game (Stardew-Style Physics)
+### 5.2 Kettle Temperature Mini-Game (Stardew-Style Physics)
 
 The brewing process is an active, horizontal stabilization minigame, inspired by the physics of popular fishing games.
 
 [← Vent Steam]  ============= [ Catcher Pad ] =============  [Stoke Fire →]
                               { Boiling Bubble }
 
-#### Gameplay Objective
+### 5.2.1 Gameplay Objective
 To complete a brew, you must keep the green **Catcher Pad** layered on top of the drifting **Boiling Bubble**. Progress accumulates only during this overlap.
 
-#### Core Mechanics
+### 5.2.2 Core Mechanics
 *   **The Catcher Pad:** This is your stable brewing zone, represented by the green block.
     *   **Width:** $21\%$ of the total track.
     *   **Physics:** Features custom momentum and drag for a smooth feel.
@@ -210,7 +223,7 @@ To complete a brew, you must keep the green **Catcher Pad** layered on top of th
 *   **The Boiling Bubble:** A custom bubble icon that drifts back and forth along the track.
     *   Its drift patterns are highly smoothed ($35\%$ slower maximum speeds, $20\%$ lower sudden adjustment frequencies) to make alignment satisfying and comfortable.
 
-#### Completion Time
+### 5.2.3 Completion Time
 The total time required to complete a brew is dynamic and scales with the base value of the beer recipe.
 
 $$\text{Brew Time Required} = 7.5 + \left(\frac{\text{Base Value} - 30}{100}\right) \times 14.5\text{ seconds}$$
@@ -220,11 +233,11 @@ $$\text{Brew Time Required} = 7.5 + \left(\frac{\text{Base Value} - 30}{100}\rig
 
 [!tip] Dynamic Tab Re-binding & Resilience If you navigate away from the Brewery to harvest crops, your thermal state and active target positions are maintained in the background thread. Returning to the Brewery dynamically binds inputs back to the UI, allowing you to resume with zero progress loss.
 
-## 5. Market Square & Oversupply Mechanics
+## 6. Market Square & Oversupply Mechanics
 
 The town market does not pay fixed rates. It employs a dynamic supply-and-demand algorithm that reacts to how you sell your goods.
 
-### 5.1 Price Volatility & Market Shifts
+### 6.1 Price Volatility & Market Shifts
 
 Every $30\text{-seconds}$ real-time, the market experiences a Market Shift. Base prices fluctuate according to volatility metrics:
 
@@ -242,11 +255,11 @@ Oversupply Recovery: During each $30\text{-second}$ Market Shift, the oversupply
 
 The Market interface renders SVG Sparklines displaying the pricing trend over the last $10$ market shifts.
 
-## 6. Customer Order Board
+## 7. Customer Order Board
 
 The Customer Order Board, accessible via the "Orders" tab, is a dynamic contract system where NPCs request wines with specific characteristics. Fulfilling these contracts offers premium payouts and provides a directed challenge for master winemakers.
 
-### 6.1 Dialogue Difficulty
+### 7.1 Dialogue Difficulty
 
 To accommodate all players, NPC requests can be interpreted at different difficulty levels, which can be changed at any time.
 
@@ -254,7 +267,7 @@ To accommodate all players, NPC requests can be interpreted at different difficu
 *   **Sommelier Mode:** NPCs use evocative, professional terms like "austere," "enamel-stripping," and "cigar-box."
 *   **Intermediate Mode:** A 50/50 blend of both, helping players naturally learn advanced terminology.
 
-### 6.2 Contract Mechanics
+### 7.2 Contract Mechanics
 
 *   **Requests:** An NPC will request a specific wine variety (e.g., Cabernet Bold Red) with one to four flavour attributes falling within a target range (e.g., Tannin between 75-85%).
 *   **The Solvability Engine:** To ensure fairness, every contract is pre-validated by a background simulation engine. This engine confirms that a valid combination of weather, additives, and barrel aging exists to create the requested wine, making every order achievable.
@@ -264,7 +277,7 @@ To accommodate all players, NPC requests can be interpreted at different difficu
     *   If the deviation is greater than 20%, the customer will refuse the wine, but the order will not be canceled, allowing you to try again with a different bottle.
 *   **Cancellation:** If you no longer wish to complete an active order, you can open its detail screen and select "Cancel Order".
 
-### 6.3 Precision Payouts & Rewards
+### 7.3 Precision Payouts & Rewards
 
 The reward for a successful contract delivery is significantly higher than a standard market sale. The formula is:
 
@@ -291,7 +304,7 @@ When submitting a wine, you will see a qualitative rating to help you gauge its 
 | >40% (<12% avg. deviation) | "A Good Fit" |
 | <40% (>12% avg. deviation) | "An Acceptable Offer" |
 
-### 6.4 The Fulfillment Report
+### 7.4 The Fulfillment Report
 
 After a successful sale, a detailed **Order Fulfillment Report** will appear. This modal provides a complete breakdown of the transaction, helping you learn and improve. It includes:
 *   A side-by-side comparison of the requested flavour ranges versus your submitted wine's stats.
@@ -302,11 +315,11 @@ After a successful sale, a detailed **Order Fulfillment Report** will appear. Th
 [!tip] Maximizing Profit
 Fulfilling a 4-constraint contract with a perfectly crafted, S-Tier, Centennial Vintage wine will yield the highest possible payout in the game, combining all available multipliers for a massive reward.
 
-## 7. Saving Your Progress
+## 8. Saving Your Progress
 
 Your estate's progress is automatically saved to your browser's local storage every 10 seconds. You can also manually save at any time by pressing `Ctrl + S`. Since the game saves locally, your progress is tied to the browser and device you are currently using.
 
-## 8. Graphics & Sound Engineering (Tactile Immersion)
+## 9. Graphics & Sound Engineering (Tactile Immersion)
 
 The visual and auditory experience is designed to feel tactile, cozy, and highly responsive.
 
@@ -322,7 +335,7 @@ Bavarian Brewery Vessels: Beer rendering alternates between flared steins with t
 
 Seed Pouches: Seed bag vectors feature miniature preview drawings of the crop on the cover for easy sorting.
 
-### 8.2 Web Audio Synthesis API
+### 9.2 Web Audio Synthesis API
 
 Sound effects are synthesized live in the audio buffer, eliminating lag and loaded assets:
 
@@ -336,11 +349,11 @@ Market Clinks: Dual high-frequency sine oscillators ($987.77\text{Hz}$ and $1318
 
 Active Bubbles: Intermittent low-frequency sine bursts simulate active fermentation.
 
-### 9. The Estate Label Architect (Customization)
+## 10. The Estate Label Architect (Customization)
 
 To add personal prestige to your products, you can customize the label of any bottled wine or brewed beer from your Cellar Reserve (Warehouse) tab.
 
-## 9.1 Custom Vector Composites
+## 10.1 Custom Vector Composites
 
 Labels are mapped as real-time SVG nested vector nodes. Players can design and preview custom labels immediately before attaching them to their stock.
 

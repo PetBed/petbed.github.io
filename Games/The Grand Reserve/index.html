@@ -264,7 +264,7 @@
           <div>
             <label class="text-[9px] font-black uppercase tracking-wider text-amber-800 block mb-1">Estate Crest
               Emblem</label>
-            <div class="grid grid-cols-6 gap-2">
+            <div id="labeler-crest-grid" class="grid grid-cols-6 gap-2">
               <button type="button" data-crest="star" onclick="updateLabelDraft('crestId', 'star')"
                 class="aspect-square rounded-lg border border-stone-200 bg-stone-50 hover:bg-stone-200 flex items-center justify-center transition-all"><i
                   data-lucide="star" class="w-4 h-4 text-stone-600"></i></button>
@@ -323,7 +323,7 @@
             </div>
           </div>
 
-          <button type="button" onclick="saveCustomLabel()"
+          <button type="button" id="labeler-save-btn" onclick="saveCustomLabel()"
             class="w-full mt-auto py-3 bg-indigo-700 hover:bg-indigo-600 text-white font-extrabold rounded-xl shadow-lg transition-all text-xs uppercase tracking-wide active:scale-95">Attach
             Custom Label</button>
         </div>

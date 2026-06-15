@@ -74,6 +74,19 @@
   animation: urgencyFlash 0.8s infinite;
 }
 
+@keyframes flash {
+  0%, 100% {
+    background-color: #fef3c7; /* amber-100 */
+    transform: scale(1);
+  }
+  50% {
+    background-color: #fcd34d; /* amber-300 */
+    transform: scale(1.05);
+  }
+}
+
+.tutorial-flash { animation: flash 0.7s 2; }
+
 body {
   user-select: none;
   -webkit-user-select: none;

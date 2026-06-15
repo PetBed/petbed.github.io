@@ -1,5 +1,24 @@
 # The Grand Reserve - Changelog
 
+## Version 0.3.1 - The Onboarding & QoL Update
+
+This patch focuses on improving the new player experience with a comprehensive tutorial and adding numerous quality-of-life tooltips to make the game's mechanics more transparent.
+
+### New Features & Gameplay Mechanics
+
+*   **Hands-On Tutorial:** A new multi-phase tutorial has been added for first-time players. It provides a guided, step-by-step walkthrough of the core gameplay loop, from planting and harvesting the first crop, to pressing, fermenting, bottling, and custom-labeling a wine, and finally introducing the market.
+*   **Checkpoint System:** The tutorial includes a robust checkpoint system, ensuring players can safely reload the game and resume from the beginning of their current phase without getting stuck.
+
+### UI & UX Improvements (Quality of Life)
+
+*   **Contextual Tooltips:** Added a wide array of new tooltips to provide players with instant information:
+    *   **Weather:** Hovering over the weather display now shows the exact flavour modifiers it applies to harvests.
+    *   **Live Crops:** Hovering over a growing or ready-to-harvest crop now shows its base flavour, the current weather modifier, and the final calculated flavour profile.
+    *   **Shop Items:** Hovering over seeds, pantry additives, and barrel upgrades in the shop now displays tooltips with their respective flavour profiles or modifiers.
+    *   **Cellar Barrels:** Hovering over an empty barrel now shows a tooltip detailing the flavour modifiers it will impart during aging.
+
+---
+
 ## Version 0.3.0 - The Precision & Feedback Update
 
 This update focuses on adding significant depth and skill expression to the contract system, rewarding precision and providing players with detailed feedback to help them master the art of winemaking.

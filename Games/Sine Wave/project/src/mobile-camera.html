@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MV Mobile Camera</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peer.min.js"></script>
+    <style>
+        :root {
+            --mv-bg: #0a0a0a;
+            --mv-border: rgba(107, 143, 113, 0.35);
+            --mv-text: #a8a8a8;
+            --mv-bright: #d4d4d4;
+            --mv-track: #6b8f71;
+            --mv-alert: #a86565;
+            --mv-font: 'IBM Plex Mono', Consolas, monospace;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: var(--mv-font);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: var(--mv-bg);
+            color: var(--mv-text);
+            text-align: center;
+            font-size: 12px;
+            letter-spacing: 0.06em;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+            background-size: 24px 24px;
+            pointer-events: none;
+        }
+        h1 {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--mv-bright);
+        }
+        #status {
+            font-size: 11px;
+            padding: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        #localVideo {
+            max-width: 80%;
+            max-height: 40%;
+            border: 1px solid var(--mv-border);
+            margin-top: 1rem;
+            transform: scaleX(-1);
+            filter: grayscale(0.85) contrast(1.08) brightness(0.92);
+        }
+        .connected { color: var(--mv-track); }
+        .error { color: var(--mv-alert); }
+    </style>
+</head>
+<body>
+    <h1>Mobile Camera Broadcaster</h1>
+    <p id="status">Initializing...</p>
+    <video id="localVideo" autoplay playsinline muted></video>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const videoEl = document.getElementById('localVideo');
+        const params = new URLSearchParams(window.location.search);
+        const connectToId = params.get('connect_to');
+
+        if (!connectToId) {
+            statusEl.textContent = "Error: Peer ID not found in URL.";
+            statusEl.className = 'error';
+        } else {
+            if (typeof Peer === 'undefined') {
+                statusEl.textContent = "Error: PeerJS library not loaded. Check network connection.";
+                statusEl.className = 'error';
+            } else {
+                const peer = new Peer();
+
+                peer.on('open', id => {
+                    statusEl.textContent = `Acquiring camera...`;
+                    navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+                    })
+                    .then(stream => {
+                        videoEl.srcObject = stream;
+                        statusEl.textContent = `Calling laptop peer: ${connectToId.substring(0, 8)}...`;
+                        const call = peer.call(connectToId, stream);
+                        call.on('close', () => {
+                            statusEl.textContent = 'Connection closed.';
+                            statusEl.className = '';
+                        });
+                        call.on('error', (err) => {
+                            statusEl.textContent = `Call Error: ${err.message}`;
+                            statusEl.className = 'error';
+                        });
+                        statusEl.textContent = 'Connection established! Keep this page open.';
+                        statusEl.className = 'connected';
+                    }).catch(err => {
+                        statusEl.textContent = `Camera Error: ${err.message}`;
+                        statusEl.className = 'error';
+                    });
+                });
+
+                peer.on('error', err => {
+                    statusEl.textContent = `Connection Error: ${err.message}`;
+                    statusEl.className = 'error';
+                });
+            }
+        }
+    </script>
+</body>
+</html>

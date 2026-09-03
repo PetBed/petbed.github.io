@@ -438,3 +438,177 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 #card-detail-modal {
     transition: opacity 0.3s ease;
 }
+
+/* =======================================================
+   SEMESTER HUB & MANAGEMENT STYLING
+   ======================================================= */
+.semester-card {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.semester-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.12), 0 4px 10px -3px rgba(0, 0, 0, 0.07);
+}
+
+.semester-card.is-active {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35), 0 10px 25px -5px rgba(59, 130, 246, 0.15);
+}
+
+.dark .semester-card.is-active {
+    border-color: #60a5fa !important;
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.35), 0 10px 25px -5px rgba(59, 130, 246, 0.25);
+}
+
+/* Pulse animation for active semester indicator */
+.pulse-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #10b981;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    animation: pulse-ring 1.8s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+@keyframes pulse-ring {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 7px rgba(16, 185, 129, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+/* Grade badges */
+.grade-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.025em;
+}
+
+.grade-pill-a {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.dark .grade-pill-a {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    border-color: rgba(52, 211, 153, 0.3);
+}
+
+.grade-pill-b {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #2563eb;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+.dark .grade-pill-b {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    border-color: rgba(96, 165, 250, 0.3);
+}
+
+.grade-pill-c {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.dark .grade-pill-c {
+    background-color: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border-color: rgba(251, 191, 36, 0.3);
+}
+
+.grade-pill-d {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.dark .grade-pill-d {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.3);
+}
+
+.grade-pill-none {
+    background-color: rgba(148, 163, 184, 0.15);
+    color: #64748b;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+}
+.dark .grade-pill-none {
+    background-color: rgba(148, 163, 184, 0.2);
+    color: #94a3b8;
+    border-color: rgba(148, 163, 184, 0.3);
+}
+
+/* Exam table item transition */
+.exam-item-row {
+    transition: background-color 0.15s ease-in-out;
+}
+.exam-item-row:hover {
+    background-color: rgba(241, 245, 249, 0.8);
+}
+.dark .exam-item-row:hover {
+    background-color: rgba(51, 65, 85, 0.5);
+}
+
+/* GPA pill badge */
+.gpa-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.18rem 0.55rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    letter-spacing: 0.025em;
+    background-color: rgba(147, 51, 234, 0.12);
+    color: #7e22ce;
+    border: 1px solid rgba(147, 51, 234, 0.28);
+}
+.dark .gpa-pill {
+    background-color: rgba(168, 85, 247, 0.2);
+    color: #c084fc;
+    border-color: rgba(168, 85, 247, 0.35);
+}
+
+/* Modal Tab buttons */
+.modal-tab-btn {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.modal-tab-btn.is-active {
+    background-color: #ffffff;
+    color: #2563eb;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+.dark .modal-tab-btn.is-active {
+    background-color: #334155;
+    color: #60a5fa;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+}
+
+/* Final Subject Score row hover */
+.final-score-row {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.final-score-row:hover {
+    border-color: rgba(99, 102, 241, 0.35);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+}
+.dark .final-score-row:hover {
+    border-color: rgba(99, 102, 241, 0.45);
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.25);
+}

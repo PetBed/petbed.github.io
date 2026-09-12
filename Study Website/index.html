@@ -39,18 +39,19 @@
       <div>
         <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">Study Dashboard</h1>
         <p id="welcome-message" class="text-slate-500 mt-1 dark:text-slate-400"></p>
-        <div class="mt-4 flex items-center bg-slate-200 dark:bg-slate-800 rounded-lg p-1 max-w-xl">
+        <div class="mt-4 flex items-center bg-slate-200 dark:bg-slate-800 rounded-lg p-1 max-w-2xl overflow-x-auto">
           <button id="nav-dashboard"
-            class="nav-btn active w-1/4 text-center py-2 px-4 rounded-md font-semibold">Dashboard</button>
+            class="nav-btn active flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm">Dashboard</button>
           <button id="nav-study"
-            class="nav-btn w-1/4 text-center py-2 px-4 rounded-md font-semibold text-slate-600 dark:text-slate-300">Study
-            Tracker</button>
+            class="nav-btn flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-300">Study Tracker</button>
           <button id="nav-tasks"
-            class="nav-btn w-1/4 text-center py-2 px-4 rounded-md font-semibold text-slate-600 dark:text-slate-300">Tasks</button>
+            class="nav-btn flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-300">Tasks</button>
           <button id="nav-flashcards"
-            class="nav-btn w-1/4 text-center py-2 px-4 rounded-md font-semibold text-slate-600 dark:text-slate-300">Flashcards</button>
+            class="nav-btn flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-300">Flashcards</button>
           <button id="nav-binder"
-            class="nav-btn w-1/4 text-center py-2 px-4 rounded-md font-semibold text-slate-600 dark:text-slate-300">Binder</button>
+            class="nav-btn flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-300">Binder</button>
+          <button id="nav-syllabus"
+            class="nav-btn flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-300">Syllabus</button>
         </div>
       </div>
       <div class="flex items-center space-x-2">
@@ -422,6 +423,58 @@
       <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6">Your Collection</h2>
       <div id="binder-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
         <!-- Collected cards will be dynamically inserted here -->
+      </div>
+    </main>
+
+    <!-- Syllabus & Topic Mastery Page -->
+    <main id="syllabus-page" class="hidden flex-grow space-y-6">
+      <!-- Syllabus Overview Header -->
+      <section class="bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl p-5 md:p-6 shadow-xs">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-700/60">
+          <div>
+            <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100">Subject Syllabus & Topic Mastery</h2>
+            <p id="syllabus-overall-text" class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1">Track chapter progress and mastery across all your subjects.</p>
+          </div>
+          <div class="flex items-center gap-3 flex-wrap">
+            <span id="syllabus-subjects-count" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">0 Subjects</span>
+            <span id="syllabus-chapters-count" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">0 Chapters</span>
+            <button type="button" id="syllabus-add-subject-tab-btn" class="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-semibold rounded-xl shadow-xs transition">
+              <span>+ Add Subject</span>
+            </button>
+          </div>
+        </div>
+        <div class="mt-4">
+          <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
+            <div id="syllabus-overall-progress" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Subject Tabs Bar -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1" id="syllabus-tabs-container">
+        <!-- Dynamically populated subject tabs -->
+      </div>
+
+      <!-- Active Subject Content Container -->
+      <div id="syllabus-subject-content" class="space-y-6">
+        <!-- Dynamically rendered active subject card and chapter checklist -->
+      </div>
+
+      <!-- Empty State (When no subjects exist) -->
+      <div id="syllabus-empty-state" class="hidden bg-white dark:bg-slate-800 border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-10 text-center space-y-3">
+        <h3 class="text-base font-semibold text-slate-800 dark:text-slate-200">No subjects added yet</h3>
+        <p class="text-xs text-slate-400 dark:text-slate-500 max-w-sm mx-auto">Create your first subject tab to organize chapters and track your topic mastery checklist.</p>
+        <div class="flex items-center justify-center gap-2 flex-wrap pt-2">
+          <button type="button" id="syllabus-empty-add-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-semibold rounded-xl shadow-xs transition">
+          + Add First Subject
+          </button>
+          <button type="button" id="syllabus-empty-import-logs-btn" class="px-3.5 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition border border-slate-200 dark:border-slate-600">
+            Import from Study Logs
+          </button>
+          <button type="button" id="syllabus-empty-import-template-btn" class="px-3.5 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition border border-slate-200 dark:border-slate-600">
+            Load Starter Template
+          </button>
+        </div>
       </div>
     </main>
 
@@ -1191,8 +1244,97 @@
     </div>
   </div>
 
+  <!-- Syllabus Subject Modal (Create / Rename / Color) -->
+  <div id="syllabus-subject-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden z-50">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 md:p-8 w-full max-w-md space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+        <h3 id="syllabus-subject-modal-title" class="text-lg font-bold text-slate-900 dark:text-slate-100">Add New Subject</h3>
+        <button type="button" id="close-subject-modal-btn" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="syllabus-subject-form" class="space-y-4">
+        <input type="hidden" id="syllabus-subject-id-input">
+        <div>
+          <label for="syllabus-subject-name-input" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Subject Name *</label>
+          <input type="text" id="syllabus-subject-name-input" required placeholder="e.g. Physics, Modern Mathematics"
+            class="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Accent Color</label>
+          <div class="flex items-center gap-2 pt-1">
+            <input type="color" id="syllabus-subject-color-input" value="#00B4D8" class="w-9 h-9 rounded-lg border border-slate-300 dark:border-slate-600 cursor-pointer p-0.5 bg-transparent">
+            <span class="text-xs text-slate-500 dark:text-slate-400">Pick color for subject badges and tabs</span>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2.5 pt-3">
+          <button type="button" id="cancel-subject-modal-btn"
+            class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition text-xs">Cancel</button>
+          <button type="submit"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-xs transition text-xs">Save Subject</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Syllabus Chapter Modal (Add / Edit Chapter) -->
+  <div id="syllabus-chapter-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden z-50">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 md:p-8 w-full max-w-lg space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+        <h3 id="syllabus-chapter-modal-title" class="text-lg font-bold text-slate-900 dark:text-slate-100">Add Chapter</h3>
+        <button type="button" id="close-chapter-modal-btn" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="syllabus-chapter-form" class="space-y-4">
+        <input type="hidden" id="syllabus-chapter-subject-id-input">
+        <input type="hidden" id="syllabus-chapter-id-input">
+        <div>
+          <label for="syllabus-chapter-name-input" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+            Chapter Title <span class="font-normal text-slate-400">(Optional: leave blank to name automatically as Chapter #)</span>
+          </label>
+          <input type="text" id="syllabus-chapter-name-input" placeholder="e.g. Kinematics"
+            class="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label for="syllabus-chapter-status-input" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mastery Status</label>
+          <select id="syllabus-chapter-status-input"
+            class="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="not_started">Not Started</option>
+            <option value="in_progress">In Progress</option>
+            <option value="review_required">Review Required</option>
+            <option value="mastered">Mastered</option>
+          </select>
+        </div>
+        <div>
+          <label for="syllabus-chapter-notes-input" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Notes / Key Concepts <span class="font-normal text-slate-400">(Optional)</span></label>
+          <textarea id="syllabus-chapter-notes-input" rows="3" placeholder="Key formulas, challenging concepts, or revision notes..."
+            class="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+        <div class="flex justify-end gap-2.5 pt-3">
+          <button type="button" id="cancel-chapter-modal-btn"
+            class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition text-xs">Cancel</button>
+          <button type="submit"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-xs transition text-xs">Save Chapter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="https://www.youtube.com/iframe_api"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+  <script src="js/config.js" defer></script>
+  <script src="js/state.js" defer></script>
+  <script src="js/dom.js" defer></script>
+  <script src="js/utils.js" defer></script>
+  <script src="js/auth.js" defer></script>
+  <script src="js/semesters.js" defer></script>
+  <script src="js/tasks.js" defer></script>
+  <script src="js/calendar.js" defer></script>
+  <script src="js/timer.js" defer></script>
+  <script src="js/sounds.js" defer></script>
+  <script src="js/flashcards.js" defer></script>
+  <script src="js/syllabus.js" defer></script>
   <script src="collectibles.js" defer></script>
   <script src="script.js" defer></script>
 </body>

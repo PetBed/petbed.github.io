@@ -77,7 +77,7 @@
 
       <!-- Semester Hub Section -->
       <section id="semester-hub-section" class="mb-8 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl p-6 shadow-sm">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-700/60">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-700/60 mb-5">
           <div>
             <div class="flex items-center gap-2.5">
               <!-- <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 flex-shrink-0">
@@ -88,7 +88,6 @@
               </div> -->
               <div>
                 <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Academic Semesters</h2>
-                <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400">Exam marks, schedules, and study logs are separated by semester</p>
               </div>
             </div>
           </div>
@@ -104,69 +103,6 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
               <span>New Semester</span>
             </button>
-          </div>
-        </div>
-
-        <!-- Active / Selected Semester Overview Metrics -->
-        <div id="semester-metrics-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 my-5">
-          <!-- Metric 1: Total Study Time -->
-          <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/50 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </div>
-            <div class="min-w-0">
-              <p class="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">Semester Study Time</p>
-              <p id="metric-sem-study-time" class="text-lg font-bold text-slate-800 dark:text-slate-100">0h 0m</p>
-            </div>
-          </div>
-          <!-- Metric 2: Academic Records Status -->
-          <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/50 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            </div>
-            <div class="min-w-0">
-              <p class="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">Academic Records</p>
-              <p id="metric-sem-exams" class="text-sm md:text-base font-bold text-slate-800 dark:text-slate-100 truncate">0 Exams</p>
-            </div>
-          </div>
-          <!-- Metric 3: Average Mark -->
-          <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/50 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            </div>
-            <div class="min-w-0">
-              <div class="flex items-center gap-1.5">
-                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">Average Mark</p>
-                <span id="metric-sem-avg-source" class="text-[9px] font-semibold px-1 py-0.2 rounded bg-slate-200/80 dark:bg-slate-600 text-slate-600 dark:text-slate-300"></span>
-              </div>
-              <div class="flex items-center gap-1.5 mt-0.5">
-                <p id="metric-sem-avg" class="text-lg font-bold text-slate-800 dark:text-slate-100">--</p>
-                <span id="metric-sem-grade-badge" class="hidden grade-pill"></span>
-              </div>
-            </div>
-          </div>
-          <!-- Metric 4: Semester GPA -->
-          <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/50 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center flex-shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            </div>
-            <div class="min-w-0">
-              <p class="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">Semester GPA</p>
-              <div class="flex items-center gap-1.5 mt-0.5">
-                <p id="metric-sem-gpa" class="text-lg font-bold text-purple-600 dark:text-purple-400">--</p>
-                <span id="metric-sem-gpa-badge" class="hidden gpa-pill text-[10px]"></span>
-              </div>
-            </div>
-          </div>
-          <!-- Metric 5: Duration -->
-          <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/50 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            </div>
-            <div class="min-w-0 flex-1">
-              <p class="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">Semester Duration</p>
-              <p id="metric-sem-dates" class="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">Ongoing</p>
-            </div>
           </div>
         </div>
 
@@ -220,19 +156,33 @@
       <div class="lg:col-span-2 space-y-8">
         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
           <div id="calendar-feature">
-            <div class="flex items-center justify-between mb-6">
-              <h2 id="month-year" class="text-xl font-bold text-slate-900 dark:text-slate-100"></h2>
-              <div class="flex items-center space-x-2"><button id="prev-month"
-                  class="p-2 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600"><svg
-                    xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
+              <h2 id="month-year" class="text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight"></h2>
+              <div class="flex items-center space-x-2">
+                <button id="open-gcal-modal-btn"
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-300 transition active:scale-95 border border-blue-200/80 dark:border-blue-700/50 shadow-xs"
+                  title="Link & Sync Google Calendar">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h5v5H7z"/>
+                  </svg>
+                  <span>Google Calendar</span>
+                  <span id="gcal-status-dot" class="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500" title="Not synced yet"></span>
+                </button>
+                <button id="today-month-btn"
+                  class="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition active:scale-95 shadow-xs">Today</button>
+                <button id="prev-month" aria-label="Previous month"
+                  class="p-2 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition active:scale-95"><svg
+                    xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="15 18 9 12 15 6"></polyline>
-                  </svg></button><button id="next-month"
-                  class="p-2 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600"><svg
-                    xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  </svg></button>
+                <button id="next-month" aria-label="Next month"
+                  class="p-2 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition active:scale-95"><svg
+                    xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg></button></div>
+                  </svg></button>
+              </div>
             </div>
             <div class="grid calendar-grid gap-1 text-center font-semibold text-slate-600 dark:text-slate-400 mb-2">
               <div>Sun</div>
@@ -476,15 +426,149 @@
     </main>
 
   </div>
-  <div id="event-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 w-full max-w-md">
-      <h3 class="text-xl font-bold mb-4 dark:text-slate-100">Add Event</h3>
-      <p id="modal-date" class="mb-6 text-slate-500 dark:text-slate-400"></p><input type="text" id="event-title"
-        class="w-full p-3 border rounded-lg mb-4 bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600"
-        placeholder="Event title">
-      <div class="flex justify-end space-x-3"><button id="close-modal"
-          class="px-4 py-2 bg-slate-100 rounded-lg dark:bg-slate-600 dark:text-slate-200">Cancel</button><button
-          id="save-event" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Save</button></div>
+  <!-- Calendar Day & Timeline Modal (Google Calendar style) -->
+  <div id="event-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 hidden z-50 transition-opacity duration-200">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] sm:max-h-[85vh] flex flex-col border border-slate-100 dark:border-slate-700/80 overflow-hidden transform transition-all">
+      
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-700/80 flex items-center justify-between gap-3 bg-white/95 dark:bg-slate-800/95 backdrop-blur shrink-0">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center flex-wrap gap-2">
+            <h3 id="modal-date-heading" class="text-lg sm:text-2xl font-bold text-slate-800 dark:text-slate-100 truncate">Date</h3>
+            <span id="modal-today-badge" class="hidden text-[11px] bg-blue-600 text-white font-semibold px-2.5 py-0.5 rounded-full shadow-xs">Today</span>
+            <span id="modal-events-count" class="text-[11px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium px-2.5 py-0.5 rounded-full">0 events</span>
+          </div>
+          <p id="modal-date-sub" class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5"></p>
+          <span id="modal-date" class="hidden"></span>
+        </div>
+        <div class="flex items-center space-x-2 shrink-0">
+          <button id="open-add-event-btn"
+            class="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-sm transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Add Event</span>
+          </button>
+          <button id="close-modal" aria-label="Close modal"
+            class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition active:scale-95">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Add Event Panel (Collapsible) -->
+      <div id="calendar-add-event-panel" class="hidden bg-slate-50 dark:bg-slate-900/70 border-b border-slate-200 dark:border-slate-700/70 p-4 sm:p-5 transition-all shrink-0">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+            <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200">New Custom Event</h4>
+          </div>
+          <button id="cancel-add-event-x" class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            Dismiss
+          </button>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <input type="text" id="event-title"
+              class="w-full p-2.5 text-sm border rounded-lg bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 outline-none transition"
+              placeholder="Event title (e.g. Physics Past Paper, Math Study Session...)">
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Subject</label>
+              <select id="event-subject"
+                class="w-full p-2 text-sm border rounded-lg bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none transition"></select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Start Time</label>
+              <input type="time" id="event-start-time" value="09:00"
+                class="w-full p-2 text-sm border rounded-lg bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">End Time</label>
+              <input type="time" id="event-end-time" value="10:00"
+                class="w-full p-2 text-sm border rounded-lg bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none transition">
+            </div>
+          </div>
+          <div>
+            <input type="text" id="event-notes"
+              class="w-full p-2 text-sm border rounded-lg bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 outline-none transition"
+              placeholder="Notes or description (optional)">
+          </div>
+          <div class="flex items-center justify-end space-x-2 pt-1">
+            <button id="cancel-add-event-btn"
+              class="px-3.5 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-medium rounded-lg transition">Cancel</button>
+            <button id="save-event"
+              class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs sm:text-sm font-semibold rounded-lg shadow-sm transition">Save Event</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline Scroll Area -->
+      <div id="calendar-timeline-scroll" class="flex-1 overflow-y-auto overflow-x-hidden relative p-3 sm:p-5">
+        
+        <!-- Untimed / All-Day Section -->
+        <div id="timeline-all-day-section" class="hidden mb-4 pb-3 border-b border-slate-200 dark:border-slate-700/60">
+          <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">All-Day & Untimed</p>
+          <div id="timeline-all-day-list" class="space-y-1.5"></div>
+        </div>
+
+        <!-- Google Calendar Hourly Timeline Grid -->
+        <div class="relative">
+          <div id="calendar-timeline-grid" class="relative flex">
+            <!-- Left time labels column -->
+            <div id="timeline-time-labels" class="w-12 sm:w-16 shrink-0 select-none"></div>
+            <!-- Right grid & events container -->
+            <div id="timeline-events-container" class="flex-1 relative border-l border-slate-200 dark:border-slate-700/60 min-h-[1440px]">
+              <!-- Hour row lines inserted here -->
+              <div id="timeline-hour-rows" class="absolute inset-0"></div>
+              <!-- Red current time line -->
+              <div id="timeline-now-line" class="hidden timeline-now-line">
+                <div class="timeline-now-dot"></div>
+              </div>
+              <!-- Events overlay -->
+              <div id="timeline-events-overlay" class="absolute inset-0 pointer-events-none"></div>
+            </div>
+          </div>
+
+          <!-- Empty state when no events on this day -->
+          <div id="timeline-empty-state" class="hidden py-10 flex flex-col items-center justify-center text-center">
+            <div class="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-900/20 text-blue-500 flex items-center justify-center mb-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </div>
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">No events scheduled</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 max-w-xs">There are no exams or custom study events for this date.</p>
+            <button id="empty-state-add-btn" class="mt-4 px-4 py-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-semibold rounded-xl transition flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Schedule an Event
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700/80 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 shrink-0">
+        <span class="flex items-center gap-1.5 truncate mr-2">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+          <span class="truncate">Tip: Click on any time slot in the timeline to quick-add an event</span>
+        </span>
+        <button id="close-modal-footer" class="px-3 py-1 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition font-medium shrink-0">Close</button>
+      </div>
+
     </div>
   </div>
 
@@ -976,6 +1060,135 @@
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
     </button>
+  </div>
+
+  <!-- Google Calendar Sync & Management Modal -->
+  <div id="gcal-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4 z-50 transition-opacity duration-200">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-xl max-h-[92vh] flex flex-col border border-slate-100 dark:border-slate-700/80 overflow-hidden transform transition-all">
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-700/80 flex items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h5v5H7z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Google Calendar Link</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">One-way sync to view your events on this calendar</p>
+          </div>
+        </div>
+        <button id="close-gcal-modal-btn" aria-label="Close modal"
+          class="p-2 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="p-4 sm:p-6 space-y-5 overflow-y-auto flex-1">
+        
+        <!-- Quick Instructions Accordion / Card -->
+        <div class="bg-blue-50/70 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 rounded-xl p-3.5 text-xs text-blue-900 dark:text-blue-200">
+          <div class="flex items-center justify-between cursor-pointer font-semibold select-none" id="gcal-guide-toggle">
+            <span class="flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              How to get your Google Calendar secret iCal link
+            </span>
+            <span id="gcal-guide-icon" class="text-blue-500 transition-transform">▼</span>
+          </div>
+          <div id="gcal-guide-content" class="mt-2.5 pt-2 border-t border-blue-100/80 dark:border-blue-900/50 space-y-1.5 text-slate-600 dark:text-slate-300 leading-relaxed">
+            <p>1. On computer, open <a href="https://calendar.google.com" target="_blank" rel="noopener" class="text-blue-600 dark:text-blue-400 underline font-medium">Google Calendar</a>.</p>
+            <p>2. On the left under <strong>"My calendars"</strong>, hover over your calendar, click the 3 dots <strong>⋮</strong> → <strong>Settings and sharing</strong>.</p>
+            <p>3. Scroll down to the <strong>"Integrate calendar"</strong> section.</p>
+            <p>4. Copy the URL in the box labeled <strong>"Secret address in iCal format"</strong> (or "Public address in iCal format").</p>
+            <p class="text-[11px] text-blue-600 dark:text-blue-400 font-medium pt-0.5">🔒 Private & Read-Only: Your calendar is displayed locally in this browser without giving write permissions.</p>
+          </div>
+        </div>
+
+        <!-- Add Calendar Form -->
+        <form id="gcal-add-form" class="space-y-3 bg-slate-50 dark:bg-slate-700/30 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Link New Calendar</h4>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1" for="gcal-url-input">Google Calendar iCal / ICS URL</label>
+            <input type="url" id="gcal-url-input" required placeholder="https://calendar.google.com/calendar/ical/.../basic.ics"
+              class="w-full p-2.5 text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500 font-mono">
+          </div>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1" for="gcal-name-input">Calendar Label</label>
+              <input type="text" id="gcal-name-input" placeholder="e.g., Personal / Classes" value="Google Calendar"
+                class="w-full p-2 text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Color Theme</label>
+              <div class="flex items-center gap-1.5 pt-1" id="gcal-color-picker">
+                <button type="button" data-color="#4285F4" class="gcal-color-opt w-6 h-6 rounded-full ring-2 ring-offset-2 ring-blue-500 bg-[#4285F4] transition"></button>
+                <button type="button" data-color="#0F9D58" class="gcal-color-opt w-6 h-6 rounded-full bg-[#0F9D58] hover:scale-110 transition"></button>
+                <button type="button" data-color="#F4B400" class="gcal-color-opt w-6 h-6 rounded-full bg-[#F4B400] hover:scale-110 transition"></button>
+                <button type="button" data-color="#DB4437" class="gcal-color-opt w-6 h-6 rounded-full bg-[#DB4437] hover:scale-110 transition"></button>
+                <button type="button" data-color="#8E24AA" class="gcal-color-opt w-6 h-6 rounded-full bg-[#8E24AA] hover:scale-110 transition"></button>
+                <button type="button" data-color="#00897B" class="gcal-color-opt w-6 h-6 rounded-full bg-[#00897B] hover:scale-110 transition"></button>
+                <button type="button" data-color="#E91E63" class="gcal-color-opt w-6 h-6 rounded-full bg-[#E91E63] hover:scale-110 transition"></button>
+                <input type="hidden" id="gcal-selected-color" value="#4285F4">
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-1">
+            <p id="gcal-form-error" class="text-xs text-red-500"></p>
+            <button type="submit" id="gcal-add-btn"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 transition">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>Add & Sync Calendar</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Linked Calendars List -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Linked Calendars</h4>
+            <button type="button" id="gcal-sync-all-btn" class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-semibold">
+              <svg id="gcal-sync-all-icon" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              <span>Sync All</span>
+            </button>
+          </div>
+          <div id="gcal-calendars-list" class="space-y-2.5">
+            <!-- Dynamically populated by JS -->
+          </div>
+          <div id="gcal-empty-calendars" class="text-center py-6 text-slate-400 dark:text-slate-500 text-xs border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+            No Google Calendars linked yet. Paste your secret iCal link above to see your events!
+          </div>
+        </div>
+
+        <!-- Offline / File Import Fallback -->
+        <div class="pt-2 border-t border-slate-100 dark:border-slate-700/80">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-slate-600 dark:text-slate-300">Offline .ICS File Import</span>
+            <label class="cursor-pointer px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 transition">
+              <span>Choose .ics file</span>
+              <input type="file" id="gcal-file-input" accept=".ics,text/calendar" class="hidden">
+            </label>
+          </div>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">If you have a downloaded .ics export file, you can upload it directly.</p>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-3.5 sm:p-4 border-t border-slate-100 dark:border-slate-700/80 bg-slate-50/70 dark:bg-slate-800/80 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 shrink-0">
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" id="gcal-auto-sync-toggle" class="rounded text-blue-600 focus:ring-0">
+          <span>Auto-sync on page load</span>
+        </label>
+        <button type="button" id="close-gcal-modal-footer-btn"
+          class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg font-semibold transition">
+          Done
+        </button>
+      </div>
+
+    </div>
   </div>
 
   <script src="https://www.youtube.com/iframe_api"></script>

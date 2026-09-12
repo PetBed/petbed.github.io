@@ -70,8 +70,8 @@ document.addEventListener("DOMContentLoaded", function () {
 		try {
 			const response = await fetch(`${API_URL}/api/study/login`, {
 				method: "POST",
-				headers: {"Content-Type": "application/json"},
-				body: JSON.stringify({email, password}),
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ email, password }),
 			});
 			const data = await response.json();
 			if (data.error) {
@@ -102,8 +102,8 @@ document.addEventListener("DOMContentLoaded", function () {
 		try {
 			const response = await fetch(`${API_URL}/api/study/register`, {
 				method: "POST",
-				headers: {"Content-Type": "application/json"},
-				body: JSON.stringify({username, email, password, securityQuestion, securityAnswer}),
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ username, email, password, securityQuestion, securityAnswer }),
 			});
 			const data = await response.json();
 			if (data.error) {
@@ -128,8 +128,8 @@ document.addEventListener("DOMContentLoaded", function () {
 		try {
 			const response = await fetch(`${API_URL}/api/study/forgot-password/step1`, {
 				method: "POST",
-				headers: {"Content-Type": "application/json"},
-				body: JSON.stringify({email}),
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ email }),
 			});
 			const data = await response.json();
 			if (data.error) {
@@ -162,8 +162,8 @@ document.addEventListener("DOMContentLoaded", function () {
 		try {
 			const response = await fetch(`${API_URL}/api/study/forgot-password/step2`, {
 				method: "POST",
-				headers: {"Content-Type": "application/json"},
-				body: JSON.stringify({userId: resetUserId, securityAnswer, newPassword}),
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ userId: resetUserId, securityAnswer, newPassword }),
 			});
 			const data = await response.json();
 			if (data.error) {

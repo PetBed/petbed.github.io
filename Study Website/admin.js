@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	const itemModelUploadBtn = document.getElementById("item-model-upload-btn");
 	const itemModelRemoveImageBtn = document.getElementById("item-model-remove-image-btn");
 
-  const importModelsBtn = document.getElementById("import-models-btn");
+	const importModelsBtn = document.getElementById("import-models-btn");
 	const exportModelsBtn = document.getElementById("export-models-btn");
 	const itemModelTextModal = document.getElementById("item-model-text-modal");
 	const itemModelTextModalTitle = document.getElementById("item-model-text-modal-title");
@@ -155,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	itemModelImageInput.addEventListener("change", handleImageSelection);
 	itemModelRemoveImageBtn.addEventListener("click", handleRemoveImage);
 
-  importModelsBtn.addEventListener("click", () => openItemModelTextModal("import"));
+	importModelsBtn.addEventListener("click", () => openItemModelTextModal("import"));
 	exportModelsBtn.addEventListener("click", () => openItemModelTextModal("export"));
 
 	// --- BASE ITEM LOGIC ---
@@ -230,14 +230,14 @@ document.addEventListener("DOMContentLoaded", () => {
 			const itemIndex = currentBaseItems.findIndex((i) => i._id === id);
 			if (itemIndex === -1) return;
 
-			const originalItem = {...currentBaseItems[itemIndex]};
-			currentBaseItems[itemIndex] = {...originalItem, ...data};
+			const originalItem = { ...currentBaseItems[itemIndex] };
+			currentBaseItems[itemIndex] = { ...originalItem, ...data };
 			renderBaseItems();
 
 			try {
 				const response = await fetch(`${API_URL}/api/admin/base-items/${id}`, {
 					method: "PUT",
-					headers: {"Content-Type": "application/json"},
+					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(data),
 				});
 				if (!response.ok) throw new Error("Server update failed");
@@ -249,14 +249,14 @@ document.addEventListener("DOMContentLoaded", () => {
 			}
 		} else {
 			const tempId = `temp_${Date.now()}`;
-			const optimisticItem = {...data, _id: tempId};
+			const optimisticItem = { ...data, _id: tempId };
 			currentBaseItems.push(optimisticItem);
 			renderBaseItems();
 
 			try {
 				const response = await fetch(`${API_URL}/api/admin/base-items`, {
 					method: "POST",
-					headers: {"Content-Type": "application/json"},
+					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(data),
 				});
 				if (!response.ok) throw new Error("Server create failed");
@@ -295,7 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
 				renderBaseItems();
 
 				try {
-					const response = await fetch(`${API_URL}/api/admin/base-items/${id}`, {method: "DELETE"});
+					const response = await fetch(`${API_URL}/api/admin/base-items/${id}`, { method: "DELETE" });
 					if (!response.ok) throw new Error("Server delete failed");
 				} catch (error) {
 					console.error("Failed to delete base item:", error);
@@ -426,9 +426,9 @@ document.addEventListener("DOMContentLoaded", () => {
 		const parseRange = (str) =>
 			str
 				? str
-						.split(",")
-						.map(Number)
-						.filter((n) => !isNaN(n))
+					.split(",")
+					.map(Number)
+					.filter((n) => !isNaN(n))
 				: undefined;
 
 		const data = {
@@ -456,14 +456,14 @@ document.addEventListener("DOMContentLoaded", () => {
 			const modelIndex = currentItemModels.findIndex((m) => m._id === id);
 			if (modelIndex === -1) return;
 
-			const originalModel = {...currentItemModels[modelIndex]};
-			currentItemModels[modelIndex] = {...originalModel, ...data};
+			const originalModel = { ...currentItemModels[modelIndex] };
+			currentItemModels[modelIndex] = { ...originalModel, ...data };
 			renderItemModels();
 
 			try {
 				const response = await fetch(`${API_URL}/api/admin/item-models/${id}`, {
 					method: "PUT",
-					headers: {"Content-Type": "application/json"},
+					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(data),
 				});
 				if (!response.ok) throw new Error("Server update failed");
@@ -475,14 +475,14 @@ document.addEventListener("DOMContentLoaded", () => {
 			}
 		} else {
 			const tempId = `temp_model_${Date.now()}`;
-			const optimisticModel = {...data, _id: tempId};
+			const optimisticModel = { ...data, _id: tempId };
 			currentItemModels.push(optimisticModel);
 			renderItemModels();
 
 			try {
 				const response = await fetch(`${API_URL}/api/admin/item-models`, {
 					method: "POST",
-					headers: {"Content-Type": "application/json"},
+					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(data),
 				});
 				if (!response.ok) throw new Error("Server create failed");
@@ -521,7 +521,7 @@ document.addEventListener("DOMContentLoaded", () => {
 				renderItemModels();
 
 				try {
-					const response = await fetch(`${API_URL}/api/admin/item-models/${id}`, {method: "DELETE"});
+					const response = await fetch(`${API_URL}/api/admin/item-models/${id}`, { method: "DELETE" });
 					if (!response.ok) throw new Error("Server delete failed");
 				} catch (error) {
 					console.error("Failed to delete item model:", error);
@@ -605,7 +605,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		});
 	}
 
-  function openItemModelTextModal(mode) {
+	function openItemModelTextModal(mode) {
 		itemModelTextError.textContent = "";
 		itemModelTextModalButtons.innerHTML = "";
 
@@ -750,8 +750,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 			const response = await fetch(`${API_URL}/api/admin/base-items/${currentBaseItem._id}/batch-models`, {
 				method: "POST",
-				headers: {"Content-Type": "application/json"},
-				body: JSON.stringify({models}),
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ models }),
 			});
 
 			if (!response.ok) {
@@ -767,7 +767,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 	}
 
-  async function handleEditModelsAsText() {
+	async function handleEditModelsAsText() {
 		const text = itemModelTextArea.value;
 		try {
 			const models = parseTextToModels(text);
@@ -778,8 +778,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 			const response = await fetch(`${API_URL}/api/admin/base-items/${currentBaseItem._id}/batch-models`, {
 				method: "PUT", // Using PUT for replacement
-				headers: {"Content-Type": "application/json"},
-				body: JSON.stringify({models}),
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ models }),
 			});
 
 			if (!response.ok) {

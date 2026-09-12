@@ -7,12 +7,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	// Rarity styles - used for borders, text colors, etc.
 	const RARITY_STYLES = {
-		common: {bg: "bg-slate-200 dark:bg-slate-600", text: "text-slate-600 dark:text-slate-300", border: "border-slate-300 dark:border-slate-500"},
-		uncommon: {bg: "bg-green-100 dark:bg-green-900/50", text: "text-green-700 dark:text-green-400", border: "border-green-400 dark:border-green-600"},
-		rare: {bg: "bg-blue-100 dark:bg-blue-900/50", text: "text-blue-700 dark:text-blue-400", border: "border-blue-400 dark:border-blue-600"},
-		epic: {bg: "bg-purple-100 dark:bg-purple-900/50", text: "text-purple-700 dark:text-purple-400", border: "border-purple-400 dark:border-purple-600"},
-		legendary: {bg: "bg-yellow-100 dark:bg-yellow-900/50", text: "text-yellow-700 dark:text-yellow-400", border: "border-yellow-400 dark:border-yellow-600"},
-		mythic: {bg: "bg-red-100 dark:bg-red-900/50", text: "text-red-700 dark:text-red-400", border: "border-red-400 dark:border-red-600"},
+		common: { bg: "bg-slate-200 dark:bg-slate-600", text: "text-slate-600 dark:text-slate-300", border: "border-slate-300 dark:border-slate-500" },
+		uncommon: { bg: "bg-green-100 dark:bg-green-900/50", text: "text-green-700 dark:text-green-400", border: "border-green-400 dark:border-green-600" },
+		rare: { bg: "bg-blue-100 dark:bg-blue-900/50", text: "text-blue-700 dark:text-blue-400", border: "border-blue-400 dark:border-blue-600" },
+		epic: { bg: "bg-purple-100 dark:bg-purple-900/50", text: "text-purple-700 dark:text-purple-400", border: "border-purple-400 dark:border-purple-600" },
+		legendary: { bg: "bg-yellow-100 dark:bg-yellow-900/50", text: "text-yellow-700 dark:text-yellow-400", border: "border-yellow-400 dark:border-yellow-600" },
+		mythic: { bg: "bg-red-100 dark:bg-red-900/50", text: "text-red-700 dark:text-red-400", border: "border-red-400 dark:border-red-600" },
 	};
 
 	// --- STATE ---
@@ -92,8 +92,8 @@ document.addEventListener("DOMContentLoaded", () => {
 		try {
 			const response = await fetch(`${API_URL}/api/study/user/collectible-state`, {
 				method: "PUT",
-				headers: {"Content-Type": "application/json"},
-				body: JSON.stringify({userId, accumulatedStudyTime: accumulatedTime, unclaimedDrops}),
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ userId, accumulatedStudyTime: accumulatedTime, unclaimedDrops }),
 			});
 			if (!response.ok) throw new Error("Failed to save progress.");
 
@@ -140,21 +140,21 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 
 		openClaimModal(true);
-    console.log("Generating card drop for user:", userId);
-    try {
-      const response = await fetch(`${API_URL}/api/collectibles/generate-drop`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
-      });
-      cardChoices = await response.json();
-      renderCardChoices();
-      openClaimModal(false);
-    } catch (error) {
-      console.error("Failed to generate card drop:", error);
-      closeClaimModal();
-      alert("Could not generate a card drop. Please try again.");
-    }
+		console.log("Generating card drop for user:", userId);
+		try {
+			const response = await fetch(`${API_URL}/api/collectibles/generate-drop`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ userId }),
+			});
+			cardChoices = await response.json();
+			renderCardChoices();
+			openClaimModal(false);
+		} catch (error) {
+			console.error("Failed to generate card drop:", error);
+			closeClaimModal();
+			alert("Could not generate a card drop. Please try again.");
+		}
 	}
 
 	function openClaimModal(isLoading = false) {
@@ -265,8 +265,8 @@ document.addEventListener("DOMContentLoaded", () => {
 		try {
 			const response = await fetch(`${API_URL}/api/collectibles/claim-card`, {
 				method: "POST",
-				headers: {"Content-Type": "application/json"},
-				body: JSON.stringify({userId, chosenCard}),
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ userId, chosenCard }),
 			});
 			const data = await response.json();
 			if (!response.ok) throw new Error(data.error);
@@ -306,38 +306,38 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 
 	function renderInventory() {
-        if (!binderGrid) return;
-        binderGrid.innerHTML = '';
-        if (inventory.length === 0) {
-            binderGrid.innerHTML = `<p class="text-slate-500 dark:text-slate-400 col-span-full text-center">Your collection is empty. Keep studying to earn cards!</p>`;
-            return;
-        }
+		if (!binderGrid) return;
+		binderGrid.innerHTML = '';
+		if (inventory.length === 0) {
+			binderGrid.innerHTML = `<p class="text-slate-500 dark:text-slate-400 col-span-full text-center">Your collection is empty. Keep studying to earn cards!</p>`;
+			return;
+		}
 
-        inventory.forEach(item => {
-            const rarityStyle = RARITY_STYLES[item.generatedStats.rarity] || RARITY_STYLES.common;
-            const cardEl = document.createElement("div");
-            cardEl.className = `binder-card relative bg-white dark:bg-slate-700 rounded-lg shadow-md border ${rarityStyle.border} flex flex-col overflow-hidden cursor-pointer`;
-            cardEl.dataset.itemId = item._id;
+		inventory.forEach(item => {
+			const rarityStyle = RARITY_STYLES[item.generatedStats.rarity] || RARITY_STYLES.common;
+			const cardEl = document.createElement("div");
+			cardEl.className = `binder-card relative bg-white dark:bg-slate-700 rounded-lg shadow-md border ${rarityStyle.border} flex flex-col overflow-hidden cursor-pointer`;
+			cardEl.dataset.itemId = item._id;
 
-            let versionClass = "";
-						if (item.generatedStats.version === "shiny") {
-							versionClass = " card-version-shiny";
-						} else if (item.generatedStats.version === "gold") {
-							versionClass = " card-version-gold";
-						}
+			let versionClass = "";
+			if (item.generatedStats.version === "shiny") {
+				versionClass = " card-version-shiny";
+			} else if (item.generatedStats.version === "gold") {
+				versionClass = " card-version-gold";
+			}
 
-            let versionHTML = '';
-            if (item.generatedStats.version === "shiny") {
-                versionHTML = `<span class="font-bold text-yellow-400">✨</span>`;
-            } else if (item.generatedStats.version === "gold") {
-                versionHTML = `<span class="font-bold text-amber-500">🏆</span>`;
-            } else if (item.generatedStats.version === "inverted") {
-                versionHTML = `<span class="font-bold text-indigo-500">🎨</span>`;
-            }
+			let versionHTML = '';
+			if (item.generatedStats.version === "shiny") {
+				versionHTML = `<span class="font-bold text-yellow-400">✨</span>`;
+			} else if (item.generatedStats.version === "gold") {
+				versionHTML = `<span class="font-bold text-amber-500">🏆</span>`;
+			} else if (item.generatedStats.version === "inverted") {
+				versionHTML = `<span class="font-bold text-indigo-500">🎨</span>`;
+			}
 
-            const serialHTML = item.generatedStats.serialNumber ? `<span class="font-mono text-[9px]">${item.generatedStats.serialNumber.split("/")[0]}</span>` : "";
+			const serialHTML = item.generatedStats.serialNumber ? `<span class="font-mono text-[9px]">${item.generatedStats.serialNumber.split("/")[0]}</span>` : "";
 
-            cardEl.innerHTML = `
+			cardEl.innerHTML = `
             <div class="${versionClass}">
                 <div class="w-full text-center py-0.5 ${rarityStyle.bg}">
                     <p class="font-semibold text-[10px] capitalize ${rarityStyle.text}">${item.generatedStats.rarity}</p>
@@ -364,9 +364,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             </div>
             `;
-            binderGrid.appendChild(cardEl);
-        });
-      }
+			binderGrid.appendChild(cardEl);
+		});
+	}
 
 	function handleBinderGridClick(event) {
 		const card = event.target.closest(".binder-card");

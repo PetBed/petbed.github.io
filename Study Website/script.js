@@ -14,11 +14,17 @@ window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
 async function loadDataFromDB() {
 	await loadTasks();
 	await loadStudyLogs();
+	if (typeof loadStudySessions === "function") {
+		await loadStudySessions();
+	}
 	await loadStreak();
 	await loadSoundLibrary();
 	await loadFlashcardSets();
 	if (typeof loadSyllabus === "function") {
 		await loadSyllabus();
+	}
+	if (typeof loadNotesData === "function") {
+		await loadNotesData();
 	}
 	await loadSemesters();
 	checkStreak();
@@ -42,6 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	if (typeof initSoundEvents === "function") initSoundEvents();
 	if (typeof initFlashcardEvents === "function") initFlashcardEvents();
 	if (typeof initSyllabusEvents === "function") initSyllabusEvents();
+	if (typeof initNotesEvents === "function") initNotesEvents();
 
 	// 3. Authenticate and initialize the app
 	if (typeof checkAuthAndInitialize === "function") {

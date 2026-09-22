@@ -49,6 +49,22 @@ var flashcardSetSortableInstance = null;
 var sessionSecondsStudied = 0;
 var syllabus = [];
 var activeSyllabusSubjectId = null;
+var timerEngine = "pomodoro"; // "pomodoro" or "stopwatch"
+var stopwatchSeconds = 0;
+var activeSessionStartTime = null;
+var activeSessionAccumulatedSeconds = 0;
+var currentLinkedItem = null;
+var studySessions = [];
+var notes = [];
+var notebooks = [];
+var activeNoteId = null;
+var activeNotebookId = 'all';
+var noteSearchQuery = '';
+var noteSubjectFilter = 'all';
+var noteTagFilter = 'all';
+var noteSortBy = 'updatedAt';
+var noteEditorMode = 'split';
+var isNoteDirty = false;
 
 if ("Notification" in window && Notification.permission === "default") {
 	Notification.requestPermission().then(permission => {
@@ -146,5 +162,37 @@ window.StudyApp.state = {
 	get syllabus() { return syllabus; },
 	set syllabus(v) { syllabus = v; },
 	get activeSyllabusSubjectId() { return activeSyllabusSubjectId; },
-	set activeSyllabusSubjectId(v) { activeSyllabusSubjectId = v; }
+	set activeSyllabusSubjectId(v) { activeSyllabusSubjectId = v; },
+	get timerEngine() { return timerEngine; },
+	set timerEngine(v) { timerEngine = v; },
+	get stopwatchSeconds() { return stopwatchSeconds; },
+	set stopwatchSeconds(v) { stopwatchSeconds = v; },
+	get activeSessionStartTime() { return activeSessionStartTime; },
+	set activeSessionStartTime(v) { activeSessionStartTime = v; },
+	get activeSessionAccumulatedSeconds() { return activeSessionAccumulatedSeconds; },
+	set activeSessionAccumulatedSeconds(v) { activeSessionAccumulatedSeconds = v; },
+	get currentLinkedItem() { return currentLinkedItem; },
+	set currentLinkedItem(v) { currentLinkedItem = v; },
+	get studySessions() { return studySessions; },
+	set studySessions(v) { studySessions = v; },
+	get notes() { return notes; },
+	set notes(v) { notes = v; },
+	get notebooks() { return notebooks; },
+	set notebooks(v) { notebooks = v; },
+	get activeNoteId() { return activeNoteId; },
+	set activeNoteId(v) { activeNoteId = v; },
+	get activeNotebookId() { return activeNotebookId; },
+	set activeNotebookId(v) { activeNotebookId = v; },
+	get noteSearchQuery() { return noteSearchQuery; },
+	set noteSearchQuery(v) { noteSearchQuery = v; },
+	get noteSubjectFilter() { return noteSubjectFilter; },
+	set noteSubjectFilter(v) { noteSubjectFilter = v; },
+	get noteTagFilter() { return noteTagFilter; },
+	set noteTagFilter(v) { noteTagFilter = v; },
+	get noteSortBy() { return noteSortBy; },
+	set noteSortBy(v) { noteSortBy = v; },
+	get noteEditorMode() { return noteEditorMode; },
+	set noteEditorMode(v) { noteEditorMode = v; },
+	get isNoteDirty() { return isNoteDirty; },
+	set isNoteDirty(v) { isNoteDirty = v; }
 };

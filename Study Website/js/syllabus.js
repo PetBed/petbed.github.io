@@ -5,6 +5,7 @@
 window.StudyApp = window.StudyApp || {};
 
 var syllabusSortableInstance = null;
+var collapsedChapters = new Set();
 
 const SYLLABUS_STATUSES = [
 	{ key: "not_started", label: "Not Started", colorClass: "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600" },
@@ -51,8 +52,10 @@ async function loadSyllabus() {
 
 async function saveSyllabus(syncToServer = true) {
 	if (!currentUser) return;
-	// Always save locally first (optimistic update)
 	localStorage.setItem(`studySyllabus_${currentUser.id}`, JSON.stringify(syllabus));
+	if (typeof refreshLinkActivityData === "function") {
+		refreshLinkActivityData();
+	}
 
 	if (syncToServer) {
 		try {
@@ -79,6 +82,8 @@ function renderSyllabusPage() {
 	let inProgressChapters = 0;
 	let reviewChapters = 0;
 	let notStartedChapters = 0;
+	let totalSubchapters = 0;
+	let masteredSubchapters = 0;
 
 	syllabus.forEach(sub => {
 		(sub.chapters || []).forEach(ch => {
@@ -87,6 +92,11 @@ function renderSyllabusPage() {
 			else if (ch.status === "in_progress") inProgressChapters++;
 			else if (ch.status === "review_required") reviewChapters++;
 			else notStartedChapters++;
+
+			(ch.subchapters || []).forEach(sc => {
+				totalSubchapters++;
+				if (sc.status === "mastered") masteredSubchapters++;
+			});
 		});
 	});
 
@@ -96,7 +106,8 @@ function renderSyllabusPage() {
 		syllabusOverallProgress.style.width = `${overallPct}%`;
 	}
 	if (syllabusOverallText) {
-		syllabusOverallText.textContent = `${masteredChapters} of ${totalChapters} chapters mastered (${overallPct}%)`;
+		const subStats = totalSubchapters > 0 ? ` • ${masteredSubchapters}/${totalSubchapters} subchapters mastered` : '';
+		syllabusOverallText.textContent = `${masteredChapters} of ${totalChapters} chapters mastered (${overallPct}%)${subStats}`;
 	}
 	if (syllabusSubjectsCount) {
 		syllabusSubjectsCount.textContent = `${syllabus.length} Subject${syllabus.length === 1 ? "" : "s"}`;
@@ -136,11 +147,10 @@ function renderSubjectTabs() {
 
 		const tabBtn = document.createElement("button");
 		tabBtn.type = "button";
-		tabBtn.className = `px-4 py-2 rounded-xl text-sm font-semibold transition shrink-0 flex items-center gap-2 border ${
-			isActive
+		tabBtn.className = `px-4 py-2 rounded-xl text-sm font-semibold transition shrink-0 flex items-center gap-2 border ${isActive
 				? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-500 shadow-xs"
 				: "bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 border-transparent hover:bg-slate-200 dark:hover:bg-slate-700/60"
-		}`;
+			}`;
 		tabBtn.dataset.subjectId = sub.id;
 
 		const dot = document.createElement("span");
@@ -199,11 +209,10 @@ function renderActiveSubjectContent() {
 					<div class="flex items-center gap-3">
 						<span class="w-3.5 h-3.5 rounded-full shrink-0" style="background-color: ${subject.color || '#00B4D8'};"></span>
 						<h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100">${escapeHtml(subject.name)}</h2>
-						<span class="text-xs px-2.5 py-1 rounded-full font-semibold border ${
-							pct === 100 
-								? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700' 
-								: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600'
-						}">${pct}% Mastered</span>
+						<span class="text-xs px-2.5 py-1 rounded-full font-semibold border ${pct === 100
+			? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700'
+			: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600'
+		}">${pct}% Mastered</span>
 					</div>
 					<p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
 						${mastered} mastered, ${inProgress} in progress, ${review} review required, ${notStarted} not started
@@ -270,10 +279,10 @@ function renderActiveSubjectContent() {
 				</div>
 				<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
 					${subjectExams.map(ex => {
-						const d = new Date(ex.date);
-						const dateDisplay = isNaN(d.getTime()) ? ex.date : d.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-						const hasMark = ex.mark !== null && ex.mark !== undefined && ex.mark !== "";
-						return `
+			const d = new Date(ex.date);
+			const dateDisplay = isNaN(d.getTime()) ? ex.date : d.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+			const hasMark = ex.mark !== null && ex.mark !== undefined && ex.mark !== "";
+			return `
 						<div class="p-3 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-700/30 flex items-center justify-between gap-2">
 							<div class="min-w-0">
 								<p class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">${escapeHtml(ex.paper || "Exam Paper")}</p>
@@ -286,7 +295,7 @@ function renderActiveSubjectContent() {
 							`}
 						</div>
 						`;
-					}).join("")}
+		}).join("")}
 				</div>
 			</div>
 			` : ''}
@@ -365,80 +374,207 @@ function renderChaptersList(subject) {
 		const displayName = hasCustomName ? ch.name.trim() : chapterLabel;
 		const statusCfg = getStatusConfig(ch.status);
 
+		if (!ch.subchapters) ch.subchapters = [];
+		const subchapters = ch.subchapters;
+		const subCount = subchapters.length;
+		const subMastered = subchapters.filter(s => s.status === "mastered").length;
+		const isCollapsed = collapsedChapters.has(ch.id);
+
 		const item = document.createElement("div");
-		item.className = "p-3.5 sm:p-4 rounded-xl border border-slate-200/90 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-700/30 hover:border-slate-300 dark:hover:border-slate-600 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3";
+		item.className = "p-3.5 sm:p-4 rounded-xl border border-slate-200/90 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-700/30 hover:border-slate-300 dark:hover:border-slate-600 transition space-y-3";
 		item.dataset.chapterId = ch.id;
 
 		item.innerHTML = `
-			<div class="flex items-start gap-3 min-w-0">
-				<span class="px-2 py-0.5 rounded-md text-xs font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 shrink-0 select-none">
-					${chapterLabel}
-				</span>
-				<div class="min-w-0">
-					<div class="flex items-center gap-2">
-						<h4 class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
-							${hasCustomName ? escapeHtml(displayName) : chapterLabel}
-						</h4>
+			<!-- Chapter Header Row -->
+			<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+				<div class="flex items-start gap-2.5 min-w-0">
+					<span class="px-2 py-0.5 rounded-md text-xs font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 shrink-0 select-none">
+						${chapterLabel}
+					</span>
+					<div class="min-w-0">
+						<div class="flex items-center gap-2 flex-wrap">
+							<h4 class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
+								${hasCustomName ? escapeHtml(displayName) : chapterLabel}
+							</h4>
+							${subCount > 0 ? `
+								<span class="text-[11px] font-medium px-2 py-0.5 rounded bg-slate-200/70 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+									${subMastered}/${subCount} Subchapters Mastered
+								</span>
+							` : ''}
+						</div>
+						${ch.notes ? `<p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">${escapeHtml(ch.notes)}</p>` : ''}
 					</div>
-					${ch.notes ? `<p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">${escapeHtml(ch.notes)}</p>` : ''}
+				</div>
+
+				<div class="flex items-center gap-1.5 flex-wrap shrink-0 self-end sm:self-center">
+					<!-- Add Subchapter Button -->
+					<button type="button" data-action="add-subchapter" data-chapter-id="${ch.id}"
+						class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 active:scale-95 text-white transition"
+						title="Add subchapter to this chapter">
+						+ Subchapter
+					</button>
+
+					<!-- Chapter Status Button -->
+					<button type="button" data-action="toggle-status" data-chapter-id="${ch.id}"
+						class="px-2.5 py-1 rounded-lg text-xs font-semibold border transition ${statusCfg.colorClass}"
+						title="Click to advance status">
+						${statusCfg.label}
+					</button>
+
+					<!-- Chapter Move Up/Down Buttons -->
+					<button type="button" data-action="move-up" data-chapter-id="${ch.id}" ${idx === 0 ? 'disabled' : ''}
+						class="px-2 py-1 text-xs font-semibold rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
+						title="Move Chapter Up">
+						Up
+					</button>
+					<button type="button" data-action="move-down" data-chapter-id="${ch.id}" ${idx === chapters.length - 1 ? 'disabled' : ''}
+						class="px-2 py-1 text-xs font-semibold rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
+						title="Move Chapter Down">
+						Down
+					</button>
+
+					<!-- Edit Chapter Button -->
+					<button type="button" data-action="edit-chapter" data-chapter-id="${ch.id}"
+						class="px-2 py-1 text-xs font-semibold rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition"
+						title="Edit Chapter">
+						Edit
+					</button>
+
+					<!-- Delete Chapter Button -->
+					<button type="button" data-action="delete-chapter" data-chapter-id="${ch.id}"
+						class="px-2 py-1 text-xs font-semibold rounded border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition"
+						title="Delete Chapter">
+						Delete
+					</button>
+
+					${subCount > 0 ? `
+					<!-- Collapse / Expand Toggle Button -->
+					<button type="button" data-action="toggle-collapse" data-chapter-id="${ch.id}"
+						class="px-2 py-1 text-xs font-semibold rounded border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition"
+						title="Toggle Subchapters">
+						${isCollapsed ? `Show (${subCount})` : 'Hide'}
+					</button>
+					` : ''}
 				</div>
 			</div>
 
-			<div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
-				<!-- Status Toggle Button -->
-				<button type="button" data-action="toggle-status" data-chapter-id="${ch.id}"
-					class="px-3 py-1 rounded-lg text-xs font-semibold border transition ${statusCfg.colorClass}"
-					title="Click to advance status">
-					${statusCfg.label}
-				</button>
+			<!-- Subchapters Container -->
+			<div class="subchapters-container ${isCollapsed ? 'hidden' : ''}">
+				${subCount > 0 ? `
+				<div class="ml-2 sm:ml-4 pl-3 sm:pl-4 border-l-2 border-slate-200 dark:border-slate-700 space-y-2 pt-1">
+					${subchapters.map((sc, subIdx) => {
+			const subNumber = `${chapterNumber}.${subIdx + 1}`;
+			const subLabel = `Subchapter ${subNumber}`;
+			const hasCustomSubName = sc.name && sc.name.trim().length > 0;
+			const subDisplayName = hasCustomSubName ? sc.name.trim() : subLabel;
+			const subStatusCfg = getStatusConfig(sc.status);
 
-				<!-- Reorder Up/Down -->
-				<button type="button" data-action="move-up" data-chapter-id="${ch.id}" ${idx === 0 ? 'disabled' : ''}
-					class="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed transition"
-					title="Move Up">
-					<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m18 15-6-6-6 6"/></svg>
-				</button>
-				<button type="button" data-action="move-down" data-chapter-id="${ch.id}" ${idx === chapters.length - 1 ? 'disabled' : ''}
-					class="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed transition"
-					title="Move Down">
-					<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
-				</button>
+			return `
+						<div class="p-2.5 rounded-lg border border-slate-200/80 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 transition hover:border-slate-300 dark:hover:border-slate-600" data-subchapter-id="${sc.id}">
+							<div class="flex items-start gap-2.5 min-w-0">
+								<span class="px-1.5 py-0.5 rounded text-[11px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 shrink-0 select-none border border-slate-200 dark:border-slate-600">
+									${subNumber}
+								</span>
+								<div class="min-w-0">
+									<h5 class="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
+										${hasCustomSubName ? escapeHtml(subDisplayName) : subLabel}
+									</h5>
+									${sc.notes ? `<p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">${escapeHtml(sc.notes)}</p>` : ''}
+								</div>
+							</div>
 
-				<!-- Edit Chapter -->
-				<button type="button" data-action="edit-chapter" data-chapter-id="${ch.id}"
-					class="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 transition"
-					title="Edit Chapter">
-					<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-				</button>
+							<div class="flex items-center gap-1.5 flex-wrap shrink-0 self-end sm:self-center">
+								<!-- Subchapter Status Toggle -->
+								<button type="button" data-action="toggle-sub-status" data-chapter-id="${ch.id}" data-sub-id="${sc.id}"
+									class="px-2 py-0.5 rounded-md text-[11px] font-semibold border transition ${subStatusCfg.colorClass}"
+									title="Click to advance status">
+									${subStatusCfg.label}
+								</button>
 
-				<!-- Delete Chapter -->
-				<button type="button" data-action="delete-chapter" data-chapter-id="${ch.id}"
-					class="p-1.5 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 transition"
-					title="Delete Chapter">
-					<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-				</button>
+								<!-- Move Subchapter Up -->
+								<button type="button" data-action="move-sub-up" data-chapter-id="${ch.id}" data-sub-id="${sc.id}" ${subIdx === 0 ? 'disabled' : ''}
+									class="px-2 py-0.5 text-xs font-semibold rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
+									title="Move Subchapter Up">
+									Up
+								</button>
+
+								<!-- Move Subchapter Down -->
+								<button type="button" data-action="move-sub-down" data-chapter-id="${ch.id}" data-sub-id="${sc.id}" ${subIdx === subCount - 1 ? 'disabled' : ''}
+									class="px-2 py-0.5 text-xs font-semibold rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
+									title="Move Subchapter Down">
+									Down
+								</button>
+
+								<!-- Edit Subchapter -->
+								<button type="button" data-action="edit-subchapter" data-chapter-id="${ch.id}" data-sub-id="${sc.id}"
+									class="px-2 py-0.5 text-xs font-semibold rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition"
+									title="Edit Subchapter">
+									Edit
+								</button>
+
+								<!-- Delete Subchapter -->
+								<button type="button" data-action="delete-subchapter" data-chapter-id="${ch.id}" data-sub-id="${sc.id}"
+									class="px-2 py-0.5 text-xs font-semibold rounded border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition"
+									title="Delete Subchapter">
+									Delete
+								</button>
+							</div>
+						</div>
+						`;
+		}).join("")}
+				</div>
+				` : `
+				<div class="ml-2 sm:ml-4 pl-3 sm:pl-4 border-l-2 border-dashed border-slate-200 dark:border-slate-700/60 py-1">
+					<p class="text-[11px] text-slate-400 dark:text-slate-500">
+						No subchapters yet. Click <span class="font-semibold text-blue-600 dark:text-blue-400">+ Subchapter</span> to add ${chapterNumber}.1, ${chapterNumber}.2...
+					</p>
+				</div>
+				`}
 			</div>
 		`;
 
-		// Wire row actions
-		item.querySelector('[data-action="toggle-status"]').addEventListener("click", () => {
-			cycleChapterStatus(subject.id, ch.id);
-		});
+		// Wire row actions using event delegation
+		item.addEventListener("click", (e) => {
+			const target = e.target.closest("[data-action]");
+			if (!target) return;
+			const action = target.dataset.action;
 
-		item.querySelector('[data-action="move-up"]').addEventListener("click", () => {
-			moveChapter(subject.id, ch.id, -1);
-		});
-
-		item.querySelector('[data-action="move-down"]').addEventListener("click", () => {
-			moveChapter(subject.id, ch.id, 1);
-		});
-
-		item.querySelector('[data-action="edit-chapter"]').addEventListener("click", () => {
-			openChapterModal(subject.id, ch);
-		});
-
-		item.querySelector('[data-action="delete-chapter"]').addEventListener("click", () => {
-			handleDeleteChapter(subject.id, ch.id);
+			if (action === "toggle-status") {
+				cycleChapterStatus(subject.id, ch.id);
+			} else if (action === "move-up") {
+				moveChapter(subject.id, ch.id, -1);
+			} else if (action === "move-down") {
+				moveChapter(subject.id, ch.id, 1);
+			} else if (action === "edit-chapter") {
+				openChapterModal(subject.id, ch);
+			} else if (action === "delete-chapter") {
+				handleDeleteChapter(subject.id, ch.id);
+			} else if (action === "add-subchapter") {
+				openSubchapterModal(subject.id, ch.id);
+			} else if (action === "toggle-collapse") {
+				if (collapsedChapters.has(ch.id)) {
+					collapsedChapters.delete(ch.id);
+				} else {
+					collapsedChapters.add(ch.id);
+				}
+				renderSyllabusPage();
+			} else if (action === "toggle-sub-status") {
+				const subId = target.dataset.subId;
+				if (subId) cycleSubchapterStatus(subject.id, ch.id, subId);
+			} else if (action === "move-sub-up") {
+				const subId = target.dataset.subId;
+				if (subId) moveSubchapter(subject.id, ch.id, subId, -1);
+			} else if (action === "move-sub-down") {
+				const subId = target.dataset.subId;
+				if (subId) moveSubchapter(subject.id, ch.id, subId, 1);
+			} else if (action === "edit-subchapter") {
+				const subId = target.dataset.subId;
+				const sub = (ch.subchapters || []).find(s => s.id === subId);
+				if (sub) openSubchapterModal(subject.id, ch.id, sub);
+			} else if (action === "delete-subchapter") {
+				const subId = target.dataset.subId;
+				if (subId) handleDeleteSubchapter(subject.id, ch.id, subId);
+			}
 		});
 
 		container.appendChild(item);
@@ -707,6 +843,8 @@ function handleDeleteChapter(subjectId, chapterId) {
 		return;
 	}
 
+	collapsedChapters.delete(chapterId);
+
 	subject.chapters = subject.chapters.filter(c => c.id !== chapterId);
 	// Re-index chapter orders
 	subject.chapters.forEach((c, idx) => { c.order = idx; });
@@ -731,6 +869,167 @@ function moveChapter(subjectId, chapterId, offset) {
 
 	subject.chapters.forEach((c, idx) => { c.order = idx; });
 
+	saveSyllabus();
+	renderSyllabusPage();
+}
+
+// ----------------------------------------------------
+// Subchapter Operations (Create, Edit, Delete, Reorder, Status)
+// ----------------------------------------------------
+function openSubchapterModal(subjectId, chapterId, subToEdit = null) {
+	if (!syllabusSubchapterModal) return;
+
+	if (syllabusSubchapterSubjectIdInput) syllabusSubchapterSubjectIdInput.value = subjectId;
+	if (syllabusSubchapterChapterIdInput) syllabusSubchapterChapterIdInput.value = chapterId;
+
+	const subject = syllabus.find(s => s.id === subjectId);
+	const chapterIndex = subject && subject.chapters ? subject.chapters.findIndex(c => c.id === chapterId) : -1;
+	const chapterNumber = chapterIndex > -1 ? chapterIndex + 1 : 1;
+	const chapter = chapterIndex > -1 ? subject.chapters[chapterIndex] : null;
+
+	const subchapters = chapter && chapter.subchapters ? chapter.subchapters : [];
+	const nextSubNumber = `${chapterNumber}.${subchapters.length + 1}`;
+
+	if (subToEdit) {
+		const subIdx = subchapters.findIndex(s => s.id === subToEdit.id);
+		const currentSubNum = `${chapterNumber}.${subIdx > -1 ? subIdx + 1 : 1}`;
+		if (syllabusSubchapterModalTitle) syllabusSubchapterModalTitle.textContent = `Edit Subchapter (${currentSubNum})`;
+		if (syllabusSubchapterIdInput) syllabusSubchapterIdInput.value = subToEdit.id;
+		if (syllabusSubchapterNameInput) {
+			syllabusSubchapterNameInput.value = subToEdit.name || "";
+			syllabusSubchapterNameInput.placeholder = `e.g. Linear Motion (Defaults to Subchapter ${currentSubNum})`;
+		}
+		if (syllabusSubchapterNotesInput) syllabusSubchapterNotesInput.value = subToEdit.notes || "";
+		if (syllabusSubchapterStatusInput) syllabusSubchapterStatusInput.value = subToEdit.status || "not_started";
+	} else {
+		if (syllabusSubchapterModalTitle) syllabusSubchapterModalTitle.textContent = `Add Subchapter (${nextSubNumber})`;
+		if (syllabusSubchapterIdInput) syllabusSubchapterIdInput.value = "";
+		if (syllabusSubchapterNameInput) {
+			syllabusSubchapterNameInput.value = "";
+			syllabusSubchapterNameInput.placeholder = `e.g. Linear Motion (Leave blank for "Subchapter ${nextSubNumber}")`;
+		}
+		if (syllabusSubchapterNotesInput) syllabusSubchapterNotesInput.value = "";
+		if (syllabusSubchapterStatusInput) syllabusSubchapterStatusInput.value = "not_started";
+	}
+
+	syllabusSubchapterModal.classList.remove("hidden");
+	if (syllabusSubchapterNameInput) syllabusSubchapterNameInput.focus();
+}
+
+function closeSubchapterModal() {
+	if (!syllabusSubchapterModal) return;
+	syllabusSubchapterModal.classList.add("hidden");
+	if (syllabusSubchapterForm) syllabusSubchapterForm.reset();
+}
+
+function handleSaveSubchapter(e) {
+	e.preventDefault();
+	const subjectId = syllabusSubchapterSubjectIdInput ? syllabusSubchapterSubjectIdInput.value : "";
+	const chapterId = syllabusSubchapterChapterIdInput ? syllabusSubchapterChapterIdInput.value : "";
+	const subject = syllabus.find(s => s.id === subjectId);
+	if (!subject) return;
+
+	const chapter = (subject.chapters || []).find(c => c.id === chapterId);
+	if (!chapter) return;
+
+	if (!chapter.subchapters) chapter.subchapters = [];
+
+	const id = syllabusSubchapterIdInput ? syllabusSubchapterIdInput.value : "";
+	const name = syllabusSubchapterNameInput ? syllabusSubchapterNameInput.value.trim() : "";
+	const notes = syllabusSubchapterNotesInput ? syllabusSubchapterNotesInput.value.trim() : "";
+	const status = syllabusSubchapterStatusInput ? syllabusSubchapterStatusInput.value : "not_started";
+
+	if (id) {
+		// Edit existing subchapter
+		const existing = chapter.subchapters.find(s => s.id === id);
+		if (existing) {
+			existing.name = name;
+			existing.notes = notes;
+			existing.status = status;
+		}
+	} else {
+		// Create new subchapter
+		const newSub = {
+			id: "subchap_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
+			name: name,
+			notes: notes,
+			status: status,
+			order: chapter.subchapters.length
+		};
+		chapter.subchapters.push(newSub);
+	}
+
+	// Ensure chapter is not collapsed when user adds a subchapter
+	collapsedChapters.delete(chapterId);
+
+	closeSubchapterModal();
+	saveSyllabus();
+	renderSyllabusPage();
+}
+
+function handleDeleteSubchapter(subjectId, chapterId, subId) {
+	const subject = syllabus.find(s => s.id === subjectId);
+	if (!subject) return;
+
+	const chapter = (subject.chapters || []).find(c => c.id === chapterId);
+	if (!chapter || !chapter.subchapters) return;
+
+	const chapIdx = subject.chapters.indexOf(chapter);
+	const subIdx = chapter.subchapters.findIndex(s => s.id === subId);
+	if (subIdx === -1) return;
+
+	const sub = chapter.subchapters[subIdx];
+	const subLabel = `Subchapter ${chapIdx + 1}.${subIdx + 1}${sub.name ? ': ' + sub.name : ''}`;
+
+	if (!confirm(`Delete ${subLabel}?`)) {
+		return;
+	}
+
+	chapter.subchapters = chapter.subchapters.filter(s => s.id !== subId);
+	chapter.subchapters.forEach((s, idx) => { s.order = idx; });
+
+	saveSyllabus();
+	renderSyllabusPage();
+}
+
+function moveSubchapter(subjectId, chapterId, subId, offset) {
+	const subject = syllabus.find(s => s.id === subjectId);
+	if (!subject) return;
+
+	const chapter = (subject.chapters || []).find(c => c.id === chapterId);
+	if (!chapter || !chapter.subchapters) return;
+
+	const currentIdx = chapter.subchapters.findIndex(s => s.id === subId);
+	if (currentIdx === -1) return;
+
+	const targetIdx = currentIdx + offset;
+	if (targetIdx < 0 || targetIdx >= chapter.subchapters.length) return;
+
+	const temp = chapter.subchapters[currentIdx];
+	chapter.subchapters[currentIdx] = chapter.subchapters[targetIdx];
+	chapter.subchapters[targetIdx] = temp;
+
+	chapter.subchapters.forEach((s, idx) => { s.order = idx; });
+
+	saveSyllabus();
+	renderSyllabusPage();
+}
+
+function cycleSubchapterStatus(subjectId, chapterId, subId) {
+	const subject = syllabus.find(s => s.id === subjectId);
+	if (!subject) return;
+
+	const chapter = (subject.chapters || []).find(c => c.id === chapterId);
+	if (!chapter || !chapter.subchapters) return;
+
+	const subchapter = chapter.subchapters.find(s => s.id === subId);
+	if (!subchapter) return;
+
+	const statusKeys = ["not_started", "in_progress", "review_required", "mastered"];
+	const currentIdx = statusKeys.indexOf(subchapter.status || "not_started");
+	const nextStatus = statusKeys[(currentIdx + 1) % statusKeys.length];
+
+	subchapter.status = nextStatus;
 	saveSyllabus();
 	renderSyllabusPage();
 }
@@ -880,6 +1179,24 @@ function initSyllabusEvents() {
 			if (e.target === syllabusChapterModal) closeChapterModal();
 		});
 	}
+
+	if (syllabusSubchapterForm) {
+		syllabusSubchapterForm.addEventListener("submit", handleSaveSubchapter);
+	}
+
+	if (closeSubchapterModalBtn) {
+		closeSubchapterModalBtn.addEventListener("click", closeSubchapterModal);
+	}
+
+	if (cancelSubchapterModalBtn) {
+		cancelSubchapterModalBtn.addEventListener("click", closeSubchapterModal);
+	}
+
+	if (syllabusSubchapterModal) {
+		syllabusSubchapterModal.addEventListener("click", (e) => {
+			if (e.target === syllabusSubchapterModal) closeSubchapterModal();
+		});
+	}
 }
 
 window.initSyllabusEvents = initSyllabusEvents;
@@ -901,6 +1218,12 @@ window.StudyApp.syllabus = {
 	handleDeleteChapter,
 	moveChapter,
 	cycleChapterStatus,
+	openSubchapterModal,
+	closeSubchapterModal,
+	handleSaveSubchapter,
+	handleDeleteSubchapter,
+	moveSubchapter,
+	cycleSubchapterStatus,
 	initSyllabusEvents,
 	importFromStudyLogs,
 	importStarterTemplate

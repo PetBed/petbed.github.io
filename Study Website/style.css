@@ -93,11 +93,14 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 /* Custom Toggle */
 .toggle-checkbox:checked {
     border-color: #3b82f6;
-    transform: translateX(1rem); /* Corrected value */
+    transform: translateX(1rem);
+    /* Corrected value */
 }
-.toggle-checkbox:checked + .toggle-label {
+
+.toggle-checkbox:checked+.toggle-label {
     background-color: #3b82f6;
 }
+
 .toggle-checkbox {
     transition: all .2s ease-in-out;
 }
@@ -106,7 +109,8 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     perspective: 1000px;
 }
 
-#flashcard-flipper, #card-preview-flipper {
+#flashcard-flipper,
+#card-preview-flipper {
     transition: transform 0.6s;
     transform-style: preserve-3d;
     cursor: pointer;
@@ -117,38 +121,51 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     width: 100%;
     height: 100%;
     backface-visibility: hidden;
-    -webkit-backface-visibility: hidden; /* Safari */
+    -webkit-backface-visibility: hidden;
+    /* Safari */
     display: block;
     text-align: left;
     padding: 2rem;
     border-radius: 1rem;
-    font-size: 1rem; /* Base font size */
+    font-size: 1rem;
+    /* Base font size */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow-y: auto; /* Allow scrolling for long content */
+    overflow-y: auto;
+    /* Allow scrolling for long content */
 }
 
-#flashcard-front, #card-preview-front {
+#flashcard-front,
+#card-preview-front {
     background-color: white;
     color: #1e293b;
 }
 
-.dark #flashcard-front, .dark #card-preview-front {
-    background-color: #334155; /* slate-700 */
-    color: #f1f5f9; /* slate-100 */
+.dark #flashcard-front,
+.dark #card-preview-front {
+    background-color: #334155;
+    /* slate-700 */
+    color: #f1f5f9;
+    /* slate-100 */
 }
 
-#flashcard-back, #card-preview-back {
-    background-color: #e2e8f0; /* slate-200 */
+#flashcard-back,
+#card-preview-back {
+    background-color: #e2e8f0;
+    /* slate-200 */
     color: #1e293b;
     transform: rotateY(180deg);
 }
 
-.dark #flashcard-back, .dark #card-preview-back {
-    background-color: #1e293b; /* slate-800 */
-    color: #f1f5f9; /* slate-100 */
+.dark #flashcard-back,
+.dark #card-preview-back {
+    background-color: #1e293b;
+    /* slate-800 */
+    color: #f1f5f9;
+    /* slate-100 */
 }
 
-#flashcard-flipper.is-flipped, #card-preview-flipper.is-flipped {
+#flashcard-flipper.is-flipped,
+#card-preview-flipper.is-flipped {
     transform: rotateY(180deg);
 }
 
@@ -157,7 +174,8 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     transform-style: preserve-3d;
     cursor: pointer;
     width: 100%;
-    height: 12rem; /* Give the card a fixed height */
+    height: 12rem;
+    /* Give the card a fixed height */
 }
 
 .card-preview-face {
@@ -165,14 +183,17 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     width: 100%;
     height: 100%;
     backface-visibility: hidden;
-    -webkit-backface-visibility: hidden; /* Safari */
+    -webkit-backface-visibility: hidden;
+    /* Safari */
     display: block;
     text-align: left;
     padding: 1rem;
     border-radius: 0.5rem;
-    font-size: 0.875rem; /* Smaller font size */
+    font-size: 0.875rem;
+    /* Smaller font size */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    overflow-y: auto; /* Allow scrolling */
+    overflow-y: auto;
+    /* Allow scrolling */
     word-break: break-word;
 }
 
@@ -180,27 +201,34 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     background-color: white;
     color: #1e293b;
 }
+
 .dark .card-preview-face.front {
     background-color: #334155;
     color: #f1f5f9;
 }
+
 .card-preview-face.back {
     background-color: #f1f5f9;
     color: #1e293b;
     transform: rotateY(180deg);
 }
+
 .dark .card-preview-face.back {
     background-color: #1e293b;
     color: #f1f5f9;
 }
+
 .card-preview-flipper.is-flipped {
     transform: rotateY(180deg);
 }
 
-.flashcard-face > *:first-child, .card-preview-face > *:first-child {
+.flashcard-face>*:first-child,
+.card-preview-face>*:first-child {
     margin-top: 0;
 }
-.flashcard-face > *:last-child, .card-preview-face > *:last-child {
+
+.flashcard-face>*:last-child,
+.card-preview-face>*:last-child {
     margin-bottom: 0;
 }
 
@@ -209,31 +237,61 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     margin-right: auto;
 } */
 
-.flashcard-face h1, .card-preview-face h1,
-.flashcard-face h2, .card-preview-face h2,
-.flashcard-face h3, .card-preview-face h3,
-.flashcard-face h4, .card-preview-face h4 {
+.flashcard-face h1,
+.card-preview-face h1,
+.flashcard-face h2,
+.card-preview-face h2,
+.flashcard-face h3,
+.card-preview-face h3,
+.flashcard-face h4,
+.card-preview-face h4 {
     margin-top: 0.75em;
     margin-bottom: 0.25em;
     font-weight: 700;
     line-height: 1.2;
 }
 
-.flashcard-face h1, .card-preview-face h1 { font-size: 1.8em; }
-.flashcard-face h2, .card-preview-face h2 { font-size: 1.5em; }
-.flashcard-face h3, .card-preview-face h3 { font-size: 1.25em; }
-.flashcard-face h4, .card-preview-face h4 { font-size: 1.1em; }
+.flashcard-face h1,
+.card-preview-face h1 {
+    font-size: 1.8em;
+}
 
-.flashcard-face ul, .flashcard-face ol,
-.card-preview-face ul, .card-preview-face ol {
+.flashcard-face h2,
+.card-preview-face h2 {
+    font-size: 1.5em;
+}
+
+.flashcard-face h3,
+.card-preview-face h3 {
+    font-size: 1.25em;
+}
+
+.flashcard-face h4,
+.card-preview-face h4 {
+    font-size: 1.1em;
+}
+
+.flashcard-face ul,
+.flashcard-face ol,
+.card-preview-face ul,
+.card-preview-face ol {
     text-align: left;
     list-style-position: outside;
-    padding-left: 1.5em; /* Proper indentation */
+    padding-left: 1.5em;
+    /* Proper indentation */
     margin-top: 0.5em;
     margin-bottom: 0.5em;
 }
-.flashcard-face ul, .card-preview-face ul { list-style-type: disc; }
-.flashcard-face ol, .card-preview-face ol { list-style-type: decimal; }
+
+.flashcard-face ul,
+.card-preview-face ul {
+    list-style-type: disc;
+}
+
+.flashcard-face ol,
+.card-preview-face ol {
+    list-style-type: decimal;
+}
 
 .flashcard-face li,
 .card-preview-face li {
@@ -247,7 +305,7 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 
 .flashcard-face code,
 .card-preview-face code {
-    background-color: rgba(0,0,0,0.08);
+    background-color: rgba(0, 0, 0, 0.08);
     padding: 0.125rem 0.25rem;
     border-radius: 0.25rem;
     font-family: monospace;
@@ -256,7 +314,7 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 
 .dark .flashcard-face code,
 .dark .card-preview-face code {
-    background-color: rgba(255,255,255,0.1);
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .flashcard-face blockquote,
@@ -267,6 +325,7 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     color: #64748b;
     font-style: italic;
 }
+
 .dark .flashcard-face blockquote,
 .dark .card-preview-face blockquote {
     border-left-color: #475569;
@@ -278,6 +337,7 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     border-top: 1px solid #e2e8f0;
     margin: 1em 0;
 }
+
 .dark .flashcard-face hr,
 .dark .card-preview-face hr {
     border-top-color: #334155;
@@ -293,10 +353,12 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     top: 8px;
     left: 8px;
     cursor: grab;
-    color: #94a3b8; /* slate-400 */
+    color: #94a3b8;
+    /* slate-400 */
     opacity: 0;
     transition: opacity 0.2s;
-    z-index: 20; /* Ensure it's above the card face */
+    z-index: 20;
+    /* Ensure it's above the card face */
 }
 
 .flashcard-preview-container:hover .drag-handle {
@@ -325,7 +387,8 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 }
 
 #claim-notification {
-    pointer-events: none; /* Make sure it doesn't block clicks on the button */
+    pointer-events: none;
+    /* Make sure it doesn't block clicks on the button */
 }
 
 /* Styles for the claim modal card choices */
@@ -344,12 +407,35 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 
 
 /* Styles for different rarity text/borders */
-.rarity-common { color: #64748b; border-color: #cbd5e1; }
-.rarity-uncommon { color: #16a34a; border-color: #86efac; }
-.rarity-rare { color: #2563eb; border-color: #93c5fd; }
-.rarity-epic { color: #7e22ce; border-color: #d8b4fe; }
-.rarity-legendary { color: #d97706; border-color: #fde68a; }
-.rarity-mythic { color: #dc2626; border-color: #fca5a5; }
+.rarity-common {
+    color: #64748b;
+    border-color: #cbd5e1;
+}
+
+.rarity-uncommon {
+    color: #16a34a;
+    border-color: #86efac;
+}
+
+.rarity-rare {
+    color: #2563eb;
+    border-color: #93c5fd;
+}
+
+.rarity-epic {
+    color: #7e22ce;
+    border-color: #d8b4fe;
+}
+
+.rarity-legendary {
+    color: #d97706;
+    border-color: #fde68a;
+}
+
+.rarity-mythic {
+    color: #dc2626;
+    border-color: #fca5a5;
+}
 
 /* .claim-card-container {
     position: relative;
@@ -366,21 +452,21 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     left: -80%;
     width: 50%;
     height: 100%;
-    background: linear-gradient(
-        to right,
-        rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.4) 50%,
-        rgba(255, 255, 255, 0) 100%
-    );
+    background: linear-gradient(to right,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.4) 50%,
+            rgba(255, 255, 255, 0) 100%);
     transform: skewX(-25deg);
     animation: shiny-effect 3.5s infinite linear;
-    z-index: 2; /* Position it above the card content */
+    z-index: 2;
+    /* Position it above the card content */
 }
 
 @keyframes shiny-effect {
     from {
         left: -80%;
     }
+
     to {
         left: 130%;
     }
@@ -390,6 +476,7 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 .card-version-gold {
     background: linear-gradient(135deg, #fceabb 0%, #f8b500 25%, #f69d00 50%, #f08b00 75%, #e17700 100%);
 }
+
 /* Ensure text inside gold card is readable */
 .card-version-gold h3,
 .card-version-gold p,
@@ -408,12 +495,10 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     left: -100%;
     width: 40%;
     height: 120%;
-    background: linear-gradient(
-        to right,
-        rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.35) 50%,
-        rgba(255, 255, 255, 0) 100%
-    );
+    background: linear-gradient(to right,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.35) 50%,
+            rgba(255, 255, 255, 0) 100%);
     transform: skewX(-20deg);
     animation: gold-glint 4s infinite ease-in-out;
     z-index: 2;
@@ -423,24 +508,27 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     0% {
         left: -100%;
     }
+
     40% {
         left: 150%;
     }
+
     100% {
         left: 150%;
     }
 }
 
 /* Ensure the main card content (text, image, etc.) is not affected by the overlays */
-.claim-card-container > * {
+.claim-card-container>* {
     position: relative;
     z-index: 1;
 }
 
-.claim-card-container > div {
+.claim-card-container>div {
     /* Apply a small 3D translation to child divs for a layered effect */
     transform: translateZ(20px);
 }
+
 .claim-card-container .card-image-wrapper {
     /* Make the image pop out more */
     transform: translateZ(40px);
@@ -453,7 +541,7 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 
 .binder-card:hover {
     transform: translateY(-4px) scale(1.05);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 #card-detail-modal {
@@ -498,9 +586,11 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     0% {
         box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
     }
+
     70% {
         box-shadow: 0 0 0 7px rgba(16, 185, 129, 0);
     }
+
     100% {
         box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
     }
@@ -523,6 +613,7 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     color: #059669;
     border: 1px solid rgba(16, 185, 129, 0.3);
 }
+
 .dark .grade-pill-a {
     background-color: rgba(16, 185, 129, 0.2);
     color: #34d399;
@@ -534,6 +625,7 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     color: #2563eb;
     border: 1px solid rgba(59, 130, 246, 0.3);
 }
+
 .dark .grade-pill-b {
     background-color: rgba(59, 130, 246, 0.2);
     color: #60a5fa;
@@ -545,6 +637,7 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     color: #d97706;
     border: 1px solid rgba(245, 158, 11, 0.3);
 }
+
 .dark .grade-pill-c {
     background-color: rgba(245, 158, 11, 0.2);
     color: #fbbf24;
@@ -556,6 +649,7 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     color: #dc2626;
     border: 1px solid rgba(239, 68, 68, 0.3);
 }
+
 .dark .grade-pill-d {
     background-color: rgba(239, 68, 68, 0.2);
     color: #f87171;
@@ -567,6 +661,7 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     color: #64748b;
     border: 1px solid rgba(148, 163, 184, 0.3);
 }
+
 .dark .grade-pill-none {
     background-color: rgba(148, 163, 184, 0.2);
     color: #94a3b8;
@@ -577,9 +672,11 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 .exam-item-row {
     transition: background-color 0.15s ease-in-out;
 }
+
 .exam-item-row:hover {
     background-color: rgba(241, 245, 249, 0.8);
 }
+
 .dark .exam-item-row:hover {
     background-color: rgba(51, 65, 85, 0.5);
 }
@@ -599,6 +696,7 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     color: #7e22ce;
     border: 1px solid rgba(147, 51, 234, 0.28);
 }
+
 .dark .gpa-pill {
     background-color: rgba(168, 85, 247, 0.2);
     color: #c084fc;
@@ -609,11 +707,13 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 .modal-tab-btn {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .modal-tab-btn.is-active {
     background-color: #ffffff;
     color: #2563eb;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
 }
+
 .dark .modal-tab-btn.is-active {
     background-color: #334155;
     color: #60a5fa;
@@ -624,11 +724,13 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 .final-score-row {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .final-score-row:hover {
     border-color: rgba(99, 102, 241, 0.35);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
 }
+
 .dark .final-score-row:hover {
     border-color: rgba(99, 102, 241, 0.45);
     box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.25);
@@ -752,13 +854,27 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 }
 
 @keyframes gcalPulse {
-    0%, 100% { transform: scale(1); opacity: 0.9; }
-    50% { transform: scale(1.4); opacity: 0.5; }
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+
+    50% {
+        transform: scale(1.4);
+        opacity: 0.5;
+    }
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .animate-spin-fast {
@@ -797,4 +913,356 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 
 .dark .gcal-pill:hover {
     filter: brightness(1.1);
+}
+
+/* ==========================================
+   OBSIDIAN NOTES & MARKDOWN STYLES
+   ========================================== */
+
+/* Markdown Content Styling */
+.markdown-content {
+    line-height: 1.65;
+    word-break: break-word;
+}
+
+.markdown-content h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-top: 1.25rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    color: inherit;
+}
+
+.dark .markdown-content h1 {
+    border-bottom-color: rgba(51, 65, 85, 0.6);
+}
+
+.markdown-content h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: inherit;
+}
+
+.markdown-content h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-top: 0.75rem;
+    margin-bottom: 0.35rem;
+    color: inherit;
+}
+
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+    color: inherit;
+}
+
+.markdown-content p {
+    margin-bottom: 0.75rem;
+}
+
+.markdown-content ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.markdown-content ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.markdown-content li {
+    margin-bottom: 0.25rem;
+}
+
+.markdown-content hr {
+    border: 0;
+    border-top: 1px solid rgba(203, 213, 225, 0.8);
+    margin: 1.25rem 0;
+}
+
+.dark .markdown-content hr {
+    border-top-color: rgba(71, 85, 105, 0.6);
+}
+
+.markdown-content blockquote {
+    border-left: 4px solid #94a3b8;
+    padding: 0.35rem 0.85rem;
+    margin: 0.75rem 0;
+    background-color: rgba(241, 245, 249, 0.5);
+    border-radius: 0 0.5rem 0.5rem 0;
+    font-style: italic;
+    color: #475569;
+}
+
+.dark .markdown-content blockquote {
+    border-left-color: #64748b;
+    background-color: rgba(30, 41, 59, 0.5);
+    color: #94a3b8;
+}
+
+.markdown-content code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 0.85em;
+    padding: 0.15rem 0.35rem;
+    border-radius: 0.375rem;
+    background-color: rgba(226, 232, 240, 0.8);
+    color: #1e40af;
+}
+
+.dark .markdown-content code {
+    background-color: rgba(51, 65, 85, 0.8);
+    color: #93c5fd;
+}
+
+.markdown-content pre {
+    background-color: #0f172a;
+    color: #f8fafc;
+    border-radius: 0.75rem;
+    padding: 0.85rem 1rem;
+    overflow-x: auto;
+    margin: 0.75rem 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.85rem;
+    border: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+.dark .markdown-content pre {
+    background-color: #0b1120;
+    border-color: rgba(30, 41, 59, 0.8);
+}
+
+.markdown-content pre code {
+    background-color: transparent !important;
+    color: inherit !important;
+    padding: 0;
+    border-radius: 0;
+    font-size: inherit;
+}
+
+.markdown-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.75rem 0;
+    font-size: 0.875rem;
+}
+
+.markdown-content th {
+    background-color: rgba(241, 245, 249, 0.8);
+    border: 1px solid #cbd5e1;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+.dark .markdown-content th {
+    background-color: rgba(30, 41, 59, 0.8);
+    border-color: #475569;
+}
+
+.markdown-content td {
+    border: 1px solid #e2e8f0;
+    padding: 0.5rem 0.75rem;
+}
+
+.dark .markdown-content td {
+    border-color: #334155;
+}
+
+.markdown-content a {
+    color: #2563eb;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.dark .markdown-content a {
+    color: #60a5fa;
+}
+
+/* Obsidian Wikilinks [[Note Title]] and [[Note Title|Custom Text]] */
+.internal-wikilink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #4f46e5;
+    background-color: rgba(238, 242, 255, 0.9);
+    border: 1px solid rgba(199, 210, 254, 0.8);
+    padding: 0.1rem 0.45rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    font-size: 0.875em;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.internal-wikilink:hover {
+    background-color: #e0e7ff;
+    border-color: #a5b4fc;
+    color: #3730a3;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.dark .internal-wikilink {
+    color: #a5b4fc;
+    background-color: rgba(49, 46, 129, 0.3);
+    border-color: rgba(99, 102, 241, 0.35);
+}
+
+.dark .internal-wikilink:hover {
+    background-color: rgba(49, 46, 129, 0.5);
+    border-color: rgba(129, 140, 248, 0.5);
+    color: #c7d2fe;
+}
+
+.internal-wikilink.not-found {
+    color: #64748b;
+    background-color: rgba(241, 245, 249, 0.8);
+    border-style: dashed;
+    border-color: #cbd5e1;
+}
+
+.dark .internal-wikilink.not-found {
+    color: #94a3b8;
+    background-color: rgba(30, 41, 59, 0.6);
+    border-color: #475569;
+}
+
+/* Obsidian Callouts */
+.obsidian-callout {
+    border-left-width: 4px;
+    border-radius: 0 0.5rem 0.5rem 0;
+    padding: 0.75rem 1rem;
+    margin: 0.85rem 0;
+}
+
+.obsidian-callout-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.35rem;
+}
+
+.callout-note {
+    border-left-color: #3b82f6;
+    background-color: rgba(239, 246, 255, 0.7);
+}
+
+.dark .callout-note {
+    background-color: rgba(30, 58, 138, 0.2);
+}
+
+.callout-tip, .callout-success {
+    border-left-color: #10b981;
+    background-color: rgba(236, 253, 245, 0.7);
+}
+
+.dark .callout-tip, .dark .callout-success {
+    background-color: rgba(6, 78, 59, 0.2);
+}
+
+.callout-warning {
+    border-left-color: #f59e0b;
+    background-color: rgba(254, 243, 199, 0.7);
+}
+
+.dark .callout-warning {
+    background-color: rgba(120, 53, 15, 0.2);
+}
+
+.callout-danger, .callout-error {
+    border-left-color: #ef4444;
+    background-color: rgba(254, 242, 242, 0.7);
+}
+
+.dark .callout-danger, .dark .callout-error {
+    background-color: rgba(127, 29, 29, 0.2);
+}
+
+.callout-info {
+    border-left-color: #0284c7;
+    background-color: rgba(240, 249, 255, 0.7);
+}
+
+.dark .callout-info {
+    background-color: rgba(12, 74, 110, 0.2);
+}
+
+.callout-example, .callout-quote {
+    border-left-color: #8b5cf6;
+    background-color: rgba(245, 243, 255, 0.7);
+}
+
+.dark .callout-example, .dark .callout-quote {
+    background-color: rgba(76, 29, 149, 0.2);
+}
+
+/* Interactive Checkboxes in Preview */
+.markdown-task-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1.05rem;
+    height: 1.05rem;
+    border: 1.5px solid #94a3b8;
+    border-radius: 0.25rem;
+    outline: none;
+    cursor: pointer;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+    position: relative;
+    top: -1px;
+    background-color: transparent;
+    transition: all 0.15s ease;
+}
+
+.markdown-task-checkbox:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.markdown-task-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Note card active state */
+.note-card.active-note {
+    border-color: #3b82f6 !important;
+    background-color: rgba(239, 246, 255, 0.7);
+}
+
+.dark .note-card.active-note {
+    border-color: #60a5fa !important;
+    background-color: rgba(30, 41, 59, 0.9);
+}
+
+/* Notebook item active state */
+.notebook-pill.active-notebook {
+    background-color: #e2e8f0;
+    color: #0f172a;
+    font-weight: 600;
+}
+
+.dark .notebook-pill.active-notebook {
+    background-color: #334155;
+    color: #f8fafc;
 }

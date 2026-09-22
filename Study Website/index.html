@@ -39,15 +39,18 @@
       <div>
         <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">Study Dashboard</h1>
         <p id="welcome-message" class="text-slate-500 mt-1 dark:text-slate-400"></p>
-        <div class="mt-4 flex items-center bg-slate-200 dark:bg-slate-800 rounded-lg p-1 max-w-2xl overflow-x-auto">
+        <div class="mt-4 flex items-center bg-slate-200 dark:bg-slate-800 rounded-lg p-1 max-w-3xl overflow-x-auto">
           <button id="nav-dashboard"
             class="nav-btn active flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm">Dashboard</button>
           <button id="nav-study"
-            class="nav-btn flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-300">Study Tracker</button>
+            class="nav-btn flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-300">Study
+            Tracker</button>
           <button id="nav-tasks"
             class="nav-btn flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-300">Tasks</button>
           <button id="nav-flashcards"
             class="nav-btn flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-300">Flashcards</button>
+          <button id="nav-notes"
+            class="nav-btn flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-300">Notes</button>
           <button id="nav-binder"
             class="nav-btn flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-300">Binder</button>
           <button id="nav-syllabus"
@@ -77,8 +80,10 @@
       </div>
 
       <!-- Semester Hub Section -->
-      <section id="semester-hub-section" class="mb-8 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl p-6 shadow-sm">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-700/60 mb-5">
+      <section id="semester-hub-section"
+        class="mb-8 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl p-6 shadow-sm">
+        <div
+          class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-700/60 mb-5">
           <div>
             <div class="flex items-center gap-2.5">
               <!-- <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 flex-shrink-0">
@@ -94,14 +99,24 @@
           </div>
           <div class="flex items-center gap-3">
             <div class="relative">
-              <select id="quick-semester-select" class="appearance-none bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm font-semibold rounded-xl pl-3 pr-8 py-2.5 border border-slate-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+              <select id="quick-semester-select"
+                class="appearance-none bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm font-semibold rounded-xl pl-3 pr-8 py-2.5 border border-slate-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
               </select>
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-500 dark:text-slate-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              <div
+                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-500 dark:text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
               </div>
             </div>
-            <button id="add-semester-btn" class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm hover:shadow-md transition active:scale-95">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            <button id="add-semester-btn"
+              class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm hover:shadow-md transition active:scale-95">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14" />
+                <path d="M12 5v14" />
+              </svg>
               <span>New Semester</span>
             </button>
           </div>
@@ -125,8 +140,10 @@
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
               <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Study Time Analysis</h2>
               <div class="flex items-center gap-2">
-                <label for="chart-semester-filter" class="text-xs font-medium text-slate-500 dark:text-slate-400">Semester:</label>
-                <select id="chart-semester-filter" class="text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg px-2.5 py-1.5 border border-slate-200 dark:border-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer">
+                <label for="chart-semester-filter"
+                  class="text-xs font-medium text-slate-500 dark:text-slate-400">Semester:</label>
+                <select id="chart-semester-filter"
+                  class="text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg px-2.5 py-1.5 border border-slate-200 dark:border-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer">
                 </select>
               </div>
             </div>
@@ -164,10 +181,12 @@
                   class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-300 transition active:scale-95 border border-blue-200/80 dark:border-blue-700/50 shadow-xs"
                   title="Link & Sync Google Calendar">
                   <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h5v5H7z"/>
+                    <path
+                      d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h5v5H7z" />
                   </svg>
                   <span>Google Calendar</span>
-                  <span id="gcal-status-dot" class="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500" title="Not synced yet"></span>
+                  <span id="gcal-status-dot" class="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500"
+                    title="Not synced yet"></span>
                 </button>
                 <button id="today-month-btn"
                   class="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition active:scale-95 shadow-xs">Today</button>
@@ -222,32 +241,195 @@
                 </button>
               </div>
               <div class="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-3">
-                <div id="drop-progress-bar" class="bg-blue-600 h-3 rounded-full transition-all duration-500" style="width: 0%">
+                <div id="drop-progress-bar" class="bg-blue-600 h-3 rounded-full transition-all duration-500"
+                  style="width: 0%">
                 </div>
               </div>
-              <p id="drop-progress-text" class="text-center text-xs text-slate-500 dark:text-slate-400 mt-1">0 / 30 mins</p>
-            </div>
-            <div class="text-center p-4 bg-slate-100 dark:bg-slate-700 rounded-lg">
-              <p id="mode-indicator" class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase">Focus
+              <p id="drop-progress-text" class="text-center text-xs text-slate-500 dark:text-slate-400 mt-1">0 / 30 mins
               </p>
+            </div>
+            <!-- Timer Engine Mode Selector (Pomodoro / Stopwatch) -->
+            <div class="flex rounded-lg bg-slate-100 dark:bg-slate-700 p-1">
+              <button id="timer-mode-pomodoro-btn" type="button"
+                class="flex-1 py-1.5 px-3 text-xs font-semibold rounded-md bg-blue-600 text-white transition">Pomodoro</button>
+              <button id="timer-mode-stopwatch-btn" type="button"
+                class="flex-1 py-1.5 px-3 text-xs font-semibold rounded-md text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition">Stopwatch</button>
+            </div>
+
+            <div class="text-center p-4 bg-slate-100 dark:bg-slate-700 rounded-lg">
+              <p id="mode-indicator"
+                class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Focus</p>
               <p id="timer-display" class="text-6xl font-bold font-mono text-slate-800 dark:text-slate-200 my-2">25:00
-              </p><select id="pomodoro-subject"
-                class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700"></select>
+              </p>
+
+              <!-- Subject Dropdown -->
+              <div class="text-left mt-2">
+                <label for="pomodoro-subject"
+                  class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Subject</label>
+                <select id="pomodoro-subject"
+                  class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"></select>
+              </div>
+
+              <!-- Linked Activity Section -->
+              <div id="linked-activity-section"
+                class="mt-3 text-left border-t border-slate-200 dark:border-slate-600/80 pt-2.5 relative">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400">Link Activity
+                    (Optional)</span>
+                  <button id="clear-linked-item-btn" type="button"
+                    class="hidden text-[11px] text-rose-500 hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300 font-semibold transition">Clear
+                    Link</button>
+                </div>
+
+                <!-- Active Linked Activity Card (shown when an item is linked) -->
+                <div id="linked-activity-active-card"
+                  class="hidden mb-2 p-2.5 rounded-lg bg-blue-50 dark:bg-slate-700/80 border border-blue-200 dark:border-slate-600 text-xs">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center gap-1.5 flex-wrap mb-1">
+                        <span id="linked-card-type-badge"
+                          class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-600 text-white uppercase tracking-wider">Chapter</span>
+                        <span id="linked-card-subject-badge"
+                          class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200">Math</span>
+                      </div>
+                      <div id="linked-card-title" class="font-semibold text-slate-800 dark:text-slate-100 truncate">
+                        Title</div>
+                      <div id="linked-card-parent"
+                        class="text-[11px] text-slate-500 dark:text-slate-400 hidden truncate">Parent</div>
+                    </div>
+                    <div class="shrink-0 flex items-center gap-1">
+                      <button id="change-linked-item-btn" type="button"
+                        class="px-2 py-1 rounded text-[11px] font-medium bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 transition">Change</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Custom Dropdown Selector -->
+                <div id="link-activity-selector-container" class="relative">
+                  <!-- Search / Input Trigger Row -->
+                  <div class="flex items-center gap-1.5">
+                    <div class="relative flex-1">
+                      <input type="text" id="link-activity-search-input"
+                        placeholder="Search chapter, subchapter, task..."
+                        class="w-full py-1.5 px-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition placeholder:text-slate-400"
+                        autocomplete="off">
+                      <button id="clear-search-btn" type="button"
+                        class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs font-bold px-1">✕</button>
+                    </div>
+                    <button type="button" id="link-activity-dropdown-toggle"
+                      class="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition shrink-0">
+                      Browse
+                    </button>
+                  </div>
+
+                  <!-- Dropdown Menu Panel -->
+                  <div id="link-activity-menu"
+                    class="hidden absolute left-0 right-0 top-full mt-1.5 z-50 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-2.5 max-h-[360px] flex flex-col space-y-2">
+
+                    <!-- Filters Row 1: Type Pills -->
+                    <div class="flex items-center gap-1 overflow-x-auto pb-1 hide-scrollbar">
+                      <button type="button" data-type-filter="all"
+                        class="link-type-filter-btn active text-[10px] font-semibold px-2 py-1 rounded bg-blue-600 text-white transition shrink-0">All</button>
+                      <button type="button" data-type-filter="chapter"
+                        class="link-type-filter-btn text-[10px] font-semibold px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition shrink-0">Chapters</button>
+                      <button type="button" data-type-filter="subchapter"
+                        class="link-type-filter-btn text-[10px] font-semibold px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition shrink-0">Subchapters</button>
+                      <button type="button" data-type-filter="task"
+                        class="link-type-filter-btn text-[10px] font-semibold px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition shrink-0">Tasks</button>
+                      <button type="button" data-type-filter="exam"
+                        class="link-type-filter-btn text-[10px] font-semibold px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition shrink-0">Exams</button>
+                      <button type="button" data-type-filter="flashcard"
+                        class="link-type-filter-btn text-[10px] font-semibold px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition shrink-0">Flashcards</button>
+                    </div>
+
+                    <!-- Filters Row 2: Subject Filter & Sort -->
+                    <div class="flex items-center gap-1.5 pt-1 border-t border-slate-100 dark:border-slate-700">
+                      <select id="link-activity-subject-filter"
+                        class="flex-1 py-1 px-2 text-[11px] border border-slate-200 dark:border-slate-600 rounded-md bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none">
+                        <option value="all">All Subjects</option>
+                      </select>
+
+                      <button type="button" id="link-activity-quick-curr-subj"
+                        class="text-[10px] font-medium px-2 py-1 rounded border border-slate-200 dark:border-slate-600 bg-slate-50 hover:bg-slate-100 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition shrink-0 whitespace-nowrap"
+                        title="Filter to current selected timer subject">
+                        Current Subject
+                      </button>
+
+                      <button type="button" id="link-activity-sort-btn"
+                        class="text-[10px] font-medium px-2 py-1 rounded border border-slate-200 dark:border-slate-600 bg-slate-50 hover:bg-slate-100 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition shrink-0 whitespace-nowrap"
+                        data-sort-mode="curriculum">
+                        Sort: Default
+                      </button>
+                    </div>
+
+                    <!-- Results Count / Info Bar -->
+                    <div
+                      class="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 px-0.5">
+                      <span id="link-activity-results-count">0 items</span>
+                      <button type="button" id="link-activity-close-btn"
+                        class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-medium">Close</button>
+                    </div>
+
+                    <!-- Scrollable Items List Container -->
+                    <div id="link-activity-items-list" class="flex-1 overflow-y-auto space-y-1.5 max-h-[220px] pr-1">
+                      <!-- Dynamically rendered items -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Hidden legacy elements for backward compatibility -->
+                <div class="hidden">
+                  <select id="session-link-type">
+                    <option value="none">None</option>
+                    <option value="task">Task</option>
+                    <option value="syllabus">Syllabus</option>
+                    <option value="exam">Exam</option>
+                    <option value="flashcard">Flashcard</option>
+                  </select>
+                  <div id="session-link-target-container">
+                    <select id="session-link-target"></select>
+                  </div>
+                  <div id="session-link-preview"></div>
+                </div>
+              </div>
             </div>
-            <div class="flex space-x-2"><input type="number" id="focus-duration" value="25"
-                class="w-full p-2 text-center border rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700"><input
-                type="number" id="break-duration" value="5"
-                class="w-full p-2 text-center border rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700">
+
+            <!-- Pomodoro Duration Inputs -->
+            <div id="pomodoro-durations-container" class="flex space-x-2">
+              <div class="flex-1">
+                <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-0.5 text-center font-medium">Focus
+                  (min)</label>
+                <input type="number" id="focus-duration" value="25" min="1" max="180"
+                  class="w-full p-2 text-center border rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm">
+              </div>
+              <div class="flex-1">
+                <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-0.5 text-center font-medium">Break
+                  (min)</label>
+                <input type="number" id="break-duration" value="5" min="1" max="60"
+                  class="w-full p-2 text-center border rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm">
+              </div>
             </div>
-            <div class="grid grid-cols-2 gap-2"><button id="play-pause-btn"
-                class="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg">Start</button><button
-                id="skip-btn"
-                class="w-full py-3 px-4 bg-slate-200 text-slate-700 font-semibold rounded-lg dark:bg-slate-600 dark:text-slate-200">Skip</button>
+
+            <!-- Timer Action Buttons -->
+            <div class="grid grid-cols-2 gap-2">
+              <button id="play-pause-btn"
+                class="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm transition">Start</button>
+              <button id="skip-btn"
+                class="w-full py-2.5 px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg dark:bg-slate-600 dark:hover:bg-slate-500 dark:text-slate-200 text-sm transition">Skip</button>
+              <button id="stop-stopwatch-btn"
+                class="hidden w-full py-2.5 px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg dark:bg-slate-600 dark:hover:bg-slate-500 dark:text-slate-200 text-sm transition">Reset</button>
             </div>
+
             <div>
               <div class="flex items-center justify-between mt-4 mb-2">
-                <h4 class="text-md font-bold text-slate-800 dark:text-slate-200">Study Log</h4>
-                <span id="study-tracker-semester-badge" class="text-xs px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 font-semibold truncate max-w-[140px]"></span>
+                <div class="flex items-center gap-2">
+                  <h4 class="text-md font-bold text-slate-800 dark:text-slate-200">Study Log</h4>
+                  <button id="open-study-history-btn" type="button"
+                    class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-900/30">View
+                    History</button>
+                </div>
+                <span id="study-tracker-semester-badge"
+                  class="text-xs px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 font-semibold truncate max-w-[140px]"></span>
               </div>
               <div id="study-log-container" class="space-y-2 max-h-40 overflow-y-auto pr-2"></div>
             </div>
@@ -419,6 +601,420 @@
       </div>
     </main>
 
+    <!-- Notes & Obsidian System Page -->
+    <main id="notes-page"
+      class="hidden flex-grow flex flex-col h-[calc(100vh-140px)] min-h-[640px] bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-xs overflow-hidden">
+      <div class="flex-1 flex flex-col md:flex-row min-h-0">
+
+        <!-- Left Sidebar: Notebooks & Notes List -->
+        <aside id="notes-sidebar-pane"
+          class="w-full md:w-80 lg:w-96 flex flex-col border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/40 flex-shrink-0">
+
+          <!-- Sidebar Action Header -->
+          <div class="p-3.5 border-b border-slate-200 dark:border-slate-700/80 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <h2 class="text-base font-bold text-slate-800 dark:text-slate-100">Notes</h2>
+              <span id="notes-count-badge"
+                class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300">0
+                notes</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <input type="file" id="note-import-input" class="hidden" accept=".md,text/markdown" multiple>
+              <button type="button" id="note-import-btn" title="Import Obsidian Markdown Files (.md)"
+                class="p-1.5 text-xs font-semibold rounded-lg bg-slate-200/70 hover:bg-slate-300 text-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-200 transition">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+              </button>
+              <button type="button" id="new-notebook-btn" title="New Notebook"
+                class="p-1.5 text-xs font-semibold rounded-lg bg-slate-200/70 hover:bg-slate-300 text-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-200 transition">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                  <line x1="12" y1="11" x2="12" y2="17"></line>
+                  <line x1="9" y1="14" x2="15" y2="14"></line>
+                </svg>
+              </button>
+              <button type="button" id="new-note-btn"
+                class="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition active:scale-95 shadow-xs">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>New Note</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Search & Filter Controls -->
+          <div class="p-3 border-b border-slate-200 dark:border-slate-700/80 space-y-2">
+            <div class="relative">
+              <input type="text" id="notes-search-input" placeholder="Search notes, tags, content..."
+                class="w-full pl-8 pr-7 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-700/70 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500">
+              <svg class="absolute left-2.5 top-2 w-3.5 h-3.5 text-slate-400 pointer-events-none" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <button type="button" id="clear-notes-search-btn"
+                class="hidden absolute right-2 top-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs leading-none">&times;</button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <select id="note-subject-filter"
+                class="flex-1 p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer">
+                <option value="all">All Subjects</option>
+              </select>
+              <select id="note-sort"
+                class="p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer">
+                <option value="updatedAt">Recent</option>
+                <option value="createdAt">Created</option>
+                <option value="titleAsc">Title A-Z</option>
+                <option value="titleDesc">Title Z-A</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Notebooks List Section -->
+          <div class="px-3 py-2 border-b border-slate-200 dark:border-slate-700/80">
+            <div
+              class="flex items-center justify-between mb-1.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <span>Notebooks</span>
+            </div>
+            <div id="notebooks-list" class="space-y-0.5 max-h-36 overflow-y-auto pr-1">
+              <!-- Dynamically populated notebook pills -->
+            </div>
+          </div>
+
+          <!-- Notes List Scroll Area -->
+          <div id="notes-list-container" class="flex-1 overflow-y-auto p-3 space-y-2">
+            <!-- Dynamically populated note cards -->
+          </div>
+        </aside>
+
+        <!-- Right Main: Editor & Workspace Pane -->
+        <section id="notes-editor-pane" class="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-800">
+
+          <!-- Empty State (when no note is selected) -->
+          <div id="no-note-selected-placeholder"
+            class="flex-1 flex flex-col items-center justify-center p-8 text-center">
+            <div
+              class="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-700/60 flex items-center justify-center text-slate-400 mb-4">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            </div>
+            <h3 class="text-base font-bold text-slate-800 dark:text-slate-200 mb-1">No Note Selected</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mb-4">Choose a note from the left sidebar or
+              create a new markdown note to start writing.</p>
+            <button type="button" id="notes-empty-create-btn"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition">Create
+              Note</button>
+          </div>
+
+          <!-- Active Note Container -->
+          <div id="active-note-container" class="flex-1 flex flex-col min-h-0 hidden">
+
+            <!-- Note Header & Metadata Bar -->
+            <div class="p-3 sm:p-4 border-b border-slate-200 dark:border-slate-700 space-y-3">
+
+              <!-- Mobile Back & Top Controls Row -->
+              <div class="flex items-center justify-between gap-2">
+                <button type="button" id="note-mobile-back-btn"
+                  class="md:hidden flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                  </svg>
+                  <span>Notes</span>
+                </button>
+
+                <!-- Note Title Input -->
+                <input type="text" id="note-title-input" placeholder="Untitled Note"
+                  class="flex-1 text-lg sm:text-xl font-bold bg-transparent border-0 outline-none text-slate-900 dark:text-slate-100 placeholder-slate-400">
+
+                <!-- Mode Toggles & Actions -->
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                  <div
+                    class="flex items-center bg-slate-100 dark:bg-slate-700/80 p-0.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300">
+                    <button type="button" id="note-mode-edit-btn" class="px-2.5 py-1 rounded-md transition"
+                      title="Edit Mode (Ctrl+E)">Edit</button>
+                    <button type="button" id="note-mode-split-btn"
+                      class="hidden md:inline-block px-2.5 py-1 rounded-md active bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs transition"
+                      title="Split Live Preview">Split</button>
+                    <button type="button" id="note-mode-preview-btn" class="px-2.5 py-1 rounded-md transition"
+                      title="Preview Mode">Preview</button>
+                  </div>
+
+                  <button type="button" id="note-pin-btn"
+                    class="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                    title="Pin Note">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z" />
+                    </svg>
+                  </button>
+
+                  <button type="button" id="note-export-btn"
+                    class="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                    title="Download as Obsidian Markdown (.md)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                  </button>
+
+                  <button type="button" id="note-copy-md-btn"
+                    class="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                    title="Copy Markdown to Clipboard">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                  </button>
+
+                  <button type="button" id="note-delete-btn"
+                    class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                    title="Delete Note">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Metadata Controls Row -->
+              <div class="flex items-center gap-3 flex-wrap text-xs">
+                <!-- Notebook Picker -->
+                <div
+                  class="flex items-center gap-1.5">
+                  <svg width="13" height="13" class="text-slate-400" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                  <select id="note-notebook-select"
+                    class="p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 outline-none cursor-pointer">
+                    <option value="none">No Notebook (Unfiled)</option>
+                  </select>
+                </div>
+
+                <!-- Subject Picker -->
+                <div
+                  class="flex items-center gap-1.5">
+                  <span id="note-subject-dot" class="w-2 h-2 rounded-full bg-slate-400 flex-shrink-0"></span>
+                  <select id="note-subject-select"
+                    class="p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 outline-none cursor-pointer">
+                    <!-- Populated dynamically -->
+                  </select>
+                </div>
+
+                <!-- Tags Container -->
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <div id="note-tags-list" class="flex items-center gap-1 flex-wrap"></div>
+                  <input type="text" id="note-tag-input" placeholder="+ Tag (Enter)"
+                    class="px-2 py-1 text-xs rounded-lg bg-slate-100 dark:bg-slate-700/60 border border-slate-200/80 dark:border-slate-600/60 text-slate-700 dark:text-slate-200 outline-none w-24 focus:w-32 transition-all">
+                </div>
+              </div>
+            </div>
+
+            <!-- Formatting Toolbar (Zero Emojis, Clean SVGs) -->
+            <div id="note-toolbar"
+              class="px-3 py-1.5 border-b border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/60 flex items-center gap-1 overflow-x-auto text-xs">
+              <button type="button" id="tb-h1"
+                class="px-2 py-1 rounded font-bold hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+                title="Heading 1">H1</button>
+              <button type="button" id="tb-h2"
+                class="px-2 py-1 rounded font-bold hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+                title="Heading 2">H2</button>
+              <button type="button" id="tb-h3"
+                class="px-2 py-1 rounded font-bold hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+                title="Heading 3">H3</button>
+              <div class="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-1"></div>
+
+              <button type="button" id="tb-bold"
+                class="px-2 py-1 rounded font-bold hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+                title="Bold (Ctrl+B)">B</button>
+              <button type="button" id="tb-italic"
+                class="px-2 py-1 rounded italic font-serif hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+                title="Italic (Ctrl+I)">I</button>
+              <button type="button" id="tb-strike"
+                class="px-2 py-1 rounded line-through hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+                title="Strikethrough">S</button>
+              <div class="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-1"></div>
+
+              <button type="button" id="tb-bullet"
+                class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+                title="Bullet List">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12"></line>
+                  <line x1="8" y1="18" x2="21" y2="18"></line>
+                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+              </button>
+              <button type="button" id="tb-numbered"
+                class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+                title="Numbered List">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="10" y1="6" x2="21" y2="6"></line>
+                  <line x1="10" y1="12" x2="21" y2="12"></line>
+                  <line x1="10" y1="18" x2="21" y2="18"></line>
+                  <path d="M4 6h1v4"></path>
+                  <path d="M4 10h2"></path>
+                  <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"></path>
+                </svg>
+              </button>
+              <button type="button" id="tb-task"
+                class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+                title="Task Checklist">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="5" width="6" height="6" rx="1"></rect>
+                  <path d="m5 8 1 1 2-2"></path>
+                  <line x1="13" y1="8" x2="21" y2="8"></line>
+                  <rect x="3" y="13" width="6" height="6" rx="1">
+                    </line>
+                    <line x1="13" y1="16" x2="21" y2="16"></line>
+                </svg>
+              </button>
+              <div class="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-1"></div>
+
+              <button type="button" id="tb-quote"
+                class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+                title="Blockquote">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path
+                    d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z">
+                  </path>
+                  <path
+                    d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z">
+                  </path>
+                </svg>
+              </button>
+              <button type="button" id="tb-code-inline"
+                class="px-1.5 py-0.5 font-mono text-xs rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+                title="Inline Code">`code`</button>
+              <button type="button" id="tb-code-block"
+                class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+                title="Code Block">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"></polyline>
+                  <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+              </button>
+              <div class="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-1"></div>
+
+              <button type="button" id="tb-link"
+                class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+                title="Insert Markdown Link (Ctrl+K)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+              </button>
+              <button type="button" id="tb-wikilink"
+                class="px-2 py-0.5 rounded font-mono text-xs font-semibold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition"
+                title="Insert [[Wikilink]] (Ctrl+Shift+L)">[[ ]]</button>
+              <button type="button" id="tb-callout"
+                class="px-2 py-0.5 rounded font-semibold text-xs bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-700 dark:text-slate-300 transition"
+                title="Insert Obsidian Callout">Callout</button>
+              <button type="button" id="tb-table"
+                class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+                title="Insert Table">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="3" y1="9" x2="21" y2="9"></line>
+                  <line x1="3" y1="15" x2="21" y2="15"></line>
+                  <line x1="9" y1="3" x2="9" y2="21"></line>
+                  <line x1="15" y1="3" x2="15" y2="21"></line>
+                </svg>
+              </button>
+              <button type="button" id="tb-hr"
+                class="px-1.5 py-0.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono text-xs"
+                title="Divider line">---</button>
+            </div>
+
+            <!-- Workspace Area: Editor & Live Preview -->
+            <div class="flex-1 flex flex-col md:flex-row min-h-0 relative">
+
+              <!-- Editor Column -->
+              <div id="note-editor-col"
+                class="w-full md:w-1/2 flex flex-col min-w-0 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-700 relative">
+                <textarea id="note-editor-textarea"
+                  placeholder="Start typing markdown... Use [[Note Title]] to link notes, > [!note] for callouts..."
+                  class="w-full h-full p-4 font-mono sm:font-sans text-sm md:text-base leading-relaxed bg-transparent border-0 outline-none resize-none text-slate-800 dark:text-slate-200 placeholder-slate-400"></textarea>
+
+                <!-- Autocomplete Suggest Popover for [[Wikilinks]] -->
+                <div id="wikilink-suggest-popover"
+                  class="absolute left-4 top-14 z-30 hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-1 w-64 max-h-48 overflow-y-auto">
+                  <!-- Matching note titles -->
+                </div>
+              </div>
+
+              <!-- Split Divider -->
+              <div id="note-split-divider" class="hidden md:block w-px bg-slate-200 dark:border-slate-700"></div>
+
+              <!-- Preview Column -->
+              <div id="note-preview-col"
+                class="w-full md:w-1/2 flex flex-col min-w-0 overflow-y-auto bg-slate-50/30 dark:bg-slate-900/30">
+                <div id="note-preview-container"
+                  class="w-full h-full p-4 markdown-content text-slate-800 dark:text-slate-200">
+                  <!-- Rendered markdown -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Status Bar & Linked Mentions Drawer -->
+            <div class="border-t border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/80">
+
+              <!-- Status Bar -->
+              <div class="px-4 py-2 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <div class="flex items-center gap-4">
+                  <div id="note-save-status" class="flex items-center">
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1.5"></span>
+                    <span>Saved</span>
+                  </div>
+                  <span id="note-word-count">0 words</span>
+                  <span id="note-char-count">0 chars</span>
+                  <span id="note-read-time">0 min read</span>
+                </div>
+
+                <!-- Backlinks Toggle Button -->
+                <button type="button" id="note-backlinks-toggle-btn"
+                  class="flex items-center gap-1 font-semibold text-slate-600 dark:text-slate-300 hover:text-blue-600 transition">
+                  <span>Linked Mentions (<span id="note-backlinks-count">0</span>)</span>
+                  <svg id="note-backlinks-chevron" class="w-3.5 h-3.5 transition-transform" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Backlinks Collapsible Drawer -->
+              <div id="note-backlinks-body"
+                class="hidden border-t border-slate-200 dark:border-slate-700/80 p-3 bg-white dark:bg-slate-800 max-h-48 overflow-y-auto">
+                <div id="note-backlinks-container">
+                  <div id="note-backlinks-list" class="space-y-2">
+                    <!-- Dynamically populated backlinks cards -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
     <main id="binder-page" class="hidden">
       <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6">Your Collection</h2>
       <div id="binder-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
@@ -429,23 +1025,33 @@
     <!-- Syllabus & Topic Mastery Page -->
     <main id="syllabus-page" class="hidden flex-grow space-y-6">
       <!-- Syllabus Overview Header -->
-      <section class="bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl p-5 md:p-6 shadow-xs">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-700/60">
+      <section
+        class="bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl p-5 md:p-6 shadow-xs">
+        <div
+          class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-700/60">
           <div>
-            <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100">Subject Syllabus & Topic Mastery</h2>
-            <p id="syllabus-overall-text" class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1">Track chapter progress and mastery across all your subjects.</p>
+            <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100">Subject Syllabus & Topic
+              Mastery</h2>
+            <p id="syllabus-overall-text" class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1">Track
+              chapter progress and mastery across all your subjects.</p>
           </div>
           <div class="flex items-center gap-3 flex-wrap">
-            <span id="syllabus-subjects-count" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">0 Subjects</span>
-            <span id="syllabus-chapters-count" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">0 Chapters</span>
-            <button type="button" id="syllabus-add-subject-tab-btn" class="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-semibold rounded-xl shadow-xs transition">
+            <span id="syllabus-subjects-count"
+              class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">0
+              Subjects</span>
+            <span id="syllabus-chapters-count"
+              class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">0
+              Chapters</span>
+            <button type="button" id="syllabus-add-subject-tab-btn"
+              class="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-semibold rounded-xl shadow-xs transition">
               <span>+ Add Subject</span>
             </button>
           </div>
         </div>
         <div class="mt-4">
           <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
-            <div id="syllabus-overall-progress" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+            <div id="syllabus-overall-progress" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-300"
+              style="width: 0%"></div>
           </div>
         </div>
       </section>
@@ -461,17 +1067,22 @@
       </div>
 
       <!-- Empty State (When no subjects exist) -->
-      <div id="syllabus-empty-state" class="hidden bg-white dark:bg-slate-800 border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-10 text-center space-y-3">
+      <div id="syllabus-empty-state"
+        class="hidden bg-white dark:bg-slate-800 border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-10 text-center space-y-3">
         <h3 class="text-base font-semibold text-slate-800 dark:text-slate-200">No subjects added yet</h3>
-        <p class="text-xs text-slate-400 dark:text-slate-500 max-w-sm mx-auto">Create your first subject tab to organize chapters and track your topic mastery checklist.</p>
+        <p class="text-xs text-slate-400 dark:text-slate-500 max-w-sm mx-auto">Create your first subject tab to organize
+          chapters and track your topic mastery checklist.</p>
         <div class="flex items-center justify-center gap-2 flex-wrap pt-2">
-          <button type="button" id="syllabus-empty-add-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-semibold rounded-xl shadow-xs transition">
-          + Add First Subject
+          <button type="button" id="syllabus-empty-add-btn"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-semibold rounded-xl shadow-xs transition">
+            + Add First Subject
           </button>
-          <button type="button" id="syllabus-empty-import-logs-btn" class="px-3.5 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition border border-slate-200 dark:border-slate-600">
+          <button type="button" id="syllabus-empty-import-logs-btn"
+            class="px-3.5 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition border border-slate-200 dark:border-slate-600">
             Import from Study Logs
           </button>
-          <button type="button" id="syllabus-empty-import-template-btn" class="px-3.5 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition border border-slate-200 dark:border-slate-600">
+          <button type="button" id="syllabus-empty-import-template-btn"
+            class="px-3.5 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition border border-slate-200 dark:border-slate-600">
             Load Starter Template
           </button>
         </div>
@@ -480,16 +1091,23 @@
 
   </div>
   <!-- Calendar Day & Timeline Modal (Google Calendar style) -->
-  <div id="event-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 hidden z-50 transition-opacity duration-200">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] sm:max-h-[85vh] flex flex-col border border-slate-100 dark:border-slate-700/80 overflow-hidden transform transition-all">
-      
+  <div id="event-modal"
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 hidden z-50 transition-opacity duration-200">
+    <div
+      class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] sm:max-h-[85vh] flex flex-col border border-slate-100 dark:border-slate-700/80 overflow-hidden transform transition-all">
+
       <!-- Modal Header -->
-      <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-700/80 flex items-center justify-between gap-3 bg-white/95 dark:bg-slate-800/95 backdrop-blur shrink-0">
+      <div
+        class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-700/80 flex items-center justify-between gap-3 bg-white/95 dark:bg-slate-800/95 backdrop-blur shrink-0">
         <div class="min-w-0 flex-1">
           <div class="flex items-center flex-wrap gap-2">
-            <h3 id="modal-date-heading" class="text-lg sm:text-2xl font-bold text-slate-800 dark:text-slate-100 truncate">Date</h3>
-            <span id="modal-today-badge" class="hidden text-[11px] bg-blue-600 text-white font-semibold px-2.5 py-0.5 rounded-full shadow-xs">Today</span>
-            <span id="modal-events-count" class="text-[11px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium px-2.5 py-0.5 rounded-full">0 events</span>
+            <h3 id="modal-date-heading"
+              class="text-lg sm:text-2xl font-bold text-slate-800 dark:text-slate-100 truncate">Date</h3>
+            <span id="modal-today-badge"
+              class="hidden text-[11px] bg-blue-600 text-white font-semibold px-2.5 py-0.5 rounded-full shadow-xs">Today</span>
+            <span id="modal-events-count"
+              class="text-[11px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium px-2.5 py-0.5 rounded-full">0
+              events</span>
           </div>
           <p id="modal-date-sub" class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5"></p>
           <span id="modal-date" class="hidden"></span>
@@ -497,7 +1115,8 @@
         <div class="flex items-center space-x-2 shrink-0">
           <button id="open-add-event-btn"
             class="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-sm transition">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
@@ -515,7 +1134,8 @@
       </div>
 
       <!-- Add Event Panel (Collapsible) -->
-      <div id="calendar-add-event-panel" class="hidden bg-slate-50 dark:bg-slate-900/70 border-b border-slate-200 dark:border-slate-700/70 p-4 sm:p-5 transition-all shrink-0">
+      <div id="calendar-add-event-panel"
+        class="hidden bg-slate-50 dark:bg-slate-900/70 border-b border-slate-200 dark:border-slate-700/70 p-4 sm:p-5 transition-all shrink-0">
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
@@ -557,17 +1177,19 @@
             <button id="cancel-add-event-btn"
               class="px-3.5 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-medium rounded-lg transition">Cancel</button>
             <button id="save-event"
-              class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs sm:text-sm font-semibold rounded-lg shadow-sm transition">Save Event</button>
+              class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs sm:text-sm font-semibold rounded-lg shadow-sm transition">Save
+              Event</button>
           </div>
         </div>
       </div>
 
       <!-- Timeline Scroll Area -->
       <div id="calendar-timeline-scroll" class="flex-1 overflow-y-auto overflow-x-hidden relative p-3 sm:p-5">
-        
+
         <!-- Untimed / All-Day Section -->
         <div id="timeline-all-day-section" class="hidden mb-4 pb-3 border-b border-slate-200 dark:border-slate-700/60">
-          <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">All-Day & Untimed</p>
+          <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">All-Day &
+            Untimed</p>
           <div id="timeline-all-day-list" class="space-y-1.5"></div>
         </div>
 
@@ -577,7 +1199,8 @@
             <!-- Left time labels column -->
             <div id="timeline-time-labels" class="w-12 sm:w-16 shrink-0 select-none"></div>
             <!-- Right grid & events container -->
-            <div id="timeline-events-container" class="flex-1 relative border-l border-slate-200 dark:border-slate-700/60 min-h-[1440px]">
+            <div id="timeline-events-container"
+              class="flex-1 relative border-l border-slate-200 dark:border-slate-700/60 min-h-[1440px]">
               <!-- Hour row lines inserted here -->
               <div id="timeline-hour-rows" class="absolute inset-0"></div>
               <!-- Red current time line -->
@@ -591,8 +1214,10 @@
 
           <!-- Empty state when no events on this day -->
           <div id="timeline-empty-state" class="hidden py-10 flex flex-col items-center justify-center text-center">
-            <div class="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-900/20 text-blue-500 flex items-center justify-center mb-3">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <div
+              class="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-900/20 text-blue-500 flex items-center justify-center mb-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
                 <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -600,9 +1225,12 @@
               </svg>
             </div>
             <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">No events scheduled</p>
-            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 max-w-xs">There are no exams or custom study events for this date.</p>
-            <button id="empty-state-add-btn" class="mt-4 px-4 py-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-semibold rounded-xl transition flex items-center gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 max-w-xs">There are no exams or custom study
+              events for this date.</p>
+            <button id="empty-state-add-btn"
+              class="mt-4 px-4 py-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-semibold rounded-xl transition flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
@@ -614,12 +1242,14 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700/80 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 shrink-0">
+      <div
+        class="px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700/80 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 shrink-0">
         <span class="flex items-center gap-1.5 truncate mr-2">
           <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
           <span class="truncate">Tip: Click on any time slot in the timeline to quick-add an event</span>
         </span>
-        <button id="close-modal-footer" class="px-3 py-1 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition font-medium shrink-0">Close</button>
+        <button id="close-modal-footer"
+          class="px-3 py-1 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition font-medium shrink-0">Close</button>
       </div>
 
     </div>
@@ -743,103 +1373,138 @@
   <div id="semester-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden z-50">
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 md:p-8 w-full max-w-lg">
       <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-700">
-        <h3 id="semester-modal-title" class="text-xl font-bold text-slate-900 dark:text-slate-100">Create New Semester</h3>
-        <button type="button" id="close-semester-modal-btn" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <h3 id="semester-modal-title" class="text-xl font-bold text-slate-900 dark:text-slate-100">Create New Semester
+        </h3>
+        <button type="button" id="close-semester-modal-btn"
+          class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
       </div>
       <form id="semester-form" class="space-y-4 mt-4">
         <input type="hidden" id="editing-semester-id">
         <div>
-          <label for="semester-name-input" class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Semester Name *</label>
+          <label for="semester-name-input"
+            class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Semester Name *</label>
           <input type="text" id="semester-name-input" required placeholder="e.g. Semester 2 (2025/2026)"
             class="mt-1 w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label for="semester-start-date" class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Start Date</label>
+            <label for="semester-start-date"
+              class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Start Date</label>
             <input type="date" id="semester-start-date"
               class="mt-1 w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
           </div>
           <div>
-            <label for="semester-end-date" class="block text-sm font-semibold text-slate-700 dark:text-slate-300">End Date</label>
+            <label for="semester-end-date" class="block text-sm font-semibold text-slate-700 dark:text-slate-300">End
+              Date</label>
             <input type="date" id="semester-end-date"
               class="mt-1 w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
           </div>
         </div>
         <div>
-          <label for="semester-description-input" class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Notes / Academic Goals</label>
+          <label for="semester-description-input"
+            class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Notes / Academic Goals</label>
           <textarea id="semester-description-input" rows="3" placeholder="Target GPA, key milestones, or focus areas..."
             class="mt-1 w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
         </div>
-        <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600/50">
-          <input type="checkbox" id="semester-is-active-input" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer">
-          <label for="semester-is-active-input" class="text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
-            Set as Active Semester <span class="text-xs text-slate-500 dark:text-slate-400 block font-normal">(New study timer sessions will log to this semester)</span>
+        <div
+          class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600/50">
+          <input type="checkbox" id="semester-is-active-input"
+            class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer">
+          <label for="semester-is-active-input"
+            class="text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+            Set as Active Semester <span class="text-xs text-slate-500 dark:text-slate-400 block font-normal">(New study
+              timer sessions will log to this semester)</span>
           </label>
         </div>
         <div class="flex justify-end gap-3 pt-3">
           <button type="button" id="cancel-semester-modal-btn"
             class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition text-sm">Cancel</button>
           <button type="submit"
-            class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-sm hover:shadow transition text-sm">Save Semester</button>
+            class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-sm hover:shadow transition text-sm">Save
+            Semester</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- Semester Academic Records & Exams Modal -->
-  <div id="semester-exams-modal" class="fixed inset-0 bg-black/60 flex items-center justify-center p-3 md:p-6 hidden z-50 overflow-y-auto">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-5 md:p-7 w-full max-w-4xl max-h-[92vh] flex flex-col">
+  <div id="semester-exams-modal"
+    class="fixed inset-0 bg-black/60 flex items-center justify-center p-3 md:p-6 hidden z-50 overflow-y-auto">
+    <div
+      class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-5 md:p-7 w-full max-w-4xl max-h-[92vh] flex flex-col">
       <!-- Modal Header -->
-      <div class="flex items-center justify-between pb-3.5 border-b border-slate-100 dark:border-slate-700 flex-shrink-0">
+      <div
+        class="flex items-center justify-between pb-3.5 border-b border-slate-100 dark:border-slate-700 flex-shrink-0">
         <div>
           <div class="flex items-center gap-2">
-            <h3 id="exams-modal-semester-title" class="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100">Academic Records & Exams</h3>
-            <span id="exams-modal-active-badge" class="hidden text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">Active</span>
+            <h3 id="exams-modal-semester-title"
+              class="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100">Academic Records & Exams</h3>
+            <span id="exams-modal-active-badge"
+              class="hidden text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">Active</span>
           </div>
           <p id="exams-modal-semester-dates" class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5"></p>
         </div>
-        <button type="button" id="close-exams-modal-btn" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <button type="button" id="close-exams-modal-btn"
+          class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
       </div>
 
       <!-- Quick Metrics Ribbon (4 Cards) -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 my-3.5 flex-shrink-0">
-        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/50 text-center">
+        <div
+          class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/50 text-center">
           <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Final Scores</p>
           <p id="exams-modal-finals-count" class="text-lg font-bold text-blue-600 dark:text-blue-400 mt-0.5">0</p>
         </div>
-        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/50 text-center">
+        <div
+          class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/50 text-center">
           <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Semester GPA</p>
           <p id="exams-modal-gpa" class="text-lg font-bold text-purple-600 dark:text-purple-400 mt-0.5">--</p>
         </div>
-        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/50 text-center">
+        <div
+          class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/50 text-center">
           <div class="flex items-center justify-center gap-1">
             <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Semester Avg</p>
-            <span id="exams-modal-avg-source" class="text-[9px] font-bold px-1 rounded bg-slate-200/80 dark:bg-slate-600 text-slate-600 dark:text-slate-300"></span>
+            <span id="exams-modal-avg-source"
+              class="text-[9px] font-bold px-1 rounded bg-slate-200/80 dark:bg-slate-600 text-slate-600 dark:text-slate-300"></span>
           </div>
           <div class="flex items-center justify-center gap-1.5 mt-0.5">
             <p id="exams-modal-avg-mark" class="text-lg font-bold text-emerald-600 dark:text-emerald-400">--</p>
             <span id="exams-modal-grade-pill" class="hidden grade-pill"></span>
           </div>
         </div>
-        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/50 text-center">
+        <div
+          class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/50 text-center">
           <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Exam Papers</p>
           <p id="exams-modal-count" class="text-lg font-bold text-slate-800 dark:text-slate-100 mt-0.5">0</p>
         </div>
       </div>
 
       <!-- Segmented Tab Navigation -->
-      <div class="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-700/60 rounded-xl mb-3.5 flex-shrink-0 text-xs font-semibold">
-        <button type="button" id="tab-btn-final-scores" class="modal-tab-btn flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 is-active">
+      <div
+        class="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-700/60 rounded-xl mb-3.5 flex-shrink-0 text-xs font-semibold">
+        <button type="button" id="tab-btn-final-scores"
+          class="modal-tab-btn flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 is-active">
           <span>Final Subject Scores & GPA</span>
-          <span id="tab-finals-badge" class="px-1.5 py-0.5 rounded-full text-[10px] bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">0</span>
+          <span id="tab-finals-badge"
+            class="px-1.5 py-0.5 rounded-full text-[10px] bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">0</span>
         </button>
-        <button type="button" id="tab-btn-exam-papers" class="modal-tab-btn flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100">
+        <button type="button" id="tab-btn-exam-papers"
+          class="modal-tab-btn flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100">
           <span>Individual Exam Papers</span>
-          <span id="tab-exams-badge" class="px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300">0</span>
+          <span id="tab-exams-badge"
+            class="px-1.5 py-0.5 rounded-full text-[10px] bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300">0</span>
         </button>
       </div>
 
@@ -862,48 +1527,72 @@
       <!-- TAB 1 CONTENT: Final Subject Scores & GPA -->
       <div id="tab-content-final-scores" class="flex-1 flex flex-col overflow-hidden">
         <!-- Add/Edit Final Score Form -->
-        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700/80 mb-3 flex-shrink-0">
+        <div
+          class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700/80 mb-3 flex-shrink-0">
           <div class="flex items-center justify-between cursor-pointer" id="toggle-final-form-btn">
             <div class="flex items-center gap-2">
-              <span class="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs font-bold">+</span>
-              <h4 id="final-form-heading" class="text-sm font-bold text-slate-800 dark:text-slate-200">Key In Final Subject Score & GPA</h4>
+              <span
+                class="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs font-bold">+</span>
+              <h4 id="final-form-heading" class="text-sm font-bold text-slate-800 dark:text-slate-200">Key In Final
+                Subject Score & GPA</h4>
             </div>
-            <button type="button" id="reset-final-form-btn" class="hidden text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline">Cancel Edit</button>
+            <button type="button" id="reset-final-form-btn"
+              class="hidden text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline">Cancel
+              Edit</button>
           </div>
           <form id="subject-final-form" class="mt-3 space-y-2.5">
             <input type="hidden" id="editing-final-id">
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2.5">
               <div class="md:col-span-2">
-                <label for="final-subject-input" class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Subject *</label>
-                <select id="final-subject-input" required class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"></select>
+                <label for="final-subject-input"
+                  class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Subject *</label>
+                <select id="final-subject-input" required
+                  class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"></select>
               </div>
               <div class="grid grid-cols-2 gap-2 md:col-span-2">
                 <div>
-                  <label for="final-score-input" class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Final Mark *</label>
-                  <input type="number" step="0.1" min="0" id="final-score-input" required placeholder="e.g. 88" class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100">
+                  <label for="final-score-input"
+                    class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Final Mark *</label>
+                  <input type="number" step="0.1" min="0" id="final-score-input" required placeholder="e.g. 88"
+                    class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100">
                 </div>
                 <div>
-                  <label for="final-max-score-input" class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Max Mark</label>
-                  <input type="number" step="1" min="1" id="final-max-score-input" value="100" class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100">
+                  <label for="final-max-score-input"
+                    class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Max Mark</label>
+                  <input type="number" step="1" min="1" id="final-max-score-input" value="100"
+                    class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100">
                 </div>
               </div>
               <div>
-                <label for="final-gpa-input" class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Subject GPA</label>
-                <input type="number" step="0.01" min="0" max="5" id="final-gpa-input" placeholder="e.g. 4.00" class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 font-mono">
+                <label for="final-gpa-input"
+                  class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Subject GPA</label>
+                <input type="number" step="0.01" min="0" max="5" id="final-gpa-input" placeholder="e.g. 4.00"
+                  class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 font-mono">
               </div>
               <div>
-                <label for="final-grade-input" class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Letter Grade</label>
-                <input type="text" id="final-grade-input" list="grade-options-list" placeholder="e.g. A+" class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold uppercase">
+                <label for="final-grade-input"
+                  class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Letter Grade</label>
+                <input type="text" id="final-grade-input" list="grade-options-list" placeholder="e.g. A+"
+                  class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold uppercase">
               </div>
             </div>
             <div class="flex flex-col sm:flex-row items-center justify-between gap-2 pt-1">
               <div class="flex items-center gap-2 w-full sm:w-2/3">
-                <input type="text" id="final-notes-input" placeholder="Optional notes (e.g. Paper 1 40% + Paper 2 60%)..." class="flex-1 p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100">
-                <input type="number" step="0.5" min="0.5" id="final-credits-input" value="1" title="Credit Hours / Weight for GPA" placeholder="Credits" class="w-16 p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-center" title="Weight / Credits">
+                <input type="text" id="final-notes-input"
+                  placeholder="Optional notes (e.g. Paper 1 40% + Paper 2 60%)..."
+                  class="flex-1 p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100">
+                <input type="number" step="0.5" min="0.5" id="final-credits-input" value="1"
+                  title="Credit Hours / Weight for GPA" placeholder="Credits"
+                  class="w-16 p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-center"
+                  title="Weight / Credits">
               </div>
               <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <button type="button" id="calc-final-from-exams-btn" class="px-3 py-2 bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg transition" title="Auto-calculate average from logged exam papers for this subject">Auto-fill from Exams</button>
-                <button type="submit" id="save-final-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">Save Final Score</button>
+                <button type="button" id="calc-final-from-exams-btn"
+                  class="px-3 py-2 bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg transition"
+                  title="Auto-calculate average from logged exam papers for this subject">Auto-fill from Exams</button>
+                <button type="submit" id="save-final-btn"
+                  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">Save
+                  Final Score</button>
               </div>
             </div>
           </form>
@@ -913,8 +1602,10 @@
         <div class="flex-1 overflow-y-auto pr-1">
           <div class="flex items-center justify-between mb-2">
             <div>
-              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Final Subject Scores & GPA</h4>
-              <p class="text-[11px] text-slate-400 dark:text-slate-500">These final scores determine your Semester Average & Semester GPA</p>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Final Subject
+                Scores & GPA</h4>
+              <p class="text-[11px] text-slate-400 dark:text-slate-500">These final scores determine your Semester
+                Average & Semester GPA</p>
             </div>
           </div>
           <div id="subject-finals-list-container" class="space-y-2">
@@ -926,47 +1617,67 @@
       <!-- TAB 2 CONTENT: Individual Exam Papers -->
       <div id="tab-content-exam-papers" class="hidden flex-1 flex flex-col overflow-hidden">
         <!-- Exam Add/Edit Form -->
-        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700/80 mb-3 flex-shrink-0">
+        <div
+          class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700/80 mb-3 flex-shrink-0">
           <div class="flex items-center justify-between cursor-pointer" id="toggle-exam-form-btn">
             <div class="flex items-center gap-2">
-              <span class="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs font-bold">+</span>
-              <h4 id="exam-form-heading" class="text-sm font-bold text-slate-800 dark:text-slate-200">Add Exam Paper / Log Mark</h4>
+              <span
+                class="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs font-bold">+</span>
+              <h4 id="exam-form-heading" class="text-sm font-bold text-slate-800 dark:text-slate-200">Add Exam Paper /
+                Log Mark</h4>
             </div>
-            <button type="button" id="reset-exam-form-btn" class="hidden text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline">Cancel Edit</button>
+            <button type="button" id="reset-exam-form-btn"
+              class="hidden text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline">Cancel
+              Edit</button>
           </div>
           <form id="semester-exam-form" class="mt-3 space-y-2.5">
             <input type="hidden" id="editing-exam-id">
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5">
               <div>
-                <label for="exam-subject-input" class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Subject *</label>
-                <select id="exam-subject-input" required class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"></select>
+                <label for="exam-subject-input"
+                  class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Subject *</label>
+                <select id="exam-subject-input" required
+                  class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"></select>
               </div>
               <div>
-                <label for="exam-title-input" class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Paper / Title</label>
-                <input type="text" id="exam-title-input" placeholder="e.g. Paper 1, Paper 2" class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100">
+                <label for="exam-title-input"
+                  class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Paper / Title</label>
+                <input type="text" id="exam-title-input" placeholder="e.g. Paper 1, Paper 2"
+                  class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100">
               </div>
               <div>
-                <label for="exam-datetime-input" class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Exam Date & Time *</label>
-                <input type="datetime-local" id="exam-datetime-input" required class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100">
+                <label for="exam-datetime-input"
+                  class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Exam Date & Time *</label>
+                <input type="datetime-local" id="exam-datetime-input" required
+                  class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100">
               </div>
               <div class="grid grid-cols-2 gap-2">
                 <div>
-                  <label for="exam-mark-input" class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Mark</label>
-                  <input type="number" step="0.5" min="0" id="exam-mark-input" placeholder="e.g. 85" class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100">
+                  <label for="exam-mark-input"
+                    class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Mark</label>
+                  <input type="number" step="0.5" min="0" id="exam-mark-input" placeholder="e.g. 85"
+                    class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100">
                 </div>
                 <div>
-                  <label for="exam-max-mark-input" class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Max Mark</label>
-                  <input type="number" step="1" min="1" id="exam-max-mark-input" value="100" class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100">
+                  <label for="exam-max-mark-input"
+                    class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Max Mark</label>
+                  <input type="number" step="1" min="1" id="exam-max-mark-input" value="100"
+                    class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100">
                 </div>
               </div>
               <div>
-                <label for="exam-letter-grade-input" class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Letter Grade</label>
-                <input type="text" id="exam-letter-grade-input" list="grade-options-list" placeholder="e.g. A+" class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold uppercase">
+                <label for="exam-letter-grade-input"
+                  class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Letter Grade</label>
+                <input type="text" id="exam-letter-grade-input" list="grade-options-list" placeholder="e.g. A+"
+                  class="mt-1 w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold uppercase">
               </div>
             </div>
             <div class="flex items-center justify-between pt-1">
-              <input type="text" id="exam-notes-input" placeholder="Optional notes, exam venue, or topics..." class="w-2/3 p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100">
-              <button type="submit" id="save-exam-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">Save Exam</button>
+              <input type="text" id="exam-notes-input" placeholder="Optional notes, exam venue, or topics..."
+                class="w-2/3 p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-xs bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100">
+              <button type="submit" id="save-exam-btn"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">Save
+                Exam</button>
             </div>
           </form>
         </div>
@@ -975,8 +1686,10 @@
         <div class="flex-1 overflow-y-auto pr-1">
           <div class="flex items-center justify-between mb-2">
             <div>
-              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Scheduled Exam Papers & Marks</h4>
-              <p class="text-[11px] text-slate-400 dark:text-slate-500">Individual papers (e.g. Paper 1, Paper 2) for each subject</p>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Scheduled Exam
+                Papers & Marks</h4>
+              <p class="text-[11px] text-slate-400 dark:text-slate-500">Individual papers (e.g. Paper 1, Paper 2) for
+                each subject</p>
             </div>
           </div>
           <div id="exams-list-container" class="space-y-2">
@@ -990,15 +1703,24 @@
   <!-- Delete Semester Confirmation Modal -->
   <div id="delete-semester-modal" class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 hidden z-50">
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 w-full max-w-md text-center">
-      <div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center mx-auto mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      <div
+        class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center mx-auto mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6h18" />
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        </svg>
       </div>
       <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Delete Semester</h3>
       <p id="delete-semester-name" class="text-sm text-slate-600 dark:text-slate-300 font-medium my-2"></p>
-      <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">Are you sure you want to delete this semester? This will permanently remove its recorded study logs, exam schedules, and marks.</p>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">Are you sure you want to delete this semester? This
+        will permanently remove its recorded study logs, exam schedules, and marks.</p>
       <div class="flex justify-center gap-3">
-        <button type="button" id="cancel-delete-semester-btn" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition">Cancel</button>
-        <button type="button" id="confirm-delete-semester-btn" class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-sm transition">Delete Semester</button>
+        <button type="button" id="cancel-delete-semester-btn"
+          class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition">Cancel</button>
+        <button type="button" id="confirm-delete-semester-btn"
+          class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-sm transition">Delete
+          Semester</button>
       </div>
     </div>
   </div>
@@ -1088,13 +1810,13 @@
       <h3 class="text-2xl font-bold mb-2 dark:text-slate-100">Claim Your Reward!</h3>
       <p class="text-slate-500 dark:text-slate-400 mb-6">You've earned a card drop! Choose one of the three cards below.
       </p>
-  
+
       <!-- Loading State -->
       <div id="claim-loading" class="flex flex-col items-center justify-center h-72">
         <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
         <p class="mt-4 text-slate-500">Generating cards...</p>
       </div>
-  
+
       <!-- Card Choices -->
       <div id="claim-card-choices" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Card choices will be rendered here by collectibles.js -->
@@ -1107,8 +1829,8 @@
       <!-- The detailed card will be rendered here by collectibles.js -->
     </div>
     <button id="close-card-detail-modal-btn" class="absolute top-4 right-4 text-white/70 hover:text-white transition">
-      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        stroke-width="3">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="3">
         <line x1="18" y1="6" x2="6" y2="18"></line>
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
@@ -1116,14 +1838,19 @@
   </div>
 
   <!-- Google Calendar Sync & Management Modal -->
-  <div id="gcal-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4 z-50 transition-opacity duration-200">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-xl max-h-[92vh] flex flex-col border border-slate-100 dark:border-slate-700/80 overflow-hidden transform transition-all">
+  <div id="gcal-modal"
+    class="fixed inset-0 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4 z-50 transition-opacity duration-200">
+    <div
+      class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-xl max-h-[92vh] flex flex-col border border-slate-100 dark:border-slate-700/80 overflow-hidden transform transition-all">
       <!-- Modal Header -->
-      <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-700/80 flex items-center justify-between gap-3 shrink-0">
+      <div
+        class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-700/80 flex items-center justify-between gap-3 shrink-0">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+          <div
+            class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h5v5H7z"/>
+              <path
+                d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h5v5H7z" />
             </svg>
           </div>
           <div>
@@ -1133,56 +1860,84 @@
         </div>
         <button id="close-gcal-modal-btn" aria-label="Close modal"
           class="p-2 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
       </div>
 
       <!-- Modal Body (Scrollable) -->
       <div class="p-4 sm:p-6 space-y-5 overflow-y-auto flex-1">
-        
+
         <!-- Quick Instructions Accordion / Card -->
-        <div class="bg-blue-50/70 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 rounded-xl p-3.5 text-xs text-blue-900 dark:text-blue-200">
-          <div class="flex items-center justify-between cursor-pointer font-semibold select-none" id="gcal-guide-toggle">
+        <div
+          class="bg-blue-50/70 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 rounded-xl p-3.5 text-xs text-blue-900 dark:text-blue-200">
+          <div class="flex items-center justify-between cursor-pointer font-semibold select-none"
+            id="gcal-guide-toggle">
             <span class="flex items-center gap-1.5">
-              <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
               How to get your Google Calendar secret iCal link
             </span>
             <span id="gcal-guide-icon" class="text-blue-500 transition-transform">▼</span>
           </div>
-          <div id="gcal-guide-content" class="mt-2.5 pt-2 border-t border-blue-100/80 dark:border-blue-900/50 space-y-1.5 text-slate-600 dark:text-slate-300 leading-relaxed">
-            <p>1. On computer, open <a href="https://calendar.google.com" target="_blank" rel="noopener" class="text-blue-600 dark:text-blue-400 underline font-medium">Google Calendar</a>.</p>
-            <p>2. On the left under <strong>"My calendars"</strong>, hover over your calendar, click the 3 dots <strong>⋮</strong> → <strong>Settings and sharing</strong>.</p>
+          <div id="gcal-guide-content"
+            class="mt-2.5 pt-2 border-t border-blue-100/80 dark:border-blue-900/50 space-y-1.5 text-slate-600 dark:text-slate-300 leading-relaxed">
+            <p>1. On computer, open <a href="https://calendar.google.com" target="_blank" rel="noopener"
+                class="text-blue-600 dark:text-blue-400 underline font-medium">Google Calendar</a>.</p>
+            <p>2. On the left under <strong>"My calendars"</strong>, hover over your calendar, click the 3 dots
+              <strong>⋮</strong> → <strong>Settings and sharing</strong>.
+            </p>
             <p>3. Scroll down to the <strong>"Integrate calendar"</strong> section.</p>
-            <p>4. Copy the URL in the box labeled <strong>"Secret address in iCal format"</strong> (or "Public address in iCal format").</p>
-            <p class="text-[11px] text-blue-600 dark:text-blue-400 font-medium pt-0.5">🔒 Private & Read-Only: Your calendar is displayed locally in this browser without giving write permissions.</p>
+            <p>4. Copy the URL in the box labeled <strong>"Secret address in iCal format"</strong> (or "Public address
+              in iCal format").</p>
+            <p class="text-[11px] text-blue-600 dark:text-blue-400 font-medium pt-0.5">🔒 Private & Read-Only: Your
+              calendar is displayed locally in this browser without giving write permissions.</p>
           </div>
         </div>
 
         <!-- Add Calendar Form -->
-        <form id="gcal-add-form" class="space-y-3 bg-slate-50 dark:bg-slate-700/30 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
-          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Link New Calendar</h4>
+        <form id="gcal-add-form"
+          class="space-y-3 bg-slate-50 dark:bg-slate-700/30 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Link New Calendar
+          </h4>
           <div>
-            <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1" for="gcal-url-input">Google Calendar iCal / ICS URL</label>
-            <input type="url" id="gcal-url-input" required placeholder="https://calendar.google.com/calendar/ical/.../basic.ics"
+            <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1" for="gcal-url-input">Google
+              Calendar iCal / ICS URL</label>
+            <input type="url" id="gcal-url-input" required
+              placeholder="https://calendar.google.com/calendar/ical/.../basic.ics"
               class="w-full p-2.5 text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500 font-mono">
           </div>
-          
+
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1" for="gcal-name-input">Calendar Label</label>
+              <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1"
+                for="gcal-name-input">Calendar Label</label>
               <input type="text" id="gcal-name-input" placeholder="e.g., Personal / Classes" value="Google Calendar"
                 class="w-full p-2 text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500">
             </div>
             <div>
               <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Color Theme</label>
               <div class="flex items-center gap-1.5 pt-1" id="gcal-color-picker">
-                <button type="button" data-color="#4285F4" class="gcal-color-opt w-6 h-6 rounded-full ring-2 ring-offset-2 ring-blue-500 bg-[#4285F4] transition"></button>
-                <button type="button" data-color="#0F9D58" class="gcal-color-opt w-6 h-6 rounded-full bg-[#0F9D58] hover:scale-110 transition"></button>
-                <button type="button" data-color="#F4B400" class="gcal-color-opt w-6 h-6 rounded-full bg-[#F4B400] hover:scale-110 transition"></button>
-                <button type="button" data-color="#DB4437" class="gcal-color-opt w-6 h-6 rounded-full bg-[#DB4437] hover:scale-110 transition"></button>
-                <button type="button" data-color="#8E24AA" class="gcal-color-opt w-6 h-6 rounded-full bg-[#8E24AA] hover:scale-110 transition"></button>
-                <button type="button" data-color="#00897B" class="gcal-color-opt w-6 h-6 rounded-full bg-[#00897B] hover:scale-110 transition"></button>
-                <button type="button" data-color="#E91E63" class="gcal-color-opt w-6 h-6 rounded-full bg-[#E91E63] hover:scale-110 transition"></button>
+                <button type="button" data-color="#4285F4"
+                  class="gcal-color-opt w-6 h-6 rounded-full ring-2 ring-offset-2 ring-blue-500 bg-[#4285F4] transition"></button>
+                <button type="button" data-color="#0F9D58"
+                  class="gcal-color-opt w-6 h-6 rounded-full bg-[#0F9D58] hover:scale-110 transition"></button>
+                <button type="button" data-color="#F4B400"
+                  class="gcal-color-opt w-6 h-6 rounded-full bg-[#F4B400] hover:scale-110 transition"></button>
+                <button type="button" data-color="#DB4437"
+                  class="gcal-color-opt w-6 h-6 rounded-full bg-[#DB4437] hover:scale-110 transition"></button>
+                <button type="button" data-color="#8E24AA"
+                  class="gcal-color-opt w-6 h-6 rounded-full bg-[#8E24AA] hover:scale-110 transition"></button>
+                <button type="button" data-color="#00897B"
+                  class="gcal-color-opt w-6 h-6 rounded-full bg-[#00897B] hover:scale-110 transition"></button>
+                <button type="button" data-color="#E91E63"
+                  class="gcal-color-opt w-6 h-6 rounded-full bg-[#E91E63] hover:scale-110 transition"></button>
                 <input type="hidden" id="gcal-selected-color" value="#4285F4">
               </div>
             </div>
@@ -1192,7 +1947,10 @@
             <p id="gcal-form-error" class="text-xs text-red-500"></p>
             <button type="submit" id="gcal-add-btn"
               class="px-4 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 transition">
-              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
               <span>Add & Sync Calendar</span>
             </button>
           </div>
@@ -1201,16 +1959,22 @@
         <!-- Linked Calendars List -->
         <div>
           <div class="flex items-center justify-between mb-2">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Linked Calendars</h4>
-            <button type="button" id="gcal-sync-all-btn" class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-semibold">
-              <svg id="gcal-sync-all-icon" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Linked Calendars
+            </h4>
+            <button type="button" id="gcal-sync-all-btn"
+              class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-semibold">
+              <svg id="gcal-sync-all-icon" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+              </svg>
               <span>Sync All</span>
             </button>
           </div>
           <div id="gcal-calendars-list" class="space-y-2.5">
             <!-- Dynamically populated by JS -->
           </div>
-          <div id="gcal-empty-calendars" class="text-center py-6 text-slate-400 dark:text-slate-500 text-xs border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+          <div id="gcal-empty-calendars"
+            class="text-center py-6 text-slate-400 dark:text-slate-500 text-xs border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
             No Google Calendars linked yet. Paste your secret iCal link above to see your events!
           </div>
         </div>
@@ -1219,18 +1983,21 @@
         <div class="pt-2 border-t border-slate-100 dark:border-slate-700/80">
           <div class="flex items-center justify-between">
             <span class="text-xs font-medium text-slate-600 dark:text-slate-300">Offline .ICS File Import</span>
-            <label class="cursor-pointer px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 transition">
+            <label
+              class="cursor-pointer px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 transition">
               <span>Choose .ics file</span>
               <input type="file" id="gcal-file-input" accept=".ics,text/calendar" class="hidden">
             </label>
           </div>
-          <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">If you have a downloaded .ics export file, you can upload it directly.</p>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">If you have a downloaded .ics export file, you
+            can upload it directly.</p>
         </div>
 
       </div>
 
       <!-- Modal Footer -->
-      <div class="p-3.5 sm:p-4 border-t border-slate-100 dark:border-slate-700/80 bg-slate-50/70 dark:bg-slate-800/80 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 shrink-0">
+      <div
+        class="p-3.5 sm:p-4 border-t border-slate-100 dark:border-slate-700/80 bg-slate-50/70 dark:bg-slate-800/80 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 shrink-0">
         <label class="flex items-center gap-2 cursor-pointer select-none">
           <input type="checkbox" id="gcal-auto-sync-toggle" class="rounded text-blue-600 focus:ring-0">
           <span>Auto-sync on page load</span>
@@ -1248,22 +2015,29 @@
   <div id="syllabus-subject-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden z-50">
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 md:p-8 w-full max-w-md space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
-        <h3 id="syllabus-subject-modal-title" class="text-lg font-bold text-slate-900 dark:text-slate-100">Add New Subject</h3>
-        <button type="button" id="close-subject-modal-btn" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <h3 id="syllabus-subject-modal-title" class="text-lg font-bold text-slate-900 dark:text-slate-100">Add New
+          Subject</h3>
+        <button type="button" id="close-subject-modal-btn"
+          class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
       </div>
       <form id="syllabus-subject-form" class="space-y-4">
         <input type="hidden" id="syllabus-subject-id-input">
         <div>
-          <label for="syllabus-subject-name-input" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Subject Name *</label>
+          <label for="syllabus-subject-name-input"
+            class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Subject Name *</label>
           <input type="text" id="syllabus-subject-name-input" required placeholder="e.g. Physics, Modern Mathematics"
             class="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Accent Color</label>
           <div class="flex items-center gap-2 pt-1">
-            <input type="color" id="syllabus-subject-color-input" value="#00B4D8" class="w-9 h-9 rounded-lg border border-slate-300 dark:border-slate-600 cursor-pointer p-0.5 bg-transparent">
+            <input type="color" id="syllabus-subject-color-input" value="#00B4D8"
+              class="w-9 h-9 rounded-lg border border-slate-300 dark:border-slate-600 cursor-pointer p-0.5 bg-transparent">
             <span class="text-xs text-slate-500 dark:text-slate-400">Pick color for subject badges and tabs</span>
           </div>
         </div>
@@ -1271,7 +2045,8 @@
           <button type="button" id="cancel-subject-modal-btn"
             class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition text-xs">Cancel</button>
           <button type="submit"
-            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-xs transition text-xs">Save Subject</button>
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-xs transition text-xs">Save
+            Subject</button>
         </div>
       </form>
     </div>
@@ -1281,23 +2056,31 @@
   <div id="syllabus-chapter-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden z-50">
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 md:p-8 w-full max-w-lg space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
-        <h3 id="syllabus-chapter-modal-title" class="text-lg font-bold text-slate-900 dark:text-slate-100">Add Chapter</h3>
-        <button type="button" id="close-chapter-modal-btn" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <h3 id="syllabus-chapter-modal-title" class="text-lg font-bold text-slate-900 dark:text-slate-100">Add Chapter
+        </h3>
+        <button type="button" id="close-chapter-modal-btn"
+          class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
       </div>
       <form id="syllabus-chapter-form" class="space-y-4">
         <input type="hidden" id="syllabus-chapter-subject-id-input">
         <input type="hidden" id="syllabus-chapter-id-input">
         <div>
-          <label for="syllabus-chapter-name-input" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-            Chapter Title <span class="font-normal text-slate-400">(Optional: leave blank to name automatically as Chapter #)</span>
+          <label for="syllabus-chapter-name-input"
+            class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+            Chapter Title <span class="font-normal text-slate-400">(Optional: leave blank to name automatically as
+              Chapter #)</span>
           </label>
           <input type="text" id="syllabus-chapter-name-input" placeholder="e.g. Kinematics"
             class="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
         <div>
-          <label for="syllabus-chapter-status-input" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mastery Status</label>
+          <label for="syllabus-chapter-status-input"
+            class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mastery Status</label>
           <select id="syllabus-chapter-status-input"
             class="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="not_started">Not Started</option>
@@ -1307,15 +2090,190 @@
           </select>
         </div>
         <div>
-          <label for="syllabus-chapter-notes-input" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Notes / Key Concepts <span class="font-normal text-slate-400">(Optional)</span></label>
-          <textarea id="syllabus-chapter-notes-input" rows="3" placeholder="Key formulas, challenging concepts, or revision notes..."
+          <label for="syllabus-chapter-notes-input"
+            class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Notes / Key Concepts <span
+              class="font-normal text-slate-400">(Optional)</span></label>
+          <textarea id="syllabus-chapter-notes-input" rows="3"
+            placeholder="Key formulas, challenging concepts, or revision notes..."
             class="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
         </div>
         <div class="flex justify-end gap-2.5 pt-3">
           <button type="button" id="cancel-chapter-modal-btn"
             class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition text-xs">Cancel</button>
           <button type="submit"
-            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-xs transition text-xs">Save Chapter</button>
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-xs transition text-xs">Save
+            Chapter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Syllabus Subchapter Modal (Add / Edit Subchapter) -->
+  <div id="syllabus-subchapter-modal"
+    class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden z-50">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 md:p-8 w-full max-w-lg space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+        <h3 id="syllabus-subchapter-modal-title" class="text-lg font-bold text-slate-900 dark:text-slate-100">Add
+          Subchapter</h3>
+        <button type="button" id="close-subchapter-modal-btn"
+          class="px-2.5 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          Close
+        </button>
+      </div>
+      <form id="syllabus-subchapter-form" class="space-y-4">
+        <input type="hidden" id="syllabus-subchapter-subject-id-input">
+        <input type="hidden" id="syllabus-subchapter-chapter-id-input">
+        <input type="hidden" id="syllabus-subchapter-id-input">
+        <div>
+          <label for="syllabus-subchapter-name-input"
+            class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+            Subchapter Title <span class="font-normal text-slate-400">(Optional: leave blank to name automatically e.g.
+              Subchapter 1.1)</span>
+          </label>
+          <input type="text" id="syllabus-subchapter-name-input" placeholder="e.g. Linear Motion"
+            class="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label for="syllabus-subchapter-status-input"
+            class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mastery Status</label>
+          <select id="syllabus-subchapter-status-input"
+            class="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="not_started">Not Started</option>
+            <option value="in_progress">In Progress</option>
+            <option value="review_required">Review Required</option>
+            <option value="mastered">Mastered</option>
+          </select>
+        </div>
+        <div>
+          <label for="syllabus-subchapter-notes-input"
+            class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Notes / Key Concepts <span
+              class="font-normal text-slate-400">(Optional)</span></label>
+          <textarea id="syllabus-subchapter-notes-input" rows="3"
+            placeholder="Key formulas, sub-topics, or revision notes..."
+            class="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+        <div class="flex justify-end gap-2.5 pt-3">
+          <button type="button" id="cancel-subchapter-modal-btn"
+            class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition text-xs">Cancel</button>
+          <button type="submit"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-xs transition text-xs">Save
+            Subchapter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Study Session History Modal -->
+  <div id="study-history-modal"
+    class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 hidden z-50 transition-opacity">
+    <div
+      class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <!-- Header -->
+      <div
+        class="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3 bg-white dark:bg-slate-800 shrink-0">
+        <div>
+          <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">Study Session History</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Detailed log of past study sessions with linked
+            subjects and tasks.</p>
+        </div>
+        <button id="close-study-history-btn" type="button"
+          class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition">Close</button>
+      </div>
+
+      <!-- Filters & Stats summary -->
+      <div
+        class="p-3 sm:p-4 bg-slate-50 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-700 space-y-3 shrink-0">
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
+            <span class="block text-[11px] text-slate-500 dark:text-slate-400 font-medium">Total Sessions</span>
+            <span id="history-total-sessions"
+              class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-200">0</span>
+          </div>
+          <div class="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
+            <span class="block text-[11px] text-slate-500 dark:text-slate-400 font-medium">Total Focus Time</span>
+            <span id="history-total-time" class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-200">0h
+              00m</span>
+          </div>
+          <div class="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
+            <span class="block text-[11px] text-slate-500 dark:text-slate-400 font-medium">Top Subject</span>
+            <span id="history-top-subject"
+              class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-200 truncate">None</span>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex flex-col sm:flex-row gap-2">
+          <div class="flex-1">
+            <label for="history-filter-subject"
+              class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Filter by Subject</label>
+            <select id="history-filter-subject"
+              class="w-full p-2 text-xs border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">
+              <option value="all">All Subjects</option>
+            </select>
+          </div>
+          <div class="flex-1">
+            <label for="history-filter-type"
+              class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Filter by Activity
+              Type</label>
+            <select id="history-filter-type"
+              class="w-full p-2 text-xs border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">
+              <option value="all">All Activities</option>
+              <option value="task">Tasks</option>
+              <option value="syllabus">Syllabus Chapters / Subchapters</option>
+              <option value="exam">Exams</option>
+              <option value="flashcard">Flashcards</option>
+              <option value="general">General (No link)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sessions List (Scrollable) -->
+      <div id="study-history-list" class="flex-1 overflow-y-auto p-3 sm:p-5 space-y-3">
+        <!-- Dynamically populated session cards -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Notebook Modal (Create / Edit) -->
+  <div id="notebook-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden z-50">
+    <div
+      class="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 dark:border-slate-700">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-700/60 mb-4">
+        <h3 id="notebook-modal-title" class="text-lg font-bold text-slate-900 dark:text-slate-100">New Notebook</h3>
+        <button type="button" id="close-notebook-modal-btn"
+          class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xl leading-none">&times;</button>
+      </div>
+      <form id="notebook-form" class="space-y-4">
+        <input type="hidden" id="notebook-id-input">
+        <div>
+          <label for="notebook-name-input"
+            class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Notebook Name</label>
+          <input type="text" id="notebook-name-input" required placeholder="e.g. Biology Unit 1"
+            class="w-full p-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label for="notebook-desc-input"
+            class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Description (Optional)</label>
+          <input type="text" id="notebook-desc-input" placeholder="Brief summary of this notebook"
+            class="w-full p-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label for="notebook-color-input"
+            class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Accent Color</label>
+          <div class="flex items-center gap-3">
+            <input type="color" id="notebook-color-input" value="#3b82f6"
+              class="w-10 h-10 rounded-xl cursor-pointer bg-transparent border-0">
+            <span class="text-xs text-slate-500 dark:text-slate-400">Color indicator for notebook pills</span>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="cancel-notebook-modal-btn"
+            class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition">Cancel</button>
+          <button type="submit"
+            class="px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition">Save
+            Notebook</button>
         </div>
       </form>
     </div>
@@ -1334,6 +2292,7 @@
   <script src="js/timer.js" defer></script>
   <script src="js/sounds.js" defer></script>
   <script src="js/flashcards.js" defer></script>
+  <script src="js/notes.js" defer></script>
   <script src="js/syllabus.js" defer></script>
   <script src="collectibles.js" defer></script>
   <script src="script.js" defer></script>

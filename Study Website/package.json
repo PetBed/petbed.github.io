@@ -1,0 +1,17 @@
+{
+  "name": "study-website-notes",
+  "private": true,
+  "scripts": {
+    "build:editor": "esbuild editor-entry.js --bundle --format=iife --platform=browser --outfile=js/note-editor.bundle.js"
+  },
+  "dependencies": {
+    "@codemirror/commands": "^6.8.1",
+    "@codemirror/lang-markdown": "^6.3.2",
+    "@codemirror/language": "^6.11.3",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.36.5",
+    "@lezer/highlight": "^1.2.1",
+    "codemirror": "^6.0.1",
+    "esbuild": "^0.24.2"
+  }
+}

@@ -5,7 +5,8 @@
 window.StudyApp = window.StudyApp || {};
 
 var syllabusSortableInstance = null;
-var collapsedChapters = new Set();
+var syllabusSubchapterSortableInstances = [];
+var expandedChapters = new Set();
 
 const SYLLABUS_STATUSES = [
 	{ key: "not_started", label: "Not Started", colorClass: "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600" },
@@ -241,12 +242,12 @@ function renderActiveSubjectContent() {
 						Right
 					</button>
 					<button type="button" id="syllabus-edit-subject-btn"
-						class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">
-						Edit Subject
+						class="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-green-500 dark:hover:text-green-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="Edit Subject" aria-label="Edit Subject">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
 					</button>
 					<button type="button" id="syllabus-delete-subject-btn"
-						class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition">
-						Delete Subject
+						class="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="Delete Subject" aria-label="Delete Subject">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
 					</button>
 					<button type="button" id="syllabus-add-exam-btn"
 						class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-amber-500 hover:bg-amber-600 active:scale-95 text-white shadow-xs transition flex items-center gap-1.5" title="Schedule an exam paper for this subject">
@@ -353,6 +354,12 @@ function renderActiveSubjectContent() {
 function renderChaptersList(subject) {
 	const container = document.getElementById("syllabus-chapters-list");
 	if (!container) return;
+	if (syllabusSortableInstance) {
+		syllabusSortableInstance.destroy();
+		syllabusSortableInstance = null;
+	}
+	syllabusSubchapterSortableInstances.forEach(instance => instance.destroy());
+	syllabusSubchapterSortableInstances = [];
 	container.innerHTML = "";
 
 	const chapters = subject.chapters || [];
@@ -378,7 +385,7 @@ function renderChaptersList(subject) {
 		const subchapters = ch.subchapters;
 		const subCount = subchapters.length;
 		const subMastered = subchapters.filter(s => s.status === "mastered").length;
-		const isCollapsed = collapsedChapters.has(ch.id);
+		const isCollapsed = !expandedChapters.has(ch.id);
 
 		const item = document.createElement("div");
 		item.className = "p-3.5 sm:p-4 rounded-xl border border-slate-200/90 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-700/30 hover:border-slate-300 dark:hover:border-slate-600 transition space-y-3";
@@ -388,6 +395,22 @@ function renderChaptersList(subject) {
 			<!-- Chapter Header Row -->
 			<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
 				<div class="flex items-start gap-2.5 min-w-0">
+					${subCount > 0 ? `
+					<button type="button" data-action="toggle-collapse" data-chapter-id="${ch.id}"
+						class="p-1 rounded-md text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 dark:text-slate-300 transition shrink-0"
+						title="${isCollapsed ? 'Show' : 'Hide'} subchapters" aria-label="${isCollapsed ? 'Show' : 'Hide'} subchapters">
+						<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<polyline points="${isCollapsed ? '6 9 12 15 18 9' : '18 15 12 9 6 15'}"></polyline>
+						</svg>
+					</button>
+					` : ''}
+					<span class="chapter-drag-handle p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-grab active:cursor-grabbing shrink-0" title="Drag to reorder chapter" aria-label="Drag to reorder chapter">
+						<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<circle cx="9" cy="5" r="1"></circle><circle cx="15" cy="5" r="1"></circle>
+							<circle cx="9" cy="12" r="1"></circle><circle cx="15" cy="12" r="1"></circle>
+							<circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="19" r="1"></circle>
+						</svg>
+					</span>
 					<span class="px-2 py-0.5 rounded-md text-xs font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 shrink-0 select-none">
 						${chapterLabel}
 					</span>
@@ -421,47 +444,25 @@ function renderChaptersList(subject) {
 						${statusCfg.label}
 					</button>
 
-					<!-- Chapter Move Up/Down Buttons -->
-					<button type="button" data-action="move-up" data-chapter-id="${ch.id}" ${idx === 0 ? 'disabled' : ''}
-						class="px-2 py-1 text-xs font-semibold rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
-						title="Move Chapter Up">
-						Up
-					</button>
-					<button type="button" data-action="move-down" data-chapter-id="${ch.id}" ${idx === chapters.length - 1 ? 'disabled' : ''}
-						class="px-2 py-1 text-xs font-semibold rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
-						title="Move Chapter Down">
-						Down
-					</button>
-
 					<!-- Edit Chapter Button -->
 					<button type="button" data-action="edit-chapter" data-chapter-id="${ch.id}"
-						class="px-2 py-1 text-xs font-semibold rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition"
-						title="Edit Chapter">
-						Edit
+						class="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-green-500 dark:hover:text-green-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="Edit Chapter" aria-label="Edit Chapter">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
 					</button>
 
 					<!-- Delete Chapter Button -->
 					<button type="button" data-action="delete-chapter" data-chapter-id="${ch.id}"
-						class="px-2 py-1 text-xs font-semibold rounded border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition"
-						title="Delete Chapter">
-						Delete
+						class="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="Delete Chapter" aria-label="Delete Chapter">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
 					</button>
 
-					${subCount > 0 ? `
-					<!-- Collapse / Expand Toggle Button -->
-					<button type="button" data-action="toggle-collapse" data-chapter-id="${ch.id}"
-						class="px-2 py-1 text-xs font-semibold rounded border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition"
-						title="Toggle Subchapters">
-						${isCollapsed ? `Show (${subCount})` : 'Hide'}
-					</button>
-					` : ''}
 				</div>
 			</div>
 
 			<!-- Subchapters Container -->
 			<div class="subchapters-container ${isCollapsed ? 'hidden' : ''}">
 				${subCount > 0 ? `
-				<div class="ml-2 sm:ml-4 pl-3 sm:pl-4 border-l-2 border-slate-200 dark:border-slate-700 space-y-2 pt-1">
+				<div data-subchapter-list="${ch.id}" class="ml-2 sm:ml-4 pl-3 sm:pl-4 border-l-2 border-slate-200 dark:border-slate-700 space-y-2 pt-1">
 					${subchapters.map((sc, subIdx) => {
 			const subNumber = `${chapterNumber}.${subIdx + 1}`;
 			const subLabel = `Subchapter ${subNumber}`;
@@ -472,6 +473,13 @@ function renderChaptersList(subject) {
 			return `
 						<div class="p-2.5 rounded-lg border border-slate-200/80 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 transition hover:border-slate-300 dark:hover:border-slate-600" data-subchapter-id="${sc.id}">
 							<div class="flex items-start gap-2.5 min-w-0">
+								<span class="subchapter-drag-handle p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-grab active:cursor-grabbing shrink-0" title="Drag to reorder subchapter" aria-label="Drag to reorder subchapter">
+									<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+										<circle cx="9" cy="5" r="1"></circle><circle cx="15" cy="5" r="1"></circle>
+										<circle cx="9" cy="12" r="1"></circle><circle cx="15" cy="12" r="1"></circle>
+										<circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="19" r="1"></circle>
+									</svg>
+								</span>
 								<span class="px-1.5 py-0.5 rounded text-[11px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 shrink-0 select-none border border-slate-200 dark:border-slate-600">
 									${subNumber}
 								</span>
@@ -491,32 +499,16 @@ function renderChaptersList(subject) {
 									${subStatusCfg.label}
 								</button>
 
-								<!-- Move Subchapter Up -->
-								<button type="button" data-action="move-sub-up" data-chapter-id="${ch.id}" data-sub-id="${sc.id}" ${subIdx === 0 ? 'disabled' : ''}
-									class="px-2 py-0.5 text-xs font-semibold rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
-									title="Move Subchapter Up">
-									Up
-								</button>
-
-								<!-- Move Subchapter Down -->
-								<button type="button" data-action="move-sub-down" data-chapter-id="${ch.id}" data-sub-id="${sc.id}" ${subIdx === subCount - 1 ? 'disabled' : ''}
-									class="px-2 py-0.5 text-xs font-semibold rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
-									title="Move Subchapter Down">
-									Down
-								</button>
-
 								<!-- Edit Subchapter -->
 								<button type="button" data-action="edit-subchapter" data-chapter-id="${ch.id}" data-sub-id="${sc.id}"
-									class="px-2 py-0.5 text-xs font-semibold rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition"
-									title="Edit Subchapter">
-									Edit
+									class="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-green-500 dark:hover:text-green-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="Edit Subchapter" aria-label="Edit Subchapter">
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
 								</button>
 
 								<!-- Delete Subchapter -->
 								<button type="button" data-action="delete-subchapter" data-chapter-id="${ch.id}" data-sub-id="${sc.id}"
-									class="px-2 py-0.5 text-xs font-semibold rounded border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition"
-									title="Delete Subchapter">
-									Delete
+									class="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="Delete Subchapter" aria-label="Delete Subchapter">
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
 								</button>
 							</div>
 						</div>
@@ -541,10 +533,6 @@ function renderChaptersList(subject) {
 
 			if (action === "toggle-status") {
 				cycleChapterStatus(subject.id, ch.id);
-			} else if (action === "move-up") {
-				moveChapter(subject.id, ch.id, -1);
-			} else if (action === "move-down") {
-				moveChapter(subject.id, ch.id, 1);
 			} else if (action === "edit-chapter") {
 				openChapterModal(subject.id, ch);
 			} else if (action === "delete-chapter") {
@@ -552,21 +540,15 @@ function renderChaptersList(subject) {
 			} else if (action === "add-subchapter") {
 				openSubchapterModal(subject.id, ch.id);
 			} else if (action === "toggle-collapse") {
-				if (collapsedChapters.has(ch.id)) {
-					collapsedChapters.delete(ch.id);
+				if (expandedChapters.has(ch.id)) {
+					expandedChapters.delete(ch.id);
 				} else {
-					collapsedChapters.add(ch.id);
+					expandedChapters.add(ch.id);
 				}
 				renderSyllabusPage();
 			} else if (action === "toggle-sub-status") {
 				const subId = target.dataset.subId;
 				if (subId) cycleSubchapterStatus(subject.id, ch.id, subId);
-			} else if (action === "move-sub-up") {
-				const subId = target.dataset.subId;
-				if (subId) moveSubchapter(subject.id, ch.id, subId, -1);
-			} else if (action === "move-sub-down") {
-				const subId = target.dataset.subId;
-				if (subId) moveSubchapter(subject.id, ch.id, subId, 1);
 			} else if (action === "edit-subchapter") {
 				const subId = target.dataset.subId;
 				const sub = (ch.subchapters || []).find(s => s.id === subId);
@@ -579,6 +561,59 @@ function renderChaptersList(subject) {
 
 		container.appendChild(item);
 	});
+
+	initializeSyllabusSortables(container, subject);
+}
+
+function initializeSyllabusSortables(container, subject) {
+	if (typeof Sortable !== "function") return;
+
+	syllabusSortableInstance = new Sortable(container, {
+		animation: 150,
+		handle: ".chapter-drag-handle",
+		draggable: "[data-chapter-id]",
+		onEnd: (event) => {
+			const orderedIds = Array.from(event.to.children).map(item => item.dataset.chapterId).filter(Boolean);
+			reorderChapters(subject.id, orderedIds);
+		}
+	});
+
+	container.querySelectorAll("[data-subchapter-list]").forEach((subchapterList) => {
+		syllabusSubchapterSortableInstances.push(new Sortable(subchapterList, {
+			animation: 150,
+			handle: ".subchapter-drag-handle",
+			draggable: "[data-subchapter-id]",
+			onEnd: (event) => {
+				const orderedIds = Array.from(event.to.children).map(item => item.dataset.subchapterId).filter(Boolean);
+				reorderSubchapters(subject.id, subchapterList.dataset.subchapterList, orderedIds);
+			}
+		}));
+	});
+}
+
+function reorderChapters(subjectId, orderedIds) {
+	const subject = syllabus.find(s => s.id === subjectId);
+	if (!subject || !subject.chapters) return;
+
+	const chaptersById = new Map(subject.chapters.map(chapter => [chapter.id, chapter]));
+	subject.chapters = orderedIds.map(id => chaptersById.get(id)).filter(Boolean);
+	subject.chapters.forEach((chapter, index) => { chapter.order = index; });
+
+	saveSyllabus();
+	renderSyllabusPage();
+}
+
+function reorderSubchapters(subjectId, chapterId, orderedIds) {
+	const subject = syllabus.find(s => s.id === subjectId);
+	const chapter = subject && (subject.chapters || []).find(item => item.id === chapterId);
+	if (!chapter || !chapter.subchapters) return;
+
+	const subchaptersById = new Map(chapter.subchapters.map(subchapter => [subchapter.id, subchapter]));
+	chapter.subchapters = orderedIds.map(id => subchaptersById.get(id)).filter(Boolean);
+	chapter.subchapters.forEach((subchapter, index) => { subchapter.order = index; });
+
+	saveSyllabus();
+	renderSyllabusPage();
 }
 
 // ----------------------------------------------------
@@ -843,7 +878,7 @@ function handleDeleteChapter(subjectId, chapterId) {
 		return;
 	}
 
-	collapsedChapters.delete(chapterId);
+	expandedChapters.delete(chapterId);
 
 	subject.chapters = subject.chapters.filter(c => c.id !== chapterId);
 	// Re-index chapter orders
@@ -959,8 +994,8 @@ function handleSaveSubchapter(e) {
 		chapter.subchapters.push(newSub);
 	}
 
-	// Ensure chapter is not collapsed when user adds a subchapter
-	collapsedChapters.delete(chapterId);
+	// Show the new subchapter so it can be reviewed immediately.
+	expandedChapters.add(chapterId);
 
 	closeSubchapterModal();
 	saveSyllabus();

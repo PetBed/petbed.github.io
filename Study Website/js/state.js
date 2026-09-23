@@ -63,7 +63,7 @@ var noteSearchQuery = '';
 var noteSubjectFilter = 'all';
 var noteTagFilter = 'all';
 var noteSortBy = 'updatedAt';
-var noteEditorMode = 'split';
+var noteEditorMode = 'edit';
 var isNoteDirty = false;
 
 if ("Notification" in window && Notification.permission === "default") {

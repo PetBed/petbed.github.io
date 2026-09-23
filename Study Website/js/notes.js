@@ -7,6 +7,10 @@ window.StudyApp = window.StudyApp || {};
 var saveNoteDebounceTimer = null;
 var activeNoteTags = [];
 var isSavingNote = false;
+var noteSaveVersion = 0;
+var noteSaveRequestChain = Promise.resolve();
+var noteEditor = null;
+var isHydratingNoteEditor = false;
 var wikilinkDropdownIndex = -1;
 var wikilinkMatches = [];
 
@@ -16,9 +20,14 @@ var wikilinkMatches = [];
 var NOTES_CACHE_KEY = "study_notes_cache";
 var NOTEBOOKS_CACHE_KEY = "study_notebooks_cache";
 
+function getNotesCacheKey(baseKey) {
+	var userKey = currentUser && currentUser.id ? String(currentUser.id) : "anonymous";
+	return `${baseKey}:${userKey}`;
+}
+
 function getCachedNotes() {
 	try {
-		var data = localStorage.getItem(NOTES_CACHE_KEY);
+		var data = localStorage.getItem(getNotesCacheKey(NOTES_CACHE_KEY));
 		return data ? JSON.parse(data) : [];
 	} catch (e) {
 		return [];
@@ -27,13 +36,13 @@ function getCachedNotes() {
 
 function setCachedNotes(notesList) {
 	try {
-		localStorage.setItem(NOTES_CACHE_KEY, JSON.stringify(notesList));
+		localStorage.setItem(getNotesCacheKey(NOTES_CACHE_KEY), JSON.stringify(notesList));
 	} catch (e) {}
 }
 
 function getCachedNotebooks() {
 	try {
-		var data = localStorage.getItem(NOTEBOOKS_CACHE_KEY);
+		var data = localStorage.getItem(getNotesCacheKey(NOTEBOOKS_CACHE_KEY));
 		return data ? JSON.parse(data) : [];
 	} catch (e) {
 		return [];
@@ -42,8 +51,58 @@ function getCachedNotebooks() {
 
 function setCachedNotebooks(notebooksList) {
 	try {
-		localStorage.setItem(NOTEBOOKS_CACHE_KEY, JSON.stringify(notebooksList));
+		localStorage.setItem(getNotesCacheKey(NOTEBOOKS_CACHE_KEY), JSON.stringify(notebooksList));
 	} catch (e) {}
+}
+
+function getEditorValue() {
+	return noteEditor ? noteEditor.getValue() : (noteEditorTextarea ? noteEditorTextarea.value : "");
+}
+
+function getEditorSelection() {
+	if (noteEditor) return noteEditor.getSelection();
+	return {
+		start: noteEditorTextarea ? noteEditorTextarea.selectionStart : 0,
+		end: noteEditorTextarea ? noteEditorTextarea.selectionEnd : 0
+	};
+}
+
+function setEditorSelection(start, end) {
+	if (noteEditor) noteEditor.setSelection(start, end);
+	else if (noteEditorTextarea) {
+		noteEditorTextarea.selectionStart = start;
+		noteEditorTextarea.selectionEnd = end === undefined ? start : end;
+	}
+}
+
+function replaceEditorRange(start, end, value) {
+	if (noteEditor) noteEditor.replaceRange(start, end, value);
+	else if (noteEditorTextarea) noteEditorTextarea.setRangeText(value, start, end, "select");
+}
+
+function focusNoteEditor() {
+	if (noteEditor) noteEditor.focus();
+	else if (noteEditorTextarea) noteEditorTextarea.focus();
+}
+
+function initializeNoteEditor(initialValue) {
+	if (!noteEditorMount || !window.StudyMarkdownEditor) return;
+	if (!noteEditor) {
+		noteEditor = window.StudyMarkdownEditor.create(noteEditorMount, initialValue || "", function (value) {
+			if (noteEditorTextarea) noteEditorTextarea.value = value;
+			if (isHydratingNoteEditor) return;
+			var note = notes.find(function (n) { return n._id === activeNoteId; });
+			if (note) note.content = value;
+			if (noteEditorMode === "reading") updateStatsAndPreview();
+			checkWikilinkTrigger();
+			queueAutoSave();
+		});
+	} else {
+		isHydratingNoteEditor = true;
+		noteEditor.setValue(initialValue || "");
+		isHydratingNoteEditor = false;
+	}
+	if (noteEditorTextarea) noteEditorTextarea.value = initialValue || "";
 }
 
 // ==========================================
@@ -51,6 +110,8 @@ function setCachedNotebooks(notebooksList) {
 // ==========================================
 async function loadNotesData() {
 	if (!currentUser) return;
+	var savedMode = localStorage.getItem(`study_note_editor_mode:${currentUser.id}`);
+	if (["edit", "reading"].includes(savedMode)) noteEditorMode = savedMode;
 
 	// Populate from cache first for instantaneous rendering
 	var cachedNotes = getCachedNotes();
@@ -168,9 +229,53 @@ function processObsidianCallouts(markdownText) {
 
 		return `<div class="obsidian-callout ${calloutClass}">` +
 			`<div class="obsidian-callout-header">${escapeHtml(displayTitle)}</div>` +
-			`<div class="obsidian-callout-body">${parseMarkdownBasic(cleanedBody)}</div>` +
+			`<div class="obsidian-callout-body">${parseMarkdownBasic(normalizeMarkdownListIndentation(cleanedBody))}</div>` +
 			`</div>\n`;
 	});
+}
+
+function normalizeMarkdownListIndentation(markdownText) {
+	var lines = markdownText.split("\n");
+	var listStack = [];
+	var inFence = false;
+
+	return lines.map(function (line) {
+		var fenceMatch = line.match(/^\s*(```+|~~~+)/);
+		if (fenceMatch) {
+			inFence = !inFence;
+			listStack = [];
+			return line;
+		}
+		if (inFence || /^\s*>/.test(line)) return line;
+
+		var listMatch = line.match(/^(\s*)([-*+]|\d+[.)])(\s+)(\[[ xX]\]\s+)?(.*)$/);
+		if (!listMatch) {
+			if (line.trim()) {
+				var nonListIndent = (line.match(/^\s*/) || [""])[0].length;
+				while (listStack.length && nonListIndent <= listStack[listStack.length - 1].rawIndent) listStack.pop();
+			}
+			return line;
+		}
+
+		var rawIndent = listMatch[1].replace(/\t/g, "  ").length;
+		while (listStack.length && rawIndent <= listStack[listStack.length - 1].rawIndent) listStack.pop();
+
+		var renderedIndent = rawIndent;
+		if (listStack.length) {
+			var parent = listStack[listStack.length - 1];
+			renderedIndent = parent.renderedIndent + parent.markerWidth;
+		}
+
+		var markerWidth = listMatch[2].length + listMatch[3].length + (listMatch[4] ? listMatch[4].length : 0);
+		listStack.push({
+			rawIndent: rawIndent,
+			renderedIndent: renderedIndent,
+			markerWidth: markerWidth
+		});
+
+		var contentStart = listMatch[1].length;
+		return " ".repeat(renderedIndent) + line.slice(contentStart);
+	}).join("\n");
 }
 
 // Parse markdown helper for callout bodies
@@ -201,11 +306,37 @@ function processWikilinks(htmlText) {
 		var tooltip = noteExists ? `Go to "${escapeHtml(target)}"` : `"${escapeHtml(target)}" (Click to create)`;
 
 		return `<a href="javascript:void(0)" class="internal-wikilink${notFoundClass}" data-note-target="${escapeHtml(target)}" title="${tooltip}">` +
-			`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block opacity-70"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>` +
 			`<span>${escapeHtml(displayText)}</span>` +
 			`</a>`;
 	});
 }
+
+function findStudyWikilinkTarget(target) {
+	var normalizedTarget = (target || "").trim().toLowerCase();
+	return notes.find(function (note) {
+		if (note.title && note.title.toLowerCase() === normalizedTarget) return true;
+		return (note.aliases || []).some(function (alias) {
+			return alias.toLowerCase() === normalizedTarget;
+		});
+	});
+}
+
+function handleStudyWikilinkClick(target) {
+	var existing = findStudyWikilinkTarget(target);
+	if (existing) {
+		selectNote(existing._id);
+		return;
+	}
+	if (confirm(`Note "${target}" does not exist yet. Create it now?`)) {
+		createNewNote(target, `# ${target}\n\n`);
+	}
+}
+
+window.isStudyWikilinkKnown = function (target) {
+	return Boolean(findStudyWikilinkTarget(target));
+};
+
+window.handleNoteWikilinkClick = handleStudyWikilinkClick;
 
 // Process task checklist checkboxes for interactive toggling
 function processTaskCheckboxes(htmlText) {
@@ -226,7 +357,8 @@ function renderObsidianMarkdown(rawText) {
 	var markdownBody = parsed.body;
 
 	// 2. Process Obsidian callouts
-	var withCallouts = processObsidianCallouts(markdownBody);
+	var normalizedBody = normalizeMarkdownListIndentation(markdownBody);
+	var withCallouts = processObsidianCallouts(normalizedBody);
 
 	// 3. Parse markdown through Marked
 	var html = "";
@@ -330,8 +462,16 @@ function markNoteSaved() {
 	}
 }
 
+function markNoteSyncFailed() {
+	isSavingNote = false;
+	if (noteSaveStatus) {
+		noteSaveStatus.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-rose-500 mr-1.5"></span><span class="text-xs text-rose-600 dark:text-rose-400">Local only</span>';
+	}
+}
+
 function queueAutoSave() {
 	isNoteDirty = true;
+	noteSaveVersion++;
 	markNoteSaving();
 	clearTimeout(saveNoteDebounceTimer);
 	saveNoteDebounceTimer = setTimeout(function () {
@@ -347,7 +487,7 @@ async function saveCurrentNote() {
 
 	// Gather values from DOM
 	var newTitle = noteTitleInput ? (noteTitleInput.value.trim() || "Untitled Note") : note.title;
-	var newContent = noteEditorTextarea ? noteEditorTextarea.value : note.content;
+	var newContent = getEditorValue() || note.content;
 	var newSubject = noteSubjectSelect ? noteSubjectSelect.value : note.subject;
 	var newNotebookId = noteNotebookSelect ? (noteNotebookSelect.value === "none" ? null : noteNotebookSelect.value) : note.notebookId;
 
@@ -357,41 +497,49 @@ async function saveCurrentNote() {
 	note.notebookId = newNotebookId;
 	note.tags = activeNoteTags;
 	note.updatedAt = new Date().toISOString();
+	var requestedVersion = noteSaveVersion;
+	var noteId = note._id;
+	var payload = {
+		userId: currentUser.id,
+		title: note.title,
+		content: note.content,
+		subject: note.subject,
+		notebookId: note.notebookId,
+		tags: note.tags,
+		aliases: note.aliases || [],
+		isPinned: note.isPinned
+	};
 
 	// Update local storage cache immediately
 	setCachedNotes(notes);
 	renderNotesList();
 	updateBacklinksSection();
 
-	// Send update to server
-	try {
-		var response = await fetch(`${API_URL}/api/study/notes/${note._id}`, {
-			method: "PUT",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				title: note.title,
-				content: note.content,
-				subject: note.subject,
-				notebookId: note.notebookId,
-				tags: note.tags,
-				aliases: note.aliases || [],
-				isPinned: note.isPinned
-			})
-		});
+	// Serialize writes so an older request cannot overtake a newer one.
+	noteSaveRequestChain = noteSaveRequestChain.then(async function () {
+		try {
+			var response = await fetch(`${API_URL}/api/study/notes/${noteId}`, {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(payload)
+			});
 
-		if (response.ok) {
+			if (!response.ok) throw new Error(`Save failed with status ${response.status}`);
 			var data = await response.json();
-			if (data && data.note) {
-				var idx = notes.findIndex(function (n) { return n._id === activeNoteId; });
+			if (data && data.note && requestedVersion === noteSaveVersion) {
+				var idx = notes.findIndex(function (n) { return n._id === noteId; });
 				if (idx !== -1) notes[idx] = data.note;
 				setCachedNotes(notes);
 			}
-		}
-	} catch (error) {
-		console.warn("Failed to sync note to server, cached locally:", error);
-	}
 
-	markNoteSaved();
+			if (requestedVersion === noteSaveVersion) markNoteSaved();
+		} catch (error) {
+			console.warn("Failed to sync note to server, cached locally:", error);
+			if (requestedVersion === noteSaveVersion) markNoteSyncFailed();
+		}
+	});
+
+	return noteSaveRequestChain;
 }
 
 // ==========================================
@@ -452,7 +600,7 @@ async function handleNotebookFormSubmit(e) {
 			await fetch(`${API_URL}/api/study/notebooks/${id}`, {
 				method: "PUT",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name: name, description: description, color: color })
+				body: JSON.stringify({ name: name, description: description, color: color, userId: currentUser.id })
 			});
 		} catch (err) {
 			console.error("Failed to update notebook on server:", err);
@@ -515,7 +663,7 @@ async function deleteNotebook(notebookId) {
 	renderNotesList();
 
 	try {
-		await fetch(`${API_URL}/api/study/notebooks/${notebookId}`, { method: "DELETE" });
+		await fetch(`${API_URL}/api/study/notebooks/${notebookId}?userId=${encodeURIComponent(currentUser.id)}`, { method: "DELETE" });
 	} catch (err) {
 		console.error("Failed to delete notebook on server:", err);
 	}
@@ -615,6 +763,7 @@ function selectNote(noteId) {
 	// Populate editor controls
 	if (noteTitleInput) noteTitleInput.value = note.title || "";
 	if (noteEditorTextarea) noteEditorTextarea.value = note.content || "";
+	initializeNoteEditor(note.content || "");
 
 	activeNoteTags = Array.isArray(note.tags) ? [...note.tags] : [];
 	renderActiveNoteTags();
@@ -632,6 +781,7 @@ function selectNote(noteId) {
 
 	updatePinButtonState(note.isPinned);
 	updateStatsAndPreview();
+	setEditorMode(noteEditorMode);
 	updateBacklinksSection();
 	markNoteSaved();
 	renderNotesList();
@@ -661,7 +811,7 @@ async function deleteActiveNote() {
 	}
 
 	try {
-		await fetch(`${API_URL}/api/study/notes/${deletedId}`, { method: "DELETE" });
+		await fetch(`${API_URL}/api/study/notes/${deletedId}?userId=${encodeURIComponent(currentUser.id)}`, { method: "DELETE" });
 	} catch (err) {
 		console.error("Failed to delete note on server:", err);
 	}
@@ -726,58 +876,229 @@ function addTagToActiveNote(rawTag) {
 }
 
 // ==========================================
-// EDITOR MODES & SPLIT VIEW
+// EDITOR MODES
 // ==========================================
 function setEditorMode(mode) {
+	if (mode === "preview") mode = "reading";
+	if (mode !== "edit" && mode !== "reading") mode = "edit";
 	noteEditorMode = mode;
+	if (currentUser && currentUser.id) localStorage.setItem(`study_note_editor_mode:${currentUser.id}`, mode);
 
 	var editorCol = document.getElementById("note-editor-col");
 	var previewCol = document.getElementById("note-preview-col");
-	var splitDivider = document.getElementById("note-split-divider");
+	var readingToolbar = document.getElementById("note-reading-toolbar");
 
 	if (!editorCol || !previewCol) return;
 
 	// Reset mode button states
-	[noteModeEditBtn, noteModeSplitBtn, noteModePreviewBtn].forEach(function (btn) {
+	[noteModeEditBtn, noteModePreviewBtn].forEach(function (btn) {
 		if (btn) btn.classList.remove("active", "bg-white", "dark:bg-slate-700", "text-blue-600", "dark:text-blue-400", "shadow-xs");
 	});
 
 	if (mode === "edit") {
 		editorCol.classList.remove("hidden");
-		editorCol.className = "flex-1 flex flex-col min-w-0";
+		editorCol.className = "w-full flex flex-col min-w-0";
 		previewCol.classList.add("hidden");
-		if (splitDivider) splitDivider.classList.add("hidden");
 		if (noteModeEditBtn) noteModeEditBtn.classList.add("active", "bg-white", "dark:bg-slate-700", "text-blue-600", "dark:text-blue-400", "shadow-xs");
-	} else if (mode === "preview") {
+		if (readingToolbar) readingToolbar.classList.add("hidden");
+	} else {
 		editorCol.classList.add("hidden");
 		previewCol.classList.remove("hidden");
-		previewCol.className = "flex-1 flex flex-col min-w-0 overflow-y-auto";
-		if (splitDivider) splitDivider.classList.add("hidden");
+		previewCol.className = "w-full flex flex-col min-w-0 overflow-y-auto";
 		if (noteModePreviewBtn) noteModePreviewBtn.classList.add("active", "bg-white", "dark:bg-slate-700", "text-blue-600", "dark:text-blue-400", "shadow-xs");
-		updateStatsAndPreview();
-	} else {
-		// Split mode
-		editorCol.classList.remove("hidden");
-		editorCol.className = "w-full md:w-1/2 flex flex-col min-w-0 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-700";
-		previewCol.classList.remove("hidden");
-		previewCol.className = "w-full md:w-1/2 flex flex-col min-w-0 overflow-y-auto";
-		if (splitDivider) splitDivider.classList.remove("hidden");
-		if (noteModeSplitBtn) noteModeSplitBtn.classList.add("active", "bg-white", "dark:bg-slate-700", "text-blue-600", "dark:text-blue-400", "shadow-xs");
+		if (readingToolbar) readingToolbar.classList.remove("hidden");
 		updateStatsAndPreview();
 	}
 }
 
+function getFoldStateKey() {
+	var userId = currentUser && currentUser.id ? currentUser.id : "anonymous";
+	return `study_note_folds:${userId}:${activeNoteId || "none"}`;
+}
+
+function loadFoldState() {
+	try {
+		return JSON.parse(localStorage.getItem(getFoldStateKey()) || "{}");
+	} catch (e) {
+		return {};
+	}
+}
+
+function saveFoldState(state) {
+	try {
+		localStorage.setItem(getFoldStateKey(), JSON.stringify(state));
+	} catch (e) {}
+}
+
+function getHeadingText(heading) {
+	return (heading.textContent || "").replace(/[+-]\s*$/, "").trim();
+}
+
+function buildPreviewStructure() {
+	if (!notePreviewContainer) return;
+
+	var nodes = Array.from(notePreviewContainer.childNodes);
+	var headings = nodes.filter(function (node) {
+		return node.nodeType === 1 && /^H[1-6]$/.test(node.tagName);
+	});
+	var occurrenceMap = {};
+	var foldState = loadFoldState();
+	var stack = [];
+	var outline = [];
+
+	nodes.forEach(function (node) {
+		if (node.nodeType === 1 && /^H[1-6]$/.test(node.tagName)) {
+			var level = parseInt(node.tagName.substring(1), 10);
+			var text = getHeadingText(node);
+			var baseKey = `${level}:${text.toLowerCase()}`;
+			occurrenceMap[baseKey] = (occurrenceMap[baseKey] || 0) + 1;
+			var key = `${baseKey}:${occurrenceMap[baseKey]}`;
+			var section = document.createElement("section");
+			section.className = "markdown-section";
+			section.dataset.headingKey = key;
+			section.dataset.headingLevel = String(level);
+
+			while (stack.length && stack[stack.length - 1].level >= level) stack.pop();
+			(stack.length ? stack[stack.length - 1].section : notePreviewContainer).appendChild(section);
+			section.appendChild(node);
+			stack.push({ level: level, section: section });
+
+			var foldButton = document.createElement("button");
+			foldButton.type = "button";
+			foldButton.className = "markdown-fold-toggle";
+			foldButton.setAttribute("aria-label", "Collapse section");
+			foldButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg>';
+			foldButton.addEventListener("click", function (event) {
+				event.preventDefault();
+				event.stopPropagation();
+				setSectionCollapsed(section, !section.classList.contains("is-collapsed"));
+			});
+			node.insertBefore(foldButton, node.firstChild);
+			outline.push({ key: key, level: level, text: text, section: section });
+		} else {
+			(stack.length ? stack[stack.length - 1].section : notePreviewContainer).appendChild(node);
+		}
+	});
+
+	outline.forEach(function (item) {
+		if (foldState[item.key]) setSectionCollapsed(item.section, true, false);
+	});
+	addNestedListFolds();
+
+	var outlineEl = document.getElementById("note-outline");
+	if (outlineEl) {
+		outlineEl.innerHTML = "";
+		outline.forEach(function (item) {
+			var link = document.createElement("button");
+			link.type = "button";
+			link.className = "note-outline-item";
+			link.textContent = item.text || "Untitled heading";
+			link.style.paddingLeft = `${Math.max(0, item.level - 1) * 0.5}rem`;
+			link.addEventListener("click", function () {
+				item.section.scrollIntoView({ behavior: "smooth", block: "start" });
+			});
+			outlineEl.appendChild(link);
+		});
+	}
+}
+
+function getListItemLabel(item) {
+	return Array.from(item.childNodes).filter(function (node) {
+		return node.nodeType === 3 || (node.nodeType === 1 && !["UL", "OL"].includes(node.tagName));
+	}).map(function (node) {
+		return node.textContent || "";
+	}).join(" ").replace(/\s+/g, " ").trim();
+}
+
+function addNestedListFolds() {
+	if (!notePreviewContainer) return;
+	var listIndex = 0;
+	notePreviewContainer.querySelectorAll("li").forEach(function (item) {
+		var nestedLists = Array.from(item.children).filter(function (child) {
+			return child.tagName === "UL" || child.tagName === "OL";
+		});
+		if (nestedLists.length === 0) return;
+
+		var key = `list:${listIndex++}:${getListItemLabel(item).toLowerCase()}`;
+		item.classList.add("markdown-list-foldable");
+		item.dataset.headingKey = key;
+		var button = document.createElement("button");
+		button.type = "button";
+		button.className = "markdown-fold-toggle markdown-list-fold-toggle";
+		button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg>';
+		button.addEventListener("click", function (event) {
+			event.preventDefault();
+			event.stopPropagation();
+			setListItemCollapsed(item, nestedLists, !item.classList.contains("is-collapsed"));
+		});
+		item.insertBefore(button, item.firstChild);
+		if (loadFoldState()[key]) setListItemCollapsed(item, nestedLists, true, false);
+	});
+}
+
+function setListItemCollapsed(item, nestedLists, collapsed, persist) {
+	item.classList.toggle("is-collapsed", collapsed);
+	nestedLists.forEach(function (list) { list.hidden = collapsed; });
+	var button = item.querySelector(":scope > .markdown-list-fold-toggle");
+	if (button) {
+		button.classList.toggle("is-collapsed", collapsed);
+		button.setAttribute("aria-label", collapsed ? "Expand nested items" : "Collapse nested items");
+	}
+	if (persist !== false) {
+		var state = loadFoldState();
+		if (item.dataset.headingKey) state[item.dataset.headingKey] = collapsed;
+		saveFoldState(state);
+	}
+}
+
+function setSectionCollapsed(section, collapsed, persist) {
+	section.classList.toggle("is-collapsed", collapsed);
+	var heading = section.firstElementChild;
+	var button = heading ? heading.querySelector(".markdown-fold-toggle") : null;
+	Array.from(section.children).forEach(function (child) {
+		if (child !== heading) child.hidden = collapsed;
+	});
+	if (button) {
+		button.classList.toggle("is-collapsed", collapsed);
+		button.setAttribute("aria-label", collapsed ? "Expand section" : "Collapse section");
+	}
+	if (persist !== false) {
+		var state = loadFoldState();
+		if (section.dataset.headingKey) state[section.dataset.headingKey] = collapsed;
+		saveFoldState(state);
+	}
+}
+
+function setAllSectionsCollapsed(collapsed) {
+	if (!notePreviewContainer) return;
+	notePreviewContainer.querySelectorAll(".markdown-section").forEach(function (section) {
+		setSectionCollapsed(section, collapsed, false);
+	});
+	notePreviewContainer.querySelectorAll(".markdown-list-foldable").forEach(function (item) {
+		var nestedLists = Array.from(item.children).filter(function (child) {
+			return child.tagName === "UL" || child.tagName === "OL";
+		});
+		setListItemCollapsed(item, nestedLists, collapsed, false);
+	});
+	var state = {};
+	if (collapsed) notePreviewContainer.querySelectorAll(".markdown-section, .markdown-list-foldable").forEach(function (item) {
+		if (item.dataset.headingKey) state[item.dataset.headingKey] = true;
+	});
+	saveFoldState(state);
+}
+
 // Update stats and preview HTML
 function updateStatsAndPreview() {
-	var raw = noteEditorTextarea ? noteEditorTextarea.value : "";
+	var raw = getEditorValue();
 	var stats = calculateNoteStats(raw);
 
 	if (noteWordCount) noteWordCount.textContent = `${stats.words} words`;
 	if (noteCharCount) noteCharCount.textContent = `${stats.chars} chars`;
 	if (noteReadTime) noteReadTime.textContent = stats.readTime;
 
-	if (notePreviewContainer) {
+	if (notePreviewContainer && noteEditorMode === "reading") {
 		notePreviewContainer.innerHTML = renderObsidianMarkdown(raw);
+		buildPreviewStructure();
 		attachPreviewInteractions();
 	}
 }
@@ -793,20 +1114,7 @@ function attachPreviewInteractions() {
 			e.preventDefault();
 			var target = link.getAttribute("data-note-target");
 			if (!target) return;
-
-			var existing = notes.find(function (n) {
-				if (n.title && n.title.toLowerCase() === target.toLowerCase()) return true;
-				if (n.aliases && n.aliases.some(function (a) { return a.toLowerCase() === target.toLowerCase(); })) return true;
-				return false;
-			});
-
-			if (existing) {
-				selectNote(existing._id);
-			} else {
-				if (confirm(`Note "${target}" does not exist yet. Create it now?`)) {
-					createNewNote(target, `# ${target}\n\n`);
-				}
-			}
+			handleStudyWikilinkClick(target);
 		});
 	});
 
@@ -822,8 +1130,8 @@ function attachPreviewInteractions() {
 
 // Toggle task in raw markdown
 function toggleMarkdownTask(targetIdx, isChecked) {
-	if (!noteEditorTextarea) return;
-	var raw = noteEditorTextarea.value;
+	var raw = getEditorValue();
+	if (!raw && !noteEditorTextarea) return;
 	var currentIdx = 0;
 	var taskRegex = /\[([ xX])\]/g;
 
@@ -836,29 +1144,31 @@ function toggleMarkdownTask(targetIdx, isChecked) {
 		return match;
 	});
 
-	noteEditorTextarea.value = updated;
-	queueAutoSave();
+	if (noteEditor) noteEditor.setValue(updated);
+	else {
+		noteEditorTextarea.value = updated;
+		queueAutoSave();
+	}
 }
 
 // ==========================================
 // TOOLBAR ACTIONS & KEYBINDS
 // ==========================================
 function insertFormatting(prefix, suffix, defaultText) {
-	if (!noteEditorTextarea) return;
-	var textarea = noteEditorTextarea;
-	var start = textarea.selectionStart;
-	var end = textarea.selectionEnd;
-	var text = textarea.value;
+	if (!noteEditor && !noteEditorTextarea) return;
+	var selection = getEditorSelection();
+	var start = selection.start;
+	var end = selection.end;
+	var text = getEditorValue();
 	var selectedText = text.substring(start, end) || defaultText;
 
 	var replacement = prefix + selectedText + suffix;
-	textarea.setRangeText(replacement, start, end, "select");
-	textarea.focus();
+	replaceEditorRange(start, end, replacement);
+	focusNoteEditor();
 
 	// If defaultText was used, select default text so user can immediately overwrite it
 	if (!text.substring(start, end)) {
-		textarea.selectionStart = start + prefix.length;
-		textarea.selectionEnd = start + prefix.length + defaultText.length;
+		setEditorSelection(start + prefix.length, start + prefix.length + defaultText.length);
 	}
 
 	updateStatsAndPreview();
@@ -866,23 +1176,99 @@ function insertFormatting(prefix, suffix, defaultText) {
 }
 
 function insertLinePrefix(linePrefix) {
-	if (!noteEditorTextarea) return;
-	var textarea = noteEditorTextarea;
-	var start = textarea.selectionStart;
-	var end = textarea.selectionEnd;
-	var text = textarea.value;
-
-	var lineStart = text.lastIndexOf("\n", start - 1) + 1;
-	var before = text.substring(0, lineStart);
-	var lineAndAfter = text.substring(lineStart);
-
-	textarea.value = before + linePrefix + lineAndAfter;
-	textarea.selectionStart = start + linePrefix.length;
-	textarea.selectionEnd = end + linePrefix.length;
-	textarea.focus();
+	if (!noteEditor && !noteEditorTextarea) return;
+	var selection = getEditorSelection();
+	var start = selection.start;
+	var end = selection.end;
+	var text = getEditorValue();
+	var lineStart = text.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
+	var lineEnd = text.indexOf("\n", end);
+	if (lineEnd === -1) lineEnd = text.length;
+	var selectedLines = text.substring(lineStart, lineEnd);
+	var prefixedLines = selectedLines.split("\n").map(function (line) {
+		return linePrefix + line;
+	}).join("\n");
+	replaceEditorRange(lineStart, lineEnd, prefixedLines);
+	setEditorSelection(start + linePrefix.length, end + linePrefix.length * (selectedLines.split("\n").length));
+	focusNoteEditor();
 
 	updateStatsAndPreview();
 	queueAutoSave();
+}
+
+function getNestedMarkdownIndent(text, lineStart) {
+	var currentLine = text.slice(lineStart).split("\n")[0];
+	var currentIndent = (currentLine.match(/^[ \t]*/) || [""])[0].replace(/\t/g, "  ").length;
+	var before = text.slice(0, lineStart).split("\n");
+	for (var index = before.length - 1; index >= 0; index--) {
+		var parentLine = before[index];
+		if (!parentLine.trim()) continue;
+		var parentIndentText = (parentLine.match(/^[ \t]*/) || [""])[0];
+		var parentIndent = parentIndentText.replace(/\t/g, "  ").length;
+		if (parentIndent >= currentIndent && currentIndent > 0) continue;
+		var marker = parentLine.slice(parentIndentText.length).match(/^(?:[-*+]|\d+[.)])(\s+)/);
+		if (!marker) return 2;
+		var desiredIndent = parentIndent + marker[0].length;
+		return Math.max(2, desiredIndent - currentIndent);
+	}
+	return 2;
+}
+
+function indentSelectedLines(outdent) {
+	if (!noteEditor && !noteEditorTextarea) return;
+	var selection = getEditorSelection();
+	var text = getEditorValue();
+	var start = selection.start;
+	var end = selection.end;
+	var lineStart = text.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
+	var lineEnd = text.indexOf("\n", end);
+	if (lineEnd === -1) lineEnd = text.length;
+	var selected = text.substring(lineStart, lineEnd);
+	var lines = selected.split("\n");
+	var indentAmount = outdent ? 2 : getNestedMarkdownIndent(text, lineStart);
+	var changed = lines.map(function (line) {
+		if (outdent) return line.replace(new RegExp(`^( {1,${indentAmount}}|\\t)`), "");
+		return " ".repeat(indentAmount) + line;
+	});
+	var replacement = changed.join("\n");
+	replaceEditorRange(lineStart, lineEnd, replacement);
+	var nextStart = Math.max(lineStart, start + (outdent ? -indentAmount : indentAmount));
+	setEditorSelection(nextStart, Math.max(nextStart, end + (outdent ? -indentAmount * lines.length : indentAmount * lines.length)));
+	focusNoteEditor();
+	updateStatsAndPreview();
+	queueAutoSave();
+}
+
+function continueMarkdownList() {
+	if (!noteEditor && !noteEditorTextarea) return false;
+	var text = getEditorValue();
+	var selection = getEditorSelection();
+	var cursor = selection.start;
+	if (selection.start !== selection.end) return false;
+	var lineStart = text.lastIndexOf("\n", Math.max(0, cursor - 1)) + 1;
+	var lineEnd = text.indexOf("\n", cursor);
+	if (lineEnd === -1) lineEnd = text.length;
+	var line = text.substring(lineStart, lineEnd);
+	var match = line.match(/^(\s*)([-*+]\s+|(\d+)[.)]\s+)(\[[ xX]\]\s+)?(.*)$/);
+	if (!match) return false;
+
+	var indentation = match[1];
+	var marker = match[2];
+	var checkbox = match[4] || "";
+	var content = match[5] || "";
+	if (!content.trim()) {
+		replaceEditorRange(lineStart, lineEnd, "\n");
+		setEditorSelection(lineStart + 1, lineStart + 1);
+	} else {
+		var nextMarker = marker;
+		if (match[3]) nextMarker = `${parseInt(match[3], 10) + 1}. `;
+		replaceEditorRange(cursor, cursor, `\n${indentation}${nextMarker}${checkbox}`);
+		setEditorSelection(cursor + indentation.length + nextMarker.length + checkbox.length + 1, cursor + indentation.length + nextMarker.length + checkbox.length + 1);
+	}
+	focusNoteEditor();
+	updateStatsAndPreview();
+	queueAutoSave();
+	return true;
 }
 
 function insertTable() {
@@ -896,7 +1282,7 @@ function insertCallout(type) {
 }
 
 function handleEditorKeydown(e) {
-	if (!noteEditorTextarea) return;
+	if (!noteEditor && !noteEditorTextarea) return;
 
 	// Autocomplete navigation when dropdown is open
 	if (wikilinkSuggestPopover && !wikilinkSuggestPopover.classList.contains("hidden")) {
@@ -942,22 +1328,24 @@ function handleEditorKeydown(e) {
 		saveCurrentNote();
 	} else if (isCtrlOrCmd && e.key.toLowerCase() === "e") {
 		e.preventDefault();
-		setEditorMode(noteEditorMode === "edit" ? "preview" : "edit");
+		setEditorMode(noteEditorMode === "edit" ? "reading" : "edit");
 	} else if (isCtrlOrCmd && e.shiftKey && e.key.toLowerCase() === "l") {
 		e.preventDefault();
 		insertFormatting("[[", "]]", "Note Title");
 	} else if (e.key === "Tab") {
 		e.preventDefault();
-		insertFormatting("  ", "", "");
+		indentSelectedLines(e.shiftKey);
+	} else if (e.key === "Enter") {
+		if (continueMarkdownList()) e.preventDefault();
 	}
 }
 
 // Wikilink Autocomplete Popover
 function checkWikilinkTrigger() {
-	if (!noteEditorTextarea || !wikilinkSuggestPopover) return;
-	var textarea = noteEditorTextarea;
-	var cursor = textarea.selectionStart;
-	var textBefore = textarea.value.substring(0, cursor);
+	if ((!noteEditor && !noteEditorTextarea) || !wikilinkSuggestPopover) return;
+	var selection = getEditorSelection();
+	var cursor = selection.start;
+	var textBefore = getEditorValue().substring(0, cursor);
 
 	var lastDoubleBracket = textBefore.lastIndexOf("[[");
 	if (lastDoubleBracket !== -1 && lastDoubleBracket >= cursor - 30) {
@@ -1012,20 +1400,18 @@ function renderWikilinkSuggestions() {
 }
 
 function insertWikilinkFromSuggestion(title) {
-	if (!noteEditorTextarea) return;
-	var textarea = noteEditorTextarea;
-	var cursor = textarea.selectionStart;
-	var text = textarea.value;
+	if (!noteEditor && !noteEditorTextarea) return;
+	var cursor = getEditorSelection().start;
+	var text = getEditorValue();
 	var lastDoubleBracket = text.substring(0, cursor).lastIndexOf("[[");
 
 	if (lastDoubleBracket !== -1) {
-		var before = text.substring(0, lastDoubleBracket);
-		var after = text.substring(cursor);
 		var insertion = `[[${title}]]`;
-		textarea.value = before + insertion + after;
-		textarea.selectionStart = textarea.selectionEnd = before.length + insertion.length;
+		replaceEditorRange(lastDoubleBracket, cursor, insertion);
+		setEditorSelection(lastDoubleBracket + insertion.length, lastDoubleBracket + insertion.length);
 	}
 	closeWikilinkSuggestions();
+	focusNoteEditor();
 	updateStatsAndPreview();
 	queueAutoSave();
 }
@@ -1250,7 +1636,8 @@ function createNotebookPill(id, name, count, isActive, notebookObj) {
 	if (notebookObj) {
 		var editBtn = document.createElement("button");
 		editBtn.type = "button";
-		editBtn.className = "opacity-0 group-hover:opacity-100 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition p-0.5";
+		editBtn.className = "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition p-1";
+		editBtn.setAttribute("aria-label", "Edit Notebook");
 		editBtn.title = "Edit Notebook";
 		editBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>`;
 		editBtn.addEventListener("click", function (e) {
@@ -1260,7 +1647,8 @@ function createNotebookPill(id, name, count, isActive, notebookObj) {
 
 		var delBtn = document.createElement("button");
 		delBtn.type = "button";
-		delBtn.className = "opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-600 transition p-0.5";
+		delBtn.className = "text-slate-400 hover:text-rose-600 transition p-1";
+		delBtn.setAttribute("aria-label", "Delete Notebook");
 		delBtn.title = "Delete Notebook";
 		delBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
 		delBtn.addEventListener("click", function (e) {
@@ -1562,8 +1950,7 @@ function initNotesEvents() {
 
 	// Mode buttons
 	if (noteModeEditBtn) noteModeEditBtn.addEventListener("click", function () { setEditorMode("edit"); });
-	if (noteModePreviewBtn) noteModePreviewBtn.addEventListener("click", function () { setEditorMode("preview"); });
-	if (noteModeSplitBtn) noteModeSplitBtn.addEventListener("click", function () { setEditorMode("split"); });
+	if (noteModePreviewBtn) noteModePreviewBtn.addEventListener("click", function () { setEditorMode("reading"); });
 
 	// Mobile Back Button
 	if (noteMobileBackBtn) {
@@ -1596,6 +1983,11 @@ function initNotesEvents() {
 		});
 	}
 
+	var foldAllBtn = document.getElementById("note-fold-all-btn");
+	if (foldAllBtn) foldAllBtn.addEventListener("click", function () { setAllSectionsCollapsed(true); });
+	var unfoldAllBtn = document.getElementById("note-unfold-all-btn");
+	if (unfoldAllBtn) unfoldAllBtn.addEventListener("click", function () { setAllSectionsCollapsed(false); });
+
 	// Notebook Modal
 	if (notebookForm) notebookForm.addEventListener("submit", handleNotebookFormSubmit);
 	if (closeNotebookModalBtn) closeNotebookModalBtn.addEventListener("click", closeNotebookModal);
@@ -1614,12 +2006,6 @@ function initNotesEvents() {
 		}
 	});
 
-	// Handle window resize for split view on mobile
-	window.addEventListener("resize", function () {
-		if (window.innerWidth < 768 && noteEditorMode === "split") {
-			setEditorMode("edit");
-		}
-	});
 }
 
 function initToolbarEvents() {
@@ -1665,6 +2051,7 @@ window.loadNotesData = loadNotesData;
 window.renderNotesPage = renderNotesPage;
 window.initNotesEvents = initNotesEvents;
 window.createNewNote = createNewNote;
+window.handleNoteEditorKeydown = handleEditorKeydown;
 
 window.StudyApp.notes = {
 	loadNotesData: loadNotesData,

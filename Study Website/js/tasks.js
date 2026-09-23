@@ -52,7 +52,7 @@ async function addTask() {
 	const subject = taskSubjectSelect.value;
 	const time = taskTimeInput.value;
 	const deadline = taskDeadlineInput.value;
-	if (!text || !subject || !time || !deadline) return;
+	if (!text || !subject || !time) return;
 	const tempId = `temp_${Date.now()}`;
 	const optimisticTask = { _id: tempId, text, subject, time, deadline, completed: false, subTasks: [] };
 	tasks.push(optimisticTask);
@@ -65,7 +65,7 @@ async function addTask() {
 		const response = await fetch(`${API_URL}/api/study/tasks`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ text, subject, time, deadline, userId: currentUser.id }),
+			body: JSON.stringify({ text, subject, time, ...(deadline ? { deadline } : {}), userId: currentUser.id }),
 		});
 		if (!response.ok) throw new Error("Server error");
 		const savedTask = await response.json();
@@ -207,9 +207,11 @@ async function updateSubTask(taskId, subtaskId, updates, fromModal = false) {
 		const updatedTask = await response.json();
 		const taskIndex = tasks.findIndex((t) => t._id === taskId);
 		if (taskIndex !== -1) tasks[taskIndex].subTasks = updatedTask.subTasks;
+		return true;
 	} catch (error) {
 		console.error("Failed to update sub-task:", error);
 		// Revert is handled by the calling function (e.g. toggleSubTask)
+		return false;
 	}
 }
 
@@ -272,7 +274,7 @@ function renderNextTodos() {
                     <div class="mt-1 w-2.5 h-2.5 rounded-full" style="background-color: ${getColorForSubject(task.subject)};"></div>
                     <div>
                         <p class="font-semibold text-slate-800 dark:text-slate-200">${task.text}</p>
-                        <p class="text-sm text-slate-500 dark:text-slate-400">Due: ${new Date(task.deadline).toLocaleDateString()}</p>
+						<p class="text-sm text-slate-500 dark:text-slate-400">${task.deadline ? `Due: ${new Date(task.deadline).toLocaleDateString()}` : "No due date"}</p>
                     </div>
                 </div>
                 ${progressBarHtml}`;
@@ -295,7 +297,11 @@ function renderTasksPage() {
 		tasksToRender = tasksToRender.filter((task) => !task.completed);
 	}
 	if (taskSort === "dueDate") {
-		tasksToRender.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+		tasksToRender.sort((a, b) => {
+			const deadlineA = a.deadline ? new Date(a.deadline).getTime() : Number.POSITIVE_INFINITY;
+			const deadlineB = b.deadline ? new Date(b.deadline).getTime() : Number.POSITIVE_INFINITY;
+			return deadlineA - deadlineB;
+		});
 	} else if (taskSort === "time") {
 		tasksToRender.sort((a, b) => a.time - b.time);
 	}
@@ -322,37 +328,40 @@ function renderTasksPage() {
 		const completedClass = task.completed ? " line-through text-slate-400 dark:text-slate-500" : "";
 		const isExpanded = isTaskExpanded(task._id);
 		let subtasksHtml = `<div class="subtask-list pl-2 mt-2 space-y-1" data-task-id="${task._id}" ${isCustomSort ? 'aria-label="Sub-tasks. Drag or use move buttons to reorder."' : ""}>`;
-		let progressBarHtml = "";
-		if (task.subTasks && task.subTasks.length > 0) {
-			const completedCount = task.subTasks.filter((st) => st.completed).length;
-			const totalCount = task.subTasks.length;
-			const percentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
-			progressBarHtml = `
-                    <div class="mt-2 flex items-center gap-2">
-						<button type="button" class="task-collapse-btn flex h-6 w-6 items-center justify-center rounded text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200" aria-expanded="${isExpanded}" aria-label="${isExpanded ? "Collapse sub-tasks" : "Expand sub-tasks"}" title="${isExpanded ? "Collapse sub-tasks" : "Expand sub-tasks"}">
-							<i class="${isExpanded ? "icon-angle-up" : "icon-angle-down"}"></i>
-						</button>
-                        <div class="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-2">
-                            <div class="bg-green-500 h-2 rounded-full" style="width: ${percentage}%"></div>
-                        </div>
-                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">${completedCount}/${totalCount}</span>
+		const subTasks = task.subTasks || [];
+		const completedCount = subTasks.filter((st) => st.completed).length;
+		const totalCount = subTasks.length;
+		const percentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+		const progressBarHtml = `
+                <div class="mt-2 flex items-center gap-2">
+					<button type="button" class="task-collapse-btn flex items-center gap-1.5 rounded px-1 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-200 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-600 dark:hover:text-slate-200" aria-expanded="${isExpanded}" aria-label="${isExpanded ? "Collapse" : "Expand"} sub-tasks" title="${isExpanded ? "Collapse" : "Expand"} sub-tasks">
+						<i class="${isExpanded ? "icon-angle-up" : "icon-angle-down"}"></i>
+						<span>Subtasks (${totalCount})</span>
+					</button>
+                    ${totalCount > 0 ? `
+                    <div class="flex-1 bg-slate-200 dark:bg-slate-600 rounded-full h-2">
+                        <div class="bg-green-500 h-2 rounded-full" style="width: ${percentage}%"></div>
                     </div>
-                `;
-			task.subTasks.forEach((st) => {
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">${completedCount}/${totalCount}</span>
+                    ` : `<span class="text-xs text-slate-400 dark:text-slate-500">None yet</span>`}
+                </div>
+            `;
+		if (totalCount > 0) {
+			subTasks.forEach((st) => {
 				const subCompletedClass = st.completed ? " line-through text-slate-500" : "dark:text-slate-300";
 				subtasksHtml += `
                         <div class="subtask-item group flex items-center justify-between" data-id="${st._id}" data-parent-id="${task._id}">
                             <div class="flex items-center flex-grow min-w-0">
 								${isCustomSort ? `<button type="button" class="subtask-drag-handle mr-2 flex-shrink-0 cursor-grab text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 transition-colors" title="Drag to reorder sub-task" aria-label="Drag to reorder sub-task"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></button>` : ""}
                                 <input type="checkbox" ${st.completed ? "checked" : ""} class="subtask-checkbox h-4 w-4 rounded border-gray-300 text-blue-600 cursor-pointer">
-                                <span class="subtask-text-view ml-2 text-sm cursor-pointer ${subCompletedClass}">${st.text}</span>
+								<span class="subtask-text-view ml-2 text-sm cursor-text ${subCompletedClass}" title="Click to edit subtask">${st.text}</span>
                             </div>
 							<div class="flex items-center">
 								${isCustomSort ? `
 									<button type="button" class="move-subtask-up-btn text-slate-400 hover:text-blue-500 mr-1" aria-label="Move sub-task up" title="Move sub-task up">↑</button>
 									<button type="button" class="move-subtask-down-btn text-slate-400 hover:text-blue-500 mr-1" aria-label="Move sub-task down" title="Move sub-task down">↓</button>
 								` : ""}
-                            	<button class="delete-subtask-btn text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100">
+	                            <button type="button" class="delete-subtask-btn p-1 text-slate-400 hover:text-red-500 transition" title="Delete sub-task" aria-label="Delete sub-task">
                                 	<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                             	</button>
 							</div>
@@ -368,18 +377,18 @@ function renderTasksPage() {
                     <div class="flex items-start flex-grow">
                         <input type="checkbox" ${task.completed ? "checked" : ""} class="task-checkbox mt-1 mr-3 h-5 w-5 rounded border-gray-300 text-blue-600 cursor-pointer">
                         <div class="task-details-view w-full">
-                            <p class="font-medium text-slate-700 dark:text-slate-200 ${completedClass}">${task.text}</p>
+								<p class="task-text-view font-medium text-slate-700 dark:text-slate-200 cursor-text ${completedClass}" title="Click to edit task">${task.text}</p>
                             <div class="flex flex-wrap items-center gap-x-2 text-xs mt-1 ${completedClass}">
                                 <span class="flex items-center font-semibold" style="color:${getColorForSubject(task.subject)};"><span class="w-2 h-2 rounded-full mr-1.5" style="background-color:${getColorForSubject(task.subject)};"></span>${task.subject}</span>
-                                <span class="dark:text-slate-400">•</span><span class="dark:text-slate-400">${task.time} mins</span><span class="dark:text-slate-400">•</span><span class="dark:text-slate-400">${new Date(task.deadline).toLocaleDateString()}</span>
+								<span class="dark:text-slate-400">•</span><span class="dark:text-slate-400">${task.time} mins</span><span class="dark:text-slate-400">•</span><span class="dark:text-slate-400">${task.deadline ? new Date(task.deadline).toLocaleDateString() : "No due date"}</span>
                             </div>
                         </div>
                     </div>
                     <div class="flex items-center">
-                         <button class="edit-task-btn opacity-0 group-hover:opacity-100 text-slate-400 hover:text-blue-500 mr-1">
+						 <button type="button" class="edit-task-btn p-1 text-slate-400 hover:text-blue-500 transition" title="Edit task details" aria-label="Edit task details">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         </button>
-                        <button class="delete-task-btn opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500">
+						<button type="button" class="delete-task-btn p-1 text-slate-400 hover:text-red-500 transition" title="Delete task" aria-label="Delete task">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
 						${isCustomSort ? `
@@ -391,9 +400,14 @@ function renderTasksPage() {
                 ${progressBarHtml}
 				<div class="subtask-panel overflow-hidden ${isExpanded ? "expanded" : ""}" data-task-id="${task._id}">
                 	${subtasksHtml}
-                	<div class="mt-2 pl-2 flex items-center gap-2">
-                    	<input type="text" id="subtask-input-${task._id}" class="w-full text-sm p-1 border border-slate-200 dark:border-slate-600 rounded bg-white dark:bg-slate-700" placeholder="Add sub-task...">
-                    	<button class="add-subtask-btn text-xs bg-blue-500 text-white rounded px-2 py-1" data-task-id="${task._id}">Add</button>
+	                <div class="mt-2 pl-2">
+						<button type="button" class="new-subtask-btn w-full rounded-lg border border-dashed border-slate-300 dark:border-slate-600 px-3 py-2 text-left text-sm font-medium text-slate-500 hover:border-blue-400 hover:text-blue-600 dark:text-slate-400 dark:hover:border-blue-500 dark:hover:text-blue-400 transition" data-task-id="${task._id}">
+							+ New subtask
+						</button>
+						<div class="new-subtask-form hidden mt-2 flex items-center gap-2" data-task-id="${task._id}">
+							<input type="text" id="subtask-input-${task._id}" class="w-full text-sm p-2 border border-slate-200 dark:border-slate-600 rounded bg-white dark:bg-slate-700" placeholder="Subtask name..." aria-label="New subtask name">
+							<button type="button" class="add-subtask-btn text-xs bg-blue-500 text-white rounded px-3 py-2" data-task-id="${task._id}">Add</button>
+						</div>
                 	</div>
                 </div>
             `;
@@ -466,6 +480,79 @@ function applySubtaskPanelHeights() {
 	});
 }
 
+function startInlineTextEdit(textElement, initialText, saveText) {
+	const input = document.createElement("input");
+	input.type = "text";
+	input.value = initialText;
+	input.className = "w-full min-w-0 rounded border border-blue-400 bg-white px-2 py-1 text-sm text-slate-800 outline-none ring-2 ring-blue-100 dark:border-blue-500 dark:bg-slate-800 dark:text-slate-100 dark:ring-blue-900";
+	input.setAttribute("aria-label", "Edit text");
+	textElement.replaceWith(input);
+	input.focus();
+	input.select();
+
+	let finished = false;
+	const finish = async (shouldSave) => {
+		if (finished) return;
+		finished = true;
+		const nextText = input.value.trim();
+		if (!shouldSave || !nextText || nextText === initialText) {
+			input.replaceWith(textElement);
+			return;
+		}
+
+		textElement.textContent = nextText;
+		input.replaceWith(textElement);
+		await saveText(nextText);
+	};
+
+	input.addEventListener("blur", () => finish(true));
+	input.addEventListener("keydown", (event) => {
+		if (event.key === "Enter") {
+			event.preventDefault();
+			finish(true);
+		} else if (event.key === "Escape") {
+			event.preventDefault();
+			finish(false);
+		}
+	});
+}
+
+async function saveInlineTaskText(taskId, text) {
+	const task = tasks.find((item) => item._id === taskId);
+	if (!task) return;
+	const previousText = task.text;
+	task.text = text;
+
+	try {
+		const response = await fetch(`${API_URL}/api/study/tasks/${taskId}`, {
+			method: "PUT",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ text }),
+		});
+		if (!response.ok) throw new Error("Server error");
+	} catch (error) {
+		console.error("Failed to update task text:", error);
+		task.text = previousText;
+		renderTasksPage();
+	}
+}
+
+async function saveInlineSubtaskText(taskId, subtaskId, text) {
+	const task = tasks.find((item) => item._id === taskId);
+	const subtask = task?.subTasks?.find((item) => item._id === subtaskId);
+	if (!subtask) return;
+	const previousText = subtask.text;
+	subtask.text = text;
+
+	try {
+		if (!await updateSubTask(taskId, subtaskId, { text })) throw new Error("Server error");
+	} catch (error) {
+		console.error("Failed to update subtask text:", error);
+		subtask.text = previousText;
+		renderTasksPage();
+	}
+}
+
 function moveTaskByOffset(taskId, offset) {
 	if (taskSort !== "custom") return;
 	const currentIndex = tasks.findIndex((task) => task._id === taskId);
@@ -499,7 +586,7 @@ function openEditModal(taskId) {
 	editTaskText.value = task.text;
 	editTaskSubject.value = task.subject;
 	editTaskTime.value = task.time;
-	editTaskDeadline.value = new Date(task.deadline).toISOString().split("T")[0];
+	editTaskDeadline.value = task.deadline ? new Date(task.deadline).toISOString().split("T")[0] : "";
 
 	renderSubtasksInModal(taskId);
 
@@ -518,7 +605,7 @@ async function saveTaskEdits() {
 		text: editTaskText.value.trim(),
 		subject: editTaskSubject.value,
 		time: editTaskTime.value,
-		deadline: editTaskDeadline.value,
+		deadline: editTaskDeadline.value || null,
 	};
 
 	// Optimistic UI update — snapshot original for rollback
@@ -586,8 +673,16 @@ function initTaskEvents() {
 			if (task) toggleTask(task);
 		} else if (target.closest(".delete-task-btn") && taskItem) {
 			deleteTask(taskItem.dataset.id);
-		} else if (target.closest(".add-subtask-btn")) {
-			const taskId = target.dataset.taskId;
+					} else if (target.closest(".new-subtask-btn") && taskItem) {
+						const taskId = target.closest(".new-subtask-btn").dataset.taskId;
+						const form = taskItem.querySelector(`.new-subtask-form[data-task-id="${taskId}"]`);
+						const inputEl = taskItem.querySelector(`#subtask-input-${taskId}`);
+						if (form && inputEl) {
+							form.classList.remove("hidden");
+							inputEl.focus();
+						}
+					} else if (target.closest(".add-subtask-btn") && taskItem) {
+						const taskId = target.closest(".add-subtask-btn").dataset.taskId;
 			const inputEl = document.getElementById(`subtask-input-${taskId}`);
 			if (inputEl) {
 				addSubTask(taskId, inputEl.value);
@@ -599,10 +694,19 @@ function initTaskEvents() {
 			toggleSubTask(taskId, subtaskId, target.checked);
 		} else if (target.closest(".edit-task-btn") && taskItem) {
 			openEditModal(taskItem.dataset.id);
+					} else if (target.closest(".task-text-view") && taskItem) {
+						const task = tasks.find((item) => item._id === taskItem.dataset.id);
+						if (task) startInlineTextEdit(target.closest(".task-text-view"), task.text, (text) => saveInlineTaskText(task._id, text));
 		} else if (target.closest(".delete-subtask-btn") && subtaskItem) {
 			const taskId = subtaskItem.dataset.parentId;
 			const subtaskId = subtaskItem.dataset.id;
 			deleteSubTask(taskId, subtaskId);
+					} else if (subtaskItem && !target.closest("button, input")) {
+						const taskId = subtaskItem.dataset.parentId;
+						const subtaskId = subtaskItem.dataset.id;
+						const subtask = tasks.find((item) => item._id === taskId)?.subTasks?.find((item) => item._id === subtaskId);
+						const textElement = subtaskItem.querySelector(".subtask-text-view");
+						if (subtask && textElement) startInlineTextEdit(textElement, subtask.text, (text) => saveInlineSubtaskText(taskId, subtaskId, text));
 		} else if (target.closest(".move-task-up-btn") && taskItem) {
 			moveTaskByOffset(taskItem.dataset.id, -1);
 		} else if (target.closest(".move-task-down-btn") && taskItem) {
@@ -628,6 +732,11 @@ function initTaskEvents() {
 		taskStatusFilter = e.target.value;
 		saveTaskViewPreferences();
 		renderTasksPage();
+	});
+	fullTaskListEl.addEventListener("keydown", (e) => {
+		if (e.key !== "Enter" || !e.target.matches(".subtask-input")) return;
+		e.preventDefault();
+		e.target.closest(".new-subtask-form")?.querySelector(".add-subtask-btn")?.click();
 	});
 	sortTasksEl.addEventListener("change", (e) => {
 		taskSort = e.target.value;

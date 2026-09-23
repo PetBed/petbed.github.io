@@ -201,8 +201,8 @@ async function handleToggleDarkMode() {
 }
 
 function showPage(page) {
-	const pages = { dashboard: dashboardPage, study: studyPage, tasks: tasksPage, flashcards: flashcardsPage, notes: notesPage, binder: binderPage, syllabus: syllabusPage };
-	const navs = { dashboard: navDashboard, study: navStudy, tasks: navTasks, flashcards: navFlashcards, notes: navNotes, binder: navBinder, syllabus: navSyllabus };
+	const pages = { dashboard: dashboardPage, study: studyPage, tasks: tasksPage, flashcards: flashcardsPage, notes: notesPage, syllabus: syllabusPage };
+	const navs = { dashboard: navDashboard, study: navStudy, tasks: navTasks, flashcards: navFlashcards, notes: navNotes, syllabus: navSyllabus };
 	Object.keys(pages).forEach((p) => {
 		if (pages[p]) pages[p].classList.add("hidden");
 		if (navs[p]) navs[p].classList.remove("active");
@@ -214,10 +214,6 @@ function showPage(page) {
 
 	if (page === "notes" && typeof renderNotesPage === "function") {
 		renderNotesPage();
-	}
-
-	if (page === "binder" && window.collectiblesModule && typeof window.collectiblesModule.renderInventory === "function") {
-		window.collectiblesModule.renderInventory();
 	}
 
 	if (page === "syllabus" && typeof renderSyllabusPage === "function") {
@@ -251,7 +247,6 @@ function initAuthEvents() {
 	if (navTasks) navTasks.addEventListener("click", () => showPage("tasks"));
 	if (navFlashcards) navFlashcards.addEventListener("click", () => showPage("flashcards"));
 	if (navNotes) navNotes.addEventListener("click", () => showPage("notes"));
-	if (navBinder) navBinder.addEventListener("click", () => showPage("binder"));
 }
 
 window.initAuthEvents = initAuthEvents;

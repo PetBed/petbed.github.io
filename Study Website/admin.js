@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
 	// --- CONFIG & STATE ---
-	const API_URL = "http://localhost:3005"; // Use the same API URL as your main app
+	const API_URL = "https://wot-tau.vercel.app"; // Use the same API URL as your main app
 	const AUTHORIZED_EMAILS = ["test@test.com", "roti_canai_telur@outlook.com"]; // IMPORTANT: Change these to your actual admin emails
 
 	let currentBaseItems = [];

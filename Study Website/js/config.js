@@ -4,7 +4,7 @@
 
 window.StudyApp = window.StudyApp || {};
 
-var API_URL = "http://localhost:3005"; // local: http://localhost:3005
+var API_URL = "https://wot-tau.vercel.app"; // local: https://wot-tau.vercel.app
 var TASK_VIEW_PREFS_KEY = "studyTaskViewPreferences";
 var subjectColors = {
 	Malay: "#8B0000",

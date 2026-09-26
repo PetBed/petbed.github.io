@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	const forgotContinueBtn = document.getElementById("forgot-continue-btn");
 
 	// --- State ---
-	const API_URL = "https://wot-tau.vercel.app"; // local: https://wot-tau.vercel.app
+	const API_URL = "http://localhost:3005"; // local: http://localhost:3005
 	let resetUserId = null;
 
 	// --- Initial Check ---
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			if (data.error) {
 				loginErrorEl.textContent = data.error;
 			} else {
-				localStorage.setItem("studyUser", JSON.stringify(data.user));
+				localStorage.setItem("studyUser", JSON.stringify({ ...data.user, token: data.token }));
 				window.location.href = "index.html";
 			}
 		} catch (err) {
@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			if (data.error) {
 				registerErrorEl.textContent = data.error;
 			} else {
-				localStorage.setItem("studyUser", JSON.stringify(data.user));
+				localStorage.setItem("studyUser", JSON.stringify({ ...data.user, token: data.token }));
 				window.location.href = "index.html";
 			}
 		} catch (err) {

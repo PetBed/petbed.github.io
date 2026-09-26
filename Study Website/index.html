@@ -36,15 +36,21 @@
   <!-- Main App Container -->
   <div id="app-container" class="min-h-screen flex-col p-4 md:p-8 hidden">
     <header class="mb-8 flex justify-between items-start">
+      <button id="mobile-menu-toggle" type="button" class="items-center justify-center h-11 w-11 rounded-lg bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200" aria-label="Open navigation menu" aria-controls="mobile-menu-panel" aria-expanded="false" title="Open menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg>
+      </button>
+      <div id="mobile-menu-panel">
       <div>
         <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">Study Dashboard</h1>
         <p id="welcome-message" class="text-slate-500 mt-1 dark:text-slate-400"></p>
-        <div class="mt-4 flex items-center bg-slate-200 dark:bg-slate-800 rounded-lg p-1 max-w-3xl overflow-x-auto">
+        <nav id="primary-navigation" aria-label="Primary navigation" class="mt-4 flex items-center bg-slate-200 dark:bg-slate-800 rounded-lg p-1 max-w-3xl overflow-x-auto">
           <button id="nav-dashboard"
             class="nav-btn active flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm">Dashboard</button>
           <button id="nav-study"
             class="nav-btn flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-300">Study
             Tracker</button>
+          <button id="nav-study-groups"
+            class="nav-btn flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-300">Groups</button>
           <button id="nav-tasks"
             class="nav-btn flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-300">Tasks</button>
           <button id="nav-flashcards"
@@ -53,11 +59,11 @@
             class="nav-btn flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-300">Notes</button>
           <button id="nav-syllabus"
             class="nav-btn flex-1 text-center py-2 px-3 rounded-md font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-300">Syllabus</button>
-        </div>
+        </nav>
       </div>
       <div class="flex items-center space-x-2">
         <button id="settings-btn"
-          class="p-2 rounded-lg bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition">
+          class="p-2 rounded-lg bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition" aria-label="Settings" title="Settings">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"></circle>
@@ -65,9 +71,11 @@
               d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
             </path>
           </svg>
+          <span class="mobile-menu-action-label hidden">Settings</span>
         </button>
         <button id="logout-btn"
           class="py-2 px-4 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition">Logout</button>
+      </div>
       </div>
     </header>
 
@@ -167,10 +175,116 @@
       </div>
     </main>
 
+    <!-- Study Groups Page -->
+    <main id="study-groups-page" class="hidden flex-grow">
+      <div class="grid grid-cols-1 xl:grid-cols-[18rem_1fr] gap-6">
+        <aside id="study-groups-sidebar" class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-5 h-fit">
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Study groups</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Keep each other moving.</p>
+            </div>
+          </div>
+          <form id="study-group-create-form" class="space-y-2 mb-4">
+            <label for="study-group-name-input" class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Create a group</label>
+            <div class="flex gap-2">
+              <input id="study-group-name-input" required maxlength="80" placeholder="Group name" class="min-w-0 flex-1 p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700">
+              <button type="submit" class="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold">Create</button>
+            </div>
+          </form>
+          <form id="study-group-join-form" class="space-y-2 mb-5">
+            <label for="study-group-join-code-input" class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Join with a code</label>
+            <div class="flex gap-2">
+              <input id="study-group-join-code-input" required maxlength="12" placeholder="AB12CD34" class="min-w-0 flex-1 p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm uppercase bg-white dark:bg-slate-700">
+              <button type="submit" class="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-500 text-white text-sm font-semibold">Join</button>
+            </div>
+          </form>
+          <div id="study-groups-list" class="space-y-2" aria-live="polite"></div>
+          <p id="study-group-status" class="text-xs mt-3" role="status"></p>
+        </aside>
+        <section id="study-group-room" class="hidden bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-5 md:p-6">
+          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 border-b border-slate-200 dark:border-slate-700 pb-4 mb-5">
+            <button id="study-group-back-button" type="button" aria-label="Back to study groups" class="hidden items-center gap-1.5 px-2 py-2 rounded-lg text-sm font-semibold text-blue-600 dark:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-700">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline><line x1="20" y1="12" x2="9" y2="12"></line></svg>
+              <span>Groups</span>
+            </button>
+            <div>
+              <h2 id="study-group-room-title" class="text-xl font-bold text-slate-900 dark:text-slate-100"></h2>
+              <p id="study-group-room-code" class="text-xs text-slate-500 dark:text-slate-400 mt-1"></p>
+            </div>
+            <div class="flex items-center gap-2 self-start">
+              <button id="study-group-refresh-button" type="button" aria-label="Refresh study group" title="Refresh study group" class="p-2 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"></path><polyline points="21 3 21 9 15 9"></polyline></svg>
+              </button>
+              <button id="study-group-leave-button" type="button" aria-label="Leave study group" title="Leave study group" class="p-2 rounded-lg border border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              </button>
+              <button id="study-group-settings-button" type="button" aria-label="Open group settings" title="Group settings" aria-controls="study-group-settings-panel" aria-expanded="false" class="p-2 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 1 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 19.4 9c.1.6.6 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.91 0-1.41.4-1.51 1z"></path></svg>
+              </button>
+            </div>
+          </div>
+          <div id="study-group-settings-panel" class="fixed inset-0 z-50 hidden bg-black/50 p-4 flex items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="study-group-settings-title">
+            <div class="w-[calc(100vw-2rem)] md:w-[80vw] h-[80vh] max-w-none rounded-2xl bg-white dark:bg-slate-800 shadow-xl p-5 md:p-6 overflow-y-auto">
+              <div class="flex items-start justify-between gap-3 mb-4">
+                <div><h3 id="study-group-settings-title" class="font-semibold text-lg text-slate-800 dark:text-slate-100">Group settings</h3><p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Control what you share and manage this group.</p></div>
+                <button id="study-group-settings-close" type="button" aria-label="Close group settings" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 dark:text-slate-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+              </div>
+            <label class="flex items-start justify-between gap-4 text-sm text-slate-700 dark:text-slate-200 cursor-pointer">
+              <span><span class="block font-semibold">Live study status</span><span class="block text-xs font-normal text-slate-500 dark:text-slate-400 mt-1">Let group members see when you are studying and the subject only if subject sharing is enabled in Privacy settings.</span></span>
+              <input id="study-group-share-toggle" type="checkbox" class="mt-1 h-4 w-4 accent-blue-600" aria-describedby="study-group-live-status-help">
+            </label>
+            <p id="study-group-live-status-help" class="sr-only">When enabled, your active timer can appear to members of this group.</p>
+            <div class="mt-4 space-y-3 border-t border-slate-200 dark:border-slate-700 pt-4 text-sm text-slate-700 dark:text-slate-200">
+              <label class="flex items-start justify-between gap-4 cursor-pointer"><span><span class="block font-semibold">Leaderboard name and time</span><span class="block text-xs font-normal text-slate-500 dark:text-slate-400 mt-1">Let this group see your name and total study time on its leaderboard.</span></span><input id="study-group-share-leaderboard-toggle" type="checkbox" class="mt-1 h-4 w-4 accent-blue-600"></label>
+              <label class="flex items-start justify-between gap-4 cursor-pointer"><span><span class="block font-semibold">Today’s study history</span><span class="block text-xs font-normal text-slate-500 dark:text-slate-400 mt-1">Let members open your shared sessions for today.</span></span><input id="study-group-share-history-toggle" type="checkbox" class="mt-1 h-4 w-4 accent-blue-600"></label>
+              <label class="flex items-start justify-between gap-4 cursor-pointer"><span><span class="block font-semibold">Subject names</span><span class="block text-xs font-normal text-slate-500 dark:text-slate-400 mt-1">Show the subject attached to your live activity and shared history.</span></span><input id="study-group-share-subject-toggle" type="checkbox" class="mt-1 h-4 w-4 accent-blue-600"></label>
+              <label class="flex items-start justify-between gap-4 cursor-pointer"><span><span class="block font-semibold">Activity details</span><span class="block text-xs font-normal text-slate-500 dark:text-slate-400 mt-1">Show linked study activities in your live status and shared history.</span></span><input id="study-group-share-activity-details-toggle" type="checkbox" class="mt-1 h-4 w-4 accent-blue-600"></label>
+            </div>
+            <div id="study-group-owner-controls" class="hidden mt-5 pt-4 border-t border-slate-200 dark:border-slate-700">
+              <h3 class="font-semibold text-sm text-slate-800 dark:text-slate-100 mb-1">Leader controls</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Change how people join, update the group name, or manage access.</p>
+              <form id="study-group-owner-form" class="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2">
+                <label class="sr-only" for="study-group-owner-name">Group name</label><input id="study-group-owner-name" class="p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700" placeholder="Group name">
+                <label class="sr-only" for="study-group-owner-policy">Join policy</label><select id="study-group-owner-policy" class="p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700"><option value="public">Anyone with the code</option><option value="approval">Approve new members</option></select>
+                <button type="submit" class="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold">Save changes</button>
+              </form>
+              <button id="study-group-regenerate-code" type="button" class="mt-3 text-xs font-semibold text-rose-600 dark:text-rose-400">Regenerate join code</button>
+              <button id="study-group-delete-button" type="button" class="block mt-4 px-3 py-2 rounded-lg border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-400 text-sm font-semibold hover:bg-rose-50 dark:hover:bg-rose-900/20">Delete group</button>
+              <div id="study-group-pending-members" class="mt-4 space-y-2"></div>
+            </div>
+            </div>
+          </div>
+          <div id="study-group-tabs" class="flex gap-1 rounded-lg bg-slate-100 dark:bg-slate-700 p-1 mb-5">
+            <button type="button" data-tab="live" class="flex-1 py-2 rounded-md text-xs font-semibold bg-blue-600 text-white">Live</button>
+            <button type="button" data-tab="leaderboard" class="flex-1 py-2 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300">Leaderboard</button>
+            <button type="button" data-tab="chat" class="flex-1 py-2 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300">Chat</button>
+          </div>
+          <div id="study-group-live-panel">
+            <div class="flex items-center justify-between mb-2"><h3 class="font-semibold text-slate-800 dark:text-slate-100">Who's studying</h3><span class="text-xs text-slate-400">Click a member for today's history</span></div>
+            <div id="study-group-members" class="divide-y divide-slate-100 dark:divide-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg"></div>
+          </div>
+          <div id="study-group-leaderboard-panel" class="hidden">
+            <div class="flex items-center justify-between mb-2"><h3 class="font-semibold text-slate-800 dark:text-slate-100">Today’s leaderboard</h3><span class="text-xs text-slate-400">Resets at 4am GMT+8</span></div>
+            <div id="study-group-leaderboard" class="border border-slate-200 dark:border-slate-700 rounded-lg px-3"></div>
+            <div class="mt-5 flex items-center justify-between gap-3"><h3 class="font-semibold text-slate-800 dark:text-slate-100">Global leaderboard</h3><button id="study-group-global-leaderboard-btn" type="button" class="text-xs font-semibold text-blue-600 dark:text-blue-400">Refresh</button></div>
+            <div id="study-group-global-leaderboard" class="border border-slate-200 dark:border-slate-700 rounded-lg px-3 mt-2"></div>
+          </div>
+          <div id="study-group-chat-panel" class="hidden">
+            <div id="study-group-messages" class="h-72 overflow-y-auto space-y-2 border border-slate-200 dark:border-slate-700 rounded-lg p-3 mb-3" aria-live="polite"></div>
+            <form id="study-group-message-form" class="flex gap-2"><label for="study-group-message-input" class="sr-only">Message group</label><input id="study-group-message-input" maxlength="1000" placeholder="Message your group" class="min-w-0 flex-1 p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700"><button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold">Send</button></form>
+          </div>
+          <div id="study-group-member-history" class="fixed inset-0 z-50 hidden bg-black/50 p-4 flex items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="study-group-member-history-title"></div>
+        </section>
+      </div>
+    </main>
+
     <!-- Study Tracker Page -->
     <main id="study-page" class="hidden flex-grow grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div class="lg:col-span-2 space-y-8">
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+      <div id="study-calendar-column" class="lg:col-span-2 space-y-8">
+        <div id="study-calendar-card" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
           <div id="calendar-feature">
             <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
               <h2 id="month-year" class="text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight"></h2>
@@ -214,13 +328,13 @@
             <div id="calendar-days" class="grid calendar-grid gap-2"></div>
           </div>
         </div>
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+        <div id="study-countdown-card" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
           <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-6">Exam Countdowns</h2>
           <div id="countdown-container"></div>
         </div>
       </div>
-      <div class="space-y-8">
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+      <div id="study-tools-column" class="space-y-8">
+        <div id="study-timer-card" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
           <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">Study Tracker</h3>
           <div class="space-y-4">
             <!-- Timer Engine Mode Selector (Pomodoro / Stopwatch) -->
@@ -410,7 +524,7 @@
             </div>
           </div>
         </div>
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+        <div id="study-sounds-card" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
           <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">Sound Library</h3>
           <div class="space-y-4">
             <div id="sound-library-error"
@@ -437,9 +551,15 @@
 
     <!-- Tasks Page -->
     <main id="tasks-page" class="hidden flex-grow grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div class="lg:col-span-1 space-y-8">
+      <div id="task-controls-column" class="lg:col-span-1 space-y-8">
+        <div id="task-add-dialog" class="task-control-dialog" aria-labelledby="task-add-dialog-title">
         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
-          <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">Add New Task</h3>
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <h3 id="task-add-dialog-title" class="text-lg font-bold text-slate-900 dark:text-slate-100">Add New Task</h3>
+            <button type="button" class="task-dialog-close" data-task-dialog-close="task-add-dialog" aria-label="Close add task dialog" title="Close">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
           <div class="space-y-2">
             <input type="text" id="task-page-input" placeholder="Enter a new task..."
               class="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700">
@@ -454,10 +574,17 @@
             <button id="task-page-add-btn" class="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg">Add
               Task</button>
           </div>
-          <div id="task-page-error" class="text-red-500 text-xs text-center mt-2 h-4"></div>
+          <div id="task-page-error" class="text-red-500 text-xs text-center mt-2" role="alert"></div>
         </div>
+        </div>
+        <div id="task-filter-dialog" class="task-control-dialog" aria-labelledby="task-filter-dialog-title">
         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
-          <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">Filter & Sort</h3>
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <h3 id="task-filter-dialog-title" class="text-lg font-bold text-slate-900 dark:text-slate-100">Filter &amp; Sort</h3>
+            <button type="button" class="task-dialog-close" data-task-dialog-close="task-filter-dialog" aria-label="Close filter and sort dialog" title="Close">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
           <div class="space-y-4">
             <div>
               <label for="filter-subject" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Filter by
@@ -489,8 +616,17 @@
             </div>
           </div>
         </div>
+        </div>
       </div>
-      <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+      <div id="task-list-column" class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+        <div id="task-mobile-actions" class="items-center justify-end gap-2 mb-3" aria-label="Task actions">
+          <button id="task-add-dialog-open" type="button" data-task-dialog-open="task-add-dialog" aria-label="Add task" aria-controls="task-add-dialog" aria-expanded="false" title="Add task" class="h-11 w-11 inline-flex items-center justify-center rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+            <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </button>
+          <button id="task-filter-dialog-open" type="button" data-task-dialog-open="task-filter-dialog" aria-label="Filter and sort tasks" aria-controls="task-filter-dialog" aria-expanded="false" title="Filter and sort" class="h-11 w-11 inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+            <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"></line><circle cx="9" cy="7" r="2"></circle><line x1="4" y1="17" x2="20" y2="17"></line><circle cx="15" cy="17" r="2"></circle></svg>
+          </button>
+        </div>
         <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">All Tasks</h2>
         <div id="full-task-list" class="space-y-3 max-h-[75vh] overflow-y-auto pr-2"></div>
       </div>
@@ -703,7 +839,7 @@
             <div class="p-3 sm:p-4 border-b border-slate-200 dark:border-slate-700 space-y-3">
 
               <!-- Mobile Back & Top Controls Row -->
-              <div class="flex items-center justify-between gap-2">
+              <div class="notes-editor-header flex items-center justify-between gap-2">
                 <button type="button" id="note-mobile-back-btn"
                   class="md:hidden flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -767,8 +903,7 @@
               <!-- Metadata Controls Row -->
               <div class="flex items-center gap-3 flex-wrap text-xs">
                 <!-- Notebook Picker -->
-                <div
-                  class="flex items-center gap-1.5">
+                <div class="flex items-center gap-1.5">
                   <svg width="13" height="13" class="text-slate-400" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
@@ -780,8 +915,7 @@
                 </div>
 
                 <!-- Subject Picker -->
-                <div
-                  class="flex items-center gap-1.5">
+                <div class="flex items-center gap-1.5">
                   <span id="note-subject-dot" class="w-2 h-2 rounded-full bg-slate-400 flex-shrink-0"></span>
                   <select id="note-subject-select"
                     class="p-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 outline-none cursor-pointer">
@@ -940,19 +1074,26 @@
                 <div id="note-reading-toolbar"
                   class="hidden sticky top-0 z-10 flex items-center justify-between gap-2 px-4 py-2 border-b border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 backdrop-blur">
                   <div class="flex items-center gap-2 min-w-0">
-                    <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Outline</span>
+                    <span
+                      class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Outline</span>
                     <nav id="note-outline" class="flex items-center gap-1 overflow-x-auto text-xs"></nav>
                   </div>
                   <div class="flex items-center gap-1 flex-shrink-0">
                     <button type="button" id="note-fold-all-btn"
                       class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
                       title="Collapse all sections" aria-label="Collapse all sections">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m6 9 6 6 6-6"></path>
+                      </svg>
                     </button>
                     <button type="button" id="note-unfold-all-btn"
                       class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
                       title="Expand all sections" aria-label="Expand all sections">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"></path></svg>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m6 15 6-6 6 6"></path>
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -967,7 +1108,7 @@
             <div class="border-t border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/80">
 
               <!-- Status Bar -->
-              <div class="px-4 py-2 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+              <div class="notes-status-bar px-4 py-2 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
                 <div class="flex items-center gap-4">
                   <div id="note-save-status" class="flex items-center">
                     <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1.5"></span>
@@ -1240,7 +1381,7 @@
   <!-- Settings Modal -->
   <div id="settings-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden z-50">
     <div
-      class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 w-full max-w-md space-y-6 transform transition-all">
+      class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 w-[calc(100vw-2rem)] md:w-[80vw] h-[80vh] max-w-none overflow-y-auto space-y-6 transform transition-all">
       <div class="flex justify-between items-center">
         <h3 class="text-2xl font-bold text-slate-800 dark:text-slate-100">Settings</h3>
         <button id="close-settings-modal"
@@ -2113,6 +2254,22 @@
     </div>
   </div>
 
+  <!-- Linked Activity Subject Confirmation Modal -->
+  <div id="linked-subject-confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden z-[60]">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 w-full max-w-md text-center border border-slate-200 dark:border-slate-700">
+      <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Override Linked Subject?</h3>
+      <p class="text-sm text-slate-600 dark:text-slate-300 mt-2">
+        <span id="linked-subject-confirm-activity" class="font-semibold"></span> belongs to
+        <span id="linked-subject-confirm-subject" class="font-semibold text-blue-600 dark:text-blue-400"></span>.
+        Use the manually selected subject anyway?
+      </p>
+      <div class="flex justify-center gap-3 mt-6">
+        <button type="button" id="cancel-linked-subject-confirm-btn" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition">Keep Linked Subject</button>
+        <button type="button" id="apply-linked-subject-confirm-btn" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm transition">Use Selected Subject</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Study Session History Modal -->
   <div id="study-history-modal"
     class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 hidden z-50 transition-opacity">
@@ -2235,6 +2392,7 @@
   <script src="js/state.js" defer></script>
   <script src="js/dom.js" defer></script>
   <script src="js/utils.js" defer></script>
+  <script src="js/study-groups.js" defer></script>
   <script src="js/auth.js" defer></script>
   <script src="js/semesters.js" defer></script>
   <script src="js/tasks.js" defer></script>

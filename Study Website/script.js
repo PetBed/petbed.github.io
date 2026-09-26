@@ -12,23 +12,36 @@ window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
 
 // Data Management (DB & Local)
 async function loadDataFromDB() {
+	const startupState = window.StudyApp.startupState || {};
 	await loadTasks();
-	await loadStudyLogs();
-	if (typeof loadStudySessions === "function") {
-		await loadStudySessions();
-	}
-	await loadStreak();
-	await loadSoundLibrary();
-	await loadFlashcardSets();
-	if (typeof loadSyllabus === "function") {
-		await loadSyllabus();
-	}
-	if (typeof loadNotesData === "function") {
-		await loadNotesData();
-	}
+	await Promise.all([
+		loadStudyLogs(startupState),
+		typeof loadStudySessions === "function" ? loadStudySessions() : Promise.resolve(),
+		loadStreak(startupState)
+	]);
 	await loadSemesters();
 	checkStreak();
 }
+
+const pageDataPromises = {};
+
+function loadPageData(page) {
+	if (pageDataPromises[page]) return pageDataPromises[page];
+	const loaders = {
+		study: () => loadSoundLibrary(window.StudyApp.startupState || {}),
+		flashcards: () => loadFlashcardSets(),
+		notes: () => typeof loadNotesData === "function" ? loadNotesData() : Promise.resolve(),
+		syllabus: () => typeof loadSyllabus === "function" ? loadSyllabus(window.StudyApp.startupState || {}) : Promise.resolve(),
+		groups: () => typeof initializeStudyGroups === "function" ? initializeStudyGroups() : Promise.resolve()
+	};
+	if (!loaders[page]) return Promise.resolve();
+	pageDataPromises[page] = Promise.resolve().then(loaders[page]).catch((error) => {
+		delete pageDataPromises[page];
+		throw error;
+	});
+	return pageDataPromises[page];
+}
+window.StudyApp.loadPageData = loadPageData;
 window.loadDataFromDB = loadDataFromDB;
 window.StudyApp.loadDataFromDB = loadDataFromDB;
 

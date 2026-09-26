@@ -52,7 +52,12 @@ async function addTask() {
 	const subject = taskSubjectSelect.value;
 	const time = taskTimeInput.value;
 	const deadline = taskDeadlineInput.value;
-	if (!text || !subject || !time) return;
+	if (!text || !subject || !time) {
+		if (document.getElementById("task-add-dialog")?.classList.contains("is-open")) {
+			taskErrorEl.textContent = "Enter a task, select a subject, and add estimated minutes.";
+		}
+		return false;
+	}
 	const tempId = `temp_${Date.now()}`;
 	const optimisticTask = { _id: tempId, text, subject, time, deadline, completed: false, subTasks: [] };
 	tasks.push(optimisticTask);
@@ -73,12 +78,21 @@ async function addTask() {
 		const tempIndex = tasks.findIndex((t) => t._id === tempId);
 		if (tempIndex !== -1) tasks[tempIndex] = savedTask;
 		renderTasksPage();
+		if (document.getElementById("task-add-dialog")?.classList.contains("is-open")) {
+			closeTaskControlDialog("task-add-dialog", true);
+		}
+		return true;
 	} catch (error) {
 		console.error("Failed to add task:", error);
 		tasks = tasks.filter((t) => t._id !== tempId);
 		renderTasksPage();
+		taskInput.value = text;
+		taskSubjectSelect.value = subject;
+		taskTimeInput.value = time;
+		taskDeadlineInput.value = deadline;
 		taskErrorEl.textContent = "Failed to save task. Please try again.";
 		setTimeout(() => (taskErrorEl.textContent = ""), 3000);
+		return false;
 	}
 }
 async function toggleTask(task) {
@@ -722,6 +736,60 @@ function initTaskEvents() {
 
 	addTaskBtn.addEventListener("click", addTask);
 	taskInput.addEventListener("keydown", (e) => e.key === "Enter" && addTask());
+	const openTaskDialog = (dialogId) => {
+		if (!window.matchMedia("(max-width: 639px)").matches) return;
+		const dialog = document.getElementById(dialogId);
+		const trigger = document.querySelector(`[aria-controls="${dialogId}"]`);
+		if (!dialog || !trigger) return;
+		dialog.classList.add("is-open");
+		dialog.setAttribute("role", "dialog");
+		dialog.setAttribute("aria-modal", "true");
+		trigger.setAttribute("aria-expanded", "true");
+		(dialog.querySelector("input:not([type='hidden']), select") || dialog.querySelector("button"))?.focus();
+	};
+	window.closeTaskControlDialog = (dialogId, restoreFocus = false) => {
+		const dialog = document.getElementById(dialogId);
+		const trigger = document.querySelector(`[aria-controls="${dialogId}"]`);
+		if (!dialog || !trigger) return;
+		dialog.classList.remove("is-open");
+		dialog.removeAttribute("role");
+		dialog.removeAttribute("aria-modal");
+		trigger.setAttribute("aria-expanded", "false");
+		if (restoreFocus) trigger.focus();
+	};
+	document.querySelectorAll("[data-task-dialog-open]").forEach((trigger) => {
+		trigger.addEventListener("click", () => openTaskDialog(trigger.dataset.taskDialogOpen));
+	});
+	document.querySelectorAll("[data-task-dialog-close]").forEach((button) => {
+		button.addEventListener("click", () => closeTaskControlDialog(button.dataset.taskDialogClose, true));
+	});
+	document.querySelectorAll(".task-control-dialog").forEach((dialog) => {
+		dialog.addEventListener("click", (event) => {
+			if (event.target === dialog) closeTaskControlDialog(dialog.id, true);
+		});
+	});
+	document.addEventListener("keydown", (event) => {
+		const dialog = document.querySelector(".task-control-dialog.is-open");
+		if (!dialog) return;
+		if (event.key === "Escape") {
+			event.preventDefault();
+			closeTaskControlDialog(dialog.id, true);
+			return;
+		}
+		if (event.key !== "Tab") return;
+		const focusable = [...dialog.querySelectorAll("button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])")]
+			.filter((element) => element.getClientRects().length);
+		if (!focusable.length) return;
+		const first = focusable[0];
+		const last = focusable[focusable.length - 1];
+		if (event.shiftKey && document.activeElement === first) {
+			event.preventDefault();
+			last.focus();
+		} else if (!event.shiftKey && document.activeElement === last) {
+			event.preventDefault();
+			first.focus();
+		}
+	});
 
 	filterSubjectEl.addEventListener("change", (e) => {
 		taskSubjectFilter = e.target.value;

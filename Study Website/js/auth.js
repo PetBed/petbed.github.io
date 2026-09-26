@@ -26,6 +26,7 @@ async function checkAuthAndInitialize() {
 			if (!response.ok) throw new Error("Server sync failed");
 
 			const serverState = await response.json();
+			window.StudyApp.startupState = serverState;
 
 			// 2. Overwrite local data with the server's authoritative data
 			// This includes both existing fields AND any newly added fields with defaults
@@ -65,6 +66,7 @@ async function checkAuthAndInitialize() {
 			console.warn("Continuing with local data. Some features may not work correctly.");
 		}
 
+		if (typeof syncStudyGroupPrivacyControls === "function") syncStudyGroupPrivacyControls();
 		await initializeApp();
 
 		// 4. Initialize the collectibles module with the fresh, synced data.
@@ -201,8 +203,9 @@ async function handleToggleDarkMode() {
 }
 
 function showPage(page) {
-	const pages = { dashboard: dashboardPage, study: studyPage, tasks: tasksPage, flashcards: flashcardsPage, notes: notesPage, syllabus: syllabusPage };
-	const navs = { dashboard: navDashboard, study: navStudy, tasks: navTasks, flashcards: navFlashcards, notes: navNotes, syllabus: navSyllabus };
+	closeMobileMenu(true);
+	const pages = { dashboard: dashboardPage, study: studyPage, groups: studyGroupsPage, tasks: tasksPage, flashcards: flashcardsPage, notes: notesPage, syllabus: syllabusPage };
+	const navs = { dashboard: navDashboard, study: navStudy, groups: navStudyGroups, tasks: navTasks, flashcards: navFlashcards, notes: navNotes, syllabus: navSyllabus };
 	Object.keys(pages).forEach((p) => {
 		if (pages[p]) pages[p].classList.add("hidden");
 		if (navs[p]) navs[p].classList.remove("active");
@@ -212,12 +215,14 @@ function showPage(page) {
 
 	if (page === "dashboard") renderDashboard();
 
-	if (page === "notes" && typeof renderNotesPage === "function") {
-		renderNotesPage();
-	}
+	const pageDataPromise = typeof window.StudyApp.loadPageData === "function" ? window.StudyApp.loadPageData(page) : Promise.resolve();
+	pageDataPromise.then(() => {
+		if (page === "notes" && typeof renderNotesPage === "function") renderNotesPage();
+		if (page === "syllabus" && typeof renderSyllabusPage === "function") renderSyllabusPage();
+	}).catch((error) => console.error(`Failed to load ${page} page data:`, error));
 
-	if (page === "syllabus" && typeof renderSyllabusPage === "function") {
-		renderSyllabusPage();
+	if (typeof handleStudyGroupsPageChange === "function") {
+		handleStudyGroupsPageChange(page);
 	}
 }
 
@@ -233,17 +238,70 @@ function renderMotivationalQuote() {
 	motivationalQuoteEl.textContent = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`;
 }
 
+function closeMobileMenu(restoreFocus = false) {
+	const toggle = document.getElementById("mobile-menu-toggle");
+	const panel = document.getElementById("mobile-menu-panel");
+	if (!toggle || !panel) return;
+	const wasOpen = panel.classList.contains("is-open");
+	panel.classList.remove("is-open");
+	toggle.setAttribute("aria-expanded", "false");
+	toggle.setAttribute("aria-label", "Open navigation menu");
+	toggle.title = "Open menu";
+	if (restoreFocus && wasOpen && window.matchMedia("(max-width: 639px)").matches) toggle.focus();
+}
+
+function initMobileMenuEvents() {
+	const toggle = document.getElementById("mobile-menu-toggle");
+	const panel = document.getElementById("mobile-menu-panel");
+	if (!toggle || !panel) return;
+
+	toggle.addEventListener("click", () => {
+		const isOpen = panel.classList.toggle("is-open");
+		toggle.setAttribute("aria-expanded", String(isOpen));
+		toggle.setAttribute("aria-label", isOpen ? "Close navigation menu" : "Open navigation menu");
+		toggle.title = isOpen ? "Close menu" : "Open menu";
+		if (!isOpen) toggle.focus();
+	});
+
+	document.addEventListener("click", (event) => {
+		if (!panel.classList.contains("is-open") || panel.contains(event.target) || toggle.contains(event.target)) return;
+		closeMobileMenu(false);
+	});
+
+	document.addEventListener("keydown", (event) => {
+		if (event.key === "Escape" && panel.classList.contains("is-open")) {
+			event.preventDefault();
+			closeMobileMenu(true);
+		}
+	});
+
+	window.addEventListener("resize", () => {
+		if (!window.matchMedia("(max-width: 639px)").matches) closeMobileMenu(false);
+	});
+}
+
 function initAuthEvents() {
 	if (logoutBtn) logoutBtn.addEventListener("click", handleLogout);
-	if (settingsBtn) settingsBtn.addEventListener("click", () => settingsModal && settingsModal.classList.remove("hidden"));
-	if (closeSettingsModalBtn) closeSettingsModalBtn.addEventListener("click", () => settingsModal && settingsModal.classList.add("hidden"));
-	if (settingsModal) settingsModal.addEventListener("click", (e) => e.target === settingsModal && settingsModal.classList.add("hidden"));
+	initMobileMenuEvents();
+	if (settingsBtn) settingsBtn.addEventListener("click", () => {
+		closeMobileMenu(false);
+		if (settingsModal) settingsModal.classList.remove("hidden");
+		if (window.matchMedia("(max-width: 639px)").matches) closeSettingsModalBtn?.focus();
+	});
+	const closeSettingsModal = () => {
+		if (settingsModal) settingsModal.classList.add("hidden");
+		if (window.matchMedia("(max-width: 639px)").matches) document.getElementById("mobile-menu-toggle")?.focus();
+	};
+	if (closeSettingsModalBtn) closeSettingsModalBtn.addEventListener("click", closeSettingsModal);
+	if (settingsModal) settingsModal.addEventListener("click", (e) => e.target === settingsModal && closeSettingsModal());
 	if (updateUsernameForm) updateUsernameForm.addEventListener("submit", handleUpdateUsername);
 	if (updatePasswordForm) updatePasswordForm.addEventListener("submit", handleUpdatePassword);
 	if (darkModeToggle) darkModeToggle.addEventListener("change", handleToggleDarkMode);
+	if (typeof initStudyGroupsEvents === "function") initStudyGroupsEvents();
 
 	if (navDashboard) navDashboard.addEventListener("click", () => showPage("dashboard"));
 	if (navStudy) navStudy.addEventListener("click", () => showPage("study"));
+	if (navStudyGroups) navStudyGroups.addEventListener("click", () => showPage("groups"));
 	if (navTasks) navTasks.addEventListener("click", () => showPage("tasks"));
 	if (navFlashcards) navFlashcards.addEventListener("click", () => showPage("flashcards"));
 	if (navNotes) navNotes.addEventListener("click", () => showPage("notes"));

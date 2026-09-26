@@ -100,8 +100,14 @@ async function updateStreak() {
 
 
 // --- Study Log Management (DB) ---
-async function loadStudyLogs() {
+async function loadStudyLogs(startupState = {}) {
 	if (!currentUser) return;
+	if (Object.prototype.hasOwnProperty.call(startupState, "studyLogs")) {
+		const logsFromServer = startupState.studyLogs;
+		studyLogs = Array.isArray(logsFromServer) ? Object.fromEntries(logsFromServer) : logsFromServer || {};
+		renderStudyLogs();
+		return;
+	}
 	try {
 		const response = await fetch(`${API_URL}/api/study/logs?userId=${currentUser.id}`);
 		const logsFromServer = await response.json();
@@ -137,8 +143,13 @@ async function saveStudyLogs() {
 
 
 // --- Streak Management (DB) ---
-async function loadStreak() {
+async function loadStreak(startupState = {}) {
 	if (!currentUser) return;
+	if (Object.prototype.hasOwnProperty.call(startupState, "studyStreak") && Object.prototype.hasOwnProperty.call(startupState, "lastStudyDay")) {
+		studyStreak = Number(startupState.studyStreak) || 0;
+		lastStudyDay = startupState.lastStudyDay || "";
+		return;
+	}
 	try {
 		const response = await fetch(`${API_URL}/api/study/streak?userId=${currentUser.id}`);
 		const data = await response.json();
@@ -228,6 +239,7 @@ async function deleteStudySession(sessionId) {
 
 function finalizeActiveSession() {
 	if (!activeSessionStartTime || activeSessionAccumulatedSeconds <= 0) {
+		if (typeof stopSharedStudyActivity === "function") stopSharedStudyActivity();
 		activeSessionStartTime = null;
 		activeSessionAccumulatedSeconds = 0;
 		return;
@@ -273,6 +285,7 @@ function finalizeActiveSession() {
 	};
 
 	saveStudySession(sessionRecord);
+	if (typeof stopSharedStudyActivity === "function") stopSharedStudyActivity();
 	activeSessionStartTime = null;
 	activeSessionAccumulatedSeconds = 0;
 }
@@ -469,6 +482,10 @@ function playPauseTimer() {
 		if (!activeSessionStartTime) {
 			activeSessionStartTime = new Date().toISOString();
 			activeSessionAccumulatedSeconds = 0;
+			if (typeof startSharedStudyActivity === "function") {
+				const subject = (pomodoroSubjectSelect && pomodoroSubjectSelect.value) ? pomodoroSubjectSelect.value : "General";
+				startSharedStudyActivity(subject, timerEngine);
+			}
 		}
 
 		if (document.visibilityState === "hidden") {
@@ -622,6 +639,7 @@ let linkActivitySubjectFilterVal = "all";
 let linkActivitySortMode = "curriculum";
 let linkActivitySearchQuery = "";
 let expandedChapterIds = new Set();
+let pendingLinkedSubject = null;
 
 function getAllLinkableActivities() {
 	const items = [];
@@ -963,6 +981,25 @@ function renderEmptyLinkActivityNotice(msg) {
 	`;
 }
 
+function applyLinkedSubject(subject) {
+	if (!pomodoroSubjectSelect || !subject) return;
+	const hasOption = Array.from(pomodoroSubjectSelect.options).some((o) => o.value === subject);
+	if (!hasOption) pomodoroSubjectSelect.add(new Option(subject, subject));
+	pomodoroSubjectSelect.value = subject;
+}
+
+function closeLinkedSubjectConfirmModal() {
+	pendingLinkedSubject = null;
+	if (linkedSubjectConfirmModal) linkedSubjectConfirmModal.classList.add("hidden");
+}
+
+function openLinkedSubjectConfirmModal(item, subject) {
+	pendingLinkedSubject = subject;
+	if (linkedSubjectConfirmActivity) linkedSubjectConfirmActivity.textContent = item.title || "this activity";
+	if (linkedSubjectConfirmSubject) linkedSubjectConfirmSubject.textContent = subject;
+	if (linkedSubjectConfirmModal) linkedSubjectConfirmModal.classList.remove("hidden");
+}
+
 function selectLinkedActivity(item) {
 	if (!item) return;
 
@@ -981,14 +1018,7 @@ function selectLinkedActivity(item) {
 		displayText: item.displayText
 	};
 
-	// Automatically switch subject to linked item's subject (user can overwrite later)
-	if (pomodoroSubjectSelect && item.subject) {
-		const hasOption = Array.from(pomodoroSubjectSelect.options).some((o) => o.value === item.subject);
-		if (!hasOption) {
-			pomodoroSubjectSelect.add(new Option(item.subject, item.subject));
-		}
-		pomodoroSubjectSelect.value = item.subject;
-	}
+	if (item.subject) applyLinkedSubject(item.subject);
 
 	// Update active card preview
 	if (linkedCardTypeBadge) {
@@ -1230,6 +1260,22 @@ function renderStudyHistoryModalContent() {
 
 
 function initTimerEvents() {
+	const syncStudyTrackerOrder = () => {
+		const studyPage = document.getElementById("study-page");
+		const calendarColumn = document.getElementById("study-calendar-column");
+		const toolsColumn = document.getElementById("study-tools-column");
+		const timerCard = document.getElementById("study-timer-card");
+		if (!studyPage || !calendarColumn || !toolsColumn || !timerCard) return;
+
+		if (window.matchMedia("(max-width: 639px)").matches) {
+			studyPage.insertBefore(timerCard, calendarColumn);
+		} else {
+			toolsColumn.insertBefore(timerCard, toolsColumn.firstChild);
+		}
+	};
+	syncStudyTrackerOrder();
+	window.addEventListener("resize", syncStudyTrackerOrder);
+
 	if (playPauseBtn) playPauseBtn.addEventListener("click", playPauseTimer);
 	if (skipBtn) {
 		skipBtn.addEventListener("click", () => {
@@ -1259,6 +1305,14 @@ function initTimerEvents() {
 	}
 	if (breakDurationInput) {
 		breakDurationInput.addEventListener("change", () => currentMode === "break" && switchMode("break"));
+	}
+	if (pomodoroSubjectSelect) {
+		pomodoroSubjectSelect.addEventListener("change", (e) => {
+			const linkedSubject = currentLinkedItem?.subject;
+			if (linkedSubject && e.target.value !== linkedSubject) {
+				openLinkedSubjectConfirmModal(currentLinkedItem, linkedSubject);
+			}
+		});
 	}
 
 	// Activity linking events
@@ -1398,6 +1452,22 @@ function initTimerEvents() {
 	if (studyHistoryModal) {
 		studyHistoryModal.addEventListener("click", (e) => {
 			if (e.target === studyHistoryModal) closeStudyHistoryModal();
+		});
+	}
+	if (cancelLinkedSubjectConfirmBtn) {
+		cancelLinkedSubjectConfirmBtn.addEventListener("click", () => {
+			if (currentLinkedItem?.subject) applyLinkedSubject(currentLinkedItem.subject);
+			closeLinkedSubjectConfirmModal();
+		});
+	}
+	if (applyLinkedSubjectConfirmBtn) {
+		applyLinkedSubjectConfirmBtn.addEventListener("click", () => {
+			closeLinkedSubjectConfirmModal();
+		});
+	}
+	if (linkedSubjectConfirmModal) {
+		linkedSubjectConfirmModal.addEventListener("click", (e) => {
+			if (e.target === linkedSubjectConfirmModal) closeLinkedSubjectConfirmModal();
 		});
 	}
 	if (historyFilterSubject) {

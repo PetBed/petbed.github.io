@@ -65,6 +65,8 @@ var noteTagFilter = 'all';
 var noteSortBy = 'updatedAt';
 var noteEditorMode = 'edit';
 var isNoteDirty = false;
+var selectedStudyGroupId = null;
+var activeSharedActivityId = null;
 
 if ("Notification" in window && Notification.permission === "default") {
 	Notification.requestPermission().then(permission => {

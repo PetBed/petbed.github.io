@@ -2,7 +2,8 @@
   "name": "study-website-notes",
   "private": true,
   "scripts": {
-    "build:editor": "esbuild editor-entry.js --bundle --format=iife --platform=browser --outfile=js/note-editor.bundle.js"
+    "build:editor": "esbuild editor-entry.js --bundle --format=iife --platform=browser --outfile=js/note-editor.bundle.js",
+    "test": "node --test"
   },
   "dependencies": {
     "@codemirror/commands": "^6.8.1",

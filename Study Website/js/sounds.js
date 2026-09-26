@@ -25,8 +25,13 @@ window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
 	// --- EDITED: All functions for the Sound Library feature ---
 
 	// Load the user's sound library from the database
-	async function loadSoundLibrary() {
+	async function loadSoundLibrary(startupState = {}) {
 		if (!currentUser) return;
+		if (Object.prototype.hasOwnProperty.call(startupState, "soundLibrary")) {
+			soundLibrary = Array.isArray(startupState.soundLibrary) ? startupState.soundLibrary : [];
+			renderSoundLibrary();
+			return;
+		}
 		try {
 			const response = await fetch(`${API_URL}/api/study/sound-library?userId=${currentUser.id}`);
 			if (!response.ok) throw new Error("Failed to load sounds");

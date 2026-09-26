@@ -22,8 +22,17 @@ function getStatusConfig(statusKey) {
 // ----------------------------------------------------
 // Data Loading & Persistence
 // ----------------------------------------------------
-async function loadSyllabus() {
+async function loadSyllabus(startupState = {}) {
 	if (!currentUser) return;
+	if (Object.prototype.hasOwnProperty.call(startupState, "syllabus")) {
+		syllabus = Array.isArray(startupState.syllabus) ? startupState.syllabus : [];
+		if (!activeSyllabusSubjectId && syllabus.length > 0) {
+			activeSyllabusSubjectId = syllabus[0].id;
+		}
+		localStorage.setItem(`studySyllabus_${currentUser.id}`, JSON.stringify(syllabus));
+		if (typeof populateSubjects === "function") populateSubjects();
+		return;
+	}
 	try {
 		const response = await fetch(`${API_URL}/api/study/syllabus?userId=${currentUser.id}`);
 		if (response.ok) {

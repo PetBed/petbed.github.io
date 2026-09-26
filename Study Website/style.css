@@ -2,6 +2,568 @@ body {
     font-family: 'Inter', sans-serif;
 }
 
+#mobile-menu-toggle {
+    display: none;
+}
+
+#mobile-menu-panel {
+    display: flex;
+    flex: 1;
+    align-items: flex-start;
+    justify-content: space-between;
+    min-width: 0;
+    width: 100%;
+}
+
+#task-mobile-actions {
+    display: none;
+}
+
+.task-dialog-close {
+    display: none;
+}
+
+@media (max-width: 639px) {
+    html,
+    body {
+        max-width: 100%;
+        overflow-x: clip;
+    }
+
+    #app-container {
+        padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+    }
+
+    #app-container > header {
+        position: relative;
+        align-items: flex-end;
+        flex-direction: row;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    #mobile-menu-toggle {
+        display: inline-flex;
+        flex: 0 0 auto;
+        position: relative;
+        z-index: 51;
+    }
+
+    #mobile-menu-panel {
+        display: none;
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        right: 0;
+        z-index: 50;
+        width: min(18rem, calc(100vw - 1.5rem));
+        max-height: calc(100dvh - 5rem);
+        overflow-y: auto;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border: 1px solid rgb(226 232 240);
+        border-radius: 0.75rem;
+        background: white;
+        box-shadow: 0 12px 28px -8px rgb(15 23 42 / 0.25);
+    }
+
+    .dark #mobile-menu-panel {
+        border-color: rgb(51 65 85);
+        background: rgb(30 41 59);
+    }
+
+    #mobile-menu-panel.is-open {
+        display: flex;
+    }
+
+    #mobile-menu-panel > div:first-child {
+        min-width: 0;
+        width: 100%;
+    }
+
+    #mobile-menu-panel h1,
+    #mobile-menu-panel #welcome-message {
+        display: none;
+    }
+
+    #mobile-menu-panel > div:first-child > #primary-navigation {
+        display: flex;
+        max-width: none;
+        margin-top: 0;
+        padding: 0;
+        overflow: visible;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.25rem;
+    }
+
+    #mobile-menu-panel .nav-btn {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        width: 100%;
+        min-width: 0;
+        min-height: 2.75rem;
+        padding: 0.625rem 0.75rem;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    #mobile-menu-panel > div:last-child {
+        display: flex;
+        align-items: stretch;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin: 0;
+        padding-top: 0.75rem;
+        border-top: 1px solid rgb(226 232 240);
+    }
+
+    .dark #mobile-menu-panel > div:last-child {
+        border-color: rgb(51 65 85);
+    }
+
+    #mobile-menu-panel > div:last-child > :not(:first-child) {
+        margin-left: 0;
+    }
+
+    #mobile-menu-panel #settings-btn,
+    #mobile-menu-panel #logout-btn {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 0.625rem;
+        width: 100%;
+        min-height: 2.75rem;
+        padding: 0.625rem 0.75rem;
+    }
+
+    #mobile-menu-panel #settings-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    #mobile-menu-panel .mobile-menu-action-label {
+        display: inline;
+    }
+
+    #app-container main {
+        min-width: 0;
+    }
+
+    #app-container main .gap-8 {
+        gap: 1rem;
+    }
+
+    #app-container main .space-y-8 > :not([hidden]) ~ :not([hidden]) {
+        margin-top: 1rem;
+    }
+
+    #app-container main .shadow-sm {
+        box-shadow: none;
+    }
+
+    #app-container main .rounded-2xl {
+        border-radius: 0.75rem;
+    }
+
+    #app-container .p-6,
+    .fixed.inset-0 .p-6 {
+        padding: 1rem;
+    }
+
+    #app-container .p-8,
+    .fixed.inset-0 .p-8 {
+        padding: 1rem;
+    }
+
+    #tasks-page .grid-cols-3,
+    #edit-task-modal .grid-cols-3 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    #tasks-page:not(.hidden) {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    #task-controls-column {
+        display: contents;
+    }
+
+    .task-control-dialog {
+        display: none;
+    }
+
+    .task-control-dialog.is-open {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 0.5rem 0.5rem max(0.5rem, env(safe-area-inset-bottom));
+        background: rgb(15 23 42 / 0.55);
+        backdrop-filter: blur(3px);
+    }
+
+    .task-control-dialog > div {
+        width: min(100%, 36rem);
+        max-height: calc(100dvh - 1rem);
+        margin: auto 0 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        border-radius: 1rem 1rem 0.75rem 0.75rem;
+    }
+
+    .task-dialog-close {
+        display: inline-flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 0.5rem;
+        color: #64748b;
+    }
+
+    .dark .task-dialog-close {
+        color: #cbd5e1;
+    }
+
+    #task-mobile-actions {
+        display: flex;
+    }
+
+    #task-list-column {
+        order: 1;
+        width: 100%;
+        padding: 0;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    #task-list-column h2 {
+        margin-bottom: 0.75rem;
+    }
+
+    #full-task-list {
+        max-height: none;
+        overflow: visible;
+        padding-right: 0;
+    }
+
+    #task-page-error:empty {
+        display: none;
+    }
+
+    #timer-display {
+        font-size: 3.25rem;
+        line-height: 1.1;
+    }
+
+    #study-page:not(.hidden) {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    #study-calendar-column,
+    #study-tools-column {
+        display: contents;
+    }
+
+    #study-timer-card,
+    #study-calendar-card,
+    #study-countdown-card,
+    #study-sounds-card {
+        margin: 0;
+        width: 100%;
+    }
+
+    #study-timer-card {
+        order: 1;
+        border: 1px solid rgb(59 130 246 / 0.25);
+    }
+
+    #timer-mode-pomodoro-btn,
+    #timer-mode-stopwatch-btn,
+    #play-pause-btn,
+    #skip-btn,
+    #stop-stopwatch-btn {
+        min-height: 2.75rem;
+    }
+
+    #study-calendar-card {
+        order: 2;
+    }
+
+    #study-countdown-card {
+        order: 3;
+    }
+
+    #study-sounds-card {
+        order: 4;
+    }
+
+    #calendar-feature > .flex {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    #calendar-feature > .flex > div {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.375rem;
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    #calendar-feature > .flex > div > :not(:first-child) {
+        margin-left: 0;
+    }
+
+    #open-gcal-modal-btn {
+        grid-column: 1 / -1;
+        justify-content: center;
+        min-height: 2.75rem;
+    }
+
+    #today-month-btn,
+    #prev-month,
+    #next-month {
+        min-height: 2.75rem;
+    }
+
+    #today-month-btn {
+        width: 100%;
+    }
+
+    #prev-month,
+    #next-month {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #calendar-days {
+        gap: 0.25rem;
+    }
+
+    #calendar-feature > .calendar-grid.gap-1 {
+        font-size: 0.75rem;
+    }
+
+    #calendar-days .day {
+        min-height: 3.5rem;
+        padding: 0.3rem;
+        border-radius: 0.5rem;
+        align-items: center;
+    }
+
+    #calendar-days .day > div:first-child {
+        justify-content: center;
+    }
+
+    #calendar-days .day > div:nth-child(2) {
+        display: none;
+    }
+
+    #notes-page:not(.hidden) {
+        height: calc(100dvh - 12rem);
+        min-height: 20rem;
+    }
+
+    #active-note-container .notes-editor-header {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    #notes-page #note-title-input {
+        flex: 1 1 8rem;
+        min-width: 8rem;
+        font-size: 1rem;
+    }
+
+    #active-note-container .notes-editor-header > div:last-child {
+        flex: 1 0 100%;
+        justify-content: flex-end;
+    }
+
+    #notes-page #note-toolbar {
+        max-width: 100%;
+        overflow-x: auto;
+        overscroll-behavior-inline: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #notes-page #note-toolbar button {
+        flex: 0 0 auto;
+        min-height: 2.5rem;
+        min-width: 2.5rem;
+    }
+
+    #notes-page .notes-status-bar {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    #notes-page .notes-status-bar > div:first-child {
+        flex-wrap: wrap;
+        gap: 0.5rem 0.75rem;
+    }
+
+    #notes-page #note-editor-col,
+    #notes-page #note-preview-col {
+        min-width: 0;
+    }
+
+    #notes-page .markdown-content {
+        overflow-wrap: anywhere;
+    }
+
+    .fixed.inset-0 {
+        align-items: flex-start;
+        overflow-y: auto;
+        padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+    }
+
+    .fixed.inset-0 > div {
+        max-height: calc(100dvh - 1rem);
+        margin-block: auto;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    #flashcard-sets-view > .flex {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    #flashcard-sets-view > .flex > div {
+        display: grid;
+        gap: 0.5rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+    }
+
+    #flashcard-sets-view > .flex > div button {
+        min-height: 2.75rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    #flashcard-single-set-view > div:nth-child(2) {
+        display: grid;
+        gap: 0.5rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    #flashcard-single-set-view > div:nth-child(2) button {
+        min-width: 0;
+        padding: 0.75rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .flashcard-face {
+        border-radius: 0.75rem;
+        padding: 1rem;
+    }
+
+    #study-groups-page > .grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    #study-groups-page:not(.mobile-room-active) #study-group-room {
+        display: none;
+    }
+
+    #study-groups-page.mobile-room-active #study-groups-sidebar {
+        display: none;
+    }
+
+    #study-groups-page.mobile-room-active #study-group-room {
+        display: block;
+    }
+
+    #study-group-back-button {
+        display: none;
+    }
+
+    #study-groups-page.mobile-room-active #study-group-back-button {
+        display: inline-flex;
+    }
+
+    #study-group-room > div:first-child {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+    }
+
+    #study-group-room > div:first-child > div:last-child {
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+    }
+
+    #study-group-tabs button {
+        min-height: 2.75rem;
+    }
+
+    #study-group-live-panel > div:first-child,
+    #study-group-leaderboard-panel > div:first-child {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    #study-group-message-form button {
+        min-width: 4rem;
+    }
+
+    #semester-hub-section > div:first-child > div:last-child {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    #semester-hub-section > div:first-child > div:last-child > .relative {
+        flex: 1 1 9rem;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 359px) {
+    #app-container {
+        padding-left: max(0.625rem, env(safe-area-inset-left));
+        padding-right: max(0.625rem, env(safe-area-inset-right));
+    }
+
+    #app-container > header h1 {
+        font-size: 1.5rem;
+    }
+
+    #app-container > header .nav-btn {
+        min-width: 4.25rem;
+        padding-left: 0.625rem;
+        padding-right: 0.625rem;
+    }
+
+    #timer-display {
+        font-size: 2.75rem;
+    }
+
+    #calendar-days .day {
+        min-height: 2.75rem;
+        padding: 0.2rem;
+    }
+}
+
 .calendar-grid {
     grid-template-columns: repeat(7, minmax(0, 1fr));
 }

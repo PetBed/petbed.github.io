@@ -216,10 +216,34 @@ function showPage(page) {
 	if (page === "dashboard") renderDashboard();
 
 	const pageDataPromise = typeof window.StudyApp.loadPageData === "function" ? window.StudyApp.loadPageData(page) : Promise.resolve();
+	const loadingLabels = { study: "Loading study tools...", groups: "Loading study groups...", flashcards: "Loading flashcards...", notes: "Loading notes...", syllabus: "Loading syllabus..." };
+	const pageElement = pages[page];
+	let loadingStatus = null;
+	if (pageElement && loadingLabels[page]) {
+		pageElement.classList.add("feature-loading-page");
+		loadingStatus = pageElement.querySelector(".feature-loading-status");
+		if (!loadingStatus) {
+			loadingStatus = document.createElement("div");
+			loadingStatus.className = "feature-loading-status";
+			loadingStatus.setAttribute("role", "status");
+			loadingStatus.setAttribute("aria-live", "polite");
+			const spinner = document.createElement("span");
+			spinner.className = "feature-loading-spinner";
+			spinner.setAttribute("aria-hidden", "true");
+			const label = document.createElement("span");
+			label.textContent = loadingLabels[page];
+			loadingStatus.append(spinner, label);
+			pageElement.appendChild(loadingStatus);
+		}
+		pageElement.setAttribute("aria-busy", "true");
+	}
 	pageDataPromise.then(() => {
 		if (page === "notes" && typeof renderNotesPage === "function") renderNotesPage();
 		if (page === "syllabus" && typeof renderSyllabusPage === "function") renderSyllabusPage();
-	}).catch((error) => console.error(`Failed to load ${page} page data:`, error));
+	}).catch((error) => console.error(`Failed to load ${page} page data:`, error)).finally(() => {
+		if (loadingStatus) loadingStatus.remove();
+		if (pageElement && loadingLabels[page]) pageElement.removeAttribute("aria-busy");
+	});
 
 	if (typeof handleStudyGroupsPageChange === "function") {
 		handleStudyGroupsPageChange(page);

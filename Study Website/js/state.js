@@ -51,6 +51,7 @@ var syllabus = [];
 var activeSyllabusSubjectId = null;
 var timerEngine = "pomodoro"; // "pomodoro" or "stopwatch"
 var stopwatchSeconds = 0;
+var stopwatchLastUpdateAt = null;
 var activeSessionStartTime = null;
 var activeSessionAccumulatedSeconds = 0;
 var currentLinkedItem = null;
@@ -66,7 +67,6 @@ var noteSortBy = 'updatedAt';
 var noteEditorMode = 'edit';
 var isNoteDirty = false;
 var selectedStudyGroupId = null;
-var activeSharedActivityId = null;
 
 if ("Notification" in window && Notification.permission === "default") {
 	Notification.requestPermission().then(permission => {
@@ -169,6 +169,8 @@ window.StudyApp.state = {
 	set timerEngine(v) { timerEngine = v; },
 	get stopwatchSeconds() { return stopwatchSeconds; },
 	set stopwatchSeconds(v) { stopwatchSeconds = v; },
+	get stopwatchLastUpdateAt() { return stopwatchLastUpdateAt; },
+	set stopwatchLastUpdateAt(v) { stopwatchLastUpdateAt = v; },
 	get activeSessionStartTime() { return activeSessionStartTime; },
 	set activeSessionStartTime(v) { activeSessionStartTime = v; },
 	get activeSessionAccumulatedSeconds() { return activeSessionAccumulatedSeconds; },

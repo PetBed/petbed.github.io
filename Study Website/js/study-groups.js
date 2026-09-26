@@ -16,6 +16,9 @@ const studyGroupsState = {
     mobileRoomShowing: false
 };
 let sharedActivityHeartbeatTimer = null;
+let sharedActivityGeneration = 0;
+const activeSharedActivities = new Map();
+const startingSharedActivityGroups = new Set();
 
 function studyGroupHeaders() {
     const token = currentUser && currentUser.token;
@@ -91,7 +94,6 @@ function renderStudyGroupsList() {
 }
 
 async function selectStudyGroup(groupId) {
-    if (selectedStudyGroupId !== groupId && activeSharedActivityId) await stopSharedStudyActivity();
     selectedStudyGroupId = groupId;
     studyGroupsState.room = null;
     studyGroupsState.lastMessageId = null;
@@ -122,7 +124,7 @@ async function loadStudyGroupRoom() {
         }
         studyGroupsState.room = room;
         renderStudyGroupRoom(room);
-        if (typeof isPaused !== "undefined" && !isPaused && !activeSharedActivityId && isStudyGroupSharingEnabled()) {
+        if (typeof isPaused !== "undefined" && !isPaused && isStudyGroupSharingEnabled()) {
             const subject = (pomodoroSubjectSelect && pomodoroSubjectSelect.value) ? pomodoroSubjectSelect.value : "General";
             startSharedStudyActivity(subject, timerEngine);
         }
@@ -348,7 +350,7 @@ async function deleteStudyGroup() {
     const groupName = studyGroupsState.room?.group?.name || "this group";
     if (!selectedStudyGroupId || !confirm(`Delete ${groupName}? This permanently removes its members, messages, and study activity.`)) return;
     try {
-        if (activeSharedActivityId) await stopSharedStudyActivity();
+        await stopSharedStudyActivity(selectedStudyGroupId);
         await studyGroupRequest(`/${selectedStudyGroupId}`, { method: "DELETE" });
         selectedStudyGroupId = null;
         studyGroupsState.room = null;
@@ -396,7 +398,7 @@ async function transferStudyGroupOwnership(userId) {
 async function leaveStudyGroup() {
     if (!selectedStudyGroupId || !confirm("Leave this study group? You will need its code to join again.")) return;
     try {
-        if (activeSharedActivityId) await stopSharedStudyActivity();
+        await stopSharedStudyActivity(selectedStudyGroupId);
         await studyGroupRequest(`/${selectedStudyGroupId}/leave`, { method: "DELETE" });
         closeStudyGroupSettings();
         if (studyGroupMemberHistory) studyGroupMemberHistory.classList.add("hidden");
@@ -457,58 +459,87 @@ function handleStudyGroupsPageChange(page) {
 }
 
 function isStudyGroupSharingEnabled() {
-    const sharingRequested = Boolean(studyGroupShareToggle && studyGroupShareToggle.checked);
-    return Boolean(sharingRequested && selectedStudyGroupId && currentUser);
+    return Boolean(currentUser && studyGroupsState.groups.some(group => group.shareLiveStatus !== false));
 }
 
 async function startSharedStudyActivity(subject, mode) {
-    if (!isStudyGroupSharingEnabled() || activeSharedActivityId) return;
-    activeSharedActivityId = `activity_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    if (!currentUser) return;
+    const generation = sharedActivityGeneration;
     try {
+        studyGroupsState.groups = await studyGroupRequest("/");
+        if (generation !== sharedActivityGeneration) return;
+        renderStudyGroupsList();
+        const eligibleGroups = studyGroupsState.groups.filter(group => group.shareLiveStatus !== false);
+        const eligibleGroupIds = new Set(eligibleGroups.map(group => group.id));
+        for (const groupId of activeSharedActivities.keys()) {
+            if (!eligibleGroupIds.has(groupId)) await stopSharedStudyActivity(groupId);
+        }
+
         const details = currentLinkedItem?.displayText || "";
-        const response = await studyGroupRequest(`/${selectedStudyGroupId}/activity/start`, { method: "POST", body: JSON.stringify({ clientActivityId: activeSharedActivityId, subject, mode, details }) });
-        activeSharedActivityId = response.activityId;
-        if (sharedActivityHeartbeatTimer) clearInterval(sharedActivityHeartbeatTimer);
-        sharedActivityHeartbeatTimer = setInterval(async () => {
-            if (!activeSharedActivityId) return;
+        await Promise.all(eligibleGroups.map(async group => {
+            if (generation !== sharedActivityGeneration || activeSharedActivities.has(group.id) || startingSharedActivityGroups.has(group.id)) return;
+            startingSharedActivityGroups.add(group.id);
             try {
-                await studyGroupRequest(`/${selectedStudyGroupId}/activity/heartbeat`, { method: "POST", body: JSON.stringify({ clientActivityId: activeSharedActivityId }) });
+                const clientActivityId = `activity_${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${group.id}`;
+                const response = await studyGroupRequest(`/${group.id}/activity/start`, { method: "POST", body: JSON.stringify({ clientActivityId, subject, mode, details }) });
+                if (generation !== sharedActivityGeneration) {
+                    await studyGroupRequest(`/${group.id}/activity/stop`, { method: "POST", body: JSON.stringify({ clientActivityId: response.activityId }) });
+                    return;
+                }
+                activeSharedActivities.set(group.id, { activityId: response.activityId, subject, mode, details, startedAt: response.startedAt });
+                const room = studyGroupsState.room;
+                const self = room?.members?.find(member => member.isSelf);
+                if (selectedStudyGroupId === group.id && room && self) {
+                    self.live = { activityId: response.activityId, startedAt: response.startedAt, mode, subject, details };
+                    room.serverNow = new Date().toISOString();
+                    renderStudyGroupRoom(room);
+                }
             } catch (error) {
-                console.warn("Unable to refresh shared study activity:", error);
+                console.warn(`Unable to share study activity with group ${group.id}:`, error);
+            } finally {
+                startingSharedActivityGroups.delete(group.id);
             }
-        }, 90000);
-        const room = studyGroupsState.room;
-        const self = room?.members?.find(member => member.isSelf);
-        if (room && self) {
-            self.live = { activityId: response.activityId, startedAt: response.startedAt, mode, subject, details };
-            room.serverNow = new Date().toISOString();
-            renderStudyGroupRoom(room);
+        }));
+
+        if (activeSharedActivities.size && !sharedActivityHeartbeatTimer) {
+            sharedActivityHeartbeatTimer = setInterval(async () => {
+                await Promise.all(Array.from(activeSharedActivities.entries()).map(async ([groupId, activity]) => {
+                    try {
+                        await studyGroupRequest(`/${groupId}/activity/heartbeat`, { method: "POST", body: JSON.stringify({ clientActivityId: activity.activityId }) });
+                    } catch (error) {
+                        console.warn(`Unable to refresh shared study activity for group ${groupId}:`, error);
+                    }
+                }));
+            }, 90000);
         }
     } catch (error) {
-        activeSharedActivityId = null;
         console.warn("Unable to share study activity:", error);
     }
 }
 
-async function stopSharedStudyActivity() {
-    if (!activeSharedActivityId || !selectedStudyGroupId) return;
-    const activityId = activeSharedActivityId;
-    activeSharedActivityId = null;
-    if (sharedActivityHeartbeatTimer) clearInterval(sharedActivityHeartbeatTimer);
-    sharedActivityHeartbeatTimer = null;
-    try {
-        const response = await studyGroupRequest(`/${selectedStudyGroupId}/activity/stop`, { method: "POST", body: JSON.stringify({ clientActivityId: activityId }) });
-        const room = studyGroupsState.room;
-        const self = room?.members?.find(member => member.isSelf);
-        if (room && self) {
-            self.live = null;
-            if (self.todaySeconds !== null) self.todaySeconds = Number(self.todaySeconds || 0) + Number(response.durationSeconds || 0);
-            room.serverNow = new Date().toISOString();
-            renderStudyGroupRoom(room);
+async function stopSharedStudyActivity(groupId = null) {
+    if (!groupId) sharedActivityGeneration += 1;
+    const activities = groupId
+        ? (activeSharedActivities.has(groupId) ? [[groupId, activeSharedActivities.get(groupId)]] : [])
+        : Array.from(activeSharedActivities.entries());
+    for (const [activityGroupId, activity] of activities) {
+        activeSharedActivities.delete(activityGroupId);
+        try {
+            const response = await studyGroupRequest(`/${activityGroupId}/activity/stop`, { method: "POST", body: JSON.stringify({ clientActivityId: activity.activityId }) });
+            const room = studyGroupsState.room;
+            const self = room?.members?.find(member => member.isSelf);
+            if (selectedStudyGroupId === activityGroupId && room && self) {
+                self.live = null;
+                if (self.todaySeconds !== null) self.todaySeconds = Number(self.todaySeconds || 0) + Number(response.durationSeconds || 0);
+                room.serverNow = new Date().toISOString();
+                renderStudyGroupRoom(room);
+            }
+        } catch (error) {
+            console.warn(`Unable to finalize shared study activity for group ${activityGroupId}:`, error);
         }
-    } catch (error) {
-        console.warn("Unable to finalize shared study activity:", error);
     }
+    if (!activeSharedActivities.size && sharedActivityHeartbeatTimer) clearInterval(sharedActivityHeartbeatTimer);
+    if (!activeSharedActivities.size) sharedActivityHeartbeatTimer = null;
 }
 
 function initStudyGroupsEvents() {

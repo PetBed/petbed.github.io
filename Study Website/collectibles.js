@@ -71,15 +71,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	// --- CORE LOGIC ---
 
-	function tickProgress() {
+	function tickProgress(seconds = 1) {
 		if (!userId) return;
 
-		accumulatedTime++;
-
-		if (accumulatedTime >= CARD_DROP_INTERVAL) {
-			unclaimedDrops++;
-			accumulatedTime -= CARD_DROP_INTERVAL;
-
+		accumulatedTime += seconds;
+		const dropsEarned = Math.floor(accumulatedTime / CARD_DROP_INTERVAL);
+		if (dropsEarned > 0) {
+			unclaimedDrops += dropsEarned;
+			accumulatedTime %= CARD_DROP_INTERVAL;
 			saveCollectibleState();
 		}
 

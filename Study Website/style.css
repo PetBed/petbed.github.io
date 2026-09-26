@@ -1439,6 +1439,41 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     }
 }
 
+.feature-loading-page {
+    position: relative;
+}
+
+.feature-loading-status {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    min-height: 8rem;
+    color: #475569;
+    background: rgba(248, 250, 252, 0.82);
+    backdrop-filter: blur(2px);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.dark .feature-loading-status {
+    color: #cbd5e1;
+    background: rgba(15, 23, 42, 0.82);
+}
+
+.feature-loading-spinner {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: 0 0 auto;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+}
+
 .animate-spin-fast {
     animation: spin 0.75s linear infinite;
 }

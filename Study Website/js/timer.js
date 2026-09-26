@@ -408,8 +408,10 @@ function setTimerEngine(engine) {
 
 	// Cleanly pause and finalize current session if running
 	if (!isPaused) {
+		if (timerEngine === "stopwatch") accrueStopwatchTime();
 		clearInterval(timerInterval);
 		timerInterval = null;
+		stopwatchLastUpdateAt = null;
 		isPaused = true;
 		saveStudyLogs();
 		finalizeActiveSession();
@@ -450,10 +452,12 @@ function setTimerEngine(engine) {
 
 function resetStopwatch() {
 	if (!isPaused) {
+		if (timerEngine === "stopwatch") accrueStopwatchTime();
 		clearInterval(timerInterval);
 		timerInterval = null;
 		isPaused = true;
 	}
+	stopwatchLastUpdateAt = null;
 	finalizeActiveSession();
 	saveStudyLogs();
 	stopwatchSeconds = 0;
@@ -466,8 +470,10 @@ function playPauseTimer() {
 	playPauseBtn.textContent = isPaused ? "Resume" : "Pause";
 
 	if (isPaused) {
+		if (timerEngine === "stopwatch") accrueStopwatchTime();
 		clearInterval(timerInterval);
 		timerInterval = null;
+		stopwatchLastUpdateAt = null;
 		saveStudyLogs();
 		if (window.collectiblesModule) {
 			window.collectiblesModule.saveCollectibleState();
@@ -487,6 +493,7 @@ function playPauseTimer() {
 				startSharedStudyActivity(subject, timerEngine);
 			}
 		}
+		if (timerEngine === "stopwatch") stopwatchLastUpdateAt = Date.now();
 
 		if (document.visibilityState === "hidden") {
 			handleVisibilityChangeForPiP();
@@ -496,26 +503,7 @@ function playPauseTimer() {
 		}
 
 		if (timerEngine === "stopwatch") {
-			// Stopwatch Mode: ticks up continuously
-			timerInterval = setInterval(() => {
-				stopwatchSeconds++;
-				activeSessionAccumulatedSeconds++;
-
-				const subject = (pomodoroSubjectSelect && pomodoroSubjectSelect.value) ? pomodoroSubjectSelect.value : "General";
-				studyLogs[subject] = (studyLogs[subject] || 0) + 1;
-
-				const activeSem = getActiveSemester();
-				if (activeSem) {
-					if (!activeSem.studyLogs) activeSem.studyLogs = {};
-					activeSem.studyLogs[subject] = (activeSem.studyLogs[subject] || 0) + 1;
-				}
-
-				if (window.collectiblesModule) {
-					window.collectiblesModule.tickProgress();
-				}
-				renderStudyLogs();
-				updateTimerDisplay();
-			}, 1000);
+			timerInterval = setInterval(accrueStopwatchTime, 1000);
 		} else {
 			// Pomodoro Mode: ticks down
 			timerInterval = setInterval(() => {
@@ -553,8 +541,35 @@ function playPauseTimer() {
 	}
 }
 
+function accrueStopwatchTime() {
+	if (stopwatchLastUpdateAt === null) return;
+
+	const now = Date.now();
+	const elapsedSeconds = Math.floor((now - stopwatchLastUpdateAt) / 1000);
+	if (elapsedSeconds <= 0) return;
+	stopwatchLastUpdateAt += elapsedSeconds * 1000;
+	stopwatchSeconds += elapsedSeconds;
+	activeSessionAccumulatedSeconds += elapsedSeconds;
+
+	const subject = (pomodoroSubjectSelect && pomodoroSubjectSelect.value) ? pomodoroSubjectSelect.value : "General";
+	studyLogs[subject] = (studyLogs[subject] || 0) + elapsedSeconds;
+
+	const activeSem = getActiveSemester();
+	if (activeSem) {
+		if (!activeSem.studyLogs) activeSem.studyLogs = {};
+		activeSem.studyLogs[subject] = (activeSem.studyLogs[subject] || 0) + elapsedSeconds;
+	}
+
+	if (window.collectiblesModule) {
+		window.collectiblesModule.tickProgress(elapsedSeconds);
+	}
+	renderStudyLogs();
+	updateTimerDisplay();
+}
+
 function handleVisibilityChangeForPiP() {
 	const timerIsActive = timerInterval && !isPaused;
+	if (timerIsActive && timerEngine === "stopwatch") accrueStopwatchTime();
 	if (document.visibilityState === "hidden" && timerIsActive) {
 		openPiPTimer();
 	} else if (document.visibilityState === "visible") {

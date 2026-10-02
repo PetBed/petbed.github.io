@@ -17,7 +17,7 @@ const NPC_ARCHETYPES = [
     { name: "Master Alchemist", title: "Guild of Transmutation", avatar: "⚗️" }
 ];
 
-function solveContractValidity(recipeKey, targets, minTimeWindow = 1.5) {
+export function solveContractValidity(recipeKey, targets, minTimeWindow = 1.5) {
     const recipe = RECIPES[recipeKey];
     if (!recipe) return [];
 
@@ -93,7 +93,7 @@ function solveContractValidity(recipeKey, targets, minTimeWindow = 1.5) {
     return [];
 }
 
-export function generateSolvableContract() {
+export function generateSolvableContract({ random = Math.random, now = Date.now } = {}) {
     let scanCount = 0;
     const MAX_SCANS = 500;
 
@@ -102,18 +102,18 @@ export function generateSolvableContract() {
 
         // 1. Pick a random wine recipe (excluding fallbacks)
         const recipeKeys = Object.keys(RECIPES).filter(k => k !== 'fruit_cider' && k !== 'house_red');
-        const recipeKey = recipeKeys[Math.floor(Math.random() * recipeKeys.length)];
+        const recipeKey = recipeKeys[Math.floor(random() * recipeKeys.length)];
 
         // 2. Decide how many attributes to target (1 to 4)
-        const attributeCount = Math.floor(Math.random() * 4) + 1;
+        const attributeCount = Math.floor(random() * 4) + 1;
         const attrs = ['sw', 'ac', 'tn', 'bd'];
-        const chosenAttrs = attrs.sort(() => 0.5 - Math.random()).slice(0, attributeCount);
+        const chosenAttrs = attrs.sort(() => 0.5 - random()).slice(0, attributeCount);
 
         // 3. Generate randomized target ranges
         const targets = {};
         for (const attr of chosenAttrs) {
-            const minVal = Math.floor(Math.random() * 70); // Start range lower
-            const maxVal = minVal + Math.floor(Math.random() * 20) + 15; // Width 15-35
+            const minVal = Math.floor(random() * 70); // Start range lower
+            const maxVal = minVal + Math.floor(random() * 20) + 15; // Width 15-35
             targets[attr] = { min: minVal, max: Math.min(100, maxVal) };
         }
 
@@ -121,7 +121,7 @@ export function generateSolvableContract() {
         const solutions = solveContractValidity(recipeKey, targets);
         if (solutions.length > 0) {
             // 5. If solvable, create the contract object
-            const npc = NPC_ARCHETYPES[Math.floor(Math.random() * NPC_ARCHETYPES.length)];
+            const npc = NPC_ARCHETYPES[Math.floor(random() * NPC_ARCHETYPES.length)];
             const multipliers = {
                 1: { min: 1.5, max: 2.35 },
                 2: { min: 2.2, max: 2.85 },
@@ -130,17 +130,17 @@ export function generateSolvableContract() {
             };
 
             const contract = {
-                id: `contract_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+                id: `contract_${now()}_${random().toString(36).substr(2, 5)}`,
                 npc: npc,
                 recipeKey: recipeKey,
                 targets: targets,
                 // Replaced 'multiplier' with 'multiplierRange'
                 multiplierRange: multipliers[attributeCount],
                 status: 'available',
-                timeRemaining: (20 + Math.random() * 10) * 60, // 20-30 minutes in seconds
+                timeRemaining: (20 + random() * 10) * 60, // 20-30 minutes in seconds
             };
 
-            contract.flavorText = generateContractFlavorText(contract);
+            contract.flavorText = generateContractFlavorText(contract, random);
             return contract;
         }
     }

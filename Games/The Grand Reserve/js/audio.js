@@ -2,6 +2,10 @@
 let audioEnabled = false;
 let audioCtx = null; // Lazily initialized to prevent console warnings on load
 
+export function isAudioEnabled() {
+	return audioEnabled;
+}
+
 export function toggleAudio() {
 	audioEnabled = !audioEnabled;
 	if (audioEnabled) {

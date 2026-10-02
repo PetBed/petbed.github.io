@@ -3,9 +3,11 @@ import {SHORT_NAMES, INGREDIENTS_DATA, SEEDS_DATA, PANTRY_DATA, RECIPES, BEER_RE
 import {WEATHER_DATA} from "./weather.js";
 import {playSound} from "./audio.js";
 import {saveGameState} from "./storage.js";
-import {renderPlots, renderCellarUI, showToast, updateHeaderUI, renderWarehouse, renderPressModal, renderMarket, renderRacks, renderShop, renderBreweryUI, renderKettleModal, renderMarketTimer, openSellModal, openSellBeerModal, openLabelerModal, renderWeather, hideItemTooltip, renderContractsBoard, openContractDetailModal} from "./ui.js";
+import { playHarvestAnimation, playPurchaseAnimation, playGoldPopupAnimation } from "./effects.js";
+import {renderPlots, renderCellarUI, showToast, updateHeaderUI, renderWarehouse, renderPressModal, renderMarket, renderRacks, renderShop, renderBreweryUI, renderKettleModal, renderMarketTimer, openSellModal, openSellBeerModal, openLabelerModal, renderWeather, hideItemTooltip, openDialog, renderContractsBoard, openContractDetailModal} from "./ui.js";
 import {generateSolvableContract, checkContractCompletion} from "./contracts.js";
 import {generateContractFlavorText} from "./flavor-text.js";
+import {advanceGameTick as advanceSimulationTick, advanceKettlePhysicsStep, harvestCrop, plantCrop, predictBeerRecipe, predictWineRecipe, updateMarketPrices as updateMarketSimulation} from "./game-simulation.js";
 
 export function setWeather(weatherKey) {
 	state.currentWeather = weatherKey;
@@ -41,40 +43,10 @@ export function handlePlotClick(id) {
 		state.activeSelectorPlotId = id;
 		renderPlots();
 	} else if (plot.state === "ready") {
-		const seedKey = plot.cropType;
-		const ingData = INGREDIENTS_DATA[seedKey];
-		let flavour = null;
-		let harvestWeatherKey = null;
-
-		if (ingData.flavour) {
-			flavour = JSON.parse(JSON.stringify(ingData.flavour)); // Deep copy to prevent mutation of base data
-			harvestWeatherKey = state.currentWeather;
-			const weather = WEATHER_DATA[harvestWeatherKey];
-			if (weather && weather.modifier) {
-				flavour.sw = Math.max(0, Math.min(100, flavour.sw + weather.modifier.sw));
-				flavour.ac = Math.max(0, Math.min(100, flavour.ac + weather.modifier.ac));
-				flavour.tn = Math.max(0, Math.min(100, flavour.tn + weather.modifier.tn));
-				flavour.bd = Math.max(0, Math.min(100, flavour.bd + weather.modifier.bd));
-			}
-		}
-
-		const existingIngredient = state.ingredients.find(ing => ing.key === seedKey && JSON.stringify(ing.flavour) === JSON.stringify(flavour));
-		if (existingIngredient) {
-			existingIngredient.count++;
-		} else {
-			state.ingredients.push({
-				id: `${seedKey}_${Date.now()}`,
-				key: seedKey,
-				count: 1,
-				flavour: flavour, // This will be null for non-flavour crops
-				weather: harvestWeatherKey, // This will be null for non-flavour crops
-			});
-		}
-
-		plot.state = "empty";
-		plot.cropType = null;
-		playSound("pluck");
-		showToast(`Harvested ${INGREDIENTS_DATA[seedKey].name}!`);
+		const plotElement = document.getElementById(`plot-btn-${id}`);
+		const seedKey = harvestCrop(id);
+		if (!seedKey) return;
+		playHarvestAnimation(plotElement, seedKey);
 		renderPlots();
 		renderWarehouse();
 		saveGameState();
@@ -82,19 +54,10 @@ export function handlePlotClick(id) {
 }
 
 export function plantSeed(id, seedKey) {
-	const plot = state.plots[id];
-	if (plot && plot.state === "empty" && state.seeds[seedKey] > 0) {
-		state.seeds[seedKey]--;
-		plot.state = "growing";
-		plot.cropType = seedKey;
-		plot.timeRemaining = SEEDS_DATA[seedKey].growTime;
-		state.activeSelectorPlotId = null;
-		playSound("pluck");
-		showToast(`Planted ${SHORT_NAMES[seedKey]}!`);
-		renderPlots();
-		renderShop();
-		saveGameState();
-	}
+	if (!plantCrop(id, seedKey)) return;
+	renderPlots();
+	renderShop();
+	saveGameState();
 }
 
 export function addToPress(ingredientId) {
@@ -166,66 +129,7 @@ export function removeFromPress(slotIndex) {
 }
 
 export function getRecipePrediction() {
-	if (globals.loadedPressIngredients.length === 0) {
-		return {key: null, name: "Empty Press", desc: "Load ingredients to preview.", flavour: {sw: 0, ac: 0, tn: 0, bd: 0}};
-	}
-
-	const flavour = {sw: 0, ac: 0, tn: 0, bd: 0};
-	const ingredientKeys = [];
-	globals.loadedPressIngredients.forEach((ingId) => {
-		const ing = state.ingredients.find(i => i.id === ingId); // Find the actual ingredient object
-		if (ing && ing.flavour) {
-			flavour.sw = Math.max(0, Math.min(100, flavour.sw + ing.flavour.sw));
-			flavour.ac = Math.max(0, Math.min(100, flavour.ac + ing.flavour.ac));
-			flavour.tn = Math.max(0, Math.min(100, flavour.tn + ing.flavour.tn));
-			flavour.bd = Math.max(0, Math.min(100, flavour.bd + ing.flavour.bd));
-			ingredientKeys.push(ing.key);
-		}
-	});
-
-	// Add flavour from pantry additive, if present
-	if (globals.loadedPantryAdditiveId) {
-		const pantryIng = state.ingredients.find(i => i.id === globals.loadedPantryAdditiveId);
-		if (pantryIng && pantryIng.flavour) {
-			flavour.sw = Math.max(0, Math.min(100, flavour.sw + pantryIng.flavour.sw));
-			flavour.ac = Math.max(0, Math.min(100, flavour.ac + pantryIng.flavour.ac));
-			flavour.tn = Math.max(0, Math.min(100, flavour.tn + pantryIng.flavour.tn));
-			flavour.bd = Math.max(0, Math.min(100, flavour.bd + pantryIng.flavour.bd));
-		}
-	};
-
-	const counts = {};
-	ingredientKeys.forEach((ing) => {
-		counts[ing] = (counts[ing] || 0) + 1;
-	});
-
-	const matches = (recipeReq) => {
-		const reqKeys = Object.keys(recipeReq);
-		if (reqKeys.length === 0) return false;
-		const loadedKeys = Object.keys(counts);
-		if (loadedKeys.length !== reqKeys.length) return false;
-		return reqKeys.every((k) => counts[k] === recipeReq[k]);
-	};
-
-	for (const [key, recipe] of Object.entries(RECIPES)) {
-		if (key === "fruit_cider" || key === "house_red") continue;
-		if (matches(recipe.req)) {
-			return {key, name: recipe.name, desc: recipe.desc, flavour};
-		}
-	}
-
-	if (globals.loadedPressIngredients.length >= 2) {
-		const berriesList = ["blackberry", "raspberry", "blueberry", "strawberry", "elderberry"];
-		const allBerries = ingredientKeys.every((ing) => berriesList.includes(ing));
-
-		if (allBerries) {
-			return {key: "fruit_cider", name: RECIPES.fruit_cider.name, desc: RECIPES.fruit_cider.desc, flavour};
-		} else {
-			return {key: "house_red", name: RECIPES.house_red.name, desc: RECIPES.house_red.desc, flavour};
-		}
-	}
-
-	return {key: null, name: "Incomplete Recipe", desc: "Add more ingredients to form a valid recipe.", flavour};
+	return predictWineRecipe();
 }
 
 export function handleBarrelClick(id) {
@@ -271,17 +175,6 @@ export function handleBottleAction(id) {
 	// 	}
 	// });
 
-	// // Add flavour from pantry additive, if present in the barrel
-	// if (barrel.pantryAdditiveId) {
-	// 	const pantryIng = state.ingredients.find(i => i.id === barrel.pantryAdditiveId);
-	// 	if (pantryIng && pantryIng.flavour) { // Ensure pantry additive has flavour data
-	// 		flavour.sw = Math.max(0, Math.min(100, flavour.sw + pantryIng.flavour.sw));
-	// 		flavour.ac = Math.max(0, Math.min(100, flavour.ac + pantryIng.flavour.ac));
-	// 		flavour.tn = Math.max(0, Math.min(100, flavour.tn + pantryIng.flavour.tn));
-	// 		flavour.bd = Math.max(0, Math.min(100, flavour.bd + pantryIng.flavour.bd));
-	// 	}
-	// }
-
 	const bottle = {
 		id: "wine_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
 		recipeKey: barrel.recipeKey,
@@ -302,7 +195,7 @@ export function handleBottleAction(id) {
 
 	if (finalTier === "s") {
 		// S-Tier handles labeler after Celebration modal via button override in UI
-		document.getElementById("pop-modal").classList.remove("hidden");
+		openDialog(document.getElementById("pop-modal"));
 		// Store temporarily on the global for the celebration to retrieve
 		globals.labeling.id = bottle.id;
 	} else {
@@ -406,46 +299,8 @@ export function startKettlePhysics() {
 		const feedbackEl = document.getElementById("kettle-feedback");
 
 		const kettle = state.kettle;
-		kettle.catcherVel *= 0.92;
-		kettle.catcherPos += kettle.catcherVel;
-
-		if (kettle.catcherPos < 0) {
-			kettle.catcherPos = 0;
-			kettle.catcherVel = -kettle.catcherVel * 0.45;
-			if (Math.abs(kettle.catcherVel) > 0.4) playSound("gurgle");
-		}
-		if (kettle.catcherPos > 100 - catcherWidth) {
-			kettle.catcherPos = 100 - catcherWidth;
-			kettle.catcherVel = -kettle.catcherVel * 0.45;
-			if (Math.abs(kettle.catcherVel) > 0.4) playSound("gurgle");
-		}
-
-		if (Math.random() < 0.8) {
-			kettle.targetVel += (Math.random() - 0.5) * 0.45;
-		}
-		kettle.targetVel = Math.max(-1.43, Math.min(1.43, kettle.targetVel));
-		kettle.targetPos += kettle.targetVel;
-
-		if (kettle.targetPos < 0) {
-			kettle.targetPos = 0;
-			kettle.targetVel = -kettle.targetVel * 0.8;
-		}
-		if (kettle.targetPos > 100) {
-			kettle.targetPos = 100;
-			kettle.targetVel = -kettle.targetVel * 0.8;
-		}
-
-		const overlap = kettle.targetPos >= kettle.catcherPos && kettle.targetPos <= kettle.catcherPos + catcherWidth;
-
-		if (overlap) {
-			const beerRecipe = BEER_RECIPES[kettle.recipeKey] || {baseVal: 30};
-			const baseVal = beerRecipe.baseVal;
-			const brewTimeSeconds = 7.5 + ((baseVal - 30) / 100) * 14.5;
-			const increment = (33 / (brewTimeSeconds * 1000)) * 100;
-			kettle.progress = Math.min(100, kettle.progress + increment);
-		} else {
-			kettle.progress = Math.max(0, kettle.progress - 0.25);
-		}
+		const { overlap, bounceSound, completed } = advanceKettlePhysicsStep(kettle);
+		if (bounceSound) playSound("gurgle");
 
 		if (catcherEl) {
 			catcherEl.style.left = `${kettle.catcherPos}%`;
@@ -463,7 +318,7 @@ export function startKettlePhysics() {
 			}
 		}
 
-		if (kettle.progress >= 100) {
+		if (completed) {
 			clearInterval(globals.kettlePhysicsInterval);
 			globals.kettlePhysicsInterval = null;
 			kettle.state = "success";
@@ -489,15 +344,18 @@ export function addToKettle(ingredientKey) {
 		showToast("Kettle is fully loaded! (Max 3 slots)");
 		return;
 	}
-	if (state.ingredients[ingredientKey] <= 0) {
+	const ingredient = state.ingredients.find((item) =>
+		item.key === ingredientKey &&
+		item.count > globals.loadedKettleIngredients.filter((loadedIngredient) => loadedIngredient === item).length
+	);
+	if (!ingredient) {
 		showToast("Not enough stock!");
 		return;
 	}
 
-	state.ingredients[ingredientKey]--;
-	globals.loadedKettleIngredients.push(ingredientKey);
+	globals.loadedKettleIngredients.push(ingredient);
 	playSound("pluck");
-			renderKettleModal(); // This will re-render the inventory, showing returned items
+	renderKettleModal();
 	renderWarehouse();
 	updateHeaderUI();
 }
@@ -505,8 +363,6 @@ export function addToKettle(ingredientKey) {
 export function removeFromKettle(slotIndex) {
 	hideItemTooltip();
 	if (slotIndex >= globals.loadedKettleIngredients.length) return;
-	const ing = globals.loadedKettleIngredients[slotIndex];
-	state.ingredients[ing]++;
 	globals.loadedKettleIngredients.splice(slotIndex, 1);
 	playSound("pluck");
 	renderKettleModal();
@@ -514,22 +370,7 @@ export function removeFromKettle(slotIndex) {
 }
 
 export function getKettleRecipePrediction() {
-	if (globals.loadedKettleIngredients.length === 0) return {key: null, name: "Empty Kettle", desc: "Load ingredients to preview."};
-	const counts = {};
-	globals.loadedKettleIngredients.forEach((ing) => {
-		counts[ing] = (counts[ing] || 0) + 1;
-	});
-	const matches = (recipeReq) => {
-		const reqKeys = Object.keys(recipeReq);
-		if (reqKeys.length === 0) return false;
-		const loadedKeys = Object.keys(counts);
-		if (loadedKeys.length !== reqKeys.length) return false;
-		return reqKeys.every((k) => counts[k] === recipeReq[k]);
-	};
-	for (const [key, recipe] of Object.entries(BEER_RECIPES)) {
-		if (matches(recipe.req)) return {key, name: recipe.name, desc: recipe.desc};
-	}
-	return {key: null, name: "Mysterious Mash", desc: "Add more grains or pantry additives to balance a valid recipe."};
+	return predictBeerRecipe();
 }
 
 export function adjustKettleHeat(deg) {
@@ -573,7 +414,7 @@ export function saveCustomLabel() {
 	saveGameState();
 }
 
-export function sellWineQualityGroup(qualityKey, rankIndex, customTitleStr, flavourStr) {
+export function sellWineQualityGroup(qualityKey, rankIndex, customTitleStr, flavourStr, sourceElement) {
 	hideItemTooltip();
 	if (!globals.activeSellingWineKey) return;
 
@@ -603,6 +444,9 @@ export function sellWineQualityGroup(qualityKey, rankIndex, customTitleStr, flav
 	state.market.oversupply[globals.activeSellingWineKey]++;
 
 	playSound("clink");
+    if (sourceElement) {
+        playGoldPopupAnimation(earnings, sourceElement);
+    }
 	showToast(`Sold 1 bottle of "${customTitleStr}" for +$${earnings}!`, "success");
 
 	updateHeaderUI();
@@ -612,7 +456,7 @@ export function sellWineQualityGroup(qualityKey, rankIndex, customTitleStr, flav
 	saveGameState();
 }
 
-export function sellBeerGroup(customTitleStr) {
+export function sellBeerGroup(customTitleStr, sourceElement) {
 	hideItemTooltip();
 	if (!globals.activeSellingBeerKey) return;
 
@@ -632,6 +476,9 @@ export function sellBeerGroup(customTitleStr) {
 	state.market.oversupply[globals.activeSellingBeerKey]++;
 
 	playSound("clink");
+	if (sourceElement) {
+        playGoldPopupAnimation(earnings, sourceElement);
+    }
 	showToast(`Sold 1 pint of "${customTitleStr}" for +$${earnings}!`, "success");
 
 	updateHeaderUI();
@@ -641,12 +488,17 @@ export function sellBeerGroup(customTitleStr) {
 	saveGameState();
 }
 
-export function buySeed(seedKey) {
+export function buySeed(seedKey, sourceElement) {
 	const seed = SEEDS_DATA[seedKey];
 	if (seed && state.gold >= seed.cost) {
 		state.gold -= seed.cost;
 		state.seeds[seedKey]++;
-		playSound("clink");
+
+		if (sourceElement) {
+            playPurchaseAnimation(sourceElement, seedKey, 'seed');
+        } else {
+			playSound("clink");
+		}
 		showToast(`Bought 1x ${seed.name}!`);
 		updateHeaderUI();
 		renderShop();
@@ -654,11 +506,10 @@ export function buySeed(seedKey) {
 	}
 }
 
-export function buyPantryItem(pantryKey) {
+export function buyPantryItem(pantryKey, sourceElement) {
 	const item = PANTRY_DATA[pantryKey];
 	if (item && state.gold >= item.cost) {
 		state.gold -= item.cost;
-
 		// Pantry items don't have flavour variations, so we can group them by key
 		const existingIngredient = state.ingredients.find((ing) => ing.key === pantryKey);
 		if (existingIngredient) {
@@ -672,7 +523,11 @@ export function buyPantryItem(pantryKey) {
 			});
 		}
 
-		playSound("clink");
+		if (sourceElement) {
+            playPurchaseAnimation(sourceElement, pantryKey, 'pantry');
+        } else {
+			playSound("clink");
+		}
 		showToast(`Direct-purchased 1x ${item.name}! Added to Pantry.`);
 		updateHeaderUI();
 		renderShop();
@@ -688,6 +543,7 @@ export function buyPlot() {
 			firstLocked.state = "empty";
 			state.shop.plotCost = Math.round(state.shop.plotCost * 1.5);
 			playSound("clink");
+			showToast("Vineyard plot unlocked!");
 			updateHeaderUI();
 			renderPlots();
 			renderShop();
@@ -758,6 +614,7 @@ export function buyOakConditioning() {
 		state.gold -= state.shop.oakBuffCost;
 		state.shop.oakBuffOwned = true;
 		playSound("clink");
+		showToast("Oak conditioning installed!");
 		updateHeaderUI();
 		renderShop();
 		saveGameState();
@@ -780,7 +637,7 @@ export function acceptContract(contractId) {
     renderContractsBoard();
 }
 
-export function fulfillContract(contractId, wineId) {
+export function fulfillContract(contractId, wineId, sourceElement) {
     const contract = state.contracts.find(c => c.id === contractId);
     const wineIndex = state.wines.findIndex(w => w.id === wineId);
     if (!contract || wineIndex === -1) {
@@ -818,6 +675,9 @@ export function fulfillContract(contractId, wineId) {
         state.contracts = state.contracts.filter(c => c.id !== contractId);
 
         playSound("clink");
+        if (sourceElement) {
+            playGoldPopupAnimation(earnings, sourceElement);
+        }
         window.closeContractDetailModal();
         renderContractsBoard();
         renderWarehouse();
@@ -854,138 +714,36 @@ export function setDialogueDifficulty(difficulty) {
     renderContractsBoard();
 }
 
-export function startLoop(multiplier = 1) {
-	return setInterval(() => {
-		const speedFactor = state.shop.oakBuffOwned ? 1.3 : 1.0;
+const DEFAULT_TICK_EFFECTS = {
+	startKettlePhysics,
+	renderPlots,
+	saveGameState,
+	playSound,
+	renderCellarUI,
+	renderRacks,
+	showToast,
+	renderContractsBoard,
+	renderMarketTimer,
+	updateMarketPrices,
+	advanceTutorial: (step) => window.advanceTutorial(step),
+};
 
-		// Auto-resume minigame physics if loaded from a cloud save mid-brew
-		if (state.kettle.state === "brewing" && !globals.kettlePhysicsInterval) {
-			startKettlePhysics();
-		}
-
-		let plotsChanged = false;
-		state.plots.forEach((plot) => {
-			if (plot.state === "growing") {
-				plot.timeRemaining--;
-				plotsChanged = true;
-				if (plot.timeRemaining <= 0) plot.state = "ready";
-			}
-		});
-		if (plotsChanged) {
-			renderPlots();
-			saveGameState();
-		}
-
-		let cellarChanged = false;
-		state.barrels.forEach((barrel) => {
-			if (barrel.state === "fermenting") {
-				barrel.fermentTime--;
-				cellarChanged = true;
-				if (Math.random() < 0.2) playSound("gurgle");
-				if (barrel.fermentTime <= 0) {
-					barrel.state = "aging";
-					barrel.ageProgress = 0;
-					barrel.qualityMultiplier = 1.0;
-					if (state.tutorial.active && state.tutorial.step === 13) {
-                        window.advanceTutorial(14);
-                    }
-					showToast(`Fermentation completed inside Barrel 0${barrel.id + 1}!`);
-				}
-			} else if (barrel.state === "aging") {
-				// Apply barrel flavour modifiers during aging
-				const barrelTypeData = BARREL_TYPES[barrel.type];
-				if (barrelTypeData && barrelTypeData.flavourModifier && barrel.flavour) {
-					const modifier = barrelTypeData.flavourModifier;
-					const actualSpeedFactor = speedFactor;
-
-					barrel.flavour.sw = Math.max(0, Math.min(100, barrel.flavour.sw + modifier.sw * actualSpeedFactor));
-					barrel.flavour.ac = Math.max(0, Math.min(100, barrel.flavour.ac + modifier.ac * actualSpeedFactor));
-					barrel.flavour.tn = Math.max(0, Math.min(100, barrel.flavour.tn + modifier.tn * actualSpeedFactor));
-					barrel.flavour.bd = Math.max(0, Math.min(100, barrel.flavour.bd + modifier.bd * actualSpeedFactor));
-				}
-
-				cellarChanged = true;
-				if (barrel.ageProgress >= 78 && barrel.ageProgress < 100) {
-					if (Math.random() < 0.5) playSound("tick");
-				}
-				barrel.ageProgress += speedFactor;
-				if (barrel.ageProgress > 100) {
-					barrel.ageProgress = 100;
-				}
-			}
-		});
-		if (cellarChanged) renderCellarUI();
-
-		let racksChanged = false;
-		state.wineRacks.forEach((bottle, idx) => {
-			if (bottle) {
-				bottle.age++;
-				racksChanged = true;
-				const potentialRank = VINTAGE_RANKS.find((r, i) => {
-					const currentBoundary = r.ageReq;
-					const isNextOverBound = VINTAGE_RANKS[i + 1] ? bottle.age >= VINTAGE_RANKS[i + 1].ageReq : false;
-					return bottle.age >= currentBoundary && !isNextOverBound;
-				});
-
-				if (potentialRank) {
-					const newIdx = VINTAGE_RANKS.indexOf(potentialRank);
-					if (newIdx !== bottle.rankIndex) {
-						bottle.rankIndex = newIdx;
-						showToast(`A racked bottle has reached "${potentialRank.name}" maturation!`);
-						playSound("tick");
-					}
-				}
-			}
-		});
-		if (racksChanged && globals.currentTab === "racks") renderRacks();
-		state.market.tickCurrent--;
-
-        // Contract expiration
-        let contractsChanged = false;
-        state.contracts.forEach(c => {
-            if (c.status === 'available' && c.timeRemaining > 0) {
-                c.timeRemaining -= (1 * multiplier);
-                if (c.timeRemaining <= 0) contractsChanged = true;
-            }
-        });
-        if (contractsChanged) state.contracts = state.contracts.filter(c => c.timeRemaining > 0 || c.status !== 'available');
-        if (contractsChanged && globals.currentTab === 'orders') renderContractsBoard();
-
-		renderMarketTimer();
-
-		if (state.market.tickCurrent <= 0) {
-			state.market.tickCurrent = state.market.tickMax;
-			updateMarketPrices();
-			showToast("📈 Market prices have shifted!");
-		}
-	}, 1000 / multiplier);
+export function advanceGameTick(multiplier = 1, options = {}) {
+	return advanceSimulationTick(multiplier, {
+		...options,
+		effects: options.effects ?? DEFAULT_TICK_EFFECTS,
+	});
 }
 
-export function updateMarketPrices() {
-	Object.keys(RECIPES).forEach((key) => {
-		const base = RECIPES[key].baseVal || 45;
-		state.market.oversupply[key] *= 0.8;
-		const penalty = Math.max(0.3, 1 - state.market.oversupply[key] * 0.05);
-		const volatility = 1 + (Math.random() * 0.4 - 0.2);
-		let newPrice = Math.round(base * volatility * penalty);
-		newPrice = Math.max(1, newPrice);
-		state.market.current[key] = newPrice;
-		state.market.history[key].push(newPrice);
-		if (state.market.history[key].length > 10) state.market.history[key].shift();
-	});
+export function startLoop(multiplier = 1) {
+	return setInterval(() => advanceGameTick(multiplier), 1000 / multiplier);
+}
 
-	Object.keys(BEER_RECIPES).forEach((key) => {
-		const base = BEER_RECIPES[key].baseVal || 30;
-		state.market.oversupply[key] *= 0.8;
-		const penalty = Math.max(0.3, 1 - state.market.oversupply[key] * 0.05);
-		const volatility = 1 + (Math.random() * 0.3 - 0.15);
-		let newPrice = Math.round(base * volatility * penalty);
-		newPrice = Math.max(1, newPrice);
-		state.market.current[key] = newPrice;
-		state.market.history[key].push(newPrice);
-		if (state.market.history[key].length > 10) state.market.history[key].shift();
-	});
+export function updateMarketPrices({ random = Math.random, render = true } = {}) {
+	updateMarketSimulation({ random });
 
-	renderMarket();
-	renderWarehouse();
+	if (render) {
+		renderMarket();
+		renderWarehouse();
+	}
 }

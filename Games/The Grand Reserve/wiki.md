@@ -1,402 +1,249 @@
-# The Grand Reserve: Official Player Wiki
+# The Grand Reserve: Player Wiki
 
-Welcome to the official strategy, mechanics, and design guide for The Grand Reserve. This vault guide is optimized for Obsidian, utilizing internal linking, clear data formatting, and visual callouts to help you master estate management, crop cultivation, cellar maturation, and copper brewery thermodynamics.
+Welcome to the estate guide. Here you'll find the crops, recipes, cellar craft, market, and customer orders available in the current game. Values below reflect the current game data and may change as the estate grows.
 
-## 1. Getting Started: The Tutorial
+## 1. Getting Started
 
-For new players, the game begins with a hands-on tutorial designed to introduce the core mechanics of winemaking. This guided experience will walk you through:
-*   **Phase 1: The First Harvest:** Learn how to plant seeds in the vineyard, wait for them to grow, and harvest your first batch of grapes.
-*   **Phase 2: The First Vintage:** Take your harvested grapes to the cellar, use the ingredient press, and learn the process of crushing, fermenting, and bottling a wine. This phase also introduces the **Label Architect**, allowing you to create a custom name and design for your first bottle.
-*   **Phase 3: The First Sale:** The tutorial concludes by guiding you to the **Market**, where you can sell your freshly made wine for a profit.
+### The Tutorial
 
-The tutorial includes a checkpoint system, so if you need to leave and come back, you can resume from the start of your current phase.
+The guided tutorial introduces the vineyard, the wine press and cellar, custom labels, and selling at the market. It has two resume checkpoints: the first harvest and the first vintage. When resumed, the current phase is reset and its tutorial state is rebuilt, so tutorial-grown Pinot Noir or the tutorial wine may be cleared.
 
-## 2. Agricultural & Pantry Registry
+### Your New Estate
 
-Your vineyard and pantry shelf form the foundation of your estate's supply chain. To grow crops, you must purchase seed packets from the Merchant Shop. Planting a crop consumes the seed packet.
+A fresh save starts with three unlocked plots out of nine, one French Oak barrel, and 150 gold in the initial game state. The opening tutorial sets the balance to 20 gold and provides two Pinot Noir seeds. Starting seed stock during the tutorial is:
 
-### 2.1 Crop & Seed Catalog (Vineyard Crops)
+| Seed | Packets |
+| :--- | ---: |
+| Pinot Noir | 2 |
+| Hops | 2 |
+| Barley | 2 |
+| Blackberry | 1 |
+| All other seeds | 0 |
 
-All crops in this registry are grapes, berries, or grains that grow in standard Vineyard plots. Each seed packet is consumed instantly upon planting. Grapes and berries have a base flavour profile that is modified by the weather upon harvesting.
+The starting weather is Temperate. The Merchant sells seeds, pantry stock, more plots, barrels, the Copper Kettle, and Oak Conditioning.
 
-| Crop Name | Seed Cost | Grow Time | Base Flavour (SW/AC/TN/BD) | Primary Blend/Brew Role |
-| :--- | :--- | :--- | :--- | :--- |
-| Pinot Noir Grapes | $15\text{ Gold}$ | $6\text{ seconds}$ | `15 / 25 / 15 / 20` | Light/medium-bodied red wine bases |
-| Chardonnay Grapes | $20\text{ Gold}$ | $8\text{ seconds}$ | `10 / 35 / 0 / 15` | Crisp white wine bases |
-| Cabernet Grapes | $30\text{ Gold}$ | $12\text{ seconds}$ | `5 / 15 / 40 / 35` | Bold, heavy tannic red wine bases |
-| Muscat Grapes | $45\text{ Gold}$ | $15\text{ seconds}$ | `45 / 10 / 5 / 20` | Highly sweet dessert wine bases |
-| Wild Blackberry | $12\text{ Gold}$ | $5\text{ seconds}$ | `15 / 15 / 30 / 25` | Heavy berry tannins / Stout additive |
-| Golden Raspberry | $18\text{ Gold}$ | $7\text{ seconds}$ | `20 / 25 / 5 / 10` | Delicate floral wine notes |
-| Forest Blueberry | $25\text{ Gold}$ | $10\text{ seconds}$ | `15 / 20 / 15 / 20` | Indigo wine complexity / Wild Sour Ale |
-| Sweet Strawberry | $35\text{ Gold}$ | $11\text{ seconds}$ | `35 / 15 / 0 / 10` | Fresh summer fruit wine sweetness |
-| Bitter Elderberry | $50\text{ Gold}$ | $18\text{ seconds}$ | `5 / 20 / 35 / 25` | High-value bitter complexity |
-| Fresh Hops | $15\text{ Gold}$ | $8\text{ seconds}$ | `N/A` | Brewing bitter and aroma agent |
-| Craft Barley | $10\text{ Gold}$ | $6\text{ seconds}$ | `N/A` | Standard malty brewing grain base |
-| Malt Wheat | $8\text{ Gold}$ | $5\text{ seconds}$ | `N/A` | Soft, cloudy, and crisp brewing grain base |
-| Spicy Rye | $14\text{ Gold}$ | $7\text{ seconds}$ | `N/A` | Dry, spicy, and earthy brewing grain base |
-| Sugar Pumpkin | $22\text{ Gold}$ | $14\text{ seconds}$ | `N/A` | Heavy, sweet seasonal brewing adjunct |
+### Expanding the Estate
 
-### 2.2 Pantry Shelf Additives (Direct Purchase)
+Buying a plot unlocks the first locked plot. The first costs 50 gold; after each purchase, the next price is rounded from 1.5 times the previous price. There are nine plots in total. Each barrel type costs the amount shown in the cellar table, and the estate can own up to two of each type. You begin with one French Oak barrel. The Copper Kettle costs 150 gold; Oak Conditioning costs 250 gold and permanently increases cellar-aging speed by 30%.
 
-Unlike agricultural crops, pantry items are bought directly from the Merchant Shop for flat gold costs and are deposited instantly into your pantry shelf inventory. They can be added to the press to significantly alter a wine's final flavour profile.
+## 2. Crops, Pantry & Weather
 
-| Pantry Additive | Unit Cost | Description | Wine Flavour Modifiers |
-| :--- | :--- | :--- | :--- |
-| Wild Yeast | $15\text{ Gold}$ | Unleashes complex, tart, sour wild fermentations. | `AC +25`, `BD +15`, `SW -20` |
-| Cacao Nibs | $10\text{ Gold}$ | Rich chocolate bitterness and smooth stout mouthfeel |
-| Coffee Beans | $12\text{ Gold}$ | Intensely roasted dark chocolate and espresso notes |
-| Pure Honey | $20\text{ Gold}$ | Highly fermentable sweet braggot/pumpkin sugar boost. | `SW +30`, `BD +5`, `AC -15` |
-| Coriander & Peel | $8\text{ Gold}$ | Citrus aromatics and light herbal spiciness in witbiers |
+Buy seed packets in the Merchant's Seed Stock shop. Planting consumes one packet. Growth timers count down in the game loop; harvest is a separate action. Weather is rerolled every three minutes and the new roll may match the previous weather.
 
-### 2.3 Dynamic Weather & Terroir
+### Crop & Seed Catalog
 
-The estate's weather is no longer just cosmetic. It changes every 3 minutes and directly impacts the chemical composition of your crops, a concept known as *terroir*. The weather at the **moment of harvest** applies a modifier to the crop's base flavour profile.
+Flavour values use the order Sweetness / Acidity / Tannin / Body. Grapes and berries have flavour profiles; grain, hops, and pumpkin are brewing ingredients without wine-flavour values. Harvest weather is applied to the crop's base profile and each attribute is clamped from 0 to 100.
 
-| Weather | Icon | Modifier | Effect Description |
-| :--- | :--- | :--- | :--- |
-| Sunny | `sun` | `SW +20`, `AC -10` | Intense sun boosts sugar development but reduces sharp acids. |
-| Rain | `cloud-rain` | `SW -10`, `AC +20` | Rain dilutes sugars but encourages bright, acidic growth. |
-| Mist | `cloud-fog` | `BD +10` | Humid, misty air leads to plumper, heavier fruit with more body. |
-| Temperate | `cloud` | None | A balanced, neutral day with no significant impact on flavour. |
+| Crop | Seed Cost | Grow Time | Base Flavour (SW/AC/TN/BD) |
+| :--- | ---: | ---: | :--- |
+| Pinot Noir Grapes | 15 gold | 6 sec | `15 / 25 / 15 / 20` |
+| Chardonnay Grapes | 20 gold | 8 sec | `10 / 35 / 0 / 15` |
+| Cabernet Grapes | 30 gold | 12 sec | `5 / 15 / 40 / 35` |
+| Muscat Grapes | 45 gold | 15 sec | `45 / 10 / 5 / 20` |
+| Wild Blackberry | 12 gold | 5 sec | `15 / 15 / 30 / 25` |
+| Golden Raspberry | 18 gold | 7 sec | `20 / 25 / 5 / 10` |
+| Forest Blueberry | 25 gold | 10 sec | `15 / 20 / 15 / 20` |
+| Sweet Strawberry | 35 gold | 11 sec | `35 / 15 / 0 / 10` |
+| Bitter Elderberry | 50 gold | 18 sec | `5 / 20 / 35 / 25` |
+| Fresh Hops | 15 gold | 8 sec | None |
+| Craft Barley | 10 gold | 6 sec | None |
+| Malt Wheat | 8 gold | 5 sec | None |
+| Spicy Rye | 14 gold | 7 sec | None |
+| Sugar Pumpkin | 22 gold | 14 sec | None |
 
-[!tip] Strategic Harvesting
-Timing your harvest to coincide with specific weather patterns is a key strategy for advanced winemakers. A Cabernet harvested in the rain will have a much different profile than one harvested in the sun, allowing you to create truly unique vintages.
+### Weather at Harvest
 
-## 3. Cellar Mechanics (Winemaking)
+| Weather | Sweetness | Acidity | Tannin | Body |
+| :--- | ---: | ---: | ---: | ---: |
+| Sunny | +20 | -10 | 0 | 0 |
+| Rain | -10 | +20 | 0 | 0 |
+| Mist | 0 | 0 | 0 | +10 |
+| Temperate | 0 | 0 | 0 | 0 |
 
-Winemaking is a slow, methodical art of patience. Once you have harvested ingredients, they must be combined to create a wine with a unique flavour profile, then processed through three active stages.
+These are ingredient modifiers, not global changes to fruit already in storage. Harvested ingredients retain their flavour and harvest-weather record.
 
-[LOAD PRESS] ──> [MANUAL CRUSH] ──> [FERMENT] ──> [ACTIVE AGING] ──> [CELLAR RACKING]
+### Pantry Shelf
 
-### 3.1.1 Barrel Types & Aging Effects
+Pantry items are purchased directly for gold and added to inventory. Only Wild Yeast and Pure Honey can be used as wine-press additives; the other pantry goods are used in beer recipes.
 
-The type of barrel you use for aging significantly impacts the final flavour profile of your wine. Each barrel type imparts unique flavour modifiers per percentage of aging progress. These modifiers are applied continuously throughout the aging phase.
+| Pantry Item | Cost | Wine Flavour Modifier | Other Recipe Use |
+| :--- | ---: | :--- | :--- |
+| Wild Yeast | 15 gold | `SW -20`, `AC +25`, `BD +15` | Wild Sour Ale |
+| Cacao Nibs | 10 gold | None | Double Espresso Stout |
+| Coffee Beans | 12 gold | None | Double Espresso Stout |
+| Pure Honey | 20 gold | `SW +30`, `AC -15`, `BD +5` | Pumpkin Spice Ale; Imperial Honey Braggot |
+| Coriander & Peel | 8 gold | None | Belgian Witbier |
 
-| Barrel Type | Cost | Max Owned | Flavour Modifier (per % progress) | Primary Effect |
-| :--- | :--- | :--- | :--- | :--- |
-| French Oak | $300\text{ Gold}$ | 2 | `TN +0.5`, `BD +0.3`, `SW -0.2` | Adds complex tannins and body, reduces sweetness. |
-| American Oak | $200\text{ Gold}$ | 2 | `TN +0.2`, `BD +0.6`, `AC -0.3` | Boosts body and subtle tannins, mellows acidity. |
-| Chestnut Wood | $300\text{ Gold}$ | 2 | `TN +1.2`, `AC +0.4`, `SW -0.2` | Imparts strong tannins and bright acidity, reduces sweetness. |
-| Old Bourbon | $500\text{ Gold}$ | 2 | `BD +0.8`, `SW +0.6`, `AC -0.4` | Adds significant body and sweetness, softens acidity. |
+Each wine batch can use at most one pantry additive. Additive and fruit flavour values are added and clamped to the 0-100 range.
 
-[!tip] Strategic Barrel Selection
-Choosing the right barrel is crucial for crafting your desired wine profile. For example, a wine high in natural acidity might benefit from an American Oak barrel to mellow it out, while a light-bodied wine could gain structure from a French Oak.
+## 3. Wine Cellar
 
-### 3.1 The Four-Point Flavour Spectrum
+The cellar's wine workflow is: load fruit in the press, crush the batch, let it ferment, then bottle during aging. Empty barrels open the press. A batch accepts up to three grapes or berries plus one eligible pantry additive.
 
-Every wine you create is now defined by a dynamic, four-point flavour profile. The final profile of a bottled wine is determined by the sum of the flavour values from its base ingredients, which is then modified by the harvest weather, any pantry additives used in the press, and finally the type of barrel and duration of the aging process.
-*   **Sweetness (SW):** Measures residual fruit sugars and unfermentable additives.
-*   **Acidity (AC):** Measures tartness and bright, mouth-watering acids.
-*   **Tannin (TN):** Measures mouth-drying astringency from skins, seeds, and wood.
-*   **Body (BD):** Measures physical density, weight, and viscous mouthfeel.
+The recipe book matches the exact fruit combination. Two or more berries that do not match a named recipe become Generic Fruit Cider. Other unmatched combinations of two or more fruit become House Red Blend. A pantry additive does not count as one of the fruit slots.
 
-[!tip] Informative Tooltips
-Hovering over almost any item or UI element in the game will display a detailed tooltip. This includes:
-*   **Crops & Ingredients:** See their base flavour, any active weather modifiers, and the final resulting flavour profile.
-*   **Barrels & Additives:** See the exact flavour modifiers they apply.
-*   **Weather Display:** See the active modifiers for the current weather.
+### Wine Recipes
 
-### 3.2 The Multi-Ingredient Press & Recipe Book
+Values are recipe base market prices before market shifts and wine multipliers.
 
-To start a batch, click any empty Oak Barrel in your Cellar to open the Ingredient Press. You can load up to $3$ harvested ingredients (grapes and berries) and one pantry additive. The Press automatically evaluates your loaded items against the Recipe Book.
+| Recipe | Exact Fruit Combination | Base Price |
+| :--- | :--- | ---: |
+| Chardonnay Dry White | 2 Chardonnay | 45 gold |
+| Pinot Noir Light Red | 2 Pinot Noir | 50 gold |
+| Cabernet Bold Red | 2 Cabernet | 65 gold |
+| Golden Muscat Dessert | 2 Muscat | 85 gold |
+| Summer Rosé | 1 Pinot Noir + 1 Strawberry | 60 gold |
+| Midnight Blackberry Port | 1 Cabernet + 2 Blackberry | 80 gold |
+| Royal Gold Mead-Wine | 1 Muscat + 1 Raspberry | 95 gold |
+| Elder-Blue Elixir | 2 Elderberry + 1 Blueberry | 110 gold |
+| Imperial Velvet Blend | 1 Cabernet + 1 Blueberry + 1 Elderberry | 150 gold |
+| Generic Fruit Cider | Unmatched combination of 2+ berries | 25 gold |
+| House Red Blend | Other unmatched combination of 2+ fruit | 30 gold |
 
-[!tip] Pantry Additives
-In addition to the three main ingredient slots, a single pantry additive (like Wild Yeast or Pure Honey) can be added to a batch. This provides a powerful way to fine-tune a wine's flavour profile to meet specific contract demands.
+### Crushing, Fermentation & Aging
 
-[!info] Ratio Standard
-Ratios below represent the exact integer count of ingredients required in the Press.
+Crushing takes five barrel clicks. Fermentation lasts five seconds. Aging then advances once per second; at normal speed it takes 100 seconds to reach 100%. Oak Conditioning changes aging speed to 1.3 progress points per second. It does not affect crop growth or fermentation.
 
-**Standard Wine Classics**
+The barrel changes the wine's flavour during aging. Modifiers below are applied on each aging update per progress point, with flavour clamped to 0-100. Each type has a maximum ownership of two barrels.
 
-| Recipe Name | Ingredients | Base Market Value |
-| :--- | :--- | :--- |
-| Chardonnay Dry White | $2\text{ Chardonnay}$ | $45\text{ Gold}$ |
-| Pinot Noir Light Red | $2\text{ Pinot Noir}$ | $50\text{ Gold}$ |
-| Cabernet Bold Red | $2\text{ Cabernet}$ | $65\text{ Gold}$ |
-| Golden Muscat Dessert | $2\text{ Muscat}$ | $85\text{ Gold}$ |
+| Barrel | Cost | Flavour Change per Aging Point (SW/AC/TN/BD) |
+| :--- | ---: | :--- |
+| French Oak | 300 gold | `-0.2 / 0 / +0.5 / +0.3` |
+| American Oak | 200 gold | `0 / -0.3 / +0.2 / +0.6` |
+| Chestnut Wood | 300 gold | `-0.2 / +0.4 / +1.2 / 0` |
+| Old Bourbon | 500 gold | `+0.6 / -0.4 / 0 / +0.8` |
 
-**Artisan Specialty Blends**
+### Flavour & Quality
 
-| Recipe Name | Ingredients | Ratio | Base Market Value |
-| :--- | :--- | :--- | :--- |
-| Summer Rosé | $1\text{ Pinot Noir} + 1\text{ Strawberry}$ | $1:1$ | $60\text{ Gold}$ |
-| Midnight Blackberry Port | $1\text{ Cabernet} + 2\text{ Blackberry}$ | $1:2$ | $80\text{ Gold}$ |
-| Royal Gold Mead-Wine | $1\text{ Muscat} + 1\text{ Raspberry}$ | $1:1$ | $95\text{ Gold}$ |
-| Elder-Blue Elixir | $2\text{ Elderberry} + 1\text{ Blueberry}$ | $2:1$ | $110\text{ Gold}$ |
-| Imperial Velvet Blend | $1\text{ Cabernet} + 1\text{ Blueberry} + 1\text{ Elderberry}$ | $1:1:1$ | $150\text{ Gold}$ |
+Wine flavour is the clamped sum of the harvested fruit profiles and any eligible additive, followed by the barrel's changes during aging. Attributes are Sweetness (SW), Acidity (AC), Tannin (TN), and Body (BD). Tooltips in the game show ingredient and product flavour details.
 
-**Recipe Fallbacks**
+| Bottle at Aging Progress | Quality | Sale Multiplier |
+| :--- | :--- | ---: |
+| 0% to under 30% | C-Tier Table | `0.6x` |
+| 30% to under 60% | B-Tier Classic | `1.0x` |
+| 60% to under 80% | A-Tier Premium | `1.5x` |
+| 80% to 100% | S-Tier Reserve | `2.5x` |
 
-| Recipe Name | Condition | Base Market Value |
-| :--- | :--- | :--- |
-| Generic Fruit Cider | Any combination consisting purely of $\ge 2$ berries. | $25\text{ Gold}$ |
-| House Red Blend | Any invalid grape-based combination of $\ge 2$ ingredients. | $30\text{ Gold}$ |
+At 100%, aging stops and the batch remains S-Tier until bottled or converted to Vinegar. Vinegar is an optional conversion with a `0.15x` quality multiplier. Bottling stores the wine in the reserve; barrel aging quality is set by the progress at the moment you bottle.
 
-### 3.3 Processing Stages
+## 4. Maturation Racks
 
-Crushing (Active Tapping): You must click the barrel manually $5\text{ times}$ to crush the grapes. Each squish deforms the barrel container with physical visual shaking.
+The cellar rack has nine slots. Move a bottled wine from the reserve onto an empty slot to mature it. Rack age advances by one year per second. When a bottle reaches a new age threshold, its vintage rank and value multiplier update.
 
-Fermentation (Passive, $5\text{s}$): The mash sits in a closed barrel to ferment. You will occasionally hear gurgling bubbles.
+| Rank | Age | Multiplier |
+| :--- | ---: | ---: |
+| Freshly Bottled | 0+ years | `1.0x` |
+| Fine Aged | 15+ years | `1.5x` |
+| Estate Reserve | 40+ years | `2.2x` |
+| Centennial Vintage | 80+ years | `3.5x` |
 
-Aging (Passive, Variable Speed): The aging indicator marker slides along a visual timeline towards the S-Tier peak. During this phase, the barrel's wood type will impart flavour changes to the wine. The aging process takes 100 seconds, with progress displayed as a percentage.
+## 5. Copper Brewery
 
-### 3.4 The Aging Timeline & Quality Multipliers
+Buy the Copper Kettle for 150 gold to unlock the Brewery. The kettle takes up to three ingredients. Its recipe must match the exact ingredient keys and quantities. Selecting an ingredient reserves it while the modal is open; removing a slot or closing the modal releases the reservation. Confirming a recipe consumes the loaded ingredients once.
 
-When a barrel transitions to the Aging phase, its value multiplier $M_{\text{tier}}$ climbs as the slider moves toward the S-Tier sweet spot. The batch will remain at peak S-Tier quality even if it reaches 100% progress, giving you a wide window to bottle your best vintages.
+### Beer Recipe Book
 
-[  C-Tier  ] [   B-Tier   ] [   A-Tier   ] [ ★ S-Tier ★ ]
-0%        30%            60%          80%            100%
+Beers do not use the wine aging or quality system. Their base price is their recipe's market value.
 
+| Beer | Exact Ingredients | Base Price |
+| :--- | :--- | ---: |
+| Wheat Beer | 1 Barley + 1 Wheat | 30 gold |
+| Golden Ale | 2 Barley + 1 Hops | 40 gold |
+| Bitter IPA | 1 Barley + 2 Hops | 55 gold |
+| Belgian Witbier | 1 Wheat + 1 Hops + 1 Coriander & Peel | 65 gold |
+| Spiced Rye IPA | 1 Rye + 2 Hops | 70 gold |
+| Wild Sour Ale | 1 Wheat + 1 Wild Yeast + 1 Blueberry | 85 gold |
+| Pumpkin Spice Ale | 1 Wheat + 1 Pumpkin + 1 Pure Honey | 95 gold |
+| Imperial Honey Braggot | 1 Barley + 2 Pure Honey | 110 gold |
+| Double Espresso Stout | 1 Barley + 1 Coffee Beans + 1 Cacao Nibs | 130 gold |
 
-| Quality Tier | Timeline Range | Multiplier ($M_{\text{tier}}$) | Description |
-| :--- | :--- | :--- | :--- |
-| ★ S-Tier Reserve ★ | $80\% \le \text{Progress} \le 100\%$ | $2.5\times$ | Flawless, rich peak aging sweet spot. |
-| A-Tier Premium | $60\% \le \text{Progress} < 80\%$ | $1.5\times$ | Excellent, highly balanced vintage. |
-| B-Tier Classic | $30\% \le \text{Progress} < 60\%$ | $1.0\times$ | Standard, everyday classic table wine. |
-| C-Tier Table | $0\% \le \text{Progress} < 30\%$ | $0.6\times$ | Weak body, bottled far too early. |
-| Vinegar | Manual Conversion at $100\%$ | $0.15\times$ | Optional conversion for specific uses. |
+### Kettle Alignment
 
-[!info] The Vinegar Option
-Once a batch reaches 100% aging progress, it will stop aging and remain at S-Tier quality indefinitely. A new button will appear, giving you the choice to convert the entire batch into low-value Vinegar. While not profitable, Vinegar may have niche uses in future updates.
+Keep the green catcher pad over the moving bubble. Progress builds while they overlap and recedes slowly when they separate. Stoke Fire adds rightward velocity; Vent Steam adds leftward velocity. The pad has momentum and drag, and bounces off the track edges. Leaving the Brewery tab does not itself reset the simulation; browser background-tab throttling can slow timers.
 
-## 4. Maturation Racks & Vintage Ranks
+Required contact time scales with recipe base price:
 
-Unlike active fermentation, matured wines can be stored in the Cellar Maturation Racks to age over long cycles, yielding exponential price gains based on in-game shelf-maturation age.
+$$t = 7.5 + \left(\frac{\text{Base Price} - 30}{100}\right) \times 14.5\text{ seconds}$$
 
-[Freshly Bottled] ──> [Fine Aged] ──> [Estate Reserve] ──> [Centennial Vintage]
-0 Years              15 Years         40 Years            80 Years
+This is alignment time, not necessarily elapsed wall-clock time, because progress only accumulates during overlap. On completion, the beer is added to the reserve and the label editor opens.
 
+## 6. Market Square
 
-Maturation Racks contain a $3 \times 3$ display grid ($9$ slots total). Players can load bottled wines from their reserve inventory directly into any empty slot.
+Market prices shift every 30 seconds. Wine and beer each have a separate random volatility range. Selling a product increases only that product's oversupply by one; oversupply decays by 20% at each market shift.
 
-### 4.1 Vintage Ranks & Multipliers
+For the price update, oversupply first decays, then the new price is calculated:
 
-Maturation age increments by $+1$ year every second the bottle remains racked.
+$$P_{\text{supply}} = \max(0.3, 1 - 0.05S)$$
 
-$$\text{Final Market Value} = \text{Base Price} \times M_{\text{tier}} \times V_{\text{rank}}$$
+$$\text{Market Price} = \text{Recipe Base Price} \times \text{Volatility} \times P_{\text{supply}}$$
 
-| Vintage Rank | Age Threshold | Value Multiplier ($V_{\text{rank}}$) | Description |
-| :--- | :--- | :--- | :--- |
-| Centennial Vintage | $\ge 80\text{ Years}$ | $3.5\times$ | Exquisite, historic antique of legendary repute. |
-| Estate Reserve | $\ge 40\text{ Years}$ | $2.2\times$ | Rich oak tones developed through patient resting. |
-| Fine Aged | $\ge 15\text{ Years}$ | $1.5\times$ | Softened acidity, smooth rounded profiles. |
-| Freshly Bottled | $\ge 0\text{ Years}$ | $1.0\times$ | Just bottled, raw youth with young notes. |
-
-## 5. Active Brewing (The Copper Kettle)
-
-Once you purchase the Copper Kettle upgrade from the Merchant Shop for $150\text{ Gold}$, the Brewery tab unlocks. This active minigame represents a physics-based, interactive temperature tracking stabilization system.
-
-### 5.1 Beer Recipe Registry
-
-All beers use processed grain and hops. Unlike wines, beers do not age; their value is determined instantly upon successful brew completion.
-
-| Recipe Name | Ingredients | Base Price |
-| :--- | :--- | :--- |
-| Wheat Beer | $1\text{ Barley} + 1\text{ Wheat}$ | $30\text{ Gold}$ |
-| Golden Ale | $2\text{ Barley} + 1\text{ Hops}$ | $40\text{ Gold}$ |
-| Bitter IPA | $1\text{ Barley} + 2\text{ Hops}$ | $55\text{ Gold}$ |
-| Belgian Witbier | $1\text{ Wheat} + 1\text{ Hops} + 1\text{ Coriander \& Peel}$ | $65\text{ Gold}$ |
-| Spiced Rye IPA | $1\text{ Rye} + 2\text{ Hops}$ | $70\text{ Gold}$ |
-| Wild Sour Ale | $1\text{ Wheat} + 1\text{ Wild Yeast} + 1\text{ Forest Blueberry}$ | $85\text{ Gold}$ |
-| Pumpkin Spice Ale | $1\text{ Wheat} + 1\text{ Pumpkin} + 1\text{ Pure Honey}$ | $95\text{ Gold}$ |
-| Imperial Honey Braggot | $1\text{ Barley} + 2\text{ Pure Honey}$ | $110\text{ Gold}$ |
-| Double Espresso Stout | $1\text{ Barley} + 1\text{ Coffee Beans} + 1\text{ Cacao Nibs}$ | $130\text{ Gold}$ |
-
-### 5.2 Kettle Temperature Mini-Game (Stardew-Style Physics)
-
-The brewing process is an active, horizontal stabilization minigame, inspired by the physics of popular fishing games.
-
-[← Vent Steam]  ============= [ Catcher Pad ] =============  [Stoke Fire →]
-                              { Boiling Bubble }
-
-### 5.2.1 Gameplay Objective
-To complete a brew, you must keep the green **Catcher Pad** layered on top of the drifting **Boiling Bubble**. Progress accumulates only during this overlap.
-
-### 5.2.2 Core Mechanics
-*   **The Catcher Pad:** This is your stable brewing zone, represented by the green block.
-    *   **Width:** $21\%$ of the total track.
-    *   **Physics:** Features custom momentum and drag for a smooth feel.
-    *   **Controls:**
-        *   **Stoke Fire:** Accelerates the pad to the right (velocity `+2.16`).
-        *   **Vent Steam:** Accelerates the pad to the left (velocity `-2.16`).
-    *   **Boundary Collisions:** Slamming into the track's edges triggers a visual bounce with realistic energy dampening ($45\%$ velocity retention).
-*   **The Boiling Bubble:** A custom bubble icon that drifts back and forth along the track.
-    *   Its drift patterns are highly smoothed ($35\%$ slower maximum speeds, $20\%$ lower sudden adjustment frequencies) to make alignment satisfying and comfortable.
-
-### 5.2.3 Completion Time
-The total time required to complete a brew is dynamic and scales with the base value of the beer recipe.
-
-$$\text{Brew Time Required} = 7.5 + \left(\frac{\text{Base Value} - 30}{100}\right) \times 14.5\text{ seconds}$$
-
-*   **Example (Low Value):** A standard $30\text{-gold}$ Wheat Beer requires only **$7.5\text{ seconds}$** of active contact.
-*   **Example (High Value):** An ultra-premium $130\text{-gold}$ Double Espresso Stout requires **$22\text{ seconds}$** of total contact.
-
-[!tip] Dynamic Tab Re-binding & Resilience If you navigate away from the Brewery to harvest crops, your thermal state and active target positions are maintained in the background thread. Returning to the Brewery dynamically binds inputs back to the UI, allowing you to resume with zero progress loss.
-
-## 6. Market Square & Oversupply Mechanics
-
-The town market does not pay fixed rates. It employs a dynamic supply-and-demand algorithm that reacts to how you sell your goods.
-
-### 6.1 Price Volatility & Market Shifts
-
-Every $30\text{-seconds}$ real-time, the market experiences a Market Shift. Base prices fluctuate according to volatility metrics:
-
-$$\text{New Base Price} = \text{Base Value} \times \text{Volatility} \times \text{Oversupply Penalty}$$
-
-Market Volatility: A random coefficient ranging between $0.8$ and $1.2$ ($\pm 20\%$).
-
-Oversupply Penalty ($P_{\text{supply}}$): Selling a bottle of wine or beer increases that specific product's market oversupply index ($S$) by $+1.0$. 
-
-$$P_{\text{supply}} = \max(0.3, 1.0 - (S \times 0.05))$$
-
-If you dump dozens of the same wine variety onto the market at once, its purchase value will plummet down to a minimum floor of $30\%$ of its base value.
-
-Oversupply Recovery: During each $30\text{-second}$ Market Shift, the oversupply index for all products naturally decays by $20\%$ ($S_{\text{new}} = S_{\text{old}} \times 0.8$).
-
-The Market interface renders SVG Sparklines displaying the pricing trend over the last $10$ market shifts.
-
-## 7. Customer Order Board
-
-The Customer Order Board, accessible via the "Orders" tab, is a dynamic contract system where NPCs request wines with specific characteristics. Fulfilling these contracts offers premium payouts and provides a directed challenge for master winemakers.
-
-### 7.1 Dialogue Difficulty
-
-To accommodate all players, NPC requests can be interpreted at different difficulty levels, which can be changed at any time.
-
-*   **Beginner Mode:** NPCs use simple, literal words like "unsweetened," "tart," and "thin."
-*   **Sommelier Mode:** NPCs use evocative, professional terms like "austere," "enamel-stripping," and "cigar-box."
-*   **Intermediate Mode:** A 50/50 blend of both, helping players naturally learn advanced terminology.
-
-### 7.2 Contract Mechanics
-
-*   **Requests:** An NPC will request a specific wine variety (e.g., Cabernet Bold Red) with one to four flavour attributes falling within a target range (e.g., Tannin between 75-85%).
-*   **The Solvability Engine:** To ensure fairness, every contract is pre-validated by a background simulation engine. This engine confirms that a valid combination of weather, additives, and barrel aging exists to create the requested wine, making every order achievable.
-*   **Lifecycle:** New orders are posted every 10-15 minutes. Available orders expire after 20-30 minutes if not accepted. A player can have up to 3 active orders, which do not expire.
-*   **Fulfillment:** From the contract detail screen, you can submit any wine from your reserve that matches the required variety. The system then calculates the wine's precision.
-    *   If the wine's average flavour deviation is within a **20% tolerance** of the requested ranges, the customer will accept it.
-    *   If the deviation is greater than 20%, the customer will refuse the wine, but the order will not be canceled, allowing you to try again with a different bottle.
-*   **Cancellation:** If you no longer wish to complete an active order, you can open its detail screen and select "Cancel Order".
-
-### 7.3 Precision Payouts & Rewards
-
-The reward for a successful contract delivery is significantly higher than a standard market sale. The formula is:
-
-$$\text{Contract Payout} = \text{Market Value} \times \max(1, M_{\text{tier}}) \times V_{\text{rank}} \times M_{\text{precision}}$$
-
-*   **Market Value:** The current market price of the wine.
-*   **$M_{\text{tier}}$ (Tier Multiplier):** The multiplier from the wine's quality (C, B, A, S). For contracts, this is floored at a minimum of `1.0x`, meaning even a C-Tier wine won't penalize your payout.
-*   **$V_{\text{rank}}$ (Vintage Multiplier):** The multiplier from the wine's maturation rank.
-|   **$M_{\text{precision}}$ (Precision Multiplier):** A dynamic bonus based on how closely your wine matches the request and the contract's difficulty. The reward scales **exponentially**, meaning small deviations have minor penalties, but the penalty grows significantly as you approach the 20% deviation limit. This makes achieving a perfect match highly rewarding.
-
-| Flavour Constraints | Payout Multiplier Range ($M_{\text{precision}}$) |
+| Product | Volatility Range |
 | :--- | :--- |
-| 1 | `1.50x` - `2.35x` |
-| 2 | `2.20x` - `2.85x` |
-| 3 | `2.70x` - `3.70x` |
-| 4 | `3.45x` - `5.00x` |
+| Wine | `0.8x` to `1.2x` (`+/-20%`) |
+| Beer | `0.85x` to `1.15x` (`+/-15%`) |
 
-When submitting a wine, you will see a qualitative rating to help you gauge its value for the order.
+The oversupply penalty has a floor of `0.3x`. A wine's sale price is the current market price multiplied by its quality and vintage rank multipliers. Beer sells at its current market price without wine multipliers. Price history keeps up to ten values for the market sparklines.
 
-| Precision (from perfect) | Qualitative Rating |
+## 7. Customer Orders
+
+The Orders board offers requests for a wine recipe and one to four flavour ranges. Requests are checked by a configuration solver against recipes, weather, eligible additives, and barrels before being posted. A new order is attempted on a randomized 10-15 minute interval while fewer than ten available orders are listed. Available orders expire after a randomized 20-30 minutes.
+
+You can accept up to three orders at once. Accepted orders do not expire. Cancelling removes the order. To fulfill an order, submit a wine of the requested recipe. A rejected bottle remains in your reserve and the order stays active.
+
+### Acceptance & Precision
+
+For each requested attribute, deviation is zero when the wine lies within the requested range; otherwise it is the distance to the nearest range edge. The customer accepts when the average deviation across requested attributes is at most 20 points on the 0-100 flavour scale. This is a point difference, not relative-percent error.
+
+Let $d$ be average deviation. Linear precision is $p=1-d/20$. The payout multiplier interpolates across the request's multiplier range using $p^2$:
+
+$$M_{\text{precision}} = M_{\min} + (M_{\max} - M_{\min})p^2$$
+
+| Average Deviation | Submission Rating |
 | :--- | :--- |
-| 100% (0% deviation) | "A Perfect Match!" |
-| >75% (<5% avg. deviation) | "An Excellent Offer" |
-| >40% (<12% avg. deviation) | "A Good Fit" |
-| <40% (>12% avg. deviation) | "An Acceptable Offer" |
+| 0 points | Perfect Match |
+| Up to 5 points | Excellent Offer |
+| Over 5 to 12 points | Good Fit |
+| Over 12 to 20 points | Acceptable Offer |
 
-### 7.4 The Fulfillment Report
+| Requested Flavour Attributes | Precision Multiplier Range |
+| ---: | :--- |
+| 1 | `1.50x` to `2.35x` |
+| 2 | `2.20x` to `2.85x` |
+| 3 | `2.70x` to `3.70x` |
+| 4 | `3.45x` to `5.00x` |
 
-After a successful sale, a detailed **Order Fulfillment Report** will appear. This modal provides a complete breakdown of the transaction, helping you learn and improve. It includes:
-*   A side-by-side comparison of the requested flavour ranges versus your submitted wine's stats.
-*   The precise deviation for each attribute, color-coded for clarity.
-*   The final average deviation score.
-*   A full breakdown of how the final payout was calculated, listing the base value and every multiplier that was applied.
+The contract payout uses the current wine market price. Contract tier multiplier is at least `1.0x`, then the vintage rank and precision multipliers are applied:
 
-[!tip] Maximizing Profit
-Fulfilling a 4-constraint contract with a perfectly crafted, S-Tier, Centennial Vintage wine will yield the highest possible payout in the game, combining all available multipliers for a massive reward.
+$$\text{Payout} = \text{Current Market Price} \times \max(1, M_{\text{tier}}) \times V_{\text{rank}} \times M_{\text{precision}}$$
 
-## 8. Saving Your Progress
+The completion report shows requested ranges, submitted flavour, deviations, and payout multipliers. Dialogue vocabulary has Beginner, Intermediate, and Sommelier styles; the difficulty selector is in the playtest controls, not the normal Settings modal.
 
-Your estate's progress is automatically saved to your browser's local storage every 10 seconds. You can also manually save at any time by pressing `Ctrl + S`. Since the game saves locally, your progress is tied to the browser and device you are currently using.
+## 8. Labels, Art & Sound
 
-## 9. Graphics & Sound Engineering (Tactile Immersion)
+The label editor is available for wines and beers. It provides a title up to 22 characters, three label shapes (rectangle, oval, shield), four border styles (none, solid, dashed, double), and six crests (star, crown, grape, leaf, droplet, diamond). The title accepts punctuation and spaces; the input enforces length, not an alphanumeric-only rule.
 
-The visual and auditory experience is designed to feel tactile, cozy, and highly responsive.
+| Paper Swatch | Color |
+| :--- | :--- |
+| White | `#FFFFFF` |
+| Soft Cream | `#FEF9E7` |
+| Rose | `#F9EBEA` |
+| Silver | `#EAECEE` |
+| Charred Oak | `#1A1008` |
+| Amethyst | `#2E1156` |
 
-### 8.1 Dynamic SVG Graphics Pipeline
+| Ink Swatch | Color |
+| :--- | :--- |
+| Gold | `#D4AC0D` |
+| Crimson | `#C0392B` |
+| Green | `#27AE60` |
+| Blue | `#1F618D` |
+| Burgundy | `#78281F` |
+| White | `#FFFFFF` |
 
-Every bottled vintage, seed bag, and mug in the game is procedurally rendered using vectors, eliminating generic icons:
+Bottle and beer illustrations are dynamic SVGs. Several crop and seed icons use pixel-art assets, with generated SVGs used for other icons. Planting, harvest, purchase, and other actions can use short GSAP item animations. Sound effects are synthesized with the Web Audio API and begin only after audio is enabled by browser interaction.
 
-Custom Bottle Outlines: Dynamic paths change color based on the recipe (crisp golden-yellow fills for Chardonnay, dark burgundy for Pinot Noir, ink-purple for Cabernet).
+## 9. Saving & Settings
 
-Quality Ribbons: Bottled wines feature a neck ribbon colored according to the quality tier (Purple for S-Tier, Yellow for A-Tier, Blue for B-Tier, Gray for C-Tier).
+The game autosaves to browser local storage every ten seconds. Use `Ctrl + S` on Windows/Linux or `Cmd + S` on macOS to save manually. Saves include gold, inventory, plots, barrels, wines, racks, beers, contracts, tutorial state, and settings. Market prices, history, and oversupply are not saved; they return to their default values after reload. The save is tied to the current browser and device.
 
-Bavarian Brewery Vessels: Beer rendering alternates between flared steins with thick white foam heads (Wheat Beer), custom-labeled glass bottles (Golden Ale), and heavy handles (Stout).
-
-Seed Pouches: Seed bag vectors feature miniature preview drawings of the crop on the cover for easy sorting.
-
-### 9.2 Web Audio Synthesis API
-
-Sound effects are synthesized live in the audio buffer, eliminating lag and loaded assets:
-
-Harvesting Plucks: A high-frequency sine wave exponential pitch slide ($600\text{Hz} \to 1200\text{Hz}$) simulates snapping vines.
-
-Squishing Squelches: Low-pass filtered random white noise simulates crushing grapes or venting kettle steam.
-
-Cork Pops: A resonant triangle wave sweeping downward ($150\text{Hz} \to 20\text{Hz}$) simulates pressure release when bottling.
-
-Market Clinks: Dual high-frequency sine oscillators ($987.77\text{Hz}$ and $1318.51\text{Hz}$) simulate counting gold coins.
-
-Active Bubbles: Intermittent low-frequency sine bursts simulate active fermentation.
-
-## 10. The Estate Label Architect (Customization)
-
-To add personal prestige to your products, you can customize the label of any bottled wine or brewed beer from your Cellar Reserve (Warehouse) tab.
-
-## 10.1 Custom Vector Composites
-
-Labels are mapped as real-time SVG nested vector nodes. Players can design and preview custom labels immediately before attaching them to their stock.
-
-[SELECT PRODUCT] ──> [OPEN ARCHITECT] ──> [SWATCH PAPER/INK] ──> [SELECT EMBLEM] ──> [SAVE LABEL]
-
-**Visual Properties Configurator:**
-
-*   **Title:** Up to 22 alphanumeric characters typed directly onto the custom bottle container.
-*   **Canvas Shapes:**
-    *   Rect (Classic Rectangle): For a traditional, geometric, clean presentation.
-    *   Oval (Refined Ellipse): Gives an antique, soft-bodied presentation.
-    *   Shield (Noble Crest): Best suited for rare reserve blends.
-*   **Ink Borders:**
-    *   None: Minimalist borderless style.
-    *   Solid: Single thin framing outline.
-    *   Dashed: Light-textured dotted outline.
-    *   Double: Ornate double-ring border.
-*   **Estate Crest Emblems:**
-    *   Star (Astral Reserve)
-    *   Crown (Imperial Grade)
-    *   Grape (Vineyard Heritage)
-    *   Leaf (Natural Fermentation)
-    *   Droplet (Pure Distilled)
-    *   Diamond (Diamond Standard)
-
-**Palette Swatches:**
-
-| Swatch Choice | Paper Hex Code | Intended Aesthetic |
-| :--- | :--- | :--- |
-| Parchment White | `#FFFFFF` | Minimalist contemporary label |
-| Soft Cream | `#FEF9E7` | Traditional vintage warm layout |
-| Rose Petal | `#F9EBEA` | Recommended for Sweet Rosés and Ciders |
-| Silver Slate | `#EAECEE` | Crisp metallic base for IPAs and Witbiers |
-| Charred Oak | `#1A1008` | Deep luxury dark contrast label |
-| Velvet Amethyst | `#2E1156` | Royal, rich dessert-style layout |
-
-**Foil Ink Choice:**
-
-| Ink/Foil Choice | Ink/Foil Hex Code | Intended Contrast |
-| :--- | :--- | :--- |
-| Gold Leaf | `#D4AC0D` | Rich gold-flake embossing foil |
-| Crimson Red | `#C0392B` | Bold ruby-contrast wax-red |
-| Meadow Green | `#27AE60` | Earthy, hop-centric garden tone |
-| Deep Ocean | `#1F618D` | Deep cool maritime sapphire |
-| Dark Burgundy | `#78281F` | Deep ink-grape tannin contrast |
-| Frost White | `#FFFFFF` | Stark white stencil highlights |
+The normal Settings modal changes the game's font. Dialogue difficulty is stored in the save but currently controlled through playtest UI.

@@ -131,6 +131,7 @@ export function initPlaytest() {
             <div id="general-controls" class="p-3 border-t border-stone-700 space-y-2">
                 <button id="add-money-btn" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2 px-4 rounded">Add 1000 Gold</button>
                 <button id="reset-game-btn" class="w-full bg-red-700 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">Reset Game State</button>
+                <a href="./testing.html" target="_blank" rel="noopener" class="block w-full bg-stone-700 hover:bg-stone-600 text-white font-bold py-2 px-4 rounded text-center">Open QA Bench</a>
             </div>
         </div>
 

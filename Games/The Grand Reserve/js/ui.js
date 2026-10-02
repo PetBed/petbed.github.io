@@ -1,39 +1,138 @@
 import {state, globals} from "./state.js";
 import {SHORT_NAMES, INGREDIENTS_DATA, SEEDS_DATA, PANTRY_DATA, RECIPES, BEER_RECIPES, TIERS, VINTAGE_RANKS, BARREL_TYPES} from "./data.js";
 import {WEATHER_DATA} from "./weather.js"; // Ensure BARREL_TYPES is imported
-import {getSeedIcon, getCropIcon, getWineIcon, getBeerIcon} from "./graphics.js";
+import {获取种子图标, 获取农作物图标, 获取红酒图标, 获取啤酒图标} from "./graphics.js";
 import { advanceTutorial } from "./tutorial.js";
-import {toggleAudio} from "./audio.js";
+import {toggleAudio, isAudioEnabled} from "./audio.js";
 import {handlePlotClick, getRecipePrediction, handleBarrelClick, handleBottleAction, getKettleRecipePrediction} from "./engine.js";
 import { checkContractCompletion } from "./contracts.js";
+import { playGoldCountUpAnimation } from "./effects.js";
+import { saveGameState } from "./storage.js";
 
+let lastDisplayedGold = 0;
+let tooltipTimeout = null;
+const WINE_INGREDIENT_KEYS = ["pinot_noir", "chardonnay", "cabernet", "muscat", "blackberry", "raspberry", "blueberry", "strawberry", "elderberry"];
+
+function positionItemTooltip(e) {
+	const tooltip = document.getElementById("flavour-tooltip");
+	if (!tooltip) return;
+
+	const targetRect = e.currentTarget?.getBoundingClientRect();
+	const pointerX = e.clientX || targetRect?.right || 8;
+	const pointerY = e.clientY || (targetRect ? targetRect.top + targetRect.height / 2 : 8);
+	const left = Math.max(8, Math.min(pointerX + 15, window.innerWidth - tooltip.offsetWidth - 8));
+	const top = pointerY + tooltip.offsetHeight + 20 > window.innerHeight
+		? Math.max(8, pointerY - tooltip.offsetHeight - 12)
+		: pointerY + 15;
+
+	tooltip.style.left = `${left}px`;
+	tooltip.style.top = `${top}px`;
+}
+
+function bindItemTooltip(element, data, {touch = true} = {}) {
+	if (!element) return;
+	if (!element.matches("button, a, input, [tabindex]")) element.tabIndex = 0;
+	element.setAttribute("aria-describedby", "flavour-tooltip");
+	element.onmouseenter = (e) => showItemTooltip(e, data);
+	element.onmousemove = positionItemTooltip;
+	element.onmouseleave = hideItemTooltip;
+	element.onfocus = (e) => showItemTooltip(e, data);
+	element.onblur = hideItemTooltip;
+
+	if (touch) {
+		element.addEventListener("click", (e) => {
+			if (!window.matchMedia("(pointer: coarse)").matches) return;
+			if (e.target.closest("button") && e.target.closest("button") !== element) return;
+			showItemTooltip(e, data);
+			tooltipTimeout = window.setTimeout(hideItemTooltip, 3500);
+		});
+	}
+}
+
+const dialogReturnFocus = new WeakMap();
+
+function getDialogFocusTargets(dialog) {
+	return Array.from(dialog.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'))
+		.filter((element) => !element.closest(".hidden") && element.getClientRects().length > 0);
+}
+
+export function openDialog(dialog) {
+	if (!dialog) return;
+	hideItemTooltip();
+	dialogReturnFocus.set(dialog, document.activeElement);
+	dialog.classList.remove("hidden");
+	if (!dialog.hasAttribute("tabindex")) dialog.tabIndex = -1;
+
+	const focusTarget = dialog.querySelector("[autofocus]") || getDialogFocusTargets(dialog)[0] || dialog;
+	window.requestAnimationFrame(() => focusTarget.focus({preventScroll: true}));
+}
+
+export function closeDialog(dialog, {restoreFocus = true} = {}) {
+	if (!dialog) return;
+	dialog.classList.add("hidden");
+	hideItemTooltip();
+	const previousFocus = dialogReturnFocus.get(dialog);
+	dialogReturnFocus.delete(dialog);
+	if (restoreFocus && previousFocus?.isConnected) window.requestAnimationFrame(() => previousFocus.focus({preventScroll: true}));
+}
+
+	if (typeof document !== "undefined") {
+		document.addEventListener("keydown", (event) => {
+			const dialogs = Array.from(document.querySelectorAll('[role="dialog"][aria-modal="true"]:not(.hidden)'));
+			const dialog = dialogs[dialogs.length - 1];
+			if (!dialog) return;
+
+			if (event.key === "Escape") {
+				const closeButton = dialog.querySelector('[data-dialog-close], [aria-label="Close Modal"], button[onclick*="close"]');
+				if (closeButton) {
+					event.preventDefault();
+					closeButton.click();
+				}
+				return;
+			}
+
+			if (event.key === "Tab") {
+				const focusTargets = getDialogFocusTargets(dialog);
+				if (!focusTargets.length) {
+					event.preventDefault();
+					dialog.focus();
+					return;
+				}
+				const first = focusTargets[0];
+				const last = focusTargets[focusTargets.length - 1];
+				if (event.shiftKey && document.activeElement === first) {
+					event.preventDefault();
+					last.focus();
+				} else if (!event.shiftKey && document.activeElement === last) {
+					event.preventDefault();
+					first.focus();
+				}
+		}
+		});
+	}
 export function renderWeather() {
 	const weather = WEATHER_DATA[state.currentWeather];
 	const weatherDisplay = document.getElementById("weather-display");
 	if (weatherDisplay) {
 		weatherDisplay.innerHTML = `
-			<i data-lucide="${weather.icon}" class="w-4 h-4 ${weather.color}"></i>
-			<span class="${weather.color}">${weather.name}</span>
+			<i data-lucide="${weather.icon}" class="w-4 h-4 ${weather.color}"></i><span class="${weather.color}">${weather.name}</span>
 		`;
-		weatherDisplay.onmouseenter = (e) => showItemTooltip(e, {
+		bindItemTooltip(weatherDisplay, {
 			title: `${weather.name} Weather`,
 			modifier: weather.modifier,
 			type: 'weather'
 		});
-		weatherDisplay.onmousemove = (e) => {
-			const tooltip = document.getElementById("flavour-tooltip");
-			tooltip.style.left = e.pageX + 15 + "px";
-			tooltip.style.top = e.pageY + 15 + "px";
-		};
-		weatherDisplay.onmouseleave = hideItemTooltip;
 		if (window.lucide) window.lucide.createIcons();
 	}
 }
 
 export function switchReserveTab(tabId) {
+	hideItemTooltip();
 	globals.currentReserveTab = tabId;
 	document.querySelectorAll('#tab-inventory [id^="res-tab-"]').forEach((btn) => {
-		if (btn.id === `res-tab-${tabId}`) btn.className = "flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all bg-white text-amber-950 shadow-sm";
+		const isSelected = btn.id === `res-tab-${tabId}`;
+		btn.setAttribute("aria-pressed", String(isSelected));
+		if (isSelected) btn.className = "flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all bg-white text-amber-950 shadow-sm";
 		else btn.className = "flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all text-amber-700/60";
 	});
 	document.getElementById("reserve-ingredients-content").className = tabId === "ingredients" ? "w-full flex flex-col gap-4" : "hidden";
@@ -43,9 +142,12 @@ export function switchReserveTab(tabId) {
 }
 
 export function switchShopTab(tabId) {
+	hideItemTooltip();
 	globals.currentShopTab = tabId;
 	document.querySelectorAll('#tab-shop [id^="shop-tab-"]').forEach((btn) => {
-		if (btn.id === `shop-tab-${tabId}`) btn.className = "flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all bg-white text-amber-950 shadow-sm";
+		const isSelected = btn.id === `shop-tab-${tabId}`;
+		btn.setAttribute("aria-pressed", String(isSelected));
+		if (isSelected) btn.className = "flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all bg-white text-amber-950 shadow-sm";
 		else btn.className = "flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all text-amber-700/60";
 	});
 	document.getElementById("shop-seeds-content").className = tabId === "seeds" ? "w-full grid grid-cols-1 md:grid-cols-2 gap-3" : "hidden";
@@ -56,7 +158,16 @@ export function switchShopTab(tabId) {
 
 export function updateHeaderUI() {
 	const goldEl = document.getElementById("ui-gold");
-	if (goldEl) goldEl.textContent = state.gold;
+	if (goldEl) {
+        const startValue = lastDisplayedGold;
+        const endValue = state.gold;
+        if (startValue !== endValue) {
+            playGoldCountUpAnimation(startValue, endValue);
+        } else if (goldEl.textContent !== String(endValue)) {
+            goldEl.textContent = endValue;
+        }
+        lastDisplayedGold = endValue;
+    }
 	let totalStored = state.wines.length + state.beers.length;
 	state.wineRacks.forEach((slot) => {
 		if (slot) totalStored++;
@@ -94,12 +205,13 @@ export function renderPlots() {
 				}
 
 				const seedButtonsHTML = ownedSeeds.map(key => {
-					let clickAction = `event.stopPropagation(); plantSeed(${plot.id}, '${key}')`;
-					// Tutorial Step 2: Advance tutorial on plant
+					let tutorialStep = 'null';
 					if (state.tutorial.active && state.tutorial.step === 2) {
-						clickAction = `event.stopPropagation(); plantSeed(${plot.id}, '${key}'); window.advanceTutorial(3);`;
+						tutorialStep = 3;
 					}
-					return `<button onclick="${clickAction}" class="w-full text-[8px] bg-amber-900 text-white font-extrabold rounded py-1 mb-1 hover:bg-rose-800 transition-colors flex items-center justify-start gap-1 px-1.5 truncate"><div class="w-4 h-4 shrink-0">${getSeedIcon(key)}</div><span class="truncate">${SHORT_NAMES[key]} (${state.seeds[key]})</span></button>`;
+					const clickAction = `event.stopPropagation(); window.handleSeedClickAnimation(this, ${plot.id}, '${key}', ${tutorialStep})`;
+
+					return `<button onclick="${clickAction}" class="w-full text-[8px] bg-amber-900 text-white font-extrabold rounded py-1 mb-1 hover:bg-rose-800 transition-colors flex items-center justify-start gap-1 px-1.5 truncate"><div class="w-4 h-4 shrink-0 pointer-events-none">${获取种子图标(key)}</div><span class="truncate pointer-events-none">${SHORT_NAMES[key]} (${state.seeds[key]})</span></button>`;
 				}).join("");
 
 				if (ownedSeeds.length === 0) {
@@ -116,17 +228,17 @@ export function renderPlots() {
 			// Tutorial: Only allow interaction with plot 0
 			if (state.tutorial.active && [2, 3, 4].includes(state.tutorial.step) && plot.id !== 0) {
 				btn.className += "bg-amber-900/10 border-amber-900/20 cursor-not-allowed opacity-40";
-				btn.innerHTML = `<div class="w-10 h-10">${getCropIcon(plot.cropType)}</div>`;
+				btn.innerHTML = `<div class="w-10 h-10">${获取农作物图标(plot.cropType)}</div>`;
 				grid.appendChild(btn);
 				return; // Use return as we are in a forEach callback
 			}
 
 			if (plot.state === "growing") {
 				btn.className += "bg-[#b0c95d] border-[#6b821f] cursor-not-allowed";
-				btn.innerHTML = `<div class="w-10 h-10 animate-bounce">${getCropIcon(plot.cropType)}</div><span class="text-[8px] font-black text-emerald-950 bg-white/50 px-1.5 py-0.5 rounded-full leading-none">${plot.timeRemaining}s</span>`;
+				btn.innerHTML = `<div class="w-10 h-10 animate-bounce">${获取农作物图标(plot.cropType)}</div><span class="text-[8px] font-black text-emerald-950 bg-white/50 px-1.5 py-0.5 rounded-full leading-none">${plot.timeRemaining}s</span>`;
 			} else { // ready
 				btn.className += "bg-emerald-600 border-emerald-800 hover:scale-105 hover:bg-emerald-500 cursor-pointer";
-				btn.innerHTML = `<div class="w-12 h-12 animate-bounce">${getCropIcon(plot.cropType)}</div><span class="text-[8px] font-black text-white bg-black/30 px-1.5 py-0.5 rounded-full uppercase tracking-wider leading-none mt-1">HARVEST</span>`;
+				btn.innerHTML = `<div class="w-12 h-12 animate-bounce">${获取农作物图标(plot.cropType)}</div><span class="text-[8px] font-black text-white bg-black/30 px-1.5 py-0.5 rounded-full uppercase tracking-wider leading-none mt-1">HARVEST</span>`;
 				btn.onclick = () => {
 					hideItemTooltip();
 					handlePlotClick(plot.id);
@@ -145,9 +257,7 @@ export function renderPlots() {
 						finalFlavour[key] = Math.max(0, Math.min(100, finalFlavour[key] + (weather.modifier[key] || 0)));
 					});
 				}
-				btn.onmouseenter = (e) => showItemTooltip(e, { title: ingData.name, flavour: ingData.flavour, finalFlavour: finalFlavour, weather: state.currentWeather, type: 'ingredient' });
-				btn.onmousemove = (e) => { const tooltip = document.getElementById("flavour-tooltip"); tooltip.style.left = e.pageX + 15 + "px"; tooltip.style.top = e.pageY + 15 + "px"; };
-				btn.onmouseleave = hideItemTooltip;
+				bindItemTooltip(btn, { title: ingData.name, flavour: ingData.flavour, finalFlavour: finalFlavour, weather: state.currentWeather, type: 'ingredient' }, {touch: false});
 			}
 		}
 		grid.appendChild(btn);
@@ -170,7 +280,8 @@ export function openPressModal(barrelId) {
 	if (!barrel || barrel.state !== "empty") return;
 	globals.activePressBarrelId = barrelId;
 	globals.loadedPressIngredients = [];
-	document.getElementById("press-modal").classList.remove("hidden");
+	hideItemTooltip();
+	openDialog(document.getElementById("press-modal"));
 	renderPressModal();
 }
 
@@ -189,7 +300,7 @@ export function closePressModal(returnIngredients = true) { // Added parameter
 	globals.loadedPressIngredients = [];
 	globals.activePressBarrelId = null;
 	globals.loadedPantryAdditiveId = null; // Clear global pantry additive
-	document.getElementById("press-modal").classList.add("hidden");
+	closeDialog(document.getElementById("press-modal"));
 	updateHeaderUI();
 	renderWarehouse();
 }
@@ -208,11 +319,9 @@ export function renderPressModal() {
 		if (ing) {
 			const ingKey = ing.key;
 			pantrySlot.className = "w-14 h-14 bg-white rounded-xl border-2 border-amber-950 flex flex-col items-center justify-center text-xs font-extrabold cursor-pointer hover:border-red-500 transition-all p-1 group";
-			pantrySlot.innerHTML = `<div class="w-8 h-8">${getCropIcon(ingKey)}</div><span class="text-[8px] text-amber-900 leading-none mt-1 truncate max-w-full px-1">${SHORT_NAMES[ingKey] || ingKey}</span>`;
+			pantrySlot.innerHTML = `<div class="w-8 h-8">${获取农作物图标(ingKey)}</div><span class="text-[8px] text-amber-900 leading-none mt-1 truncate max-w-full px-1">${SHORT_NAMES[ingKey] || ingKey}</span>`;
 			if (ing.flavour) {
-				pantrySlot.onmouseenter = (e) => showItemTooltip(e, {title: INGREDIENTS_DATA[ing.key].name, flavour: ing.flavour, type: 'pantry'});
-				pantrySlot.onmousemove = (e) => { const tooltip = document.getElementById("flavour-tooltip"); tooltip.style.left = e.pageX + 15 + "px"; tooltip.style.top = e.pageY + 15 + "px"; };
-				pantrySlot.onmouseleave = hideItemTooltip;
+				bindItemTooltip(pantrySlot, { title: INGREDIENTS_DATA[ing.key].name, flavour: ing.flavour, type: 'pantry' }, {touch: false});
 			}
 			pantrySlot.onclick = () => window.removeFromPress(globals.loadedPantryAdditiveId); // Allow removing by clicking the slot
 		} else {
@@ -234,16 +343,10 @@ export function renderPressModal() {
 			if (ing) {
 				const ingKey = ing.key;
 				slot.className = "w-14 h-14 bg-white rounded-xl border-2 border-amber-950 flex flex-col items-center justify-center text-xs font-extrabold cursor-pointer hover:border-red-500 transition-all p-1 group";
-				slot.innerHTML = `<div class="w-8 h-8">${getCropIcon(ingKey)}</div><span class="text-[8px] text-amber-900 leading-none mt-1 truncate max-w-full px-1">${SHORT_NAMES[ingKey] || ingKey}</span>`;
+				slot.innerHTML = `<div class="w-8 h-8">${获取农作物图标(ingKey)}</div><span class="text-[8px] text-amber-900 leading-none mt-1 truncate max-w-full px-1">${SHORT_NAMES[ingKey] || ingKey}</span>`;
 				const flavour = ing.flavour;
 				if (flavour) {
-					slot.onmouseenter = (e) => showItemTooltip(e, {title: INGREDIENTS_DATA[ing.key].name, flavour: ing.flavour, weather: ing.weather, type: 'ingredient'});
-					slot.onmousemove = (e) => {
-						const tooltip = document.getElementById("flavour-tooltip");
-						tooltip.style.left = e.pageX + 15 + "px";
-						tooltip.style.top = e.pageY + 15 + "px";
-					};
-					slot.onmouseleave = hideItemTooltip;
+					bindItemTooltip(slot, { title: INGREDIENTS_DATA[ing.key].name, flavour: ing.flavour, weather: ing.weather, type: 'ingredient' }, {touch: false});
 				}
 				slot.onclick = () => window.removeFromPress(ingId); // Allow removing by clicking the slot
 			} else { // Fallback for regular ingredient slot
@@ -309,22 +412,20 @@ export function renderPressModal() {
 	invList.innerHTML = "";
 	let hasRegularIngredients = false;
 	let hasPantryAdditives = false;
-	const wineIngredientKeys = ["pinot_noir", "chardonnay", "cabernet", "muscat", "blackberry", "raspberry", "blueberry", "strawberry", "elderberry"];
 	const pantryAdditiveKeys = ["wild_yeast", "pure_honey"];
 
 	const regularIngredientsContainer = document.createElement("div");
 	regularIngredientsContainer.className = "w-full flex flex-col gap-2";
 	regularIngredientsContainer.innerHTML = `<h3 class="text-xs font-black uppercase tracking-wider text-amber-900 border-b border-amber-900/10 pb-1 flex items-center gap-1"><i data-lucide="sprout" class="w-4 h-4"></i> Grapes & Berries</h3>`;
 
-	state.ingredients.filter(ing => wineIngredientKeys.includes(ing.key)).forEach((ing) => {
+	state.ingredients.filter(ing => WINE_INGREDIENT_KEYS.includes(ing.key)).forEach((ing) => {
 		if (ing.count > 0) {
 			hasRegularIngredients = true;
 			const ingData = INGREDIENTS_DATA[ing.key];
 			const item = document.createElement("button");
 			item.id = `press-inventory-item-${ing.id}`;
-			item.dataset.weather = ing.weather;
 			item.className = "w-full flex items-center justify-between p-2 bg-amber-50 hover:bg-amber-100 border border-amber-950/10 rounded-lg text-xs font-bold transition-all text-left";
-			item.onclick = () => window.addToPress(ing.id);
+			item.onclick = () => window.handleAddToPressAnimation(item, ing.id);
 			let weatherIcon = "";
 			if (ing.weather) {
 				const weather = WEATHER_DATA[ing.weather];
@@ -332,15 +433,9 @@ export function renderPressModal() {
 					weatherIcon = `<i data-lucide="${weather.icon}" class="w-3.5 h-3.5 ${weather.color}" title="Harvested in ${weather.name} weather"></i>`;
 				}
 			}
-			item.innerHTML = `<span class="flex items-center gap-1.5 font-black text-amber-950"><span class="w-6 h-6 inline-block shrink-0">${getCropIcon(ing.key)}</span>${ingData.name}${weatherIcon}</span><span class="bg-amber-950/10 px-2 py-0.5 rounded text-[10px] font-black">Stock: ${ing.count}</span>`;
+			item.innerHTML = `<span class="flex items-center gap-1.5 font-black text-amber-950 pointer-events-none"><span class="w-6 h-6 inline-block shrink-0">${获取农作物图标(ing.key)}</span>${ingData.name}${weatherIcon}</span><span class="bg-amber-950/10 px-2 py-0.5 rounded text-[10px] font-black pointer-events-none">Stock: ${ing.count}</span>`;
 			if (ing.flavour) {
-				item.onmouseenter = (e) => showItemTooltip(e, {title: ingData.name, flavour: ing.flavour, weather: ing.weather, type: 'ingredient'});
-				item.onmousemove = (e) => {
-					const tooltip = document.getElementById("flavour-tooltip");
-					tooltip.style.left = e.pageX + 15 + "px";
-					tooltip.style.top = e.pageY + 15 + "px";
-				};
-				item.onmouseleave = hideItemTooltip;
+				bindItemTooltip(item, { title: ingData.name, flavour: ing.flavour, weather: ing.weather, type: 'ingredient' }, {touch: false});
 			}
 			regularIngredientsContainer.appendChild(item);
 		}
@@ -358,18 +453,11 @@ export function renderPressModal() {
 			hasPantryAdditives = true;
 			const ingData = INGREDIENTS_DATA[ing.key];
 			const item = document.createElement("button");
-			// Disable if a pantry additive is already loaded
 			item.className = `w-full flex items-center justify-between p-2 bg-amber-50 hover:bg-amber-100 border border-amber-950/10 rounded-lg text-xs font-bold transition-all text-left ${globals.loadedPantryAdditiveId ? 'opacity-50 cursor-not-allowed' : ''}`;
-			item.onclick = globals.loadedPantryAdditiveId ? null : () => window.addToPress(ing.id);
-			item.innerHTML = `<span class="flex items-center gap-1.5 font-black text-amber-950"><span class="w-6 h-6 inline-block shrink-0">${getCropIcon(ing.key)}</span>${ingData.name}</span><span class="bg-amber-950/10 px-2 py-0.5 rounded text-[10px] font-black">Stock: ${ing.count}</span>`;
-			if (ing.flavour) {
-				item.onmouseenter = (e) => showItemTooltip(e, {title: ingData.name, flavour: ing.flavour, type: 'pantry'});
-				item.onmousemove = (e) => {
-					const tooltip = document.getElementById("flavour-tooltip");
-					tooltip.style.left = e.pageX + 15 + "px";
-					tooltip.style.top = e.pageY + 15 + "px";
-				};
-				item.onmouseleave = hideItemTooltip;
+			item.onclick = globals.loadedPantryAdditiveId ? null : () => window.handleAddToPressAnimation(item, ing.id);
+			item.innerHTML = `<span class="flex items-center gap-1.5 font-black text-amber-950 pointer-events-none"><span class="w-6 h-6 inline-block shrink-0">${获取农作物图标(ing.key)}</span>${ingData.name}</span><span class="bg-amber-950/10 px-2 py-0.5 rounded text-[10px] font-black pointer-events-none">Stock: ${ing.count}</span>`;
+			if (ing.flavour) { // This is for the pantry items in the press modal
+				bindItemTooltip(item, { title: ingData.name, flavour: ing.flavour, type: 'pantry' }, {touch: false});
 			}
 			pantryAdditivesContainer.appendChild(item);
 		}
@@ -409,15 +497,13 @@ export function renderCellarUI() {
 		if (barrel.state === "empty") {
 			bBtnClasses += "border-amber-950 bg-[#c48d53] cursor-pointer hover:scale-105";
 			contentHTML = `<i data-lucide="plus-circle" class="w-10 h-10 text-amber-950/40 mb-1"></i><span class="text-[10px] font-black text-amber-950/60 uppercase">Press ingredients</span>`;
-			const ingredientCount = Object.values(state.ingredients).reduce((a, b) => a + b, 0);
-			instructions = ingredientCount >= 2 ? "Ready to load ingredients." : "Needs harvested ingredients.";
-			wrapper.onmouseenter = (e) => showItemTooltip(e, {
+			const ingredientCount = state.ingredients.reduce((total, ingredient) => WINE_INGREDIENT_KEYS.includes(ingredient.key) ? total + ingredient.count : total, 0);
+			instructions = ingredientCount >= 2 ? "Ready to load ingredients." : "Needs 2 harvested ingredients.";
+			bindItemTooltip(wrapper, {
 				title: barrelTypeData.name,
 				modifier: barrelTypeData.flavourModifier,
 				type: 'barrel'
 			});
-			wrapper.onmousemove = (e) => { const tooltip = document.getElementById("flavour-tooltip"); tooltip.style.left = e.pageX + 15 + "px"; tooltip.style.top = e.pageY + 15 + "px"; };
-			wrapper.onmouseleave = hideItemTooltip;
 		} else if (barrel.state === "crushing") {
 			bBtnClasses += "border-amber-950 bg-[#a66f38] cursor-pointer";
 			contentHTML = `<i data-lucide="pocket" class="w-10 h-10 text-purple-900 animate-bounce mb-1"></i><span class="text-[10px] font-black text-purple-950 uppercase">Tap squish</span>`;
@@ -428,21 +514,15 @@ export function renderCellarUI() {
 			instructions = `Fermenting (${barrel.fermentTime}s)`;
 		} else if (barrel.state === "aging") {
 			bBtnClasses += "border-amber-950 bg-[#6b2c21]";
-			contentHTML = `<div class="w-14 h-14 animate-pulse">${getWineIcon(barrel.recipeKey, "s")}</div><span class="text-[9px] font-black text-purple-300 uppercase mt-1">Aging</span>`;
+			contentHTML = `<div class="w-14 h-14 animate-pulse">${获取红酒图标(barrel.recipeKey, "s")}</div><span class="text-[9px] font-black text-purple-300 uppercase mt-1">Aging</span>`;
 			instructions = `Aging safely into: ${RECIPES[barrel.recipeKey].name}`;
 
 			if (barrel.flavour) {
 				const recipeName = RECIPES[barrel.recipeKey].name;
-				wrapper.onmouseenter = (e) => showItemTooltip(e, {
+				bindItemTooltip(wrapper, {
 					title: recipeName,
 					flavour: barrel.flavour
 				});
-				wrapper.onmousemove = (e) => {
-					const tooltip = document.getElementById("flavour-tooltip");
-					tooltip.style.left = e.pageX + 15 + "px";
-					tooltip.style.top = e.pageY + 15 + "px";
-				};
-				wrapper.onmouseleave = hideItemTooltip;
 			}
 		}
 
@@ -519,7 +599,9 @@ export function generateAgingBarHTML(barrel) {
 
 export function showItemTooltip(e, data) {
     const tooltip = document.getElementById("flavour-tooltip");
-    if (!data) return;
+	if (!tooltip || !data) return;
+	window.clearTimeout(tooltipTimeout);
+	tooltipTimeout = null;
 
     let htmlParts = [];
 
@@ -593,13 +675,18 @@ export function showItemTooltip(e, data) {
 
     tooltip.innerHTML = html;
     tooltip.classList.remove("hidden");
-    tooltip.style.left = e.pageX + 15 + "px";
-    tooltip.style.top = e.pageY + 15 + "px";
+    tooltip.setAttribute("aria-hidden", "false");
+    positionItemTooltip(e);
     if (window.lucide) window.lucide.createIcons();
 }
 
 export function hideItemTooltip() {
-	document.getElementById("flavour-tooltip").classList.add("hidden");
+	window.clearTimeout(tooltipTimeout);
+	tooltipTimeout = null;
+	const tooltip = document.getElementById("flavour-tooltip");
+	if (!tooltip) return;
+	tooltip.classList.add("hidden");
+	tooltip.setAttribute("aria-hidden", "true");
 }
 
 export function renderRacks() {
@@ -608,10 +695,12 @@ export function renderRacks() {
 	grid.innerHTML = "";
 
 	state.wineRacks.forEach((bottle, slotId) => {
-		const cell = document.createElement("div");
-		cell.className = "relative w-full h-28 bg-[#a67c52] border-t-8 border-b-4 border-t-[#c48d53] border-b-[#593d1f] flex items-center justify-center p-2 transition-all duration-350";
+		const cell = document.createElement("button");
+		cell.type = "button";
+		cell.className = "relative w-full h-28 appearance-none border-x-0 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200 bg-[#a67c52] border-t-8 border-b-4 border-t-[#c48d53] border-b-[#593d1f] flex items-center justify-center p-2 transition-all duration-350";
 
 		if (bottle === null) {
+			cell.setAttribute("aria-label", `Place a bottled wine on empty rack slot ${slotId + 1}`);
 			cell.className += " cursor-pointer group hover:bg-[#b58c62]";
 			cell.innerHTML = `
                     <div class="text-center text-[#593d1f]/70 group-hover:text-[#442d17] transition-colors">
@@ -634,29 +723,23 @@ export function renderRacks() {
 
 			const displayTitle = bottle.customLabel ? bottle.customLabel.title : recipe.name;
 
+			cell.setAttribute("aria-label", `Remove ${displayTitle} from aging rack`);
 			cell.className += " cursor-pointer group";
 			cell.innerHTML = `
-                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-20">
-                        <div class="text-center text-white"><i data-lucide="trash-2" class="w-8 h-8 mx-auto"></i><span class="text-xs font-bold">Remove</span></div>
+                    <div class="absolute inset-0 bg-black/50 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-visible:opacity-100 transition-opacity duration-300 flex items-center justify-center z-20 pointer-events-none">
+                        <div class="text-center text-white"><i data-lucide="trash-2" class="w-8 h-8 mx-auto"></i><span class="text-xs font-bold"><span class="sm:hidden">Tap to remove</span><span class="hidden sm:inline">Remove</span></span></div>
                     </div>
-                    <div class="${bottleSizeClass} -rotate-90 transition-transform duration-300 group-hover:scale-95 z-10">${getWineIcon(bottle.recipeKey, bottle.qualityKey, bottle.customLabel)}</div>
+                    <div class="${bottleSizeClass} -rotate-90 transition-transform duration-300 group-hover:scale-95 z-10">${获取红酒图标(bottle.recipeKey, bottle.qualityKey, bottle.customLabel)}</div>
                     <div class="absolute bottom-1.5 text-center w-full px-2 z-0"><span class="text-[8px] font-black text-white/90 bg-black/40 px-2 py-0.5 rounded-md leading-tight truncate inline-block max-w-full">${displayTitle}</span></div>
                 `;
 			cell.onclick = () => window.removeWineFromRack(slotId);
 
-			cell.onmouseenter = (e) =>
-				showItemTooltip(e, {
+			bindItemTooltip(cell, {
 					title: displayTitle,
 					flavour: bottle.flavour, // Wine flavour is already combined
 					age: bottle.age,
 					rankName: rank.name,
-				});
-			cell.onmousemove = (e) => {
-				const tooltip = document.getElementById("flavour-tooltip");
-				tooltip.style.left = e.pageX + 15 + "px";
-				tooltip.style.top = e.pageY + 15 + "px";
-			};
-			cell.onmouseleave = hideItemTooltip;
+			}, {touch: false});
 		}
 		grid.appendChild(cell);
 	});
@@ -664,6 +747,7 @@ export function renderRacks() {
 }
 
 export function openRackSelectModal(slotId) {
+	hideItemTooltip();
 	state.activeRackSlotId = slotId;
 	const modal = document.getElementById("rack-select-modal");
 	const list = document.getElementById("rack-select-list");
@@ -679,18 +763,18 @@ export function openRackSelectModal(slotId) {
 			const item = document.createElement("button");
 			item.className = "w-full flex items-center justify-between p-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-950/10 rounded-lg text-xs font-bold text-left transition-colors";
 			item.onclick = () => window.placeWineOnRack(bottle.id);
-			item.innerHTML = `<div class="flex items-center gap-3"><div class="w-10 h-10 shrink-0">${getWineIcon(bottle.recipeKey, bottle.qualityKey, bottle.customLabel)}</div><div><h4 class="font-black text-amber-950 text-xs">${title}</h4><div class="flex items-center gap-1.5 mt-0.5 text-[8px] text-stone-500 leading-none"><span class="uppercase tracking-wider font-extrabold bg-stone-200 px-1 py-0.5 rounded">${TIERS[bottle.qualityKey].name}</span><span class="px-1 py-0.5 rounded ${rank.color}">${rank.name} (${bottle.age}y)</span></div></div></div><i data-lucide="arrow-right-circle" class="w-5 h-5 text-amber-700/60"></i>`;
+			item.innerHTML = `<div class="flex items-center gap-3"><div class="w-10 h-10 shrink-0">${获取红酒图标(bottle.recipeKey, bottle.qualityKey, bottle.customLabel)}</div><div><h4 class="font-black text-amber-950 text-xs">${title}</h4><div class="flex items-center gap-1.5 mt-0.5 text-[8px] text-stone-500 leading-none"><span class="uppercase tracking-wider font-extrabold bg-stone-200 px-1 py-0.5 rounded">${TIERS[bottle.qualityKey].name}</span><span class="px-1 py-0.5 rounded ${rank.color}">${rank.name} (${bottle.age}y)</span></div></div></div><i data-lucide="arrow-right-circle" class="w-5 h-5 text-amber-700/60"></i>`;
 			list.appendChild(item);
 		});
 	}
-	modal.classList.remove("hidden");
+	openDialog(modal);
 	if (window.lucide) window.lucide.createIcons();
 }
 
 export function closeRackSelectModal() {
 	hideItemTooltip();
 	state.activeRackSlotId = null;
-	document.getElementById("rack-select-modal").classList.add("hidden");
+	closeDialog(document.getElementById("rack-select-modal"));
 }
 
 export function renderBreweryUI() {
@@ -711,8 +795,8 @@ export function renderBreweryUI() {
 	if (kettle.state === "empty") {
 		innerHTML = `
         <div class="bg-amber-950/5 p-6 rounded-2xl border border-amber-950/10 w-full shadow-inner flex flex-col items-center text-center">
-            <div onclick="openKettleModal()" class="w-40 h-40 cursor-pointer hover:scale-105 active:scale-95 transition-all duration-200 relative">
-                <svg viewBox="0 0 64 64" class="w-full h-full drop-shadow-xl">
+			<button type="button" aria-label="Open Copper Kettle ingredient press" onclick="openKettleModal()" class="w-40 h-40 appearance-none border-0 bg-transparent p-0 cursor-pointer hover:scale-105 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 transition-all duration-200 relative">
+                <svg aria-hidden="true" viewBox="0 0 64 64" class="w-full h-full drop-shadow-xl">
                     <path d="M16,52 L48,52 L44,56 L20,56 Z" fill="#4A2F13" />
                     <path d="M12,28 C12,18 20,14 32,14 C44,14 52,18 52,28 L52,44 C52,50 44,52 32,52 C20,52 12,50 12,44 Z" fill="#cd7f32" stroke="#8c4f1c" stroke-width="2" />
                     <path d="M16,28 C16,22 22,18 32,18" fill="none" stroke="#f0a76e" stroke-width="2.5" opacity="0.6" stroke-linecap="round" />
@@ -726,7 +810,7 @@ export function renderBreweryUI() {
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-4 w-4 bg-amber-500"></span>
                 </span>
-            </div>
+			</button>
             <h3 class="text-lg font-black text-amber-950 mt-4 uppercase">The Copper Kettle</h3>
             <p class="text-xs text-amber-800/80 mt-1 max-w-sm">Click the kettle to open the ingredient press. Load grains, adjuncts, and pantry additives to discover legendary recipes!</p>
             <button onclick="openKettleModal()" class="mt-4 px-6 py-2.5 bg-[#cd7f32] hover:bg-[#b56f2b] text-white font-extrabold text-xs uppercase tracking-wide rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-all">Open Kettle Press</button>
@@ -734,7 +818,7 @@ export function renderBreweryUI() {
 	} else if (kettle.state === "brewing") {
 		innerHTML = `
         <div class="bg-[#cd7f32]/10 p-5 rounded-2xl border-4 border-[#cd7f32] w-full flex flex-col items-center shadow-lg relative">
-            <div class="w-16 h-16 animate-bounce">${getBeerIcon(kettle.recipeKey)}</div>
+            <div class="w-16 h-16 animate-bounce">${获取啤酒图标(kettle.recipeKey)}</div>
             <span class="text-xs font-black uppercase text-amber-900 tracking-wider mt-2">Brewing: ${BEER_RECIPES[kettle.recipeKey].name}</span>
             <div class="w-full bg-white p-3.5 rounded-xl border border-amber-950/10 shadow-sm mt-3 flex flex-col items-center">
                 <span class="text-[9px] font-black tracking-widest text-amber-900/60 uppercase">Kettle Stabilization</span>
@@ -776,17 +860,15 @@ export function renderBreweryUI() {
 export function openKettleModal() {
 	if (!state.kettleUnlocked) return;
 	globals.loadedKettleIngredients = [];
-	document.getElementById("kettle-modal").classList.remove("hidden");
+	hideItemTooltip();
+	openDialog(document.getElementById("kettle-modal"));
 	renderKettleModal();
 }
 
 export function closeKettleModal() {
 	hideItemTooltip();
-	globals.loadedKettleIngredients.forEach((ing) => {
-		state.ingredients[ing]++;
-	});
 	globals.loadedKettleIngredients = [];
-	document.getElementById("kettle-modal").classList.add("hidden");
+	closeDialog(document.getElementById("kettle-modal"));
 	updateHeaderUI();
 	renderWarehouse();
 }
@@ -795,9 +877,9 @@ export function renderKettleModal() {
 	for (let i = 0; i < 3; i++) {
 		const slot = document.getElementById(`kettle-slot-${i}`);
 		if (i < globals.loadedKettleIngredients.length) {
-			const ingKey = globals.loadedKettleIngredients[i];
+			const ingKey = globals.loadedKettleIngredients[i].key;
 			slot.className = "w-14 h-14 bg-white rounded-xl border-2 border-amber-950 flex flex-col items-center justify-center text-xs font-extrabold cursor-pointer hover:border-red-500 transition-all p-1";
-			slot.innerHTML = `<div class="w-8 h-8">${getCropIcon(ingKey)}</div><span class="text-[8px] text-amber-900 leading-none mt-1 truncate max-w-full px-1">${SHORT_NAMES[ingKey] || ingKey}</span>`;
+			slot.innerHTML = `<div class="w-8 h-8">${获取农作物图标(ingKey)}</div><span class="text-[8px] text-amber-900 leading-none mt-1 truncate max-w-full px-1">${SHORT_NAMES[ingKey] || ingKey}</span>`;
 		} else {
 			slot.className = "w-14 h-14 bg-white rounded-xl border-2 border-dashed border-stone-300 flex items-center justify-center text-xs font-extrabold cursor-pointer hover:text-stone-500 transition-all";
 			slot.innerHTML = "+";
@@ -813,6 +895,7 @@ export function renderKettleModal() {
 		confirmBtn.disabled = false;
 		confirmBtn.className = "w-full py-3 bg-amber-700 hover:bg-amber-600 text-white font-extrabold rounded-xl shadow-lg transition-all text-xs uppercase tracking-wide cursor-pointer active:scale-95";
 		confirmBtn.onclick = () => {
+			globals.loadedKettleIngredients.forEach((ingredient) => ingredient.count--);
 			state.kettle.recipeKey = pred.key;
 			state.kettle.state = "brewing";
 			state.kettle.progress = 0;
@@ -842,14 +925,18 @@ export function renderKettleModal() {
 	let hasIngredients = false;
 	const brewIngredients = ["barley", "hops", "wheat", "rye", "pumpkin", "blueberry", "wild_yeast", "cacao_nibs", "coffee_beans", "pure_honey", "coriander_peel"];
 	brewIngredients.forEach((key) => {
-		const count = state.ingredients[key] || 0;
+		const stockCount = state.ingredients
+			.filter((ingredient) => ingredient.key === key)
+			.reduce((total, ingredient) => total + ingredient.count, 0);
+		const reservedCount = globals.loadedKettleIngredients.filter((ingredient) => ingredient.key === key).length;
+		const count = stockCount - reservedCount;
 		if (count > 0) {
 			hasIngredients = true;
 			const ingData = INGREDIENTS_DATA[key];
 			const item = document.createElement("button");
 			item.className = "w-full flex items-center justify-between p-2 bg-amber-50 hover:bg-amber-100 border border-amber-950/10 rounded-lg text-xs font-bold transition-all text-left";
 			item.onclick = () => window.addToKettle(key);
-			item.innerHTML = `<span class="flex items-center gap-1.5 font-black text-amber-950"><span class="w-6 h-6 inline-block shrink-0">${getCropIcon(key)}</span>${ingData.name}</span><span class="bg-amber-950/10 px-2 py-0.5 rounded text-[10px] font-black">Stock: ${count}</span>`;
+			item.innerHTML = `<span class="flex items-center gap-1.5 font-black text-amber-950"><span class="w-6 h-6 inline-block shrink-0">${获取农作物图标(key)}</span>${ingData.name}</span><span class="bg-amber-950/10 px-2 py-0.5 rounded text-[10px] font-black">Stock: ${count}</span>`;
 			invList.appendChild(item);
 		}
 	});
@@ -883,16 +970,10 @@ export function renderWarehouse() {
 						weatherIcon = `<i data-lucide="${weather.icon}" class="w-3.5 h-3.5 ${weather.color} ml-1.5" title="Harvested in ${weather.name} weather"></i>`;
 					}
 				}
-				row.innerHTML = `<span class="text-xs font-black flex items-center gap-2"><div class="w-6 h-6 shrink-0">${getCropIcon(ing.key)}</div>${INGREDIENTS_DATA[ing.key].name}${weatherIcon}</span><span class="text-[10px] bg-amber-100 text-amber-950 font-black px-2.5 py-1 rounded-full border border-amber-200/50">Stock: ${ing.count}</span>`;
+				row.innerHTML = `<span class="text-xs font-black flex items-center gap-2"><div class="w-6 h-6 shrink-0">${获取农作物图标(ing.key)}</div>${INGREDIENTS_DATA[ing.key].name}${weatherIcon}</span><span class="text-[10px] bg-amber-100 text-amber-950 font-black px-2.5 py-1 rounded-full border border-amber-200/50">Stock: ${ing.count}</span>`;
 				const flavour = ing.flavour;
-				if (flavour) {
-					row.onmouseenter = (e) => showItemTooltip(e, {title: INGREDIENTS_DATA[ing.key].name, flavour: ing.flavour, weather: ing.weather, type: 'ingredient'});
-					row.onmousemove = (e) => {
-						const tooltip = document.getElementById("flavour-tooltip");
-						tooltip.style.left = e.pageX + 15 + "px";
-						tooltip.style.top = e.pageY + 15 + "px";
-					};
-					row.onmouseleave = hideItemTooltip;
+				if (flavour) { // This is for ingredients in the warehouse
+					bindItemTooltip(row, { title: INGREDIENTS_DATA[ing.key].name, flavour: ing.flavour, weather: ing.weather, type: 'ingredient' });
 				}
 				agContainer.appendChild(row);
 			}
@@ -914,14 +995,12 @@ export function renderWarehouse() {
 				pantryEmpty = false;
 				const row = document.createElement("div");
 				row.className = "flex justify-between items-center p-3 bg-white border border-stone-200/50 rounded-xl shadow-sm animate-fade-in";
-				row.innerHTML = `<span class="text-xs font-black flex items-center gap-2"><div class="w-6 h-6 shrink-0">${getCropIcon(ing.key)}</div>${INGREDIENTS_DATA[ing.key].name}</span><span class="text-[10px] bg-indigo-100 text-indigo-950 font-black px-2.5 py-1 rounded-full border border-indigo-200/50">Stock: ${ing.count}</span>`;
+				row.innerHTML = `<span class="text-xs font-black flex items-center gap-2"><div class="w-6 h-6 shrink-0">${获取农作物图标(ing.key)}</div>${INGREDIENTS_DATA[ing.key].name}</span><span class="text-[10px] bg-indigo-100 text-indigo-950 font-black px-2.5 py-1 rounded-full border border-indigo-200/50">Stock: ${ing.count}</span>`;
 				pantryContainer.appendChild(row);
 			
 				// Add tooltip for pantry items in warehouse
 				if (INGREDIENTS_DATA[ing.key].flavour) {
-					row.onmouseenter = (e) => showItemTooltip(e, {title: INGREDIENTS_DATA[ing.key].name, flavour: INGREDIENTS_DATA[ing.key].flavour, type: 'pantry'});
-					row.onmousemove = (e) => { const tooltip = document.getElementById("flavour-tooltip"); tooltip.style.left = e.pageX + 15 + "px"; tooltip.style.top = e.pageY + 15 + "px"; };
-					row.onmouseleave = hideItemTooltip;
+					bindItemTooltip(row, { title: INGREDIENTS_DATA[ing.key].name, flavour: INGREDIENTS_DATA[ing.key].flavour, type: 'pantry' });
 				}
 			}
 		});
@@ -963,7 +1042,7 @@ export function renderWarehouse() {
                     </div>
                     <div class="flex justify-between items-center gap-3">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 shrink-0">${getWineIcon(g.recipeKey, g.qualityKey, g.customLabel)}</div>
+                            <div class="w-12 h-12 shrink-0">${获取红酒图标(g.recipeKey, g.qualityKey, g.customLabel)}</div>
                             <div class="flex flex-wrap gap-1.5 mt-1">
                                 <span class="text-[8px] font-black bg-stone-900/5 px-2 py-1 rounded text-stone-700 tracking-wider uppercase">${TIERS[g.qualityKey].name}</span>
                                 <span class="text-[8px] font-black px-2 py-1 rounded tracking-wider ${rank.color}">${rank.name}</span>
@@ -975,19 +1054,12 @@ export function renderWarehouse() {
                     </div>
                 `;
 			if (g.flavour) {
-				card.onmouseenter = (e) =>
-					showItemTooltip(e, {
-						title: g.title,
-						flavour: g.flavour, // Wine flavour is already combined
-						age: g.age,
-						rankName: rank.name,
-					});
-				card.onmousemove = (e) => {
-					const tooltip = document.getElementById("flavour-tooltip");
-					tooltip.style.left = e.pageX + 15 + "px";
-					tooltip.style.top = e.pageY + 15 + "px";
-				};
-				card.onmouseleave = hideItemTooltip;
+				bindItemTooltip(card, {
+					title: g.title,
+					flavour: g.flavour,
+					age: g.age,
+					rankName: rank.name,
+				});
 			}
 			list.appendChild(card);
 		});
@@ -1026,7 +1098,7 @@ export function renderWarehouse() {
                 <span class="text-[10px] bg-amber-100 text-amber-950 font-black px-2.5 py-1 rounded-full border border-amber-200/50">Stock: ${g.count}</span>
             </div>
             <div class="flex justify-between items-center gap-2">
-                 <div class="w-10 h-10 shrink-0">${getBeerIcon(g.recipeKey, g.customLabel)}</div>
+                 <div class="w-10 h-10 shrink-0">${获取啤酒图标(g.recipeKey, g.customLabel)}</div>
                  <button onclick="openLabelerModal('${g.sampleId}', 'beer')" class="text-[9px] font-black uppercase text-amber-700 bg-amber-50 hover:bg-amber-100 px-2 py-1.5 rounded transition-all active:scale-95 whitespace-nowrap border border-amber-900/10">
                       ${hasLabel ? "Edit Label" : "+ Label"}
                   </button>
@@ -1067,7 +1139,8 @@ export function openLabelerModal(id, type) {
 	document.getElementById("labeler-title").value = globals.labeling.draft.title;
 	renderLabelerPreview();
 	updateLabelerControlsUI();
-	document.getElementById("labeler-modal").classList.remove("hidden");
+	hideItemTooltip();
+	openDialog(document.getElementById("labeler-modal"));
 }
 
 export function updateLabelDraft(key, value) {
@@ -1094,27 +1167,37 @@ export function updateLabelerControlsUI() {
 	const {bgShape, borderStyle, crestId, bgColor, crestColor} = globals.labeling.draft;
 
 	document.querySelectorAll("[data-shape]").forEach((el) => {
-		if (el.dataset.shape === bgShape) el.classList.add("ring-2", "ring-amber-500", "bg-amber-100");
+		const isSelected = el.dataset.shape === bgShape;
+		el.setAttribute("aria-pressed", String(isSelected));
+		if (isSelected) el.classList.add("ring-2", "ring-amber-500", "bg-amber-100");
 		else el.classList.remove("ring-2", "ring-amber-500", "bg-amber-100");
 	});
 
 	document.querySelectorAll("[data-border]").forEach((el) => {
-		if (el.dataset.border === borderStyle) el.classList.add("ring-2", "ring-amber-500", "bg-amber-100");
+		const isSelected = el.dataset.border === borderStyle;
+		el.setAttribute("aria-pressed", String(isSelected));
+		if (isSelected) el.classList.add("ring-2", "ring-amber-500", "bg-amber-100");
 		else el.classList.remove("ring-2", "ring-amber-500", "bg-amber-100");
 	});
 
 	document.querySelectorAll("[data-crest]").forEach((el) => {
-		if (el.dataset.crest === crestId) el.classList.add("ring-2", "ring-amber-500", "bg-amber-100");
+		const isSelected = el.dataset.crest === crestId;
+		el.setAttribute("aria-pressed", String(isSelected));
+		if (isSelected) el.classList.add("ring-2", "ring-amber-500", "bg-amber-100");
 		else el.classList.remove("ring-2", "ring-amber-500", "bg-amber-100");
 	});
 
 	document.querySelectorAll("[data-bgcolor]").forEach((el) => {
-		if (el.dataset.bgcolor === bgColor) el.classList.add("scale-125", "ring-2", "ring-offset-1", "ring-amber-900");
+		const isSelected = el.dataset.bgcolor === bgColor;
+		el.setAttribute("aria-pressed", String(isSelected));
+		if (isSelected) el.classList.add("scale-125", "ring-2", "ring-offset-1", "ring-amber-900");
 		else el.classList.remove("scale-125", "ring-2", "ring-offset-1", "ring-amber-900");
 	});
 
 	document.querySelectorAll("[data-crestcolor]").forEach((el) => {
-		if (el.dataset.crestcolor === crestColor) el.classList.add("scale-125", "ring-2", "ring-offset-1", "ring-amber-900");
+		const isSelected = el.dataset.crestcolor === crestColor;
+		el.setAttribute("aria-pressed", String(isSelected));
+		if (isSelected) el.classList.add("scale-125", "ring-2", "ring-offset-1", "ring-amber-900");
 		else el.classList.remove("scale-125", "ring-2", "ring-offset-1", "ring-amber-900");
 	});
 }
@@ -1127,17 +1210,17 @@ export function renderLabelerPreview() {
 	let item;
 	if (type === "wine") {
 		item = state.wines.find((w) => w.id === id) || state.wineRacks.find((w) => w && w.id === id);
-		if (item) container.innerHTML = getWineIcon(item.recipeKey, item.qualityKey, draft);
+		if (item) container.innerHTML = 获取红酒图标(item.recipeKey, item.qualityKey, draft);
 	} else {
 		item = state.beers.find((b) => b.id === id);
-		if (item) container.innerHTML = getBeerIcon(item.recipeKey, draft);
+		if (item) container.innerHTML = 获取啤酒图标(item.recipeKey, draft);
 	}
 }
 
 export function closeLabelerModal() {
 	hideItemTooltip();
 	globals.labeling = {id: null, type: null, draft: {}};
-	document.getElementById("labeler-modal").classList.add("hidden");
+	closeDialog(document.getElementById("labeler-modal"));
 }
 
 export function createSparkline(history) {
@@ -1193,7 +1276,7 @@ export function renderMarket() {
 
 		card.innerHTML = `
                 <div class="flex items-center gap-2.5 w-1/2 min-w-0">
-                    <div class="w-11 h-11 shrink-0">${getWineIcon(key, "s")}</div>
+                    <div class="w-11 h-11 shrink-0">${获取红酒图标(key, "s")}</div>
                     <div class="min-w-0">
                         <h4 class="font-black text-[11px] text-amber-950 truncate">${recipe.name}</h4>
                         <span class="text-[9px] text-amber-800/50 whitespace-nowrap font-bold">Stored: ${stockSum}</span>
@@ -1227,7 +1310,7 @@ export function renderMarket() {
 
 		card.innerHTML = `
                 <div class="flex items-center gap-2.5 w-1/2 min-w-0">
-                    <div class="w-11 h-11 shrink-0">${getBeerIcon(key)}</div>
+                    <div class="w-11 h-11 shrink-0">${获取啤酒图标(key)}</div>
                     <div class="min-w-0">
                         <h4 class="font-black text-[11px] text-amber-950 truncate">${recipe.name}</h4>
                         <span class="text-[9px] text-amber-800/50 whitespace-nowrap font-bold">Stored: ${stock}</span>
@@ -1290,12 +1373,12 @@ export function openSellModal(wineKey) {
 
 			const btn = document.createElement("button");
 			btn.className = "w-full flex items-center justify-between p-3 border rounded-2xl bg-amber-50 border-amber-950/20 hover:bg-amber-100 active:scale-95 transition-all font-bold text-left mb-2";
-			btn.onclick = () => window.sellWineQualityGroup(g.qualityKey, g.rankIndex, g.title, JSON.stringify(g.flavour));
+			btn.onclick = (e) => window.sellWineQualityGroup(g.qualityKey, g.rankIndex, g.title, JSON.stringify(g.flavour), e.currentTarget);
 
 			btn.innerHTML = `
                     <div class="flex items-center gap-3 w-3/4">
                         <div class="w-10 h-10 shrink-0">
-                            ${getWineIcon(wineKey, g.qualityKey, g.customLabel)}
+                            ${获取红酒图标(wineKey, g.qualityKey, g.customLabel)}
                         </div>
                         <div class="text-left min-w-0 pr-2">
                             <h4 class="text-xs font-black truncate">${g.title}</h4>
@@ -1308,7 +1391,8 @@ export function openSellModal(wineKey) {
 			container.appendChild(btn);
 		});
 	}
-	document.getElementById("sell-overlay-modal").classList.remove("hidden");
+	hideItemTooltip();
+	openDialog(document.getElementById("sell-overlay-modal"));
 }
 
 export function openSellBeerModal(beerKey) {
@@ -1349,12 +1433,12 @@ export function openSellBeerModal(beerKey) {
 
 			const btn = document.createElement("button");
 			btn.className = "w-full flex items-center justify-between p-3 border rounded-2xl bg-amber-50 border-amber-950/20 hover:bg-amber-100 active:scale-95 transition-all font-bold text-left mb-2";
-			btn.onclick = () => window.sellBeerGroup(safeTitle);
+			btn.onclick = (e) => window.sellBeerGroup(safeTitle, e.currentTarget);
 
 			btn.innerHTML = `
                     <div class="flex items-center gap-3 w-3/4">
                         <div class="w-10 h-10 shrink-0">
-                            ${getBeerIcon(beerKey, g.customLabel)}
+                            ${获取啤酒图标(beerKey, g.customLabel)}
                         </div>
                         <div class="text-left min-w-0 pr-2">
                             <h4 class="text-xs font-black truncate">${g.title}</h4>
@@ -1366,12 +1450,13 @@ export function openSellBeerModal(beerKey) {
 			container.appendChild(btn);
 		});
 	}
-	document.getElementById("sell-overlay-modal").classList.remove("hidden");
+	hideItemTooltip();
+	openDialog(document.getElementById("sell-overlay-modal"));
 }
 
 export function closeSellModal() {
 	hideItemTooltip();
-	document.getElementById("sell-overlay-modal").classList.add("hidden");
+	closeDialog(document.getElementById("sell-overlay-modal"));
 	globals.activeSellingWineKey = null;
 	globals.activeSellingBeerKey = null;
 }
@@ -1385,13 +1470,11 @@ export function renderShop() {
 			const seed = SEEDS_DATA[key];
 			const itemDiv = document.createElement("div");
 			itemDiv.className = "flex items-center justify-between bg-white p-4 rounded-xl border border-stone-200/50 shadow-sm animate-fade-in";
-			itemDiv.innerHTML = `<div class="flex items-center gap-3"><div class="w-10 h-10 shrink-0">${getSeedIcon(key)}</div><div><h4 class="font-black text-xs text-amber-950">${seed.name}</h4><p class="text-[10px] text-amber-800/60 font-bold">Grow time: ${seed.growTime}s (Owned: ${state.seeds[key]})</p></div></div><button onclick="buySeed('${key}')" class="${state.gold >= seed.cost ? "bg-yellow-500 hover:bg-yellow-400 text-amber-950 active:scale-95 cursor-pointer" : "bg-gray-100 text-gray-400 cursor-not-allowed"} px-3 py-2 text-[10px] font-black rounded-lg shadow-sm tracking-wide transition-all uppercase flex items-center gap-1" ${state.gold < seed.cost ? "disabled" : ""}><i data-lucide="coins" class="w-3.5 h-3.5"></i> ${seed.cost}</button>`;
+			itemDiv.innerHTML = `<div class="flex items-center gap-3"><div class="w-10 h-10 shrink-0">${获取种子图标(key)}</div><div><h4 class="font-black text-xs text-amber-950">${seed.name}</h4><p class="text-[10px] text-amber-800/60 font-bold">Grow time: ${seed.growTime}s (Owned: ${state.seeds[key]})</p></div></div><button onclick="buySeed('${key}', this)" class="${state.gold >= seed.cost ? "bg-yellow-500 hover:bg-yellow-400 text-amber-950 active:scale-95 cursor-pointer" : "bg-gray-100 text-gray-400 cursor-not-allowed"} px-3 py-2 text-[10px] font-black rounded-lg shadow-sm tracking-wide transition-all uppercase flex items-center gap-1" ${state.gold < seed.cost ? "disabled" : ""}><i data-lucide="coins" class="w-3.5 h-3.5"></i> ${seed.cost}</button>`;
 			
 			const ingData = INGREDIENTS_DATA[key];
 			if (ingData && ingData.flavour) {
-				itemDiv.onmouseenter = (e) => showItemTooltip(e, { title: `${ingData.name} (Base)`, flavour: ingData.flavour });
-				itemDiv.onmousemove = (e) => { const tooltip = document.getElementById("flavour-tooltip"); tooltip.style.left = e.pageX + 15 + "px"; tooltip.style.top = e.pageY + 15 + "px"; };
-				itemDiv.onmouseleave = hideItemTooltip;
+				bindItemTooltip(itemDiv, { title: `${ingData.name} (Base)`, flavour: ingData.flavour, type: 'ingredient' });
 			}
 
 			list.appendChild(itemDiv);
@@ -1409,13 +1492,11 @@ export function renderShop() {
 			// Calculate the total count for this pantry item from the state.ingredients array
 			const ownedCount = state.ingredients.reduce((sum, ing) => (ing.key === key ? sum + ing.count : sum), 0);
 
-			itemDiv.innerHTML = `<div class="flex items-center gap-3"><div class="w-10 h-10 shrink-0">${getCropIcon(key)}</div><div><h4 class="font-black text-xs text-amber-950">${item.name}</h4><p class="text-[10px] text-amber-800/60 font-bold">Instant pantry shelf addition (Owned: ${ownedCount})</p></div></div><button onclick="buyPantryItem('${key}')" class="${state.gold >= item.cost ? "bg-indigo-600 hover:bg-indigo-500 text-white active:scale-95 cursor-pointer" : "bg-gray-100 text-gray-400 cursor-not-allowed"} px-3 py-2 text-[10px] font-black rounded-lg shadow-sm tracking-wide transition-all uppercase flex items-center gap-1" ${state.gold < item.cost ? "disabled" : ""}><i data-lucide="coins" class="w-3.5 h-3.5"></i> ${item.cost}</button>`;
+			itemDiv.innerHTML = `<div class="flex items-center gap-3"><div class="w-10 h-10 shrink-0">${获取农作物图标(key)}</div><div><h4 class="font-black text-xs text-amber-950">${item.name}</h4><p class="text-[10px] text-amber-800/60 font-bold">Instant pantry shelf addition (Owned: ${ownedCount})</p></div></div><button onclick="buyPantryItem('${key}', this)" class="${state.gold >= item.cost ? "bg-indigo-600 hover:bg-indigo-500 text-white active:scale-95 cursor-pointer" : "bg-gray-100 text-gray-400 cursor-not-allowed"} px-3 py-2 text-[10px] font-black rounded-lg shadow-sm tracking-wide transition-all uppercase flex items-center gap-1" ${state.gold < item.cost ? "disabled" : ""}><i data-lucide="coins" class="w-3.5 h-3.5"></i> ${item.cost}</button>`;
 
 			const ingData = INGREDIENTS_DATA[key];
 			if (ingData && ingData.flavour) {
-				itemDiv.onmouseenter = (e) => showItemTooltip(e, { title: item.name, modifier: ingData.flavour, type: 'pantry' });
-				itemDiv.onmousemove = (e) => { const tooltip = document.getElementById("flavour-tooltip"); tooltip.style.left = e.pageX + 15 + "px"; tooltip.style.top = e.pageY + 15 + "px"; };
-				itemDiv.onmouseleave = hideItemTooltip;
+				bindItemTooltip(itemDiv, { title: item.name, flavour: ingData.flavour, type: 'pantry' });
 			}
 
 			list.appendChild(itemDiv);
@@ -1442,9 +1523,7 @@ export function renderShop() {
 		const frenchOakRow = document.createElement("div");
 		frenchOakRow.className = "flex items-center justify-between bg-white p-4 rounded-xl border border-stone-200/50 shadow-sm mt-3 animate-fade-in w-full";
 		frenchOakRow.innerHTML = `<div class="flex items-center gap-3"><div class="p-2 bg-amber-50 rounded-lg"><i data-lucide="database" class="w-6 h-6 text-amber-800"></i></div><div><h4 class="font-black text-xs text-amber-950">${frenchOakData.name}</h4><p class="text-[10px] text-amber-800/60 font-bold">${frenchOakOwned < frenchOakData.maxOwned ? `Increase capacity: ${frenchOakOwned}/${frenchOakData.maxOwned} barrels` : "Maximum owned!"}</p></div></div>${frenchOakOwned < frenchOakData.maxOwned ? `<button onclick="buyBarrelType('french_oak')" class="${state.gold >= frenchOakData.cost ? "bg-yellow-500 hover:bg-yellow-400 text-amber-950 active:scale-95 cursor-pointer" : "bg-gray-100 text-gray-400 cursor-not-allowed"} px-3 py-2 text-[10px] font-black rounded-lg shadow-sm tracking-wide transition-all uppercase flex items-center gap-1" ${state.gold < frenchOakData.cost ? "disabled" : ""}><i data-lucide="coins" class="w-3.5 h-3.5"></i> ${frenchOakData.cost}</button>` : `<span class="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-md">MAXED</span>`}`;
-		frenchOakRow.onmouseenter = (e) => showItemTooltip(e, { title: frenchOakData.name, modifier: frenchOakData.flavourModifier, type: 'barrel' });
-		frenchOakRow.onmousemove = (e) => { const tooltip = document.getElementById("flavour-tooltip"); tooltip.style.left = e.pageX + 15 + "px"; tooltip.style.top = e.pageY + 15 + "px"; };
-		frenchOakRow.onmouseleave = hideItemTooltip;
+		bindItemTooltip(frenchOakRow, { title: frenchOakData.name, modifier: frenchOakData.flavourModifier, type: 'barrel' });
 		list.appendChild(frenchOakRow);
 
 		// American Oak Barrel
@@ -1453,9 +1532,7 @@ export function renderShop() {
 		const americanOakRow = document.createElement("div");
 		americanOakRow.className = "flex items-center justify-between bg-white p-4 rounded-xl border border-stone-200/50 shadow-sm mt-3 animate-fade-in w-full";
 		americanOakRow.innerHTML = `<div class="flex items-center gap-3"><div class="p-2 bg-amber-50 rounded-lg"><i data-lucide="database" class="w-6 h-6 text-amber-800"></i></div><div><h4 class="font-black text-xs text-amber-950">${americanOakData.name}</h4><p class="text-[10px] text-amber-800/60 font-bold">${americanOakOwned < americanOakData.maxOwned ? `Increase capacity: ${americanOakOwned}/${americanOakData.maxOwned} barrels` : "Maximum owned!"}</p></div></div>${americanOakOwned < americanOakData.maxOwned ? `<button onclick="buyBarrelType('american_oak')" class="${state.gold >= americanOakData.cost ? "bg-yellow-500 hover:bg-yellow-400 text-amber-950 active:scale-95 cursor-pointer" : "bg-gray-100 text-gray-400 cursor-not-allowed"} px-3 py-2 text-[10px] font-black rounded-lg shadow-sm tracking-wide transition-all uppercase flex items-center gap-1" ${state.gold < americanOakData.cost ? "disabled" : ""}><i data-lucide="coins" class="w-3.5 h-3.5"></i> ${americanOakData.cost}</button>` : `<span class="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-md">MAXED</span>`}`;
-		americanOakRow.onmouseenter = (e) => showItemTooltip(e, { title: americanOakData.name, modifier: americanOakData.flavourModifier, type: 'barrel' });
-		americanOakRow.onmousemove = (e) => { const tooltip = document.getElementById("flavour-tooltip"); tooltip.style.left = e.pageX + 15 + "px"; tooltip.style.top = e.pageY + 15 + "px"; };
-		americanOakRow.onmouseleave = hideItemTooltip;
+		bindItemTooltip(americanOakRow, { title: americanOakData.name, modifier: americanOakData.flavourModifier, type: 'barrel' });
 		list.appendChild(americanOakRow);
 
 		// Chestnut Wood Barrel
@@ -1464,9 +1541,7 @@ export function renderShop() {
 		const chestnutWoodRow = document.createElement("div");
 		chestnutWoodRow.className = "flex items-center justify-between bg-white p-4 rounded-xl border border-stone-200/50 shadow-sm mt-3 animate-fade-in w-full";
 		chestnutWoodRow.innerHTML = `<div class="flex items-center gap-3"><div class="p-2 bg-amber-50 rounded-lg"><i data-lucide="database" class="w-6 h-6 text-amber-800"></i></div><div><h4 class="font-black text-xs text-amber-950">${chestnutWoodData.name}</h4><p class="text-[10px] text-amber-800/60 font-bold">${chestnutWoodOwned < chestnutWoodData.maxOwned ? `Increase capacity: ${chestnutWoodOwned}/${chestnutWoodData.maxOwned} barrels` : "Maximum owned!"}</p></div></div>${chestnutWoodOwned < chestnutWoodData.maxOwned ? `<button onclick="buyBarrelType('chestnut_wood')" class="${state.gold >= chestnutWoodData.cost ? "bg-yellow-500 hover:bg-yellow-400 text-amber-950 active:scale-95 cursor-pointer" : "bg-gray-100 text-gray-400 cursor-not-allowed"} px-3 py-2 text-[10px] font-black rounded-lg shadow-sm tracking-wide transition-all uppercase flex items-center gap-1" ${state.gold < chestnutWoodData.cost ? "disabled" : ""}><i data-lucide="coins" class="w-3.5 h-3.5"></i> ${chestnutWoodData.cost}</button>` : `<span class="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-md">MAXED</span>`}`;
-		chestnutWoodRow.onmouseenter = (e) => showItemTooltip(e, { title: chestnutWoodData.name, modifier: chestnutWoodData.flavourModifier, type: 'barrel' });
-		chestnutWoodRow.onmousemove = (e) => { const tooltip = document.getElementById("flavour-tooltip"); tooltip.style.left = e.pageX + 15 + "px"; tooltip.style.top = e.pageY + 15 + "px"; };
-		chestnutWoodRow.onmouseleave = hideItemTooltip;
+		bindItemTooltip(chestnutWoodRow, { title: chestnutWoodData.name, modifier: chestnutWoodData.flavourModifier, type: 'barrel' });
 		list.appendChild(chestnutWoodRow);
 
 		// Old Bourbon Barrel
@@ -1475,9 +1550,7 @@ export function renderShop() {
 		const oldBourbonRow = document.createElement("div");
 		oldBourbonRow.className = "flex items-center justify-between bg-white p-4 rounded-xl border border-stone-200/50 shadow-sm mt-3 animate-fade-in w-full";
 		oldBourbonRow.innerHTML = `<div class="flex items-center gap-3"><div class="p-2 bg-amber-50 rounded-lg"><i data-lucide="database" class="w-6 h-6 text-amber-800"></i></div><div><h4 class="font-black text-xs text-amber-950">${oldBourbonData.name}</h4><p class="text-[10px] text-amber-800/60 font-bold">${oldBourbonOwned < oldBourbonData.maxOwned ? `Increase capacity: ${oldBourbonOwned}/${oldBourbonData.maxOwned} barrels` : "Maximum owned!"}</p></div></div>${oldBourbonOwned < oldBourbonData.maxOwned ? `<button onclick="buyBarrelType('old_bourbon')" class="${state.gold >= oldBourbonData.cost ? "bg-yellow-500 hover:bg-yellow-400 text-amber-950 active:scale-95 cursor-pointer" : "bg-gray-100 text-gray-400 cursor-not-allowed"} px-3 py-2 text-[10px] font-black rounded-lg shadow-sm tracking-wide transition-all uppercase flex items-center gap-1" ${state.gold < oldBourbonData.cost ? "disabled" : ""}><i data-lucide="coins" class="w-3.5 h-3.5"></i> ${oldBourbonData.cost}</button>` : `<span class="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-md">MAXED</span>`}`;
-		oldBourbonRow.onmouseenter = (e) => showItemTooltip(e, { title: oldBourbonData.name, modifier: oldBourbonData.flavourModifier, type: 'barrel' });
-		oldBourbonRow.onmousemove = (e) => { const tooltip = document.getElementById("flavour-tooltip"); tooltip.style.left = e.pageX + 15 + "px"; tooltip.style.top = e.pageY + 15 + "px"; };
-		oldBourbonRow.onmouseleave = hideItemTooltip;
+		bindItemTooltip(oldBourbonRow, { title: oldBourbonData.name, modifier: oldBourbonData.flavourModifier, type: 'barrel' });
 		list.appendChild(oldBourbonRow);
 
 		const kettleRow = document.createElement("div");
@@ -1490,6 +1563,25 @@ export function renderShop() {
 		oakRow.innerHTML = `<div class="flex items-center gap-3"><div class="p-2 bg-indigo-50 rounded-lg"><i data-lucide="sparkles" class="w-6 h-6 text-indigo-600"></i></div><div><h4 class="font-black text-xs text-amber-950">Oak Conditioning</h4><p class="text-[10px] text-amber-800/60 font-bold">${!state.shop.oakBuffOwned ? "Permanently speeds up wine aging by +30%!" : "Conditioning owned!"}</p></div></div>${!state.shop.oakBuffOwned ? `<button onclick="buyOakConditioning()" class="${state.gold >= state.shop.oakBuffCost ? "bg-yellow-500 hover:bg-yellow-400 text-amber-950 active:scale-95 cursor-pointer" : "bg-gray-100 text-gray-400 cursor-not-allowed"} px-3 py-2 text-[10px] font-black rounded-lg shadow-sm tracking-wide transition-all uppercase flex items-center gap-1" ${state.gold < state.shop.oakBuffCost ? "disabled" : ""}><i data-lucide="coins" class="w-3.5 h-3.5"></i> ${state.shop.oakBuffCost}</button>` : `<span class="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">INSTALLED</span>`}`;
 		list.appendChild(oakRow);
 	}
+	document.querySelectorAll('#tab-shop button[onclick^="buy"]').forEach((button) => {
+		button.classList.add("whitespace-nowrap", "shrink-0");
+		if (!button.querySelector(".purchase-action-label")) {
+			const actionLabel = document.createElement("span");
+			actionLabel.className = "purchase-action-label";
+		actionLabel.textContent = "BUY";
+			button.prepend(actionLabel);
+		}
+		const itemName = button.closest("div")?.querySelector("h4")?.textContent.trim() || "item";
+		const price = button.textContent.replace(/^BUY\s*/, "").trim();
+		const priceTextNode = Array.from(button.childNodes).find((node) => node.nodeType === 3 && node.textContent.trim());
+		if (priceTextNode) {
+			const priceLabel = document.createElement("span");
+			priceLabel.className = "whitespace-nowrap";
+			priceLabel.textContent = priceTextNode.textContent.trim();
+			priceTextNode.replaceWith(priceLabel);
+		}
+		button.setAttribute("aria-label", `Buy ${itemName} for ${price} gold`);
+	});
 	if (window.lucide) window.lucide.createIcons();
 }
 
@@ -1510,8 +1602,7 @@ export function renderContractsBoard() {
         grid.className = "w-full grid grid-cols-1 md:grid-cols-3 gap-4";
         activeContracts.forEach(c => {
             const card = document.createElement('div');
-            card.className = "bg-white border-2 border-amber-500 p-4 rounded-xl shadow-lg flex flex-col gap-1 cursor-pointer hover:bg-amber-50 transition-all";
-            card.onclick = () => openContractDetailModal(c.id);
+			card.className = "bg-white border-2 border-amber-500 p-4 rounded-xl shadow-lg flex flex-col gap-1 transition-all";
             const rangesHTML = globals.showContractRanges ? `
                 <div class="text-[9px] font-mono text-amber-600 bg-amber-50 border border-amber-200 rounded p-1 mt-1 space-y-0.5">
                     ${Object.entries(c.targets).map(([key, val]) => `<div><span class="font-bold">${{sw:'SW',ac:'AC',tn:'TN',bd:'BD'}[key]}:</span> ${val.min}-${val.max}%</div>`).join('')}
@@ -1525,8 +1616,9 @@ export function renderContractsBoard() {
                 <div class="text-xs font-bold text-amber-800/80">Wants: <span class="font-extrabold text-amber-900">${RECIPES[c.recipeKey].name}</span></div>
                 <p class="text-xs italic text-stone-700 bg-stone-50 p-3 rounded-lg border border-stone-200/50 mt-2">"${c.flavorText ?? 'A classic numerical request...'}"</p>
                 ${rangesHTML}
-                <div class="text-center mt-auto pt-2"><button class="w-full py-1 bg-amber-500 text-white text-[10px] font-black rounded-lg uppercase">View Details</button></div>
+				<div class="text-center mt-auto pt-2"><button type="button" class="w-full py-2 bg-amber-500 hover:bg-amber-400 text-white text-[10px] font-black rounded-lg uppercase transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700">View Details</button></div>
             `;
+			card.querySelector("button").onclick = () => openContractDetailModal(c.id);
             grid.appendChild(card);
         });
         activeContainer.appendChild(grid);
@@ -1637,7 +1729,7 @@ export function openContractDetailModal(contractId) {
 
                 buttonHTML = `
                     <div class="text-right">
-                        <button onclick="fulfillContract('${contract.id}', '${wine.id}')" class="px-3 py-1.5 text-[10px] font-black rounded-lg shadow-sm uppercase bg-green-600 text-white hover:bg-green-500">Submit for +$${finalPayout}</button>
+                        <button onclick="fulfillContract('${contract.id}', '${wine.id}', this)" class="px-3 py-1.5 text-[10px] font-black rounded-lg shadow-sm uppercase bg-green-600 text-white hover:bg-green-500">Submit for +$${finalPayout}</button>
                         <div class="text-[9px] ${ratingColor} font-semibold mt-0.5">${ratingText}</div>
                     </div>`;
             } else {
@@ -1650,7 +1742,7 @@ export function openContractDetailModal(contractId) {
 
             item.innerHTML = `
                 <div class="flex items-center gap-2">
-                    <div class="w-10 h-10 shrink-0">${getWineIcon(wine.recipeKey, wine.qualityKey, wine.customLabel)}</div>
+                    <div class="w-10 h-10 shrink-0">${获取红酒图标(wine.recipeKey, wine.qualityKey, wine.customLabel)}</div>
                     <div class="min-w-0"><h4 class="font-black text-amber-950 text-xs truncate">${title}</h4></div>
                 </div>
                 ${buttonHTML}
@@ -1662,13 +1754,14 @@ export function openContractDetailModal(contractId) {
     const footer = document.getElementById("contract-modal-footer");
     footer.innerHTML = `<button onclick="cancelContract('${contract.id}')" class="px-4 py-2 bg-red-600 text-white text-xs font-bold uppercase rounded-lg shadow-md hover:bg-red-700 transition-all">Cancel Order</button>`;
 
-    modal.classList.remove("hidden");
+	hideItemTooltip();
+	openDialog(modal);
 }
 
 export function closeContractDetailModal() {
     hideItemTooltip();
     globals.activeContractId = null;
-    document.getElementById("contract-detail-modal").classList.add("hidden");
+	closeDialog(document.getElementById("contract-detail-modal"));
 }
 
 export function openOrderBreakdownModal(data) {
@@ -1746,13 +1839,14 @@ export function openOrderBreakdownModal(data) {
         </div>
     `;
 
-    modal.classList.remove("hidden");
+	hideItemTooltip();
+	openDialog(modal);
     if (window.lucide) window.lucide.createIcons();
 }
 
 export function closeOrderBreakdownModal() {
     const modal = document.getElementById("order-breakdown-modal");
-    if (modal) modal.classList.add("hidden");
+	closeDialog(modal);
 }
 
 export function switchTab(targetId) {
@@ -1772,12 +1866,18 @@ export function switchTab(targetId) {
         }
     }
 
+	hideItemTooltip();
 	globals.currentTab = targetId;
 	document.querySelectorAll(".tab-content").forEach((el) => el.classList.remove("active"));
 	document.getElementById(`tab-${targetId}`).classList.add("active");
 	document.querySelectorAll(".nav-btn").forEach((btn) => {
-		if (btn.dataset.target === targetId) btn.className = `nav-btn flex flex-col items-center flex-1 py-1 px-0.5 rounded-lg transition-all bg-amber-100 text-amber-950 shadow-inner`;
-		else btn.className = `nav-btn flex flex-col items-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100`;
+		if (btn.dataset.target === targetId) {
+			btn.className = `nav-btn min-h-12 flex flex-col items-center justify-center flex-1 py-1 px-0.5 rounded-lg transition-all bg-amber-100 text-amber-950 shadow-inner`;
+			btn.setAttribute("aria-current", "page");
+		} else {
+			btn.className = `nav-btn min-h-12 flex flex-col items-center justify-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100`;
+			btn.removeAttribute("aria-current");
+		}
 	});
 	if (targetId === "inventory") renderWarehouse();
 	if (targetId === "market") renderMarket();
@@ -1807,34 +1907,86 @@ export function showToast(text, type = 'default') {
 	setTimeout(() => {
 		toast.classList.add("opacity-0", "translate-y-2", "transition-all", "duration-300");
 		setTimeout(() => toast.remove(), 300);
-	}, 2500);
+	}, 3000);
 }
 
 export function initSound() {
 	const btn = document.getElementById("sound-toggle");
 	const icon = document.getElementById("sound-icon");
 	if (!btn || !icon) return;
-	btn.addEventListener("click", () => {
-		const isEnabled = toggleAudio();
-		if (isEnabled) {
+
+    const updateSoundButton = () => {
+        const isEnabled = isAudioEnabled();
+        if (isEnabled) {
 			icon.setAttribute("data-lucide", "volume-2");
 			btn.className = "p-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg transition-colors shadow-sm";
 		} else {
 			icon.setAttribute("data-lucide", "volume-x");
 			btn.className = "p-2 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg transition-colors shadow-sm";
 		}
+		btn.setAttribute("aria-pressed", String(isEnabled));
 		if (window.lucide) window.lucide.createIcons();
+    };
+
+	btn.addEventListener("click", () => {
+		toggleAudio();
+        updateSoundButton();
 	});
+
+    updateSoundButton();
+}
+
+export function openSettingsModal() {
+    renderSettingsModal();
+	hideItemTooltip();
+	openDialog(document.getElementById('settings-modal'));
+}
+
+export function closeSettingsModal() {
+	closeDialog(document.getElementById('settings-modal'));
+}
+
+export function applyFont(fontName) {
+    const body = document.body;
+    body.classList.remove('font-original', 'font-minecraft', 'font-vcr');
+    body.classList.add(`font-${fontName}`);
+}
+
+export function setFontStyle(fontName) {
+    state.font = fontName;
+    applyFont(fontName);
+    updateSettingsUI();
+    saveGameState();
+}
+
+export function renderSettingsModal() {
+    updateSettingsUI();
+}
+
+export function updateSettingsUI() {
+    document.querySelectorAll('#font-selector [data-font]').forEach(btn => {
+		const isSelected = btn.dataset.font === state.font;
+		btn.setAttribute('aria-pressed', String(isSelected));
+		if (isSelected) {
+            btn.classList.add('bg-amber-100', 'border-amber-500');
+            btn.classList.remove('border-transparent', 'bg-stone-50', 'hover:bg-stone-100');
+        } else {
+            btn.classList.remove('bg-amber-100', 'border-amber-500');
+            btn.classList.add('border-transparent', 'bg-stone-50', 'hover:bg-stone-100');
+        }
+    });
 }
 
 export function closeModal() {
-	hideItemTooltip();
-	document.getElementById("pop-modal").classList.add("hidden");
+	const popModal = document.getElementById("pop-modal");
+	const labelerReturnFocus = dialogReturnFocus.get(popModal);
+	const bottleIdToLabel = globals.labeling.id;
+	closeDialog(popModal, {restoreFocus: !bottleIdToLabel});
 
 	// If an S-Tier pop modal was just closed, check if a labeler sequence should trigger
-	if (globals.labeling.id) {
-		const bottleIdToLabel = globals.labeling.id;
+	if (bottleIdToLabel) {
 		globals.labeling.id = null; // Clear the temporary ID immediately
 		openLabelerModal(bottleIdToLabel, "wine"); // Then open the modal with the stored ID
+		dialogReturnFocus.set(document.getElementById("labeler-modal"), labelerReturnFocus);
 	}
 }

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Deterministic mechanics and balance testing for The Grand Reserve.">
+  <title>Estate QA Bench | The Grand Reserve</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f4f0e6;
+      --panel: #fffdf7;
+      --ink: #25231e;
+      --muted: #706b60;
+      --line: #d8d1c2;
+      --wine: #793b45;
+      --leaf: #496c52;
+      --gold: #a66a18;
+      --fail: #a43e35;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); }
+    button, input { font: inherit; }
+    .masthead { border-bottom: 1px solid var(--line); background: #fffdf9; }
+    .masthead-inner, main { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+    .masthead-inner { min-height: 74px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid var(--wine); color: var(--wine); font-weight: 700; }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: 20px; font-weight: 700; }
+    .eyebrow, .status, .label, .count { font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: .04em; }
+    .eyebrow { color: var(--wine); font-size: 11px; margin-bottom: 4px; }
+    .safety { color: var(--leaf); font: 12px 'Courier New', monospace; border-left: 2px solid var(--leaf); padding: 5px 0 5px 10px; }
+    main { padding: 34px 0 54px; }
+    .intro { display: flex; align-items: end; justify-content: space-between; gap: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+    .intro h2 { font-size: 30px; margin-bottom: 7px; }
+    .intro p { color: var(--muted); max-width: 600px; line-height: 1.5; font-size: 14px; }
+    .toolbar { display: flex; align-items: end; gap: 12px; padding: 20px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+    .field { display: grid; gap: 5px; }
+    .label { color: var(--muted); font-size: 10px; }
+    input[type="number"] { width: 130px; min-height: 40px; border: 1px solid var(--line); background: var(--panel); padding: 8px 10px; color: var(--ink); }
+    button, .link-button { min-height: 40px; border: 1px solid var(--wine); background: var(--wine); color: white; padding: 8px 15px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+    button.secondary, .link-button { background: transparent; color: var(--wine); }
+    button:hover, .link-button:hover { filter: brightness(.92); }
+    button:disabled { opacity: .55; cursor: wait; }
+    #run-status { min-height: 26px; align-self: center; color: var(--muted); font: 12px 'Courier New', monospace; }
+    .section-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin: 28px 0 12px; }
+    .section-heading h2 { font-size: 20px; }
+    .section-heading p { color: var(--muted); font-size: 12px; }
+    #scenario-results { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+    .result { min-height: 104px; padding: 14px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--panel); }
+    .result-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+    .result h3 { font-size: 15px; }
+    .result p { color: var(--muted); font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
+    .status { font-size: 10px; color: var(--muted); }
+    .status.pass { color: var(--leaf); }
+    .status.fail { color: var(--fail); }
+    .report-wrap { border-top: 1px solid var(--line); background: #242722; color: #eee9dc; padding: 16px; }
+    .report-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .report-top h3 { color: #e2c996; font-size: 14px; }
+    .report-wrap button { min-height: 32px; padding: 5px 10px; font-size: 12px; border-color: #b87d35; background: transparent; color: #f0d29c; }
+    pre { max-height: 360px; overflow: auto; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: #d7d5cc; font: 12px/1.5 'Courier New', monospace; }
+    .checklist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+    .check { display: flex; align-items: flex-start; gap: 10px; padding: 13px 12px; border-bottom: 1px solid var(--line); }
+    .check:nth-child(odd) { border-right: 1px solid var(--line); }
+    .check input { margin-top: 3px; accent-color: var(--leaf); }
+    .check span { font-size: 13px; line-height: 1.4; }
+    .footer { display: flex; justify-content: space-between; gap: 20px; padding-top: 20px; margin-top: 32px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .footer a { color: var(--wine); }
+    @media (max-width: 760px) {
+      .masthead-inner, main { width: min(100% - 28px, 1120px); }
+      .intro { align-items: start; flex-direction: column; }
+      .intro h2 { font-size: 25px; }
+      #scenario-results { grid-template-columns: 1fr; }
+      .result { min-height: auto; }
+      .checklist { grid-template-columns: 1fr; }
+      .check:nth-child(odd) { border-right: 0; }
+      .footer { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="masthead-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">GR</div>
+        <div><p class="eyebrow">The Grand Reserve</p><h1>Estate QA Bench</h1></div>
+      </div>
+      <p class="safety">ISOLATED RUNS · NO SAVE WRITES</p>
+    </div>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="bench-title">
+      <div><h2 id="bench-title">Mechanics & balance</h2><p>Run reproducible scenarios against the game’s production rules. Use a fixed seed to compare changes; exported reports include the seed and run count.</p></div>
+      <a class="link-button" href="index.html">Open the game</a>
+    </section>
+
+    <section class="toolbar" aria-label="Run configuration">
+      <label class="field"><span class="label">Seed</span><input id="seed-input" type="number" value="20261001" step="1"></label>
+      <label class="field"><span class="label">Simulation runs</span><input id="runs-input" type="number" value="100" min="1" max="10000" step="1"></label>
+      <button id="run-scenarios" type="button">Run scenarios</button>
+      <button id="run-balance" class="secondary" type="button">Run balance batch</button>
+      <span id="run-status" role="status" aria-live="polite">Ready</span>
+    </section>
+
+    <section aria-labelledby="scenario-title">
+      <div class="section-heading"><h2 id="scenario-title">Production scenarios</h2><p>Contract solver · time progression · market behavior</p></div>
+      <div id="scenario-results" aria-live="polite"></div>
+    </section>
+
+    <section aria-labelledby="report-title">
+      <div class="section-heading"><h2 id="report-title">Balance report</h2><p>JSON output is deterministic for the same inputs</p></div>
+      <div class="report-wrap">
+        <div class="report-top"><h3>Latest run</h3><button id="download-report" type="button" disabled>Download JSON</button></div>
+        <pre id="report-output">Run a balance batch to populate the report.</pre>
+      </div>
+    </section>
+
+    <section aria-labelledby="manual-title">
+      <div class="section-heading"><h2 id="manual-title">End-to-end checklist</h2><p>Manual checks for interactions that require the game UI</p></div>
+      <div class="checklist">
+        <label class="check"><input type="checkbox"><span>Fresh-save tutorial: plant, grow, harvest, press, ferment, bottle, label, and sell.</span></label>
+        <label class="check"><input type="checkbox"><span>Weather and crop variants: inspect flavour changes and boundary clamping.</span></label>
+        <label class="check"><input type="checkbox"><span>Wine lifecycle: additives, barrel aging, vinegar conversion, racks, and vintage rank changes.</span></label>
+        <label class="check"><input type="checkbox"><span>Orders: accept limit, rejection feedback, successful payout, cancellation, and expiry.</span></label>
+        <label class="check"><input type="checkbox"><span>Economy: seed, pantry, plot, barrel, kettle, and oak upgrade purchases at balance boundaries.</span></label>
+        <label class="check"><input type="checkbox"><span>Brewery: unlock, recipe assembly, kettle skill, labeling, and beer sale.</span></label>
+        <label class="check"><input type="checkbox"><span>Persistence: save, reload, tutorial resume, labels, settings, and legacy save migration.</span></label>
+        <label class="check"><input type="checkbox"><span>Tooltip lifecycle: hover a detail, switch primary and nested tabs, then open representative dialogs; verify it closes and reopens normally.</span></label>
+        <label class="check"><input type="checkbox"><span>Flavor details: inspect with mouse hover, keyboard focus, and touch; verify the tooltip stays within the viewport.</span></label>
+        <label class="check"><input type="checkbox"><span>Cellar status: verify empty barrels report the two-ingredient requirement and stocked barrels report readiness.</span></label>
+        <label class="check"><input type="checkbox"><span>Racks and labels: verify touch removal cues, keyboard rack controls, label option names, and selected-state feedback.</span></label>
+        <label class="check"><input type="checkbox"><span>Dialogs and feedback: test initial focus, Tab containment, Escape close, focus return, and plot/oak purchase confirmations.</span></label>
+        <label class="check"><input type="checkbox"><span>Responsive navigation: confirm every bottom-navigation destination remains legible and comfortably tappable on mobile.</span></label>
+      </div>
+    </section>
+    <footer class="footer"><span>Local test bench · no external test libraries</span><span>Start a local server from the project folder, then open <a href="testing.html">testing.html</a>.</span></footer>
+  </main>
+  <script type="module" src="js/testing.js"></script>
+</body>
+</html>

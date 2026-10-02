@@ -2,6 +2,7 @@
 export const state = {
 	gold: 150,
 	dialogueDifficulty: 'beginner',
+	font: 'minecraft',
 	currentWeather: "temperate",
 
 	seeds: {

@@ -3,7 +3,7 @@ import {getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged} f
 import {getFirestore, doc, getDoc, setDoc, onSnapshot} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 import {state} from "./state.js";
-import {updateHeaderUI, renderPlots, renderCellarUI, renderWarehouse, renderMarket, renderShop, renderBreweryUI, renderRacks, showToast} from "./ui.js";
+import {closeDialog, openDialog, updateHeaderUI, renderPlots, renderCellarUI, renderWarehouse, renderMarket, renderShop, renderBreweryUI, renderRacks, showToast} from "./ui.js";
 
 // --- FIREBASE SYNC & STORAGE CORE ---
 const appId = typeof __app_id !== "undefined" ? __app_id : "grand-reserve-default";
@@ -204,11 +204,16 @@ function updateSyncStatus(status, label) {
 }
 
 export function openSyncModal() {
-	document.getElementById("sync-modal").classList.remove("hidden");
+	const modal = document.getElementById("sync-modal");
+	if (!modal) return;
+	modal.setAttribute("role", "dialog");
+	modal.setAttribute("aria-modal", "true");
+	modal.setAttribute("aria-label", "Sync save data");
+	openDialog(modal);
 }
 
 export function closeSyncModal() {
-	document.getElementById("sync-modal").classList.add("hidden");
+	closeDialog(document.getElementById("sync-modal"));
 }
 
 export function copySyncCode() {

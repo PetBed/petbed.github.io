@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A field guide to crops, recipes, cellar craft, and customers in The Grand Reserve.">
+  <title>Estate Field Guide | The Grand Reserve</title>
+  <link rel="stylesheet" href="wiki.css">
+  <script src="wiki.js" defer></script>
+</head>
+<body>
+  <main id="top">
+    <section class="intro" aria-labelledby="page-title">
+      <div class="intro-copy">
+        <p class="eyebrow">FIELD NOTES · CURRENT GAME GUIDE</p>
+        <h1 id="page-title">A good season starts<br>with good notes.</h1>
+        <p class="intro-text">Your pocket guide to the vineyard, cellar, copper kettle, and market. Recipes and numbers here follow the game's current rules.</p>
+      </div>
+      <div class="harvest-strip" aria-label="Pixel art crops from the estate">
+        <figure><img src="../assets/crops/pinot_noir.png" alt=""><figcaption>Pinot</figcaption></figure>
+        <figure><img src="../assets/crops/chardonnay.png" alt=""><figcaption>Chardonnay</figcaption></figure>
+        <figure><img src="../assets/crops/blueberry.png" alt=""><figcaption>Blueberry</figcaption></figure>
+        <figure><img src="../assets/crops/blackberry.png" alt=""><figcaption>Blackberry</figcaption></figure>
+      </div>
+    </section>
+
+    <div class="guide-tools">
+      <label class="search-box" for="guide-search">
+        <span aria-hidden="true">⌕</span>
+        <input id="guide-search" type="search" placeholder="Search the guide" autocomplete="off">
+      </label>
+      <p id="search-status" class="search-status" aria-live="polite">9 chapters</p>
+    </div>
+
+    <div class="guide-layout">
+      <nav class="contents" aria-label="Guide chapters">
+        <p class="contents-title">IN THIS GUIDE</p>
+        <a href="#estate">01 <span>First season</span></a>
+        <a href="#crops">02 <span>Crops & weather</span></a>
+        <a href="#cellar">03 <span>Wine cellar</span></a>
+        <a href="#racks">04 <span>Vintage racks</span></a>
+        <a href="#brewery">05 <span>Copper brewery</span></a>
+        <a href="#market">06 <span>Market square</span></a>
+        <a href="#orders">07 <span>Customer orders</span></a>
+        <a href="#labels">08 <span>Labels & craft</span></a>
+        <a href="#saving">09 <span>Saves & settings</span></a>
+        <div class="contents-note"><span class="note-dot"></span>Updated for the current game</div>
+      </nav>
+
+      <article class="guide-content">
+        <section id="estate" class="chapter" data-searchable>
+          <p class="chapter-kicker">01 / BEGIN AT THE GATE</p>
+          <h2>Your first season</h2>
+          <p class="lead">The tutorial walks through planting, harvesting, pressing, bottling, labeling, and making your first market sale. It resumes at the start of its current phase; resuming can reset the tutorial's Pinot Noir or tutorial wine.</p>
+          <div class="fact-line"><span>New save</span><strong>150 gold · 3 open plots · 1 French Oak barrel</strong></div>
+          <div class="fact-line"><span>Tutorial start</span><strong>20 gold · 2 Pinot Noir seeds</strong></div>
+          <p>The opening seed stock also includes two packets each of Hops and Barley and one Blackberry packet. Other seeds begin at zero. Temperate is the starting weather.</p>
+          <h3>Grow the estate</h3>
+          <p>There are nine plots. The first plot purchase costs 50 gold; each following price is rounded from 1.5 times the previous price. Barrel types cost 200-500 gold, with a limit of two owned per type. Oak Conditioning costs 250 gold and permanently speeds cellar aging by 30%. The Copper Kettle costs 150 gold and unlocks the Brewery.</p>
+        </section>
+
+        <section id="crops" class="chapter" data-searchable>
+          <p class="chapter-kicker">02 / VINEYARD & PANTRY</p>
+          <h2>Crops, weather & flavour</h2>
+          <p>Buy a seed packet from the Merchant and plant it in an empty plot. Planting consumes one seed. Timers count down in the game loop; harvest when the plot is ready. Weather rerolls every three minutes and may repeat. At harvest, flavour-bearing grapes and berries receive that weather's modifiers, clamped to the 0-100 range.</p>
+          <p class="table-caption">Harvest catalog · flavour order: sweetness / acidity / tannin / body</p>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Crop</th><th>Seed</th><th>Grow</th><th>Base flavour</th></tr></thead>
+            <tbody>
+              <tr><td>Pinot Noir Grapes</td><td>15g</td><td>6s</td><td>15 / 25 / 15 / 20</td></tr>
+              <tr><td>Chardonnay Grapes</td><td>20g</td><td>8s</td><td>10 / 35 / 0 / 15</td></tr>
+              <tr><td>Cabernet Grapes</td><td>30g</td><td>12s</td><td>5 / 15 / 40 / 35</td></tr>
+              <tr><td>Muscat Grapes</td><td>45g</td><td>15s</td><td>45 / 10 / 5 / 20</td></tr>
+              <tr><td>Wild Blackberry</td><td>12g</td><td>5s</td><td>15 / 15 / 30 / 25</td></tr>
+              <tr><td>Golden Raspberry</td><td>18g</td><td>7s</td><td>20 / 25 / 5 / 10</td></tr>
+              <tr><td>Forest Blueberry</td><td>25g</td><td>10s</td><td>15 / 20 / 15 / 20</td></tr>
+              <tr><td>Sweet Strawberry</td><td>35g</td><td>11s</td><td>35 / 15 / 0 / 10</td></tr>
+              <tr><td>Bitter Elderberry</td><td>50g</td><td>18s</td><td>5 / 20 / 35 / 25</td></tr>
+              <tr><td>Fresh Hops</td><td>15g</td><td>8s</td><td>No wine flavour</td></tr>
+              <tr><td>Craft Barley</td><td>10g</td><td>6s</td><td>No wine flavour</td></tr>
+              <tr><td>Malt Wheat</td><td>8g</td><td>5s</td><td>No wine flavour</td></tr>
+              <tr><td>Spicy Rye</td><td>14g</td><td>7s</td><td>No wine flavour</td></tr>
+              <tr><td>Sugar Pumpkin</td><td>22g</td><td>14s</td><td>No wine flavour</td></tr>
+            </tbody>
+          </table></div>
+          <h3>Weather at harvest</h3>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Weather</th><th>Sweetness</th><th>Acidity</th><th>Tannin</th><th>Body</th></tr></thead>
+            <tbody><tr><td>Sunny</td><td>+20</td><td>-10</td><td>0</td><td>0</td></tr><tr><td>Rain</td><td>-10</td><td>+20</td><td>0</td><td>0</td></tr><tr><td>Mist</td><td>0</td><td>0</td><td>0</td><td>+10</td></tr><tr><td>Temperate</td><td>0</td><td>0</td><td>0</td><td>0</td></tr></tbody>
+          </table></div>
+          <h3>Pantry shelf</h3>
+          <p>Pantry goods are purchased directly. Only Wild Yeast and Pure Honey can be loaded into the wine press, one additive per batch. Cacao, Coffee, and Coriander & Peel have no wine modifier and are beer ingredients.</p>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Pantry item</th><th>Cost</th><th>Wine modifier</th><th>Beer recipe</th></tr></thead>
+            <tbody>
+              <tr><td>Wild Yeast</td><td>15g</td><td>SW -20 · AC +25 · BD +15</td><td>Wild Sour Ale</td></tr>
+              <tr><td>Cacao Nibs</td><td>10g</td><td>None</td><td>Double Espresso Stout</td></tr>
+              <tr><td>Coffee Beans</td><td>12g</td><td>None</td><td>Double Espresso Stout</td></tr>
+              <tr><td>Pure Honey</td><td>20g</td><td>SW +30 · AC -15 · BD +5</td><td>Pumpkin Spice Ale; Imperial Honey Braggot</td></tr>
+              <tr><td>Coriander & Peel</td><td>8g</td><td>None</td><td>Belgian Witbier</td></tr>
+            </tbody>
+          </table></div>
+        </section>
+
+        <section id="cellar" class="chapter" data-searchable>
+          <p class="chapter-kicker">03 / PRESS, BARREL, BOTTLE</p>
+          <h2>The wine cellar</h2>
+          <p>Load up to three grapes or berries and optionally one eligible pantry additive. The press matches exact fruit combinations. Additive and fruit profiles are summed and clamped from 0 to 100. Crush the barrel with five clicks; fermentation takes five seconds; then bottle during aging.</p>
+          <h3>Wine recipes</h3>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Wine</th><th>Exact fruit</th><th>Base price</th></tr></thead>
+            <tbody>
+              <tr><td>Chardonnay Dry White</td><td>2 Chardonnay</td><td>45g</td></tr>
+              <tr><td>Pinot Noir Light Red</td><td>2 Pinot Noir</td><td>50g</td></tr>
+              <tr><td>Cabernet Bold Red</td><td>2 Cabernet</td><td>65g</td></tr>
+              <tr><td>Golden Muscat Dessert</td><td>2 Muscat</td><td>85g</td></tr>
+              <tr><td>Summer Rosé</td><td>1 Pinot Noir + 1 Strawberry</td><td>60g</td></tr>
+              <tr><td>Midnight Blackberry Port</td><td>1 Cabernet + 2 Blackberry</td><td>80g</td></tr>
+              <tr><td>Royal Gold Mead-Wine</td><td>1 Muscat + 1 Raspberry</td><td>95g</td></tr>
+              <tr><td>Elder-Blue Elixir</td><td>2 Elderberry + 1 Blueberry</td><td>110g</td></tr>
+              <tr><td>Imperial Velvet Blend</td><td>1 Cabernet + 1 Blueberry + 1 Elderberry</td><td>150g</td></tr>
+              <tr><td>Generic Fruit Cider</td><td>Unmatched 2+ berries</td><td>25g</td></tr>
+              <tr><td>House Red Blend</td><td>Other unmatched 2+ fruit</td><td>30g</td></tr>
+            </tbody>
+          </table></div>
+          <h3>Barrels & aging</h3>
+          <p>Barrel modifiers are applied as aging progresses, with flavour clamped to 0-100. Normal aging takes 100 seconds; Oak Conditioning increases progress speed by 30% (about 77 seconds to full). It does not speed crops or fermentation.</p>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Barrel</th><th>Cost</th><th>Max</th><th>Modifier per progress (SW/AC/TN/BD)</th></tr></thead>
+            <tbody>
+              <tr><td>French Oak</td><td>300g</td><td>2</td><td>-0.2 / 0 / +0.5 / +0.3</td></tr>
+              <tr><td>American Oak</td><td>200g</td><td>2</td><td>0 / -0.3 / +0.2 / +0.6</td></tr>
+              <tr><td>Chestnut Wood</td><td>300g</td><td>2</td><td>-0.2 / +0.4 / +1.2 / 0</td></tr>
+              <tr><td>Old Bourbon</td><td>500g</td><td>2</td><td>+0.6 / -0.4 / 0 / +0.8</td></tr>
+            </tbody>
+          </table></div>
+          <h3>Bottle quality</h3>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Bottled at progress</th><th>Tier</th><th>Multiplier</th></tr></thead>
+            <tbody><tr><td>0% to &lt;30%</td><td>C-Tier Table</td><td>0.6x</td></tr><tr><td>30% to &lt;60%</td><td>B-Tier Classic</td><td>1.0x</td></tr><tr><td>60% to &lt;80%</td><td>A-Tier Premium</td><td>1.5x</td></tr><tr><td>80% to 100%</td><td>S-Tier Reserve</td><td>2.5x</td></tr><tr><td>Optional conversion</td><td>Vinegar</td><td>0.15x</td></tr></tbody>
+          </table></div>
+          <p class="margin-note">At 100%, aging stops and the batch remains S-Tier until bottled or converted to Vinegar.</p>
+        </section>
+
+        <section id="racks" class="chapter" data-searchable>
+          <p class="chapter-kicker">04 / PATIENCE IN THE CELLAR</p>
+          <h2>Vintage racks</h2>
+          <p>There are nine rack slots. Move a bottled wine from the reserve onto an empty rack. Age advances one year per second; rank and sale multiplier update at each threshold.</p>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Rank</th><th>Age</th><th>Multiplier</th></tr></thead>
+            <tbody><tr><td>Freshly Bottled</td><td>0-14 years</td><td>1.0x</td></tr><tr><td>Fine Aged</td><td>15-39 years</td><td>1.5x</td></tr><tr><td>Estate Reserve</td><td>40-79 years</td><td>2.2x</td></tr><tr><td>Centennial Vintage</td><td>80+ years</td><td>3.5x</td></tr></tbody>
+          </table></div>
+        </section>
+
+        <section id="brewery" class="chapter" data-searchable>
+          <p class="chapter-kicker">05 / THE COPPER KETTLE</p>
+          <h2>Brewing beer</h2>
+          <p>Buy the Copper Kettle for 150 gold to unlock the Brewery. The kettle accepts up to three ingredients and matches exact keys and quantities. Ingredient selections are reserved while the modal is open; removing a slot or closing releases them. Confirming a valid recipe consumes the ingredients once.</p>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Beer</th><th>Exact ingredients</th><th>Base price</th></tr></thead>
+            <tbody>
+              <tr><td>Wheat Beer</td><td>1 Barley + 1 Wheat</td><td>30g</td></tr>
+              <tr><td>Golden Ale</td><td>2 Barley + 1 Hops</td><td>40g</td></tr>
+              <tr><td>Bitter IPA</td><td>1 Barley + 2 Hops</td><td>55g</td></tr>
+              <tr><td>Belgian Witbier</td><td>1 Wheat + 1 Hops + 1 Coriander & Peel</td><td>65g</td></tr>
+              <tr><td>Spiced Rye IPA</td><td>1 Rye + 2 Hops</td><td>70g</td></tr>
+              <tr><td>Wild Sour Ale</td><td>1 Wheat + 1 Wild Yeast + 1 Blueberry</td><td>85g</td></tr>
+              <tr><td>Pumpkin Spice Ale</td><td>1 Wheat + 1 Pumpkin + 1 Pure Honey</td><td>95g</td></tr>
+              <tr><td>Imperial Honey Braggot</td><td>1 Barley + 2 Pure Honey</td><td>110g</td></tr>
+              <tr><td>Double Espresso Stout</td><td>1 Barley + 1 Coffee Beans + 1 Cacao Nibs</td><td>130g</td></tr>
+            </tbody>
+          </table></div>
+          <h3>Hold the bubble</h3>
+          <p>Keep the green catcher pad over the moving bubble. Progress builds during overlap and recedes slowly outside it. Stoke Fire adds rightward velocity; Vent Steam adds leftward velocity. The pad has momentum, drag, and damped edge bounces. Switching in-game tabs does not reset the kettle; browser background-tab throttling can slow its interval.</p>
+          <div class="formula-note"><span>Required overlap time</span><code>7.5 + ((base price - 30) / 100) × 14.5 seconds</code></div>
+          <p>That is alignment time, not total elapsed time. When a brew finishes, the beer enters the reserve and its label editor opens. Beer has no wine aging or quality multiplier.</p>
+        </section>
+
+        <section id="market" class="chapter" data-searchable>
+          <p class="chapter-kicker">06 / TOWN TRADE</p>
+          <h2>Market square</h2>
+          <p>Prices shift every 30 seconds. Wine uses random volatility from 0.8x to 1.2x; beer uses 0.85x to 1.15x. Selling one unit adds one oversupply point to that exact product. At each market shift, oversupply first decays by 20%.</p>
+          <div class="formula-note"><span>Oversupply penalty</span><code>max(0.3, 1 - 0.05 × oversupply)</code></div>
+          <p>New market price is recipe base price × volatility × oversupply penalty. The penalty floor is 0.3x. Wine sales then apply the bottle's quality and vintage multipliers. Beer sells at current market price alone. Sparklines retain up to ten prices.</p>
+        </section>
+
+        <section id="orders" class="chapter" data-searchable>
+          <p class="chapter-kicker">07 / A CUSTOMER'S REQUEST</p>
+          <h2>Customer orders</h2>
+          <p>Requests specify a wine recipe and one to four flavour ranges. A solver checks that a valid combination of weather, eligible additive, and barrel can satisfy the generated request. New orders are attempted on a randomized 10-15 minute interval while fewer than ten available orders are posted; each available order expires after 20-30 minutes.</p>
+          <p>Accept up to three orders at a time. Active orders do not expire. A rejected wine remains in reserve and the order stays open; cancelling removes the order.</p>
+          <h3>Match & payout</h3>
+          <p>For each requested attribute, deviation is zero inside the range and otherwise the distance to the nearest range edge. The average across requested attributes must be at most 20 points on the 0-100 scale. This is an absolute point difference, not a relative percentage.</p>
+          <div class="formula-note"><span>Precision multiplier</span><code>min + (max - min) × (1 - average deviation / 20)²</code></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Average deviation</th><th>Submission rating</th></tr></thead>
+            <tbody><tr><td>0 points</td><td>Perfect Match</td></tr><tr><td>Up to 5 points</td><td>Excellent Offer</td></tr><tr><td>Over 5 to 12 points</td><td>Good Fit</td></tr><tr><td>Over 12 to 20 points</td><td>Acceptable Offer</td></tr></tbody>
+          </table></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Requested attributes</th><th>Precision multiplier range</th></tr></thead>
+            <tbody><tr><td>1</td><td>1.50x-2.35x</td></tr><tr><td>2</td><td>2.20x-2.85x</td></tr><tr><td>3</td><td>2.70x-3.70x</td></tr><tr><td>4</td><td>3.45x-5.00x</td></tr></tbody>
+          </table></div>
+          <p>Payout uses current market price × at least 1.0x tier multiplier × vintage rank multiplier × precision multiplier. The completion report shows the ranges, wine flavour, deviations, and payout details. Beginner, Intermediate, and Sommelier dialogue styles exist; their selector currently appears in playtest controls, not normal settings.</p>
+        </section>
+
+        <section id="labels" class="chapter" data-searchable>
+          <p class="chapter-kicker">08 / MAKE IT YOURS</p>
+          <h2>Labels, art & sound</h2>
+          <p>Label any reserve wine or beer. Titles allow up to 22 characters, including spaces and punctuation. Choose a rectangle, oval, or shield; a none, solid, dashed, or double border; and a star, crown, grape, leaf, droplet, or diamond crest.</p>
+          <div class="swatch-groups">
+            <div><h3>Paper</h3><ul class="swatches"><li><i style="--swatch:#FFFFFF"></i>White <code>#FFFFFF</code></li><li><i style="--swatch:#FEF9E7"></i>Soft Cream <code>#FEF9E7</code></li><li><i style="--swatch:#F9EBEA"></i>Rose <code>#F9EBEA</code></li><li><i style="--swatch:#EAECEE"></i>Silver <code>#EAECEE</code></li><li><i style="--swatch:#1A1008"></i>Charred Oak <code>#1A1008</code></li><li><i style="--swatch:#2E1156"></i>Amethyst <code>#2E1156</code></li></ul></div>
+            <div><h3>Ink & foil</h3><ul class="swatches"><li><i style="--swatch:#D4AC0D"></i>Gold <code>#D4AC0D</code></li><li><i style="--swatch:#C0392B"></i>Crimson <code>#C0392B</code></li><li><i style="--swatch:#27AE60"></i>Green <code>#27AE60</code></li><li><i style="--swatch:#1F618D"></i>Blue <code>#1F618D</code></li><li><i style="--swatch:#78281F"></i>Burgundy <code>#78281F</code></li><li><i style="--swatch:#FFFFFF"></i>White <code>#FFFFFF</code></li></ul></div>
+          </div>
+          <p>Bottles and beer vessels use dynamic SVG illustrations. Several crops and seed packets use pixel-art files; other icons use SVG fallbacks. Harvest, planting, and purchases have short GSAP item animations. Sound cues are synthesized with the Web Audio API after audio is enabled through browser interaction.</p>
+        </section>
+
+        <section id="saving" class="chapter" data-searchable>
+          <p class="chapter-kicker">09 / KEEP YOUR NOTES</p>
+          <h2>Saves & settings</h2>
+          <p>Progress autosaves to browser local storage every ten seconds. Press Ctrl+S on Windows/Linux or Cmd+S on macOS to save manually. The save belongs to the current browser and device.</p>
+          <div class="fact-line"><span>Included</span><strong>Gold, stock, plots, barrels, wines, racks, beers, orders, tutorial, settings</strong></div>
+          <div class="fact-line"><span>Not included</span><strong>Market prices, price history, oversupply</strong></div>
+          <p>Market values and oversupply return to their defaults after reload. The normal Settings modal changes the font. Dialogue difficulty is persisted but currently exposed only in the playtest controls.</p>
+        </section>
+
+        <footer class="page-footer">
+          <p>Made for patient growers and curious cellar hands.</p>
+          <a href="../index.html">Back to the estate <span aria-hidden="true">↗</span></a>
+        </footer>
+      </article>
+    </div>
+  </main>
+</body>
+</html>

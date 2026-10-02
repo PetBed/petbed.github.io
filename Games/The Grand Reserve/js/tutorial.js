@@ -1,5 +1,6 @@
 import { state } from './state.js';
-import { renderPlots, showToast } from './ui.js';
+import { closeDialog, openDialog, renderPlots, showToast } from './ui.js';
+import { saveGameState } from './storage.js';
 
 let tutorialOverlay = null;
 let tutorialModal = null;
@@ -16,6 +17,9 @@ function createTutorialUI() {
     const modal = document.createElement('div');
     modal.id = 'tutorial-modal';
     modal.className = 'hidden fixed z-[1000] bottom-24 left-1/2 -translate-x-1/2 w-full max-w-md p-4 animate-fade-in';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'tutorial-title');
     modal.innerHTML = `
         <div class="bg-white p-5 rounded-2xl border-4 border-amber-500 shadow-2xl">
             <h3 id="tutorial-title" class="text-lg font-black text-amber-950 mb-2"></h3>
@@ -31,21 +35,21 @@ function createTutorialUI() {
 
 function showTutorialModal(title, text, buttonText, onClick) {
     if (!tutorialModal) createTutorialUI();
-    
+
     document.getElementById('tutorial-title').textContent = title;
     document.getElementById('tutorial-text').textContent = text;
     const button = document.getElementById('tutorial-button');
     button.textContent = buttonText;
     button.onclick = onClick;
 
-    tutorialModal.classList.remove('hidden');
+    openDialog(tutorialModal);
     tutorialOverlay.classList.add('pointer-events-auto');
     tutorialOverlay.classList.remove('pointer-events-none');
     tutorialOverlay.style.clipPath = ''; // Reset clip path for modal
 }
 
 function dismissTutorialModal() {
-    if (tutorialModal) tutorialModal.classList.add('hidden');
+    if (tutorialModal) closeDialog(tutorialModal);
     if (tutorialOverlay) {
         tutorialOverlay.classList.remove('pointer-events-auto');
         tutorialOverlay.classList.add('pointer-events-none');
@@ -74,10 +78,14 @@ function cleanupTutorial() {
     if (tutorialOverlay) tutorialOverlay.remove();
     if (tutorialModal) tutorialModal.remove();
     state.tutorial.active = false;
+    state.tutorial.step = 0;
     renderPlots();
     window.removeEventListener('resize', handleTutorialResize);
     window.removeEventListener('scroll', handleTutorialResize, true);
     currentHighlightSelector = null;
+    saveGameState(); // Immediately save the state to prevent tutorial from restarting on reload.
+    console.log("Tutorial cleanup complete.");
+    console.log("Current tutorial state:", state.tutorial);
 }
 
 export function advanceTutorial(step = null) {
@@ -247,6 +255,7 @@ export function advanceTutorial(step = null) {
 
 export function startTutorial() {
     if (state.tutorial.active) return;
+    console.log("Starting tutorial...");
     state.tutorial.active = true;
     state.tutorial.step = 0;
     state.gold = 20;

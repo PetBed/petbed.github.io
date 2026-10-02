@@ -1,6 +1,35 @@
 // --- CUSTOM SVG GRAPHICS PIPELINE ---
+
+// NEW: Asset mapping for pixel art. As you create new pixel art,
+// add the file path here. The getCropIcon function will automatically
+// use the new asset and fallback to the old SVG if an entry isn't found.
+const CROP_ASSET_PATHS = {
+	'pinot_noir': 'assets/crops/pinot_noir.png',
+	'chardonnay': 'assets/crops/chardonnay.png',
+  'cabernet': 'assets/crops/cabernet.png',
+  'muscat': 'assets/crops/muscat.png',
+  'blueberry': 'assets/crops/blueberry.png',
+  'blackberry': 'assets/crops/blackberry.png',
+};
+
+// NEW: Asset mapping for seed packets. As you create new pixel art for each
+// seed, add its path here. The getSeedIcon function will automatically use it.
+const SEED_ASSET_PATHS = {
+	'pinot_noir': 'assets/seeds/pinot_noir_seed.png',
+	'chardonnay': 'assets/seeds/chardonnay_seed.png',
+  'cabernet': 'assets/seeds/cabernet_seed.png',
+  'muscat': 'assets/seeds/muscat_seed.png',
+  'blueberry': 'assets/seeds/blueberry_seed.png',
+  'blackberry': 'assets/seeds/blackberry_seed.png',
+};
+
 export function getSeedIcon(key) {
-	// ... (Keep existing implementation) ...
+	// NEW: Check for a dedicated pixel art seed asset first.
+	if (SEED_ASSET_PATHS[key]) {
+		return `<img src="${SEED_ASSET_PATHS[key]}" alt="${key} seed" class="pixel-art w-full h-full">`;
+	}
+
+	// Fallback to the original SVG generation method for any assets not yet created.
 	return `
             <svg viewBox="0 0 64 64" class="w-full h-full drop-shadow">
                 <path d="M16,48 C16,56 24,58 32,58 C40,58 48,56 48,48 C48,40 46,32 44,24 L20,24 C18,32 16,40 16,48 Z" fill="#8B5A2B" stroke="#593D1F" stroke-width="3" />
@@ -16,6 +45,12 @@ export function getSeedIcon(key) {
 }
 
 export function getCropIcon(key) {
+	// If a pixel art asset path is defined for this key, use it.
+	if (CROP_ASSET_PATHS[key]) {
+		// This returns an <img> tag instead of an <svg> tag.
+		// The 'pixel-art' class ensures it's rendered without blurring.
+		return `<img src="${CROP_ASSET_PATHS[key]}" alt="${key}" class="pixel-art w-full h-full">`;
+	}
 	switch (key) {
 		case "pinot_noir":
 			return `<svg viewBox="0 0 64 64" class="w-full h-full"><circle cx="24" cy="24" r="7" fill="#722F37" /><circle cx="40" cy="24" r="7" fill="#722F37" /><circle cx="32" cy="34" r="7" fill="#722F37" /><circle cx="28" cy="44" r="7" fill="#58111A" /><circle cx="36" cy="44" r="7" fill="#58111A" /><circle cx="32" cy="52" r="6" fill="#3D0A10" /><path d="M32,18 L32,8" stroke="#4A5D23" stroke-width="4" stroke-linecap="round" /><path d="M32,14 Q42,10 44,16" fill="none" stroke="#6B821F" stroke-width="3" /></svg>`;
@@ -294,3 +329,8 @@ export function getBeerIcon(beerKey, customLabel = null) {
             `;
 	}
 }
+
+export const 获取农作物图标 = getCropIcon;
+export const 获取种子图标 = getSeedIcon;
+export const 获取红酒图标 = getWineIcon;
+export const 获取啤酒图标 = getBeerIcon;

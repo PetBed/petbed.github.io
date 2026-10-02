@@ -9,13 +9,14 @@
 
   <link rel="preconnect" href="https://cdn.tailwindcss.com">
   <link rel="preconnect" href="https://unpkg.com">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest" defer></script>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
-<body class="font-sans text-amber-950 min-h-screen">
+<body class="text-amber-950 min-h-screen">
 
   <!-- GAME CONTAINER -->
   <div
@@ -27,13 +28,10 @@
         <h1 class="text-xl font-black text-amber-950 tracking-tight flex items-center gap-1.5">
           <i data-lucide="wine" class="text-rose-800 w-6 h-6"></i> THE GRAND RESERVE
         </h1>
-        <div id="weather-display" class="flex items-center gap-1 text-xs font-bold text-amber-800">
-          <i data-lucide="cloud" class="w-4 h-4"></i>
-          <span>Temperate</span>
-        </div>
-        <div class="flex gap-1.5"><button id="sound-toggle" type="button" aria-label="Toggle Sound"
-            class="p-2 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg transition-colors shadow-sm">
-            <i data-lucide="volume-x" class="w-4 h-4" id="sound-icon"></i>
+        <div id="weather-display" class="flex items-center gap-1 text-xs font-bold text-amber-800"></div>
+        <div class="flex gap-1.5">
+          <button id="settings-btn" onclick="openSettingsModal()" type="button" aria-label="Open Settings" class="p-2 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg transition-colors shadow-sm">
+            <i data-lucide="settings" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
@@ -135,11 +133,11 @@
         </div>
         <div class="flex w-full bg-amber-950/5 p-1 rounded-xl gap-1 mb-4 border border-amber-950/10">
           <button type="button" onclick="switchReserveTab('ingredients')" id="res-tab-ingredients"
-            class="flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all bg-white text-amber-950 shadow-sm">Ingredients</button>
+            aria-pressed="true" class="flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all bg-white text-amber-950 shadow-sm">Ingredients</button>
           <button type="button" onclick="switchReserveTab('wines')" id="res-tab-wines"
-            class="flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all text-amber-700/60">Wines</button>
+            aria-pressed="false" class="flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all text-amber-700/60">Wines</button>
           <button type="button" onclick="switchReserveTab('beers')" id="res-tab-beers"
-            class="flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all text-amber-700/60">Beers</button>
+            aria-pressed="false" class="flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all text-amber-700/60">Beers</button>
         </div>
         <div id="reserve-ingredients-content" class="w-full flex flex-col gap-4"></div>
         <div id="reserve-wines-content" class="hidden w-full grid grid-cols-1 md:grid-cols-2 gap-3"></div>
@@ -181,13 +179,13 @@
         </div>
         <div class="flex w-full bg-amber-950/5 p-1 rounded-xl gap-1 mb-4 border border-amber-950/10">
           <button type="button" onclick="switchShopTab('seeds')" id="shop-tab-seeds"
-            class="flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all bg-white text-amber-950 shadow-sm">Seed
+            aria-pressed="true" class="flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all bg-white text-amber-950 shadow-sm">Seed
             Stock</button>
           <button type="button" onclick="switchShopTab('pantry')" id="shop-tab-pantry"
-            class="flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all text-amber-700/60">Pantry
+            aria-pressed="false" class="flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all text-amber-700/60">Pantry
             Shelf</button>
           <button type="button" onclick="switchShopTab('upgrades')" id="shop-tab-upgrades"
-            class="flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all text-amber-700/60">Upgrades</button>
+            aria-pressed="false" class="flex-1 py-1.5 text-xs font-black uppercase rounded-lg transition-all text-amber-700/60">Upgrades</button>
         </div>
         <div id="shop-seeds-content" class="w-full grid grid-cols-1 md:grid-cols-2 gap-3"></div>
         <div id="shop-pantry-content" class="hidden w-full grid grid-cols-1 md:grid-cols-2 gap-3"></div>
@@ -196,10 +194,10 @@
     </main>
 
     <!-- NEW CUSTOMIZATION UPDATE: Label Maker Modal -->
-    <div id="labeler-modal"
+    <div id="labeler-modal" role="dialog" aria-modal="true" aria-label="Estate label editor"
       class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div
-        class="bg-white p-5 rounded-3xl border-2 border-amber-950 shadow-2xl w-full max-w-2xl animate-fade-in flex flex-col md:flex-row gap-6 relative">
+        class="bg-white p-5 rounded-3xl border-2 border-amber-950 shadow-2xl w-full max-w-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto animate-fade-in flex flex-col md:flex-row gap-6 relative">
         <button type="button" aria-label="Close Modal" onclick="closeLabelerModal()"
           class="absolute top-4 right-4 text-stone-400 hover:text-stone-600 font-extrabold z-10 p-1">✕</button>
 
@@ -230,32 +228,32 @@
               <label class="text-[9px] font-black uppercase tracking-wider text-amber-800 block mb-1">Canvas
                 Shape</label>
               <div class="flex gap-1.5 bg-stone-50 p-1 rounded-lg border border-stone-200">
-                <button type="button" data-shape="rect" onclick="updateLabelDraft('bgShape', 'rect')"
-                  class="flex-1 py-1.5 rounded text-stone-500 transition-all hover:bg-stone-200 flex justify-center"><i
-                    data-lucide="square" class="w-4 h-4"></i></button>
-                <button type="button" data-shape="oval" onclick="updateLabelDraft('bgShape', 'oval')"
-                  class="flex-1 py-1.5 rounded text-stone-500 transition-all hover:bg-stone-200 flex justify-center"><i
-                    data-lucide="circle" class="w-4 h-4"></i></button>
-                <button type="button" data-shape="shield" onclick="updateLabelDraft('bgShape', 'shield')"
-                  class="flex-1 py-1.5 rounded text-stone-500 transition-all hover:bg-stone-200 flex justify-center"><i
-                    data-lucide="shield" class="w-4 h-4"></i></button>
+                <button type="button" data-shape="rect" aria-label="Rectangular label" title="Rectangle" onclick="updateLabelDraft('bgShape', 'rect')"
+                  class="flex-1 py-1.5 rounded text-stone-500 transition-all hover:bg-stone-200 flex flex-col items-center justify-center gap-1"><i
+                    data-lucide="square" class="w-4 h-4"></i><span class="text-[8px] font-bold">Rect</span></button>
+                <button type="button" data-shape="oval" aria-label="Oval label" title="Oval" onclick="updateLabelDraft('bgShape', 'oval')"
+                  class="flex-1 py-1.5 rounded text-stone-500 transition-all hover:bg-stone-200 flex flex-col items-center justify-center gap-1"><i
+                    data-lucide="circle" class="w-4 h-4"></i><span class="text-[8px] font-bold">Oval</span></button>
+                <button type="button" data-shape="shield" aria-label="Shield-shaped label" title="Shield" onclick="updateLabelDraft('bgShape', 'shield')"
+                  class="flex-1 py-1.5 rounded text-stone-500 transition-all hover:bg-stone-200 flex flex-col items-center justify-center gap-1"><i
+                    data-lucide="shield" class="w-4 h-4"></i><span class="text-[8px] font-bold">Shield</span></button>
               </div>
             </div>
             <div>
               <label class="text-[9px] font-black uppercase tracking-wider text-amber-800 block mb-1">Ink Border</label>
               <div class="flex gap-1.5 bg-stone-50 p-1 rounded-lg border border-stone-200">
-                <button type="button" data-border="none" onclick="updateLabelDraft('borderStyle', 'none')"
-                  class="flex-1 py-1.5 rounded text-stone-500 transition-all hover:bg-stone-200 flex justify-center"><i
-                    data-lucide="minus" class="w-4 h-4 opacity-50"></i></button>
-                <button type="button" data-border="solid" onclick="updateLabelDraft('borderStyle', 'solid')"
-                  class="flex-1 py-1.5 rounded text-stone-500 transition-all hover:bg-stone-200 flex justify-center"><i
-                    data-lucide="square" class="w-4 h-4"></i></button>
-                <button type="button" data-border="dashed" onclick="updateLabelDraft('borderStyle', 'dashed')"
-                  class="flex-1 py-1.5 rounded text-stone-500 transition-all hover:bg-stone-200 flex justify-center"><i
-                    data-lucide="square-dashed" class="w-4 h-4"></i></button>
-                <button type="button" data-border="double" onclick="updateLabelDraft('borderStyle', 'double')"
-                  class="flex-1 py-1.5 rounded text-stone-500 transition-all hover:bg-stone-200 flex justify-center"><i
-                    data-lucide="copy" class="w-4 h-4"></i></button>
+                <button type="button" data-border="none" aria-label="No border" title="No border" onclick="updateLabelDraft('borderStyle', 'none')"
+                  class="flex-1 py-1.5 rounded text-stone-500 transition-all hover:bg-stone-200 flex flex-col items-center justify-center gap-1"><i
+                    data-lucide="minus" class="w-4 h-4 opacity-50"></i><span class="text-[7px] font-bold">None</span></button>
+                <button type="button" data-border="solid" aria-label="Solid border" title="Solid border" onclick="updateLabelDraft('borderStyle', 'solid')"
+                  class="flex-1 py-1.5 rounded text-stone-500 transition-all hover:bg-stone-200 flex flex-col items-center justify-center gap-1"><i
+                    data-lucide="square" class="w-4 h-4"></i><span class="text-[7px] font-bold">Solid</span></button>
+                <button type="button" data-border="dashed" aria-label="Dashed border" title="Dashed border" onclick="updateLabelDraft('borderStyle', 'dashed')"
+                  class="flex-1 py-1.5 rounded text-stone-500 transition-all hover:bg-stone-200 flex flex-col items-center justify-center gap-1"><i
+                    data-lucide="square-dashed" class="w-4 h-4"></i><span class="text-[7px] font-bold">Dash</span></button>
+                <button type="button" data-border="double" aria-label="Double border" title="Double border" onclick="updateLabelDraft('borderStyle', 'double')"
+                  class="flex-1 py-1.5 rounded text-stone-500 transition-all hover:bg-stone-200 flex flex-col items-center justify-center gap-1"><i
+                    data-lucide="copy" class="w-4 h-4"></i><span class="text-[7px] font-bold">Double</span></button>
               </div>
             </div>
           </div>
@@ -264,25 +262,25 @@
           <div>
             <label class="text-[9px] font-black uppercase tracking-wider text-amber-800 block mb-1">Estate Crest
               Emblem</label>
-            <div id="labeler-crest-grid" class="grid grid-cols-6 gap-2">
-              <button type="button" data-crest="star" onclick="updateLabelDraft('crestId', 'star')"
-                class="aspect-square rounded-lg border border-stone-200 bg-stone-50 hover:bg-stone-200 flex items-center justify-center transition-all"><i
-                  data-lucide="star" class="w-4 h-4 text-stone-600"></i></button>
-              <button type="button" data-crest="crown" onclick="updateLabelDraft('crestId', 'crown')"
-                class="aspect-square rounded-lg border border-stone-200 bg-stone-50 hover:bg-stone-200 flex items-center justify-center transition-all"><i
-                  data-lucide="crown" class="w-4 h-4 text-stone-600"></i></button>
-              <button type="button" data-crest="grape" onclick="updateLabelDraft('crestId', 'grape')"
-                class="aspect-square rounded-lg border border-stone-200 bg-stone-50 hover:bg-stone-200 flex items-center justify-center transition-all"><i
-                  data-lucide="grape" class="w-4 h-4 text-stone-600"></i></button>
-              <button type="button" data-crest="leaf" onclick="updateLabelDraft('crestId', 'leaf')"
-                class="aspect-square rounded-lg border border-stone-200 bg-stone-50 hover:bg-stone-200 flex items-center justify-center transition-all"><i
-                  data-lucide="leaf" class="w-4 h-4 text-stone-600"></i></button>
-              <button type="button" data-crest="droplet" onclick="updateLabelDraft('crestId', 'droplet')"
-                class="aspect-square rounded-lg border border-stone-200 bg-stone-50 hover:bg-stone-200 flex items-center justify-center transition-all"><i
-                  data-lucide="droplet" class="w-4 h-4 text-stone-600"></i></button>
-              <button type="button" data-crest="diamond" onclick="updateLabelDraft('crestId', 'diamond')"
-                class="aspect-square rounded-lg border border-stone-200 bg-stone-50 hover:bg-stone-200 flex items-center justify-center transition-all"><i
-                  data-lucide="diamond" class="w-4 h-4 text-stone-600"></i></button>
+            <div id="labeler-crest-grid" class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              <button type="button" data-crest="star" aria-label="Star crest" title="Star" onclick="updateLabelDraft('crestId', 'star')"
+                class="aspect-square rounded-lg border border-stone-200 bg-stone-50 hover:bg-stone-200 flex flex-col items-center justify-center gap-1 transition-all"><i
+                  data-lucide="star" class="w-4 h-4 text-stone-600"></i><span class="text-[8px] font-bold leading-none">Star</span></button>
+              <button type="button" data-crest="crown" aria-label="Crown crest" title="Crown" onclick="updateLabelDraft('crestId', 'crown')"
+                class="aspect-square rounded-lg border border-stone-200 bg-stone-50 hover:bg-stone-200 flex flex-col items-center justify-center gap-1 transition-all"><i
+                  data-lucide="crown" class="w-4 h-4 text-stone-600"></i><span class="text-[8px] font-bold leading-none">Crown</span></button>
+              <button type="button" data-crest="grape" aria-label="Grape crest" title="Grapes" onclick="updateLabelDraft('crestId', 'grape')"
+                class="aspect-square rounded-lg border border-stone-200 bg-stone-50 hover:bg-stone-200 flex flex-col items-center justify-center gap-1 transition-all"><i
+                  data-lucide="grape" class="w-4 h-4 text-stone-600"></i><span class="text-[8px] font-bold leading-none">Grapes</span></button>
+              <button type="button" data-crest="leaf" aria-label="Leaf crest" title="Leaf" onclick="updateLabelDraft('crestId', 'leaf')"
+                class="aspect-square rounded-lg border border-stone-200 bg-stone-50 hover:bg-stone-200 flex flex-col items-center justify-center gap-1 transition-all"><i
+                  data-lucide="leaf" class="w-4 h-4 text-stone-600"></i><span class="text-[8px] font-bold leading-none">Leaf</span></button>
+              <button type="button" data-crest="droplet" aria-label="Droplet crest" title="Droplet" onclick="updateLabelDraft('crestId', 'droplet')"
+                class="aspect-square rounded-lg border border-stone-200 bg-stone-50 hover:bg-stone-200 flex flex-col items-center justify-center gap-1 transition-all"><i
+                  data-lucide="droplet" class="w-4 h-4 text-stone-600"></i><span class="text-[8px] font-bold leading-none">Drop</span></button>
+              <button type="button" data-crest="diamond" aria-label="Diamond crest" title="Diamond" onclick="updateLabelDraft('crestId', 'diamond')"
+                class="aspect-square rounded-lg border border-stone-200 bg-stone-50 hover:bg-stone-200 flex flex-col items-center justify-center gap-1 transition-all"><i
+                  data-lucide="diamond" class="w-4 h-4 text-stone-600"></i><span class="text-[8px] font-bold leading-none">Diamond</span></button>
             </div>
           </div>
 
@@ -290,36 +288,36 @@
           <div>
             <label class="text-[9px] font-black uppercase tracking-wider text-amber-800 block mb-1">Label Paper
               Swatch</label>
-            <div class="flex gap-2">
-              <button type="button" data-bgcolor="#FFFFFF" onclick="updateLabelDraft('bgColor', '#FFFFFF')"
-                class="w-6 h-6 rounded-full border border-stone-300 transition-transform bg-[#FFFFFF]"></button>
-              <button type="button" data-bgcolor="#FEF9E7" onclick="updateLabelDraft('bgColor', '#FEF9E7')"
-                class="w-6 h-6 rounded-full border border-stone-300 transition-transform bg-[#FEF9E7]"></button>
-              <button type="button" data-bgcolor="#F9EBEA" onclick="updateLabelDraft('bgColor', '#F9EBEA')"
-                class="w-6 h-6 rounded-full border border-stone-300 transition-transform bg-[#F9EBEA]"></button>
-              <button type="button" data-bgcolor="#EAECEE" onclick="updateLabelDraft('bgColor', '#EAECEE')"
-                class="w-6 h-6 rounded-full border border-stone-300 transition-transform bg-[#EAECEE]"></button>
-              <button type="button" data-bgcolor="#1A1008" onclick="updateLabelDraft('bgColor', '#1A1008')"
-                class="w-6 h-6 rounded-full border border-stone-300 transition-transform bg-[#1A1008]"></button>
-              <button type="button" data-bgcolor="#2E1156" onclick="updateLabelDraft('bgColor', '#2E1156')"
-                class="w-6 h-6 rounded-full border border-stone-300 transition-transform bg-[#2E1156]"></button>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" data-bgcolor="#FFFFFF" aria-label="White paper" title="White paper" onclick="updateLabelDraft('bgColor', '#FFFFFF')"
+                class="flex flex-col items-center gap-1 text-[8px] font-bold"><span class="w-8 h-8 rounded-full border border-stone-300 transition-transform bg-[#FFFFFF]"></span>White</button>
+              <button type="button" data-bgcolor="#FEF9E7" aria-label="Ivory paper" title="Ivory paper" onclick="updateLabelDraft('bgColor', '#FEF9E7')"
+                class="flex flex-col items-center gap-1 text-[8px] font-bold"><span class="w-8 h-8 rounded-full border border-stone-300 transition-transform bg-[#FEF9E7]"></span>Ivory</button>
+              <button type="button" data-bgcolor="#F9EBEA" aria-label="Blush paper" title="Blush paper" onclick="updateLabelDraft('bgColor', '#F9EBEA')"
+                class="flex flex-col items-center gap-1 text-[8px] font-bold"><span class="w-8 h-8 rounded-full border border-stone-300 transition-transform bg-[#F9EBEA]"></span>Blush</button>
+              <button type="button" data-bgcolor="#EAECEE" aria-label="Silver paper" title="Silver paper" onclick="updateLabelDraft('bgColor', '#EAECEE')"
+                class="flex flex-col items-center gap-1 text-[8px] font-bold"><span class="w-8 h-8 rounded-full border border-stone-300 transition-transform bg-[#EAECEE]"></span>Silver</button>
+              <button type="button" data-bgcolor="#1A1008" aria-label="Walnut paper" title="Walnut paper" onclick="updateLabelDraft('bgColor', '#1A1008')"
+                class="flex flex-col items-center gap-1 text-[8px] font-bold"><span class="w-8 h-8 rounded-full border border-stone-300 transition-transform bg-[#1A1008]"></span>Walnut</button>
+              <button type="button" data-bgcolor="#2E1156" aria-label="Violet paper" title="Violet paper" onclick="updateLabelDraft('bgColor', '#2E1156')"
+                class="flex flex-col items-center gap-1 text-[8px] font-bold"><span class="w-8 h-8 rounded-full border border-stone-300 transition-transform bg-[#2E1156]"></span>Violet</button>
             </div>
 
             <label class="text-[9px] font-black uppercase tracking-wider text-amber-800 block mb-1 mt-3">Ink & Foil
               Swatch</label>
-            <div class="flex gap-2">
-              <button type="button" data-crestcolor="#D4AC0D" onclick="updateLabelDraft('crestColor', '#D4AC0D')"
-                class="w-6 h-6 rounded-full border border-stone-300 transition-transform bg-[#D4AC0D]"></button>
-              <button type="button" data-crestcolor="#C0392B" onclick="updateLabelDraft('crestColor', '#C0392B')"
-                class="w-6 h-6 rounded-full border border-stone-300 transition-transform bg-[#C0392B]"></button>
-              <button type="button" data-crestcolor="#27AE60" onclick="updateLabelDraft('crestColor', '#27AE60')"
-                class="w-6 h-6 rounded-full border border-stone-300 transition-transform bg-[#27AE60]"></button>
-              <button type="button" data-crestcolor="#1F618D" onclick="updateLabelDraft('crestColor', '#1F618D')"
-                class="w-6 h-6 rounded-full border border-stone-300 transition-transform bg-[#1F618D]"></button>
-              <button type="button" data-crestcolor="#78281F" onclick="updateLabelDraft('crestColor', '#78281F')"
-                class="w-6 h-6 rounded-full border border-stone-300 transition-transform bg-[#78281F]"></button>
-              <button type="button" data-crestcolor="#FFFFFF" onclick="updateLabelDraft('crestColor', '#FFFFFF')"
-                class="w-6 h-6 rounded-full border border-stone-300 transition-transform bg-[#FFFFFF]"></button>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" data-crestcolor="#D4AC0D" aria-label="Gold ink" title="Gold ink" onclick="updateLabelDraft('crestColor', '#D4AC0D')"
+                class="flex flex-col items-center gap-1 text-[8px] font-bold"><span class="w-8 h-8 rounded-full border border-stone-300 transition-transform bg-[#D4AC0D]"></span>Gold</button>
+              <button type="button" data-crestcolor="#C0392B" aria-label="Crimson ink" title="Crimson ink" onclick="updateLabelDraft('crestColor', '#C0392B')"
+                class="flex flex-col items-center gap-1 text-[8px] font-bold"><span class="w-8 h-8 rounded-full border border-stone-300 transition-transform bg-[#C0392B]"></span>Crimson</button>
+              <button type="button" data-crestcolor="#27AE60" aria-label="Emerald ink" title="Emerald ink" onclick="updateLabelDraft('crestColor', '#27AE60')"
+                class="flex flex-col items-center gap-1 text-[8px] font-bold"><span class="w-8 h-8 rounded-full border border-stone-300 transition-transform bg-[#27AE60]"></span>Emerald</button>
+              <button type="button" data-crestcolor="#1F618D" aria-label="Blue ink" title="Blue ink" onclick="updateLabelDraft('crestColor', '#1F618D')"
+                class="flex flex-col items-center gap-1 text-[8px] font-bold"><span class="w-8 h-8 rounded-full border border-stone-300 transition-transform bg-[#1F618D]"></span>Blue</button>
+              <button type="button" data-crestcolor="#78281F" aria-label="Burgundy ink" title="Burgundy ink" onclick="updateLabelDraft('crestColor', '#78281F')"
+                class="flex flex-col items-center gap-1 text-[8px] font-bold"><span class="w-8 h-8 rounded-full border border-stone-300 transition-transform bg-[#78281F]"></span>Burgundy</button>
+              <button type="button" data-crestcolor="#FFFFFF" aria-label="White ink" title="White ink" onclick="updateLabelDraft('crestColor', '#FFFFFF')"
+                class="flex flex-col items-center gap-1 text-[8px] font-bold"><span class="w-8 h-8 rounded-full border border-stone-300 transition-transform bg-[#FFFFFF]"></span>White</button>
             </div>
           </div>
 
@@ -330,13 +328,46 @@
       </div>
     </div>
 
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" role="dialog" aria-modal="true" aria-label="Game settings" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white p-5 rounded-3xl border-2 border-amber-950 shadow-2xl w-full max-w-sm animate-fade-in flex flex-col">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-md font-black text-amber-950 flex items-center gap-1.5"><i data-lucide="settings" class="text-amber-700"></i> Game Settings</h3>
+          <button type="button" aria-label="Close Modal" onclick="closeSettingsModal()" class="text-stone-400 hover:text-stone-600 font-extrabold flex items-center justify-center p-1">✕</button>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Sound Toggle -->
+          <div>
+            <h4 class="text-xs font-black uppercase tracking-wider text-amber-900 mb-2">Audio</h4>
+            <div class="flex items-center justify-between bg-amber-50 p-3 rounded-xl border border-amber-900/10">
+              <span class="text-sm font-bold text-amber-950">Sound Effects</span>
+              <button id="sound-toggle" type="button" aria-label="Toggle Sound" class="p-2 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg transition-colors shadow-sm">
+                <i data-lucide="volume-x" class="w-5 h-5" id="sound-icon"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Font Style -->
+          <div>
+            <h4 class="text-xs font-black uppercase tracking-wider text-amber-900 mb-2">Font Style</h4>
+            <div id="font-selector" class="flex flex-col gap-2">
+              <button data-font="original" onclick="setFontStyle('original')" class="font-original w-full text-sm text-left font-bold p-3 rounded-lg border-2 border-transparent">Original (Sans-Serif)</button>
+              <button data-font="minecraft" onclick="setFontStyle('minecraft')" class="font-minecraft w-full text-sm text-left font-bold p-3 rounded-lg border-2 border-transparent">Pixel (Minecraft)</button>
+              <button data-font="vcr" onclick="setFontStyle('vcr')" class="font-vcr w-full text-sm text-left font-bold p-3 rounded-lg border-2 border-transparent">Retro (VCR Mono)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- FLAVOUR TOOLTIP -->
-    <div id="flavour-tooltip"
-      class="fixed hidden z-[100] pointer-events-none bg-amber-950/95 backdrop-blur border border-amber-800 text-white p-2.5 rounded-xl shadow-2xl transition-opacity animate-fade-in">
+    <div id="flavour-tooltip" role="tooltip" aria-hidden="true"
+      class="fixed hidden z-40 max-w-[calc(100vw-1rem)] pointer-events-none bg-amber-950/95 backdrop-blur border border-amber-800 text-white p-2.5 rounded-xl shadow-2xl transition-opacity animate-fade-in">
     </div>
 
     <!-- MULTI-INGREDIENT PRESS DIALOGUE / MODAL -->
-    <div id="press-modal"
+    <div id="press-modal" role="dialog" aria-modal="true" aria-label="Ingredient press"
       class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div
         class="bg-white p-5 rounded-3xl border-2 border-amber-950 shadow-2xl w-full max-w-sm animate-fade-in flex flex-col">
@@ -387,7 +418,7 @@
     </div>
 
     <!-- COPPER KETTLE INGREDIENT LOADING MODAL -->
-    <div id="kettle-modal"
+    <div id="kettle-modal" role="dialog" aria-modal="true" aria-label="Kettle press"
       class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div
         class="bg-white p-5 rounded-3xl border-2 border-amber-950 shadow-2xl w-full max-w-sm animate-fade-in flex flex-col">
@@ -431,7 +462,7 @@
     </div>
 
     <!-- RACK SELECT OVERLAY MODAL -->
-    <div id="rack-select-modal"
+    <div id="rack-select-modal" role="dialog" aria-modal="true" aria-label="Place wine on rack"
       class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div
         class="bg-white p-5 rounded-3xl border-2 border-amber-950 shadow-2xl w-full max-w-sm animate-fade-in flex flex-col">
@@ -447,12 +478,12 @@
     </div>
 
     <!-- TOAST CONTAINER -->
-    <div id="toast-container"
+    <div id="toast-container" role="status" aria-live="polite" aria-atomic="true"
       class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 w-full max-w-xs px-4 pointer-events-none transition-all flex flex-col gap-2">
     </div>
 
     <!-- CORK POP CELEBRATION MODAL -->
-    <div id="pop-modal"
+    <div id="pop-modal" role="dialog" aria-modal="true" aria-label="Bottling achievement"
       class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div
         class="bg-white p-6 rounded-3xl border-2 border-purple-500 shadow-2xl text-center w-full max-w-xs animate-fade-in flex flex-col items-center">
@@ -474,7 +505,7 @@
     </div>
 
     <!-- QUALITY SELL MODAL OVERLAY -->
-    <div id="sell-overlay-modal"
+    <div id="sell-overlay-modal" role="dialog" aria-modal="true" aria-label="Sell wine or beer"
       class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div
         class="bg-white p-5 rounded-3xl border-2 border-amber-950 shadow-2xl w-full max-w-xs animate-fade-in flex flex-col">
@@ -490,7 +521,7 @@
     </div>
 
     <!-- CONTRACT DETAIL MODAL -->
-    <div id="contract-detail-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div id="contract-detail-modal" role="dialog" aria-modal="true" aria-labelledby="contract-modal-title" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div class="bg-white p-5 rounded-3xl border-2 border-amber-950 shadow-2xl w-full max-w-md animate-fade-in flex flex-col">
         <div class="flex justify-between items-center mb-3">
           <h3 id="contract-modal-title" class="text-md font-black text-amber-950 flex items-center gap-1.5"><i data-lucide="file-check-2" class="text-amber-700"></i> Active Order Details</h3>
@@ -516,7 +547,7 @@
     </div>
 
     <!-- ORDER BREAKDOWN MODAL -->
-    <div id="order-breakdown-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div id="order-breakdown-modal" role="dialog" aria-modal="true" aria-label="Order fulfillment report" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div class="bg-white p-5 rounded-3xl border-2 border-green-500 shadow-2xl w-full max-w-md animate-fade-in flex flex-col">
         <div class="flex justify-between items-center mb-3">
           <h3 class="text-md font-black text-amber-950 flex items-center gap-1.5"><i data-lucide="receipt" class="text-green-600"></i> Order Fulfillment Report</h3>
@@ -534,53 +565,53 @@
     </div>
 
     <!-- BOTTOM NAVIGATION BAR -->
-    <nav class="bg-white border-t border-amber-200 sticky bottom-0 z-10 w-full text-[9px]">
-      <div class="flex justify-around p-2 max-w-lg mx-auto gap-0.5">
+    <nav class="bg-white border-t border-amber-200 sticky bottom-0 z-10 w-full text-[10px] sm:text-[9px]">
+      <div class="grid grid-cols-4 sm:grid-cols-8 p-2 max-w-lg mx-auto gap-1">
         <button type="button" onclick="switchTab('vineyard')"
-          class="nav-btn flex flex-col items-center flex-1 py-1 px-0.5 rounded-lg transition-all bg-amber-100 text-amber-950 shadow-inner"
-          data-target="vineyard">
+          class="nav-btn min-h-12 flex flex-col items-center justify-center flex-1 py-1 px-0.5 rounded-lg transition-all bg-amber-100 text-amber-950 shadow-inner"
+          data-target="vineyard" aria-current="page">
           <i data-lucide="sprout" class="w-4 h-4 mb-0.5"></i>
           <span class="font-black uppercase text-center leading-none">Vineyard</span>
         </button>
         <button type="button" onclick="switchTab('cellar')"
-          class="nav-btn flex flex-col items-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100"
+          class="nav-btn min-h-12 flex flex-col items-center justify-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100"
           data-target="cellar">
           <i data-lucide="database" class="w-4 h-4 mb-0.5"></i>
           <span class="font-black uppercase text-center leading-none">Cellar</span>
         </button>
         <button type="button" onclick="switchTab('brewery')"
-          class="nav-btn flex flex-col items-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100"
+          class="nav-btn min-h-12 flex flex-col items-center justify-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100"
           data-target="brewery">
           <i data-lucide="flame" class="w-4 h-4 mb-0.5"></i>
           <span class="font-black uppercase text-center leading-none">Brewery</span>
         </button>
         <button type="button" onclick="switchTab('racks')"
-          class="nav-btn flex flex-col items-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100"
+          class="nav-btn min-h-12 flex flex-col items-center justify-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100"
           data-target="racks">
           <i data-lucide="layers" class="w-4 h-4 mb-0.5"></i>
           <span class="font-black uppercase text-center leading-none">Racks</span>
         </button>
         <button type="button" onclick="switchTab('orders')"
-          class="nav-btn flex flex-col items-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100"
+          class="nav-btn min-h-12 flex flex-col items-center justify-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100"
           data-target="orders">
           <i data-lucide="scroll-text" class="w-4 h-4 mb-0.5"></i>
           <span class="font-black uppercase text-center leading-none">Orders</span>
         </button>
         <button type="button" onclick="switchTab('inventory')"
-          class="nav-btn flex flex-col items-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100 relative"
+          class="nav-btn min-h-12 flex flex-col items-center justify-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100 relative"
           data-target="inventory">
           <i data-lucide="home" class="w-4 h-4 mb-0.5"></i>
           <span class="font-black uppercase text-center leading-none">Reserve</span>
           <span id="ui-reserve-dot" class="absolute top-1 right-3 w-1.5 h-1.5 bg-rose-600 rounded-full hidden"></span>
         </button>
         <button type="button" onclick="switchTab('market')"
-          class="nav-btn flex flex-col items-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100"
+          class="nav-btn min-h-12 flex flex-col items-center justify-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100"
           data-target="market">
           <i data-lucide="store" class="w-4 h-4 mb-0.5"></i>
           <span class="font-black uppercase text-center leading-none">Market</span>
         </button>
         <button type="button" onclick="switchTab('shop')"
-          class="nav-btn flex flex-col items-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100"
+          class="nav-btn min-h-12 flex flex-col items-center justify-center flex-1 py-1 px-0.5 rounded-lg transition-all text-amber-700/50 hover:bg-amber-100"
           data-target="shop">
           <i data-lucide="shopping-cart" class="w-4 h-4 mb-0.5"></i>
           <span class="font-black uppercase text-center leading-none">Shop</span>

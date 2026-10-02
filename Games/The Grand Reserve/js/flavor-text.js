@@ -6,7 +6,7 @@ function getBracket(attribute, value) {
     return brackets.find(b => value >= b.range[0] && value <= b.range[1]) || brackets[0];
 }
 
-function getRandomTerm(bracket) {
+function getRandomTerm(bracket, random = Math.random) {
     const difficulty = state.dialogueDifficulty || 'beginner';
     let termPool = [];
 
@@ -19,7 +19,7 @@ function getRandomTerm(bracket) {
         termPool = bracket.sommelier;
     } else if (difficulty === 'intermediate') {
         // 50/50 blend, with fallback if one is empty
-        if (Math.random() < 0.5 && hasBeginner) {
+        if (random() < 0.5 && hasBeginner) {
             termPool = bracket.beginner;
         } else if (hasSommelier) {
             termPool = bracket.sommelier;
@@ -35,10 +35,10 @@ function getRandomTerm(bracket) {
         else return "balanced"; // Final fallback
     }
 
-    return termPool[Math.floor(Math.random() * termPool.length)];
+    return termPool[Math.floor(random() * termPool.length)];
 }
 
-function generateFlavorDescriptor(attribute, range) {
+function generateFlavorDescriptor(attribute, range, random = Math.random) {
     const brackets = WORDBANK[attribute];
     let minBracket = getBracket(attribute, range.min);
     let maxBracket = getBracket(attribute, range.max);
@@ -63,17 +63,17 @@ function generateFlavorDescriptor(attribute, range) {
         maxBracket = midBracket;
     }
 
-    const minWord = getRandomTerm(minBracket);
+    const minWord = getRandomTerm(minBracket, random);
 
     if (minBracket === maxBracket) {
         return minWord;
     } else {
-        const maxWord = getRandomTerm(maxBracket);
+        const maxWord = getRandomTerm(maxBracket, random);
         const templates = [
             `ranging from ${minWord} to ${maxWord}`,
             `somewhere between ${minWord} and ${maxWord}`,
         ];
-        return templates[Math.floor(Math.random() * templates.length)];
+        return templates[Math.floor(random() * templates.length)];
     }
 }
 
@@ -84,23 +84,23 @@ function generateGenericDescriptor(attribute) {
     return getRandomTerm(midBracket);
 }
 
-export function generateContractFlavorText(contract) {
+export function generateContractFlavorText(contract, random = Math.random) {
     const greetings = ["Greetings", "Salutations", "Hello there", "A moment of your time"];
-    const greeting = greetings[Math.floor(Math.random() * greetings.length)];
+    const greeting = greetings[Math.floor(random() * greetings.length)];
     const intros = [
         "I'm in need of a special wine.",
         "I'm searching for a particular vintage.",
         "I have a specific request for a client.",
         "I'm hoping you can help me with a unique order."
     ];
-    const intro = intros[Math.floor(Math.random() * intros.length)];
+    const intro = intros[Math.floor(random() * intros.length)];
     const closings = [
         "Can you help?",
         "Do you have anything that fits?",
         "I'd be most grateful.",
         "I await your finest work."
     ];
-    const closing = closings[Math.floor(Math.random() * closings.length)];
+    const closing = closings[Math.floor(random() * closings.length)];
 
     const requiredAttributes = Object.keys(contract.targets);
     if (requiredAttributes.length === 0) {
@@ -112,7 +112,7 @@ export function generateContractFlavorText(contract) {
     const attributeOrder = ['sw', 'ac', 'tn', 'bd'];
     attributeOrder.forEach(attr => {
         if (contract.targets[attr]) {
-            descriptors[attr] = generateFlavorDescriptor(attr, contract.targets[attr]);
+            descriptors[attr] = generateFlavorDescriptor(attr, contract.targets[attr], random);
         }
     });
 
@@ -176,7 +176,7 @@ export function generateContractFlavorText(contract) {
         }
     ];
 
-    const sentenceBuilder = sentenceTemplates[Math.floor(Math.random() * sentenceTemplates.length)];
+    const sentenceBuilder = sentenceTemplates[Math.floor(random() * sentenceTemplates.length)];
     const sentence = sentenceBuilder(descriptors);
 
     return `${greeting}! ${intro} ${sentence}. ${closing}`;

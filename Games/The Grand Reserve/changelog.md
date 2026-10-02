@@ -1,5 +1,73 @@
 # The Grand Reserve - Changelog
 
+## Version 0.5.0 - Accessibility & Quality-of-Life Update
+
+This update improves keyboard and assistive-technology support, refines common interface interactions, and makes save progression more reliable.
+
+### Accessibility & UI Improvements
+
+*   **Accessible Dialogs:** Game modals now use dialog semantics and shared open/close behavior, with improved focus management and restoration when dialogs are opened or dismissed.
+*   **Clearer Controls:** Added accessible labels and pressed/current states to interactive controls, including settings, sound, inventory filters, and navigation.
+*   **Responsive Interactions:** Refined shop purchase buttons, navigation targets, and contract actions for clearer, more reliable interaction across screen sizes.
+
+### Save & Progression
+
+*   **Saved Display Preferences:** Font preferences are included in save data and restored when a saved game is loaded.
+*   **Legacy Contract Migration:** Older saved contracts are migrated to the current multiplier-range format when loading a save.
+*   **Reliable Tutorial Completion:** Tutorial state is reset and saved immediately on completion so it does not restart after a reload.
+
+### Bug Fixes
+
+*   Improved modal transitions in the contract, order breakdown, settings, label editor, and tutorial flows to prevent stale tooltips and misplaced focus.
+
+---
+
+## Version 0.4.0 - Pixel & Polish Update
+
+This version marks the beginning of a major visual overhaul for the game, introducing a new pixel art aesthetic and adding a much-requested settings menu for player customization.
+
+### New Features & Systems
+
+*   **Pixel Art Overhaul:** The game has begun a transition from procedural vector graphics to a charming, handcrafted pixel art style.
+    *   A new rendering pipeline ensures all pixel art is displayed with crisp, sharp edges, preserving the aesthetic across different screen sizes.
+    *   The first wave of new assets has been implemented, including several core crops (Pinot Noir, Chardonnay, etc.) and their corresponding seed bags.
+*   **Settings Menu:** A new settings menu is now accessible via a cog icon in the header, providing a centralized place for game options.
+*   **Font Customization:** Players can now choose between three distinct font styles in the new settings menu:
+    *   **Pixel (Default):** The game's default font has been changed to a pixel-art font (`Minecraft`) for a cohesive, retro feel.
+    *   **Retro:** A classic monospaced VCR-style font has been added.
+    *   **Original:** The original clean, sans-serif font is still available.
+    *   Your font preference is now saved and will be loaded automatically on your next session.
+*   **Sound Toggle Relocated:** The sound on/off toggle has been moved from the header into the new settings menu for a cleaner UI.
+
+### Technical Improvements
+
+*   **Seed Bag Graphics:** The system for rendering seed bags has been refactored. Instead of programmatically scaling crop art onto a generic bag, the game now uses unique, pre-composed pixel art for each seed type. This allows for better artistic detail and guarantees perfect pixel rendering.
+
+### Bug Fixes
+
+*   Fixed a major bug where tooltips would become severely misaligned with the cursor after the page was scrolled. Tooltips now remain correctly positioned regardless of scroll depth.
+
+---
+
+## Version 0.3.2 - Game Juice
+
+This update is all about adding satisfying animations and visual feedback to make core interactions feel more tactile, responsive, and fun.
+
+### UI & UX Improvements (Game Feel)
+
+*   **Harvesting Animation:** When harvesting a crop, the icon now shakes, pops out of the plot, and flies into the "Reserve" tab.
+*   **Planting Animation:** Planting a seed now triggers an animation where the seed flies to the plot, and creates a puff of dirt particles on impact.
+*   **Shop Purchase Animation:** When buying an item from the shop, its icon now pops from the buy button and flies to the "Reserve" tab.
+*   **Ingredient Press Animation:** Adding an ingredient to the press is now animated. The ingredient icon flies from the inventory list into the press slot.
+*   **Animated Gold Counter:** The main gold display no longer changes instantly. It now rapidly "counts up" or "counts down" to the new total.
+*   **Floating Gold Text:** When earning money from selling items or completing contracts, a `+$X` text element now pops up from the source of the income and floats upwards before fading out.
+### Bug Fixes
+
+*   Fixed a critical bug where the tutorial would restart if the page was refreshed before the first autosave after completion. The game state is now saved immediately upon finishing the tutorial.
+*   Removed the redundant "Planted [Crop]!" toast notification, as the new planting animation provides superior feedback.
+
+---
+
 ## Version 0.3.1 - The Onboarding & QoL Update
 
 This patch focuses on improving the new player experience with a comprehensive tutorial and adding numerous quality-of-life tooltips to make the game's mechanics more transparent.

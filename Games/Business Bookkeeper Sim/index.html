@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Bookkeeper Sim</title>
+    <script>
+        try {
+            const savedTheme = localStorage.getItem('bookkeeper-theme');
+            if (savedTheme === 'light' || savedTheme === 'dark') {
+                document.documentElement.dataset.theme = savedTheme;
+            }
+        } catch (error) {
+            console.warn('The saved appearance preference could not be loaded.', error);
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="tailwind.config.js"></script>
+    <link rel="stylesheet" href="game.css">
+</head>
+<body class="h-screen w-screen flex flex-col md:flex-row text-sm">
+
+    <!-- LEFT PANEL: The Desk -->
+    <div id="left-panel" class="w-full md:w-1/3 h-[50vh] md:h-screen flex flex-col bg-gray-900 border-b md:border-b-0 md:border-r border-gray-700">
+        
+        <!-- Vitals Header -->
+        <div class="p-4 border-b border-gray-700 bg-gray-850 flex-shrink-0">
+            <div class="flex justify-between items-center mb-2">
+                <h1 class="font-bold text-lg text-gray-100">Zen Bookstore</h1>
+                <div class="flex items-center gap-2">
+                    <span id="ui-day" class="text-amber text-xs font-mono bg-gray-800 px-2 py-1 rounded">Day 1</span>
+                    <button id="save-menu-button" type="button" class="save-menu-button" onclick="openSaveMenu()" aria-haspopup="dialog">Save files</button>
+                    <button id="theme-toggle" type="button" class="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false">
+                        <svg class="theme-icon theme-icon-moon" aria-hidden="true" viewBox="0 0 20 20" fill="none">
+                            <path d="M16.4 12.2A7.3 7.3 0 0 1 7.8 3.6a7.3 7.3 0 1 0 8.6 8.6Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <svg class="theme-icon theme-icon-sun" aria-hidden="true" viewBox="0 0 20 20" fill="none">
+                            <circle cx="10" cy="10" r="3.2" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M10 1.8v2M10 16.2v2M18.2 10h-2M3.8 10h-2m14-5.8-1.4 1.4M5.6 14.4l-1.4 1.4m11.6 0-1.4-1.4M5.6 5.6 4.2 4.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        <span id="theme-toggle-label">Dark</span>
+                    </button>
+                </div>
+            </div>
+            <div class="flex justify-between text-xs mb-2 text-gray-400">
+                <span>Cash &amp; bank</span>
+                <span id="ui-cash" class="font-mono text-mint">RM 5,000.00</span>
+            </div>
+            <!-- Focus Meter -->
+            <div class="w-full bg-gray-700 rounded-full h-2 mb-1">
+                <div id="ui-focus" class="bg-blue-400 h-2 rounded-full transition-all duration-500" style="width: 100%"></div>
+            </div>
+            <div class="text-[10px] text-gray-500 text-right">Focus</div>
+        </div>
+
+        <div class="flex border-b border-gray-700 bg-gray-850 flex-shrink-0" role="tablist" aria-label="Shop workspace">
+            <button id="left-tab-shop" onclick="switchLeftTab('shop')" role="tab" aria-selected="true" aria-controls="left-view-shop" class="flex-1 px-4 py-3 text-sm font-semibold border-b-2 border-mint text-mint">
+                Shop &amp; Inbox
+            </button>
+            <button id="left-tab-management" onclick="switchLeftTab('management')" role="tab" aria-selected="false" aria-controls="left-view-management" class="flex-1 px-4 py-3 text-sm font-semibold border-b-2 border-transparent text-gray-400 hover:text-gray-200">
+                Business Management
+            </button>
+        </div>
+
+        <section id="left-view-shop" role="tabpanel" aria-labelledby="left-tab-shop" class="flex-1 min-h-0 flex flex-col">
+            <div class="flex-1 min-h-0 overflow-y-auto p-4 space-y-3" id="shop-log">
+            </div>
+
+            <div class="p-4 border-t border-gray-700 bg-gray-850 flex flex-wrap gap-2 justify-between items-center flex-shrink-0">
+                <button id="btn-advance" onclick="triggerEvent()" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded shadow transition-colors active:scale-95 text-xs font-semibold w-full">
+                    Wait
+                </button>
+                <button id="btn-close" onclick="endDay()" class="text-xs text-amber hover:text-white transition-colors w-full mt-1 py-1">Close early</button>
+            </div>
+
+            <div class="h-1/3 min-h-32 bg-gray-950 border-t border-gray-800 p-4 flex flex-col flex-shrink-0">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-gray-400">Inbox</h2>
+                    <span id="ui-inbox-count" class="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
+                </div>
+                <div id="inbox-container" class="flex flex-wrap gap-2 overflow-y-auto content-start flex-1">
+                </div>
+            </div>
+        </section>
+
+        <section id="left-view-management" role="tabpanel" aria-labelledby="left-tab-management" class="hidden flex flex-1 min-h-0 flex-col">
+            <header class="management-heading">
+                <div>
+                    <h2>Management</h2>
+                </div>
+                <button type="button" onclick="switchLeftTab('shop')" class="management-close">← Shop &amp; Inbox</button>
+            </header>
+            <div class="management-tabs" role="tablist" aria-label="Business management sections">
+                <button id="management-tab-overview" class="management-tab is-active" onclick="switchManagementTab('overview')" role="tab" aria-selected="true" aria-controls="management-view-overview">Overview</button>
+                <button id="management-tab-stock" class="management-tab" onclick="switchManagementTab('stock')" role="tab" aria-selected="false" aria-controls="management-view-stock">Stock &amp; prices</button>
+                <button id="management-tab-shelves" class="management-tab" onclick="switchManagementTab('shelves')" role="tab" aria-selected="false" aria-controls="management-view-shelves">Shelves</button>
+                <button id="management-tab-shop" class="management-tab" onclick="switchManagementTab('shop')" role="tab" aria-selected="false" aria-controls="management-view-shop">Shop &amp; upgrades</button>
+            </div>
+            <div class="management-content">
+                <section id="management-view-overview" role="tabpanel" aria-labelledby="management-tab-overview" class="management-view">
+                    <div id="management-primary-action" class="management-hero"></div>
+                    <div id="management-shop-summary" class="management-stats"></div>
+                </section>
+                <section id="management-view-stock" role="tabpanel" aria-labelledby="management-tab-stock" class="management-view hidden">
+                    <div class="management-section-heading">
+                        <div><h3>Inventory</h3></div>
+                        <button id="btn-inventory" onclick="openInventoryModal()" class="management-action">＋ Order</button>
+                    </div>
+                    <div id="management-inventory-summary" class="management-inventory-summary"></div>
+                    <div id="management-inventory-overview" class="management-product-grid"></div>
+                    <section class="supplier-bills-section" aria-labelledby="supplier-bills-title">
+                        <div class="management-section-heading">
+                            <div><h3 id="supplier-bills-title">Supplier invoices</h3></div>
+                            <span class="supplier-bills-caption">Manage credit purchases</span>
+                        </div>
+                        <div id="supplier-bills-list" class="supplier-bills-list"></div>
+                    </section>
+                </section>
+                <section id="management-view-shelves" role="tabpanel" aria-labelledby="management-tab-shelves" class="management-view hidden">
+                    <div class="management-section-heading">
+                        <div></div>
+                        <div class="shelf-toolbar">
+                            <span id="ui-energy" class="management-energy"></span>
+                            <button id="restock-all-shelves" type="button" onclick="restockAllShelves()" class="management-restock-button shelf-restock-all">Restock all</button>
+                        </div>
+                    </div>
+                    <p id="restock-phase-note" class="management-phase-note"></p>
+                    <div id="management-shelves" class="management-shelf-wall" aria-label="Storefront shelf map"></div>
+                    <div id="management-shelf-workbench" class="management-shelf-workbench"></div>
+                </section>
+                <section id="management-view-shop" role="tabpanel" aria-labelledby="management-tab-shop" class="management-view hidden">
+                    <div class="management-section-heading">
+                        <div><h3>Upgrades</h3></div>
+                    </div>
+                    <div id="management-upgrades" class="management-upgrade-list"></div>
+                </section>
+            </div>
+        </section>
+    </div>
+
+    <!-- RIGHT PANEL: The Workspace -->
+    <div id="right-panel" class="w-full md:w-2/3 h-[50vh] md:h-screen flex flex-col bg-gray-900 relative">
+        
+        <div class="flex-shrink-0 bg-gray-850 border-b border-gray-700">
+            <div class="flex items-stretch border-b border-gray-700" role="tablist" aria-label="Accounting workspace">
+                <button id="workspace-tab-books" onclick="switchTab('books')" role="tab" aria-selected="true" aria-controls="books-workspace" class="px-6 py-4 text-sm md:text-base font-bold border-b-2 border-mint text-mint whitespace-nowrap">
+                    Books of Prime Entry
+                </button>
+                <button id="workspace-tab-ledgers" onclick="switchTab('ledgers')" role="tab" aria-selected="false" aria-controls="ledgers-workspace" class="px-6 py-4 text-sm md:text-base font-bold border-b-2 border-transparent text-gray-400 hover:text-gray-200 whitespace-nowrap">
+                    Ledgers
+                </button>
+            </div>
+            <div id="books-tab-bar" class="flex overflow-x-auto text-xs" role="tablist" aria-label="Books of prime entry">
+                <button onclick="switchTab('cashBook')" id="tab-cashBook" role="tab" aria-selected="true" class="px-4 py-3 font-semibold bg-gray-900 text-mint border-b-2 border-mint whitespace-nowrap">3-Col Cash Book</button>
+                <button onclick="switchTab('generalJournal')" id="tab-generalJournal" role="tab" aria-selected="false" class="px-4 py-3 font-semibold text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap">General Journal</button>
+                <button onclick="switchTab('salesJournal')" id="tab-salesJournal" role="tab" aria-selected="false" class="px-4 py-3 font-semibold text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap">Sales Journal</button>
+                <button onclick="switchTab('purchasesJournal')" id="tab-purchasesJournal" role="tab" aria-selected="false" class="px-4 py-3 font-semibold text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap">Purchases Journal</button>
+                <button onclick="switchTab('salesReturnsJournal')" id="tab-salesReturnsJournal" role="tab" aria-selected="false" class="px-4 py-3 font-semibold text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap">Sales Returns Journal</button>
+                <button onclick="switchTab('purchasesReturnsJournal')" id="tab-purchasesReturnsJournal" role="tab" aria-selected="false" class="px-4 py-3 font-semibold text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap">Purchases Returns Journal</button>
+            </div>
+            <div id="ledger-tab-bar" class="hidden flex overflow-x-auto text-sm" role="tablist" aria-label="Ledger workspace">
+                <button onclick="switchLedgerView('posting')" id="tab-posting" role="tab" aria-selected="false" disabled class="px-5 py-3 font-semibold text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap opacity-50 cursor-not-allowed">Sunday Posting</button>
+                <button onclick="switchLedgerView('accounts')" id="tab-ledgerAccounts" role="tab" aria-selected="true" class="px-5 py-3 font-semibold text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap">Ledger Accounts</button>
+                <button class="px-5 py-3 font-semibold text-amber hover:text-white transition-colors ml-auto whitespace-nowrap" onclick="checkBalance()">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Verify Balances
+                </button>
+            </div>
+        </div>
+
+        <!-- Ledger Area -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-6" id="ledger-area">
+            <div id="books-workspace">
+            <div id="recording-banner" class="hidden mb-4 bg-amber-950/80 border border-amber-500/60 rounded-lg p-3 px-4 flex flex-wrap justify-between items-center text-xs animate-slide-up shadow-lg">
+                <div class="flex items-center gap-3">
+                    <span class="relative flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                    </span>
+                    <div>
+                        <span class="font-bold text-amber-300">Recording:</span>
+                        <span id="banner-doc-info" class="text-gray-200 ml-1">Invoice DOC-1001 (RM 480.00)</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 mt-2 sm:mt-0">
+                    <button onclick="cancelRecording()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1 rounded text-[11px] border border-gray-600 transition-colors">Cancel</button>
+                </div>
+            </div>
+
+            <!-- 1. CASH BOOK (3-Column / Buku Tunai 3 Lajur) -->
+            <div id="view-cashBook" class="journal-view space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-gray-200">Cash Book (Buku Tunai 3 Lajur)</h2>
+                </div>
+                
+                <div class="bg-gray-850 rounded-lg shadow-xl overflow-x-auto border border-gray-700">
+                    <table class="w-full text-left border-collapse text-[11px]">
+                        <thead>
+                            <tr class="bg-gray-800 text-gray-300 border-b border-gray-700 font-bold">
+                                <th colspan="6" class="p-2 text-center border-r border-gray-700 text-mint bg-emerald-950/40">DEBIT</th>
+                                <th colspan="6" class="p-2 text-center text-coral bg-rose-950/40">CREDIT</th>
+                            </tr>
+                            <tr class="bg-gray-800 text-gray-400 border-b border-gray-700 font-mono text-[10px]">
+                                <!-- DEBIT SIDE -->
+                                <th class="p-2 w-16">Date</th>
+                                <th class="p-2">Particulars</th>
+                                <th class="p-2 text-center w-10">Fol</th>
+                                <th class="p-2 text-right w-16 text-amber">Disc (RM)</th>
+                                <th class="p-2 text-right w-20 text-mint">Cash (RM)</th>
+                                <th class="p-2 text-right w-20 text-mint border-r border-gray-700">Bank (RM)</th>
+                                <!-- CREDIT SIDE -->
+                                <th class="p-2 w-16">Date</th>
+                                <th class="p-2">Particulars</th>
+                                <th class="p-2 text-center w-10">Fol</th>
+                                <th class="p-2 text-right w-16 text-amber">Disc (RM)</th>
+                                <th class="p-2 text-right w-20 text-coral">Cash (RM)</th>
+                                <th class="p-2 text-right w-20 text-coral">Bank (RM)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tb-cashBook" class="font-mono text-[11px]">
+                            <!-- Opening Balance Row -->
+                            <tr class="border-b border-gray-750 bg-gray-900/50">
+                                <td class="p-2 text-gray-400">May 1</td>
+                                <td class="p-2 text-gray-200">Balance b/d</td>
+                                <td class="p-2 text-center text-gray-500">-</td>
+                                <td class="p-2 text-right text-gray-600">-</td>
+                                <td class="p-2 text-right text-mint">1,000.00</td>
+                                <td class="p-2 text-right text-mint border-r border-gray-700">4,000.00</td>
+                                <td class="p-2 text-gray-400">-</td>
+                                <td class="p-2 text-gray-500">-</td>
+                                <td class="p-2 text-center text-gray-500">-</td>
+                                <td class="p-2 text-right text-gray-600">-</td>
+                                <td class="p-2 text-right text-gray-600">-</td>
+                                <td class="p-2 text-right text-gray-600">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 2. GENERAL JOURNAL (Jurnal Am) -->
+            <div id="view-generalJournal" class="journal-view hidden space-y-4">
+                <h2 class="text-lg font-bold text-gray-200">General Journal (Jurnal Am)</h2>
+                <div class="bg-gray-850 rounded-lg shadow-xl overflow-x-auto border border-gray-700">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-gray-800 text-gray-400 border-b border-gray-700 font-mono">
+                                <th class="p-3 w-20">Date</th>
+                                <th class="p-3">Particulars & Explanation</th>
+                                <th class="p-3 w-16 text-center">Folio</th>
+                                <th class="p-3 w-28 text-right text-mint">Debit (RM)</th>
+                                <th class="p-3 w-28 text-right text-coral">Credit (RM)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tb-generalJournal" class="font-mono text-xs">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. SPECIAL JOURNALS (Jurnal Khas) -->
+            <div id="view-salesJournal" class="journal-view hidden space-y-4">
+                <h2 class="text-lg font-bold text-gray-200">Sales Journal (Jurnal Jualan)</h2>
+                <div class="bg-gray-850 rounded-lg shadow-xl overflow-x-auto border border-gray-700">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-gray-800 text-gray-400 border-b border-gray-700 font-mono">
+                                <th class="p-3 w-20">Date</th>
+                                <th class="p-3">Account Debited (Customer / ABT)</th>
+                                <th class="p-3 w-28">Doc No.</th>
+                                <th class="p-3 w-16 text-center">Folio</th>
+                                <th class="p-3 w-32 text-right text-mint">Amount (RM)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tb-salesJournal" class="font-mono text-xs">
+                            <tr id="empty-sj"><td colspan="5" class="p-4 text-center text-gray-500">—</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="view-purchasesJournal" class="journal-view hidden space-y-4">
+                <h2 class="text-lg font-bold text-gray-200">Purchases Journal (Jurnal Belian)</h2>
+                <div class="bg-gray-850 rounded-lg shadow-xl overflow-x-auto border border-gray-700">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-gray-800 text-gray-400 border-b border-gray-700 font-mono">
+                                <th class="p-3 w-20">Date</th>
+                                <th class="p-3">Account Credited (Supplier / ABB)</th>
+                                <th class="p-3 w-28">Doc No.</th>
+                                <th class="p-3 w-16 text-center">Folio</th>
+                                <th class="p-3 w-32 text-right text-coral">Amount (RM)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tb-purchasesJournal" class="font-mono text-xs">
+                            <tr id="empty-pj"><td colspan="5" class="p-4 text-center text-gray-500">—</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="view-salesReturnsJournal" class="journal-view hidden space-y-4">
+                <h2 class="text-lg font-bold text-gray-200">Sales Returns Journal (Jurnal Pulangan Jualan)</h2>
+                <div class="bg-gray-850 rounded-lg shadow-xl overflow-x-auto border border-gray-700">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-gray-800 text-gray-400 border-b border-gray-700 font-mono">
+                                <th class="p-3 w-20">Date</th>
+                                <th class="p-3">Customer Name</th>
+                                <th class="p-3 w-28">Credit Note No.</th>
+                                <th class="p-3 w-16 text-center">Folio</th>
+                                <th class="p-3 w-32 text-right text-amber">Amount (RM)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tb-salesReturnsJournal" class="font-mono text-xs">
+                            <tr id="empty-srj"><td colspan="5" class="p-4 text-center text-gray-500">—</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 6. PURCHASES RETURNS JOURNAL -->
+            <div id="view-purchasesReturnsJournal" class="journal-view hidden space-y-4">
+                <h2 class="text-lg font-bold text-gray-200">Purchases Returns Journal (Jurnal Pulangan Belian)</h2>
+                <div class="bg-gray-850 rounded-lg shadow-xl overflow-x-auto border border-gray-700">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-gray-800 text-gray-400 border-b border-gray-700 font-mono">
+                                <th class="p-3 w-20">Date</th>
+                                <th class="p-3">Supplier Name</th>
+                                <th class="p-3 w-28">Credit Note No.</th>
+                                <th class="p-3 w-16 text-center">Folio</th>
+                                <th class="p-3 w-32 text-right text-amber">Amount (RM)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tb-purchasesReturnsJournal" class="font-mono text-xs">
+                            <tr id="empty-prj"><td colspan="5" class="p-4 text-center text-gray-500">—</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+
+            <div id="ledgers-workspace" class="hidden">
+            <div id="view-posting" class="posting-view hidden space-y-5">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-100">Posting</h2>
+                    <p id="posting-status" class="text-xs text-gray-400 mt-2">Record every document in the inbox before posting.</p>
+                </div>
+                <section class="space-y-3">
+                    <h3 class="text-sm font-semibold text-gray-200">To post</h3>
+                    <div id="posting-queue" class="space-y-2"></div>
+                </section>
+                <section class="space-y-3">
+                    <h3 class="text-sm font-semibold text-gray-200">Balances</h3>
+                    <div id="ledger-summary" class="overflow-x-auto rounded border border-gray-700 bg-gray-850 p-2"></div>
+                </section>
+            </div>
+
+            <div id="view-ledgerAccounts" class="space-y-4">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-100">Accounts</h2>
+                </div>
+                <div id="ledger-account-tabs" class="flex flex-wrap gap-2" role="tablist" aria-label="Individual ledgers"></div>
+                <div id="ledger-account-sheet" class="space-y-4"></div>
+            </div>
+            </div>
+
+            <div class="h-24"></div> <!-- Bottom Spacer -->
+        </div>
+
+        <div id="customer-event-modal" class="customer-event-modal hidden" aria-hidden="true">
+            <section role="dialog" aria-modal="true" aria-labelledby="customer-event-title" aria-describedby="customer-event-description" tabindex="-1" class="customer-event-dialog">
+                <p id="customer-event-kicker" class="customer-event-kicker">A customer needs your decision</p>
+                <h2 id="customer-event-title"></h2>
+                <p id="customer-event-customer" class="customer-event-customer"></p>
+                <p id="customer-event-description" class="customer-event-description"></p>
+                <div id="customer-event-choices" class="customer-event-choices"></div>
+            </section>
+        </div>
+
+        <!-- Document Viewer Overlay -->
+        <div id="doc-viewer" class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm hidden items-center justify-center z-40 p-4">
+            <div class="paper-doc p-5 md:p-8 rounded shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto relative transform scale-95 transition-transform duration-200" id="doc-paper">
+                <button onclick="closeDocument()" aria-label="Close document" class="absolute top-3 right-3 text-gray-500 hover:text-red-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+                
+                <!-- Dynamic Content Injected Here -->
+                <div id="doc-content"></div>
+                
+                <div class="mt-6 flex justify-end gap-3 border-t border-gray-300 pt-4">
+                    <button onclick="closeDocument()" class="px-4 py-2 text-xs text-gray-600 hover:bg-gray-200 rounded">Back</button>
+                    <button onclick="startDataEntry()" class="px-4 py-2 text-xs bg-gray-800 text-white rounded shadow hover:bg-gray-900 font-bold border border-gray-700">Record in Book</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory / Stockroom Modal -->
+    <div id="inventory-modal" class="fixed inset-0 bg-gray-900/90 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div role="dialog" aria-modal="true" aria-labelledby="inventory-modal-title" tabindex="-1" class="inventory-dialog bg-gray-850 border border-gray-700 rounded-lg shadow-2xl max-w-2xl w-full p-6 text-sm flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
+                <div>
+                    <p class="inventory-eyebrow">BUSINESS MANAGEMENT</p>
+                    <h2 id="inventory-modal-title" class="text-lg font-bold text-gray-100">Order inventory</h2>
+                </div>
+                <button onclick="closeInventoryModal()" aria-label="Close stockroom" class="text-gray-400 hover:text-red-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div id="inventory-list-view" class="inventory-step">
+                <div class="inventory-step-heading">
+                    <div><span class="inventory-step-number">1</span><strong>Choose what to restock</strong></div>
+                    <p>Compare your backroom stock and choose a product to order.</p>
+                </div>
+                <div id="inventory-list" class="inventory-list">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <div id="order-form" class="hidden flex-col gap-4 inventory-step">
+                <button type="button" onclick="cancelOrder()" class="inventory-back-button">← Back to products</button>
+                <div class="inventory-step-heading">
+                    <div><span class="inventory-step-number">2</span><strong id="order-item-name">Set up your order</strong></div>
+                    <p>Choose a supplier, quantity, and payment method. Delivery arrives the next day.</p>
+                </div>
+
+                <section class="order-section" aria-labelledby="supplier-choice-title">
+                    <div class="order-section-heading">
+                        <h3 id="supplier-choice-title">Choose a supplier</h3>
+                        <span>Compare unit prices and payment terms</span>
+                    </div>
+                    <div id="order-supplier-options" class="supplier-choice-grid" role="radiogroup" aria-labelledby="supplier-choice-title"></div>
+                </section>
+
+                <div class="order-quantity-row">
+                    <div>
+                        <label for="order-qty" class="order-field-label">Order quantity</label>
+                        <span id="order-quantity-hint" class="order-field-hint">Delivered to your backroom tomorrow</span>
+                    </div>
+                    <div class="quantity-stepper">
+                        <button type="button" onclick="changeOrderQuantity(-1)" aria-label="Decrease order quantity">−</button>
+                        <input type="number" id="order-qty" value="10" min="1" oninput="updateOrderTotal()" aria-label="Order quantity">
+                        <button type="button" onclick="changeOrderQuantity(1)" aria-label="Increase order quantity">+</button>
+                    </div>
+                </div>
+
+                <div id="supplier-offer-summary" class="supplier-offer-summary" aria-live="polite"></div>
+
+                <section class="order-section" aria-labelledby="payment-choice-title">
+                    <div class="order-section-heading">
+                        <h3 id="payment-choice-title">How would you like to pay?</h3>
+                    </div>
+                    <div class="payment-choice-grid">
+                        <label class="payment-choice">
+                            <input type="radio" name="order-payment" value="credit" checked onchange="updateOrderTotal()">
+                            <span><strong>Supplier credit</strong><small>Keep your bank balance today</small></span>
+                        </label>
+                        <label class="payment-choice">
+                            <input type="radio" name="order-payment" value="cash" onchange="updateOrderTotal()">
+                            <span><strong>Pay by bank now</strong><small>Pay the supplier immediately</small></span>
+                        </label>
+                    </div>
+                    <p id="order-payment-summary" class="order-payment-summary"></p>
+                </section>
+
+                <div class="order-summary">
+                    <div>
+                        <span>Order total</span>
+                        <strong id="order-total" class="font-mono">RM 0.00</strong>
+                    </div>
+                    <button id="submit-inventory-order" onclick="submitOrder()" class="place-order-button">Place order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="save-menu" class="save-menu hidden" aria-hidden="true">
+        <section class="save-menu-dialog" role="dialog" aria-modal="true" aria-labelledby="save-menu-title" aria-describedby="save-menu-description" tabindex="-1">
+            <div class="save-menu-heading">
+                <div>
+                    <p class="save-menu-eyebrow">BUSINESS BOOKKEEPER SIM</p>
+                    <h2 id="save-menu-title">Choose a save file</h2>
+                    <p id="save-menu-description">Your progress autosaves to the selected file as you play.</p>
+                </div>
+                <button id="save-menu-close" type="button" class="save-menu-close" onclick="closeSaveMenu()" aria-label="Return to the game">×</button>
+            </div>
+            <p id="save-menu-error" class="save-menu-error" role="status" aria-live="polite"></p>
+            <div id="save-slot-list" class="save-slot-list"></div>
+            <p class="save-menu-footnote">Each save file keeps its own independent game.</p>
+        </section>
+    </div>
+
+    <div id="toast-container" class="toast-container flex flex-col gap-2"></div>
+
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeToggleLabel = document.getElementById('theme-toggle-label');
+
+        function updateThemeToggle() {
+            const isDark = document.documentElement.dataset.theme === 'dark';
+            themeToggle.setAttribute('aria-pressed', String(isDark));
+            themeToggle.setAttribute('aria-label', `Switch to ${isDark ? 'light' : 'dark'} mode`);
+            themeToggleLabel.textContent = isDark ? 'Light' : 'Dark';
+        }
+
+        updateThemeToggle();
+        themeToggle.addEventListener('click', () => {
+            const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.dataset.theme = nextTheme;
+            updateThemeToggle();
+            try {
+                localStorage.setItem('bookkeeper-theme', nextTheme);
+            } catch (error) {
+                console.warn('The appearance preference could not be saved.', error);
+            }
+        });
+    </script>
+    <script src="game.js"></script>
+</body>
+</html>

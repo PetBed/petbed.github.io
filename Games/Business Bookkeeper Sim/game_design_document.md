@@ -1,0 +1,76 @@
+# Game Design Document: Business Bookkeeper Sim
+
+## 1. High-Level Concept
+**Genre:** Cozy Management / Educational Puzzle / Text-Based Simulation
+**Target Audience:** Accounting students (SPM KSSM syllabus), data lovers, and fans of procedural/management sims (e.g., *Papers, Please*, *Sticky Business*).
+**Core Pitch:** Manage a cozy stationery shop and perform full-cycle, double-entry bookkeeping from raw source documents to final financial statements. It combines the satisfaction of business growth with the ultimate zen puzzle of perfectly balancing a ledger.
+
+## 2. Core Gameplay Loop
+The game operates on a turn-based daily system, structured around a 30-day month. It is a procedural, player-driven simulation: the player chooses the shop's actions, while business events are generated dynamically from the shop's state. There is no fixed scripted transaction sequence.
+
+*   **Morning (Shop Management):** Review five product categories, backroom capacity, storefront shelf assignments, retail prices, energy, and the current premise. Compare supplier offers, order stock into the backroom, choose immediate bank payment or supplier credit, change prices, and invest in premises, decorations, extra storage, or shelves. Orders show unit price, minimum quantity, payment terms, and storage/cash impact before confirmation. Credit invoices can be paid later by bank, creating a separate cheque-butt source document. Business upgrades bought while the shop is open take 30 minutes and include a customer visit.
+*   **Daytime (Customer Visits):** Generate routine customer visits from the current premise's foot traffic, but give the player one distinct, context-sensitive customer decision each shop day when a suitable situation exists. Requests can involve a bulk order with a price/payment trade-off, a negotiated discount, an item stored in the backroom, or a valid return. Choices directly change stock, cash or customer balances, and create the corresponding source document. The event type and customer are varied so the same decision does not repeat on consecutive days. Routine walk-ins respond to premise appeal, displayed stock, and price; special requests can be fulfilled directly from the backroom. Walk-in cash-sale receipts are summarized into one daily source document when the shop closes; credit sales remain customer-specific.
+*   **Evening (Restock & Optional Bookkeeping):** After closing, choose which shelves to refill from the backroom. Each shelf restock action costs energy, which fully recovers the next morning; unsold shelf stock stays on display overnight. The player can also process the day's source documents into the appropriate *Buku Catatan Pertama* or leave them in the inbox.
+*   **Sunday (Rest & Catch-up):** The shop is closed. No new business occurs. The player must clear their document tray into the books of prime entry, then manually post the books to the appropriate *Lejar* (Ledgers) before Monday begins. Journal totals are posted to general ledger accounts; customer and supplier amounts are posted individually to their personal accounts.
+*   **Month-End (The Boss Battle):** The player compiles the *Imbangan Duga* (Trial Balance). If it balances, immense satisfaction. If not, the detective phase begins to find errors before generating the *Penyata Kewangan* (Financial Statements).
+
+The first cycle defines the supported Form 4 transaction types and bookkeeping rules, not a fixed list or order of events. The procedural customer system responds to premise traffic, display availability, appeal, and price, while the player's management decisions determine what can sell and which documents follow. Premises have different traffic, appeal, upfront moving costs, and recurring monthly rent. Decorations improve browsing conversion and basket size. Storefront shelves and backroom storage have separate capacities; additional options unlock as gross sales reach milestones.
+
+## 3. Core Mechanics
+
+### 3.1. Bookkeeping & The "Truth Engine"
+*   **Data Entry (The "Option B" Method):** 
+    *   Players click a source document (e.g., *Resit Rasmi*) in their tray. 
+    *   The player manually selects which book to open (e.g., *Buku Tunai*).
+    *   The game creates a pending row and fills in the **Date** and any straightforward document total. Where a calculation is part of the lesson (for example, splitting a payment that includes a discount), the player calculates and enters the required amount or amounts.
+    *   The player must manually enter the **Particulars** and select the correct account and Debit/Credit side. Entries are not validated against the correct answer at the point of entry; mistakes can flow into later books and be found during reconciliation.
+    *   At shop closing, the player records the day's walk-in cash-sale total as one **Sales** entry in the Cash Book, supported by a summary referencing the underlying receipts. Credit sales are recorded individually in the Sales Journal.
+    *   After processing source documents into books of prime entry, the player manually posts entries to the ledgers during the Sunday catch-up. General ledger postings use journal totals where appropriate, while customer and supplier personal accounts receive individual postings.
+    *   **The Truth Engine:** The game secretly calculates the 100% correct ledger states in the background. At the end of the month, if the player's *Imbangan Duga* fails to balance, the game uses the Truth Engine to provide localized hints (e.g., "Check your Sales Journal totals" or "There seems to be a transposition error in the Cash Book").
+    *   **Reconciliation & Corrections:** The player can request optional, graduated hints, from a broad area of the books to a specific discrepancy. Hints identify where to investigate without stating the correct entry. Once an entry has been posted, it cannot be edited in place; the player records a separate correcting entry in the appropriate book.
+
+### 3.2. Shop & Credit Management
+*   **Inventory Categories:** The shop tracks physical stock for management, abstracted into categories to prevent inventory micromanagement:
+    1. Paper Goods (Notebooks, paper)
+    2. Writing Instruments (Pens, pencils)
+    3. Art Supplies (Paints, brushes)
+    4. Office Accessories (Staplers, folders)
+    5. Electronics (Calculators, printers)
+*   **Supplier Offers & Payment:** Suppliers have distinct price/quantity offers. The standard supplier has no minimum order; a bulk supplier offers a lower unit cost above a minimum quantity; a flexible supplier charges a small premium in return for a longer credit term. The player chooses to pay by bank at order time or take supplier credit. Credit orders create a dated supplier invoice and an outstanding payable; settling it reduces Bank and creates a cheque butt that the player records in the Cash Book.
+*   The opening General Journal records the owner's contributed cash, bank funds, and opening inventory at cost, with Capital credited for the total contribution. Opening balances are reflected in the ledgers immediately. Physical stock movements after setup remain separate from accounting and do not automatically post to a perpetual Inventory ledger.
+* Manually ordering an item creates the purchase source document, but the stock is delivered the next in-game day. In-transit quantities reserve backroom capacity until arrival. Routine walk-in sales deduct displayed shelf stock; a customer decision event may let the player fetch a requested item from the backroom or fulfil a group order from available stock. The game tracks each customer's remaining returnable quantities by item in the background, and an accepted return restores the returned units to stock.
+*   **Supplier Invoice Payment:** Credit orders create supplier invoices with a due date. The player may settle an outstanding invoice from Business Management; payment reduces Bank and creates a cheque butt that must be recorded in the Cash Book. Early-settlement cash discounts (*Diskaun Tunai*) and discount calculations are future work.
+
+### 3.3. Dynamic Documents & Corrections
+*   **Returns (*Pulangan*):** Customers may return only items and quantities present in their purchase history. Returning a credit purchase creates a *Nota Kredit*; returning a cash purchase creates a cash refund voucher. Returned units go back into stock.
+*   **Supplier Errors:** After this transaction type is unlocked, suppliers may make billing mistakes. If they undercharge the player, they will send a *Nota Debit* (increasing the player's debt). The player must record these adjustments to keep their ledgers matching the supplier's actual demands.
+
+### 3.4. Personal Life & Energy System
+*   **Focus/Energy Meter:** Representing the owner's well-being. Processing documents, dealing with difficult customers, or working late drains Focus.
+*   **Replenishment:** To regain Focus, the player must trigger personal events (e.g., buying a nice lunch, paying personal rent, taking a weekend trip).
+*   **Accounting Tie-in:** These personal replenishments cost money or goods. The player must actively take cash or stock from the business, forcing them to record *Ambilan* (Drawings) and eventually manage *Modal Tambahan* (Additional Capital) if the business runs dry.
+
+## 4. User Interface & Experience
+*   **Visual Style:** A clean paper-and-sage interface with readable type, clear spacing, and simple ledger cards. No simulated browser chrome or decorative desk illustration.
+*   **Layout:** The left window has two tabs: **Shop & Inbox** for the current activity log, shop controls, and pending documents; and **Business Management** for physical stock review and ordering. The right window has two large tabs: **Books of Prime Entry**, containing the transaction journals, and **Ledgers**, containing Sunday posting and individual ledger accounts. Each ledger is presented as a spreadsheet with dated debit and credit postings, folio references, totals, and a running balance. Stock management is kept out of the current shop activity view. The interface uses text labels without emojis.
+*   **Language:** English is the prototype interface language. Form 4 KSSM book names are shown consistently in parentheses beside their English labels, such as **Cash Book (Buku Tunai)**; a full Bahasa Melayu toggle remains future work.
+*   **Day/Accounting Phases:** The player prepares and opens the shop in Step 1. Closing the shop moves the player to transaction recording. Each step offers a direct route to its prerequisite or next task.
+*   **Opening Entry:** The starting General Journal includes the balanced owner contribution: debit Cash RM 1,000.00, Bank RM 4,000.00, and Inventory RM 914.00; credit Capital RM 5,914.00. Inventory is valued using the starting quantities and unit costs. These opening amounts are not queued for duplicate Sunday posting.
+*   **Source Documents:** Documents use formal business layouts with document type and reference number, date, parties, itemised quantities and prices where available, total, remarks, and acknowledgement or signature fields.
+
+## 5. Progression & Difficulty
+*   The first playable cycle stays within the Form 4 KSSM syllabus and starts with a simpler set of supported transaction types. Complexity comes from the player's decisions and the procedural combinations of valid events, rather than a fixed scripted sequence.
+*   Later chapters within the Form 4 scope can expand the supported return (*Nota Kredit*) scenarios and add supplier billing corrections (*Nota Debit*) after the simpler cycle is understood.
+*   Topics outside the Form 4 scope, including later-year adjustments and provisions, are not part of the first playable version. They may be considered for future content only after the Form 4 cycle is established.
+
+### First Playable Web Prototype
+The initial browser prototype implements a repeating Monday-to-Saturday shop week followed by a closed Sunday bookkeeping catch-up, rather than the complete 30-day simulation. It uses plain HTML, CSS, and JavaScript.
+*   The starter shop begins with a modest premise, three product-assigned shelves, backroom stock, and category prices. The player can order goods into limited backroom storage, set retail prices, and use bank funds to move premises or buy decor, shelves, and storage expansions. These payments create source documents.
+*   While the shop is open, 3 to 5 customer visits are generated, adjusted by premise foot traffic. The first relevant customer opportunity each day is a unique decision event, such as a bulk request, price negotiation, backroom request, or return; recent event types and customers are rotated to reduce repetition. The player's response can change price, quantity, payment type, stock movement, and the resulting documents. Remaining visits are routine simulation. Regular browsing and specific-item customers respond to appeal, price, and display stock; a special backroom request can be fulfilled from storage. Shelf restocking happens after closing, costs energy per action, and energy recovers the next morning.
+*   Stock orders compare supplier offers with different unit costs, minimum quantities, and credit terms. The player can pay from Bank immediately or take credit with a due date. Outstanding invoices can be settled from Business Management; doing so reduces Bank and adds a cheque butt to the Inbox for Cash Book recording.
+*   A rent bill is issued every 30 in-game days. The player can pay by bank cheque, reducing Bank, or record it on credit as Unpaid Rent; credit rent debits Rent Expense and credits Unpaid Rent in the General Journal. Customer returns are limited by each customer's prior purchases. Walk-in cash sales are summarized at close, while credit sales remain customer-specific.
+*   Each source document is entered by the player in a book of prime entry. Straightforward amounts are prefilled, while the account classification and book are selected by the player.
+*   On Sunday, the shop stays closed. The player must record all documents in the inbox before manually posting special-journal totals to general ledger accounts and customer or supplier amounts individually to personal ledgers. Cash and bank balances are maintained by the Cash Book; its counterpart accounts and General Journal entries are posted during catch-up. Monday cannot begin until posting is complete.
+*   Trial-balance preparation, reconciliation hints, and correcting entries are planned follow-up work; the Sunday posting screen currently establishes the ledger balances those features will use.
+*   The interface keeps shop activity and documents in the left **Shop & Inbox** tab, with premises, decor, inventory, pricing, shelves, and restocking in the adjacent **Business Management** tab. The right workspace contains the books and ledgers.
+*   This prototype does not yet implement a full month calendar, all Form 4 transaction types, cash-discount calculations, supplier billing corrections, financial statements, an expanded Focus/personal-life system, a working bilingual UI, or later-year topics.

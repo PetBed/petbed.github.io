@@ -1,4 +1,8 @@
-import { BELT_COST, BUILDING_DEFINITIONS } from './buildings.js';
+import {
+  BELT_COST,
+  BUILDING_DEFINITIONS,
+  getBuildingFootprint,
+} from './buildings.js';
 import { FOSSIL_FAMILIES } from './fossils.js';
 
 const VALID_ROTATIONS = new Set([0, 90, 180, 270]);
@@ -8,20 +12,6 @@ const MINERAL_RESOURCES = ['coal', 'iron', 'copper', 'stone', 'sediment'];
 
 function activeSite(state) {
   return state.sites.find(site => site.id === state.activeSiteId);
-}
-
-function footprintAt(building, x, y, rotation) {
-  const definition = BUILDING_DEFINITIONS[building.type];
-  const swapsDimensions = rotation === 90 || rotation === 270;
-  const width = swapsDimensions ? definition.height : definition.width;
-  const height = swapsDimensions ? definition.width : definition.height;
-
-  return {
-    left: x,
-    top: y,
-    right: x + width - 1,
-    bottom: y + height - 1,
-  };
 }
 
 function intersects(first, second) {
@@ -42,7 +32,7 @@ function isOccupied(site, footprint) {
   }
 
   return site.buildings.some(building =>
-    intersects(footprintAt(building, building.x, building.y, building.rotation), footprint)
+    intersects(getBuildingFootprint(building), footprint)
   );
 }
 
@@ -175,7 +165,7 @@ export function placeBuilding(state, buildingId, x, y, rotation = 0) {
     return { ok: false, reason: 'invalid rotation' };
   }
 
-  const footprint = footprintAt({ type: buildingId }, x, y, rotation);
+  const footprint = getBuildingFootprint({ type: buildingId, x, y, rotation });
   if (isOccupied(site, footprint)) {
     return { ok: false, reason: 'occupied tiles' };
   }

@@ -1,4 +1,4 @@
-import { BUILDING_DEFINITIONS } from './buildings.js';
+import { BUILDING_DEFINITIONS, getBuildingPorts } from './buildings.js';
 
 const DIRECTIONS = ['north', 'east', 'south', 'west'];
 const DIRECTION_OFFSETS = {
@@ -23,36 +23,18 @@ function positionKey(x, y) {
   return `${x},${y}`;
 }
 
-function portPosition(building, port, rotation) {
-  const definition = BUILDING_DEFINITIONS[building.type];
-  let width = definition.width;
-  let height = definition.height;
-  let x = port.x;
-  let y = port.y;
-  let direction = port.direction;
-
-  for (let turn = 0; turn < rotation / 90; turn += 1) {
-    [x, y] = [height - 1 - y, x];
-    [width, height] = [height, width];
-    direction = rotateDirection(direction, 90);
-  }
-
-  return {
-    x: building.x + x,
-    y: building.y + y,
-    direction,
-  };
-}
-
 function getInputPort(site, belt) {
   for (const building of site.buildings) {
-    const definition = BUILDING_DEFINITIONS[building.type];
-    if (!definition || building.type === 'splitter') {
+    if (!BUILDING_DEFINITIONS[building.type] || building.type === 'splitter') {
       continue;
     }
 
-    for (const port of definition.inputs) {
-      const position = portPosition(building, port, building.rotation);
+    for (const port of getBuildingPorts(building)) {
+      if (port.type !== 'input') {
+        continue;
+      }
+
+      const position = port;
       if (
         position.x === belt.x &&
         position.y === belt.y &&
@@ -72,9 +54,12 @@ function getSplitterInput(site, belt) {
       continue;
     }
 
-    const definition = BUILDING_DEFINITIONS.splitter;
-    for (const port of definition.inputs) {
-      const position = portPosition(building, port, building.rotation);
+    for (const port of getBuildingPorts(building)) {
+      if (port.type !== 'input') {
+        continue;
+      }
+
+      const position = port;
       if (
         position.x === belt.x &&
         position.y === belt.y &&
@@ -153,8 +138,11 @@ function releaseMachineOutputs(site, reservedBelts, initiallyOccupied) {
       continue;
     }
 
-    for (const port of definition.outputs) {
-      const position = portPosition(building, port, building.rotation);
+    for (const position of getBuildingPorts(building)) {
+      if (position.type !== 'output') {
+        continue;
+      }
+
       const belt = site.belts.find(item => item.x === position.x && item.y === position.y);
       if (
         !belt ||

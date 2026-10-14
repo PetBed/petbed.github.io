@@ -106,3 +106,17 @@ test('rejectsInsufficientMaterialBuildingCost', () => {
   assert.deepEqual(result, { ok: false, reason: 'insufficient resources' });
   assert.deepEqual(state, before);
 });
+
+test('keepsExcavatorPlacementOnResourceNode', () => {
+  const state = createInitialState();
+  const site = state.sites.find(({ id }) => id === state.activeSiteId);
+  const node = { id: 'node-placement-test', resource: 'iron', x: 1000, y: 1000, remaining: 100 };
+  site.resourceNodes.push(node);
+
+  const result = worldGrid.placeBuilding(state, 'excavator', node.x, node.y, 0);
+
+  assert.deepEqual(result, { ok: true });
+  assert.ok(site.buildings.some(building =>
+    building.type === 'excavator' && building.x === node.x && building.y === node.y
+  ));
+});

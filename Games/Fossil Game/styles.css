@@ -155,14 +155,17 @@ kbd {
 
 .resource-strip {
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
   gap: 5px;
   min-width: 0;
-  overflow: hidden;
+  overflow-x: auto;
+  scrollbar-width: thin;
 }
 
 .resource-chip {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 4px;
   white-space: nowrap;
@@ -177,6 +180,49 @@ kbd {
 
 .resource-chip span {
   color: #b9bdab;
+}
+
+.material-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: 13px;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.material-icon[data-resource="coal"] {
+  color: #737d72;
+}
+
+.material-icon[data-resource="iron"] {
+  color: #c4c9c3;
+}
+
+.material-icon[data-resource="copper"] {
+  color: #df9168;
+}
+
+.material-icon[data-resource="stone"] {
+  color: #c2ad83;
+}
+
+.material-icon[data-resource="sediment"] {
+  color: #d4bd72;
+}
+
+.material-icon[data-resource="steel"] {
+  color: #a9d0d4;
+}
+
+.material-icon[data-resource="concrete"] {
+  color: #c9c6bb;
+}
+
+.resource-chip .material-name {
+  color: #b9bdab;
+  font-size: 10px;
 }
 
 .power-readout {
@@ -207,8 +253,10 @@ kbd {
   top: 78px;
   left: 10px;
   width: 174px;
+  max-height: calc(100vh - 90px);
   display: grid;
   gap: 5px;
+  overflow-y: auto;
   padding: 9px;
 }
 
@@ -223,13 +271,61 @@ kbd {
 }
 
 .build-button {
+  display: grid;
+  gap: 4px;
   background: #3a443c;
+}
+
+.build-button.unaffordable {
+  border-color: #855746;
 }
 
 .build-button.selected {
   border-color: #171d18;
   background: #756943;
   box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.build-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.build-name {
+  min-width: 0;
+}
+
+.build-cost {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 7px;
+}
+
+.material-cost-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #c8cbbb;
+  font-size: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.material-cost-row strong {
+  color: #f0e6c8;
+  font-variant-numeric: tabular-nums;
+}
+
+.build-affordability {
+  color: var(--green);
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.build-button.unaffordable .build-affordability {
+  color: #f0a18b;
 }
 
 .build-hint {
@@ -452,6 +548,8 @@ kbd {
   .resource-strip {
     flex-wrap: nowrap;
     gap: 0;
+    flex: 1 1 0;
+    overflow-x: auto;
   }
 
   .resource-chip {
@@ -459,8 +557,8 @@ kbd {
     font-size: 10px;
   }
 
-  .resource-chip:nth-child(n + 5) {
-    display: none;
+  .resource-chip .material-name {
+    font-size: 9px;
   }
 
   .power-readout {
@@ -492,6 +590,14 @@ kbd {
     min-height: 38px;
     padding: 6px 8px;
     white-space: nowrap;
+  }
+
+  .build-button {
+    min-width: 132px;
+  }
+
+  .build-cost {
+    gap: 2px 6px;
   }
 
   .build-button kbd {
@@ -549,10 +655,6 @@ kbd {
 }
 
 @media (max-width: 390px) {
-  .resource-chip:nth-child(n + 4) {
-    display: none;
-  }
-
   .site-mark {
     min-width: 89px;
   }

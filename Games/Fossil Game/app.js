@@ -1,6 +1,11 @@
 import { advanceSiteFrame, createInitialState } from './src/game-core.js';
 import { exploreSite, placeBelt, placeBuilding } from './src/world-grid.js';
-import { BUILDING_DEFINITIONS } from './src/buildings.js';
+import { BELT_COST, BUILDING_DEFINITIONS } from './src/buildings.js';
+import {
+  canAffordCost,
+  getCostDisplayRows,
+  getResourceDisplayRows,
+} from './src/materials.js';
 import {
   expandMuseum,
   getMuseumBonuses,
@@ -31,24 +36,6 @@ const inspectDetails = document.getElementById('inspect-details');
 const toast = document.getElementById('toast');
 const saveWarning = document.getElementById('save-warning');
 const TILE_SIZE = 32;
-const RESOURCE_LABELS = {
-  coal: 'Coal',
-  iron: 'Iron',
-  copper: 'Copper',
-  stone: 'Stone',
-  sediment: 'Sediment',
-  steel: 'Steel',
-  concrete: 'Concrete',
-};
-const RESOURCE_MARKS = {
-  coal: 'C',
-  iron: 'Fe',
-  copper: 'Cu',
-  stone: 'S',
-  sediment: 'D',
-  steel: 'St',
-  concrete: 'Co',
-};
 const BELT_DIRECTIONS = ['east', 'south', 'west', 'north'];
 const BUILDINGS = ['excavator', 'generator', 'smelter', 'crusher', 'fossil-finisher', 'splitter'];
 const HOTKEY_BUILDS = ['belt', ...BUILDINGS];
@@ -156,15 +143,24 @@ function resize() {
 function renderResources() {
   const site = activeSite();
   resourceStrip.replaceChildren();
-  for (const [key, label] of Object.entries(RESOURCE_LABELS)) {
+  for (const { resource, name, icon, amount } of getResourceDisplayRows(site.resources)) {
     const chip = document.createElement('span');
     chip.className = 'resource-chip';
-    const mark = document.createElement('span');
-    mark.textContent = RESOURCE_MARKS[key];
-    const amount = document.createElement('strong');
-    amount.textContent = String(Math.floor(site.resources[key] || 0));
-    chip.title = label;
-    chip.append(mark, amount);
+    chip.dataset.resource = resource;
+    chip.setAttribute('role', 'group');
+    chip.setAttribute('aria-label', `${name}: ${amount}`);
+    const iconElement = document.createElement('span');
+    iconElement.className = 'material-icon';
+    iconElement.dataset.resource = resource;
+    iconElement.setAttribute('aria-hidden', 'true');
+    iconElement.textContent = icon;
+    const label = document.createElement('span');
+    label.className = 'material-name';
+    label.textContent = name;
+    const amountElement = document.createElement('strong');
+    amountElement.textContent = String(amount);
+    chip.title = `${name}: ${amount}`;
+    chip.append(iconElement, label, amountElement);
     resourceStrip.append(chip);
   }
   document.getElementById('power-value').textContent = String(Math.floor(site.resources.power));
@@ -230,6 +226,35 @@ function renderFossilInventory() {
 
 function renderBuildSelection() {
   for (const button of document.querySelectorAll('[data-build]')) {
+    const buildId = button.dataset.build;
+    const cost = buildId === 'belt' ? BELT_COST : BUILDING_DEFINITIONS[buildId].cost;
+    const rows = getCostDisplayRows(cost);
+    const affordable = canAffordCost(activeSite().resources, cost);
+    const costElement = button.querySelector('.build-cost');
+    const affordabilityElement = button.querySelector('.build-affordability');
+    costElement.replaceChildren(...rows.map(({ resource, name, icon, amount }) => {
+      const row = document.createElement('span');
+      row.className = 'material-cost-row';
+      row.dataset.resource = resource;
+      const iconElement = document.createElement('span');
+      iconElement.className = 'material-icon';
+      iconElement.dataset.resource = resource;
+      iconElement.setAttribute('aria-hidden', 'true');
+      iconElement.textContent = icon;
+      const label = document.createElement('span');
+      label.className = 'material-name';
+      label.textContent = name;
+      const amountElement = document.createElement('strong');
+      amountElement.textContent = String(amount);
+      row.append(iconElement, label, amountElement);
+      return row;
+    }));
+    button.classList.toggle('unaffordable', !affordable);
+    button.dataset.affordable = String(affordable);
+    button.title = `${button.querySelector('.build-name').textContent}: ${
+      rows.map(({ name, amount }) => `${amount} ${name}`).join(', ')
+    }`;
+    affordabilityElement.textContent = affordable ? 'Materials ready' : 'Not enough materials';
     button.classList.toggle('selected', button.dataset.build === selectedBuild);
   }
   const hint = document.getElementById('build-hint');
@@ -237,10 +262,8 @@ function renderBuildSelection() {
     hint.textContent = 'Click a tile to inspect · Esc clears build selection';
   } else if (selectedBuild === 'belt') {
     hint.textContent = `${BELT_DIRECTIONS[beltDirectionIndex]} belt · R rotates`;
-    return;
   } else {
-    const cost = BUILDING_DEFINITIONS[selectedBuild].cost;
-    hint.textContent = `${Object.entries(cost).map(([material, amount]) => `${amount} ${material}`).join(' · ')} · R rotates`;
+    hint.textContent = 'Preview the footprint · R rotates';
   }
 }
 
@@ -248,6 +271,7 @@ function updateHud() {
   renderSiteNavigation();
   renderResources();
   renderFossilInventory();
+  renderBuildSelection();
 }
 
 function renderSiteNavigation() {

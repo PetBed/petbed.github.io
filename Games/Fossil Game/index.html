@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#202622" />
+    <title>Basalt Basin — Fossil Factory</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main id="game-screen" aria-label="Basalt Basin fossil factory">
+      <canvas id="world-canvas" aria-label="Top-down factory map"></canvas>
+
+      <header class="hud top-hud">
+        <div class="site-mark">
+          <strong id="site-name">Basalt Basin</strong>
+          <span>Excavation site</span>
+        </div>
+        <div id="resource-strip" class="resource-strip" aria-label="Site resources"></div>
+        <div class="power-readout">Power <strong id="power-value">0</strong></div>
+      </header>
+
+      <nav class="hud build-tools" aria-label="Factory construction">
+        <p class="hud-heading">Build</p>
+        <button class="build-button selected" data-build="belt" title="Belt (1)">Belt <kbd>1</kbd></button>
+        <button class="build-button" data-build="excavator" title="Excavator (2)">Excavator <kbd>2</kbd></button>
+        <button class="build-button" data-build="generator" title="Generator (3)">Generator <kbd>3</kbd></button>
+        <button class="build-button" data-build="smelter" title="Smelter (4)">Smelter <kbd>4</kbd></button>
+        <button class="build-button" data-build="crusher" title="Crusher (5)">Crusher <kbd>5</kbd></button>
+        <button class="build-button" data-build="fossil-finisher" title="Fossil finisher (6)">Fossil finisher <kbd>6</kbd></button>
+        <button class="build-button" data-build="splitter" title="Splitter (7)">Splitter <kbd>7</kbd></button>
+        <p id="build-hint" class="build-hint">Eastbound belt · R rotates</p>
+        <button id="cancel-build" class="quiet-button">Inspect <kbd>Esc</kbd></button>
+      </nav>
+
+      <aside class="hud minimap-panel" aria-label="Factory minimap">
+        <canvas id="minimap-canvas" aria-label="Click to recenter the factory map"></canvas>
+        <span>Map · click to travel</span>
+      </aside>
+
+      <aside class="hud inspector-panel" aria-live="polite">
+        <h2 id="inspect-title">Factory</h2>
+        <p id="inspect-copy">Belts carry excavated items to the warehouse. Place a route from the excavator output.</p>
+        <div id="inspect-details"></div>
+      </aside>
+
+      <section class="hud inventory-panel" aria-label="Fossil inventory">
+        <div class="panel-title-row">
+          <h2>Fossils</h2>
+          <button id="expand-museum" class="quiet-button">Expand museum · 8 iron / 8 stone</button>
+        </div>
+        <div class="fossil-columns">
+          <div>
+            <h3>Unidentified</h3>
+            <ul id="unidentified-list" class="fossil-items"></ul>
+          </div>
+          <div>
+            <h3>Museum <span id="museum-count"></span></h3>
+            <div id="museum-slots" class="museum-slots"></div>
+            <ul id="collection-list" class="fossil-items"></ul>
+          </div>
+        </div>
+      </section>
+
+      <aside class="hud event-panel" aria-label="Factory events">
+        <h2>Factory log</h2>
+        <ul id="event-log" class="event-log" aria-live="polite"></ul>
+      </aside>
+
+      <p id="toast" class="toast" role="status" aria-live="polite"></p>
+    </main>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

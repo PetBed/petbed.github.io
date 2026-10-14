@@ -9,8 +9,9 @@ import {
 } from './src/fossils.js';
 import { panCamera, screenToWorld, zoomCamera } from './src/camera.js';
 import { drawMinimap, drawWorld } from './src/world-renderer.js';
+import { loadGame, saveGame } from './src/storage.js';
 
-const state = createInitialState();
+let state = createInitialState();
 const worldCanvas = document.getElementById('world-canvas');
 const worldContext = worldCanvas.getContext('2d');
 const minimapCanvas = document.getElementById('minimap-canvas');
@@ -21,6 +22,7 @@ const inspectTitle = document.getElementById('inspect-title');
 const inspectCopy = document.getElementById('inspect-copy');
 const inspectDetails = document.getElementById('inspect-details');
 const toast = document.getElementById('toast');
+const saveWarning = document.getElementById('save-warning');
 const TILE_SIZE = 32;
 const RESOURCE_LABELS = {
   coal: 'Coal',
@@ -61,6 +63,10 @@ let canvasScale = 1;
 let minimapMap = null;
 let lastViewportWidth = window.innerWidth;
 let lastViewportHeight = window.innerHeight;
+let gameReady = false;
+let savingEnabled = true;
+let saveInProgress = false;
+let lastSaveError = '';
 
 function activeSite() {
   return state.sites.find(site => site.id === state.activeSiteId);
@@ -80,6 +86,32 @@ function showToast(message) {
   toast.classList.add('visible');
   clearTimeout(toastTimeout);
   toastTimeout = setTimeout(() => toast.classList.remove('visible'), 1800);
+}
+
+function setSaveWarning(message) {
+  saveWarning.textContent = message;
+  saveWarning.hidden = !message;
+}
+
+async function persistState() {
+  if (!gameReady || !savingEnabled || saveInProgress) {
+    return;
+  }
+  saveInProgress = true;
+  try {
+    await saveGame(state);
+    lastSaveError = '';
+    setSaveWarning('');
+  } catch (error) {
+    const message = error.message || 'Unknown save error';
+    setSaveWarning(`Save error: ${message}`);
+    if (message !== lastSaveError) {
+      pushLog(`Save failed: ${message}`);
+      lastSaveError = message;
+    }
+  } finally {
+    saveInProgress = false;
+  }
 }
 
 function formatItem(item) {
@@ -282,7 +314,6 @@ function inspectTile(tile) {
 }
 
 function placeSelected(tile) {
-  const site = activeSite();
   const result = selectedBuild === 'belt'
     ? placeBelt(state, tile.x, tile.y, BELT_DIRECTIONS[beltDirectionIndex])
     : placeBuilding(state, selectedBuild, tile.x, tile.y, selectedRotation);
@@ -295,6 +326,7 @@ function placeSelected(tile) {
   showToast('Construction placed');
   updateHud();
   inspectTile(tile);
+  void persistState();
 }
 
 function handleWorldClick(event) {
@@ -363,6 +395,7 @@ document.getElementById('expand-museum').addEventListener('click', () => {
     pushLog('Museum expanded with iron and stone.');
     showToast('Museum slot added');
     updateHud();
+    void persistState();
   } else {
     showToast(result.reason);
   }
@@ -376,6 +409,7 @@ document.querySelector('.inventory-panel').addEventListener('click', event => {
       pushLog(`Opened ${result.fossil.rarity} ${result.fossil.family} fossil.`);
       showToast(`Discovery: ${result.fossil.name}`);
       updateHud();
+      void persistState();
     } else {
       showToast(result.reason);
     }
@@ -402,6 +436,7 @@ document.querySelector('.inventory-panel').addEventListener('click', event => {
       pushLog(`Museum bonuses: +${Math.round(bonuses.digSpeed * 100)}% dig speed.`);
       showToast('Specimen displayed at this site');
       updateHud();
+      void persistState();
     } else {
       showToast(result.reason);
     }
@@ -481,12 +516,38 @@ window.addEventListener('keydown', event => {
   }
 });
 
-document.getElementById('site-name').textContent = activeSite().name;
-document.getElementById('inspect-title').textContent = 'Basalt Basin';
-document.getElementById('inspect-copy').textContent =
-  'Place belts from machine ports. Items enter inventory only when a belt reaches the warehouse.';
-pushLog('Basalt Basin factory online.');
-resize();
-renderBuildSelection();
-updateHud();
-requestAnimationFrame(gameFrame);
+async function startGame() {
+  try {
+    const savedState = await loadGame();
+    if (savedState) {
+      state = savedState;
+      pushLog('Factory restored from local save.');
+    } else {
+      pushLog('New Basalt Basin factory ready.');
+    }
+  } catch (error) {
+    savingEnabled = false;
+    const message = error.message || 'Unknown load error';
+    setSaveWarning(`Save not loaded. Playing without saving to protect existing data. ${message}`);
+    pushLog(`Factory save was not loaded: ${message}`);
+  }
+
+  document.getElementById('site-name').textContent = activeSite().name;
+  document.getElementById('inspect-title').textContent = activeSite().name;
+  document.getElementById('inspect-copy').textContent =
+    'Place belts from machine ports. Items enter inventory only when a belt reaches the warehouse.';
+  resize();
+  renderBuildSelection();
+  updateHud();
+  gameReady = true;
+  window.setInterval(() => { void persistState(); }, 5000);
+  window.addEventListener('pagehide', () => { void persistState(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      void persistState();
+    }
+  });
+  requestAnimationFrame(gameFrame);
+}
+
+startGame();

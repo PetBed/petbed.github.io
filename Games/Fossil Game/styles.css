@@ -124,6 +124,35 @@ kbd {
   font-size: 11px;
 }
 
+.site-navigation {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+.site-tab,
+.found-site {
+  min-width: 30px;
+  min-height: 28px;
+  padding: 3px 6px;
+  text-align: center;
+}
+
+.site-tab {
+  background: #303a33;
+}
+
+.site-tab.selected {
+  border-color: #171d18;
+  background: #756943;
+  color: #fff0b3;
+}
+
+.found-site {
+  color: #f0d987;
+}
+
 .resource-strip {
   display: flex;
   align-items: center;
@@ -408,6 +437,18 @@ kbd {
     font-size: 9px;
   }
 
+  .site-navigation {
+    gap: 3px;
+  }
+
+  .site-tab,
+  .found-site {
+    min-width: 25px;
+    min-height: 26px;
+    padding: 2px 4px;
+    font-size: 10px;
+  }
+
   .resource-strip {
     flex-wrap: nowrap;
     gap: 0;
@@ -514,6 +555,20 @@ kbd {
 
   .site-mark {
     min-width: 89px;
+  }
+
+  .top-hud {
+    gap: 4px;
+  }
+
+  .site-navigation {
+    gap: 2px;
+  }
+
+  .site-tab,
+  .found-site {
+    min-width: 22px;
+    padding: 2px 3px;
   }
 
   .inventory-panel h2 {

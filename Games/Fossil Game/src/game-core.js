@@ -14,35 +14,46 @@ const MACHINE_COSTS = {
   generator: { steel: 40, concrete: 25 },
 };
 
-export function createInitialState() {
-  const resources = {
-    coal: 12,
-    iron: 16,
-    stone: 20,
-    sediment: 16,
-    steel: 0,
-    concrete: 0,
-    power: 0,
-  };
-  const fragments = {
-    trilobite: 0,
-    pterosaur: 0,
-    fish: 0,
-    fern: 0,
-  };
-  const collection = [];
+const INITIAL_RESOURCES = {
+  coal: 12,
+  iron: 16,
+  stone: 20,
+  sediment: 16,
+  steel: 0,
+  concrete: 0,
+  power: 0,
+};
+const INITIAL_FRAGMENTS = {
+  trilobite: 0,
+  pterosaur: 0,
+  fish: 0,
+  fern: 0,
+};
+
+export function createSite({
+  id = 'site-1',
+  name = 'Basalt Basin',
+  depth = 1,
+  startingResources = INITIAL_RESOURCES,
+  resourceNodes = null,
+} = {}) {
+  const resources = { ...startingResources };
+  const fragments = { ...INITIAL_FRAGMENTS };
   const museumDisplay = [null];
   const unidentifiedFossils = [];
-  const site = {
-    id: 'site-1',
-    name: 'Basalt Basin',
-    depth: 1,
+  const isStartingSite = id === 'site-1';
+  const buildingId = suffix => isStartingSite ? `building-${suffix}` : `${id}-building-${suffix}`;
+
+  return {
+    id,
+    name,
+    depth,
     grid: {},
     resources,
     fragments,
     buildings: [
       {
-        id: 'building-1',
+        id: buildingId(1),
         type: 'excavator',
         x: -8,
         y: 4,
@@ -54,7 +65,7 @@ export function createInitialState() {
         outputCapacity: 4,
       },
       {
-        id: 'building-2',
+        id: buildingId(2),
         type: 'warehouse',
         x: 0,
         y: 0,
@@ -65,7 +76,7 @@ export function createInitialState() {
       },
     ],
     belts: [],
-    resourceNodes: [
+    resourceNodes: resourceNodes || [
       { id: 'node-coal', resource: 'coal', x: -8, y: 4, remaining: 100 },
       { id: 'node-iron', resource: 'iron', x: 8, y: 4, remaining: 100 },
       { id: 'node-stone', resource: 'stone', x: 4, y: -8, remaining: 100 },
@@ -79,7 +90,17 @@ export function createInitialState() {
       bonuses: { digSpeed: 0, output: 0 },
     },
     nextFossilId: 1,
+    lastSimulatedAt: Date.now(),
   };
+}
+
+export function createInitialState() {
+  const site = createSite();
+  const resources = site.resources;
+  const fragments = site.fragments;
+  const collection = [];
+  const museumDisplay = site.museum.displayed;
+  const unidentifiedFossils = site.unidentifiedFossils;
 
   return {
     version: 1,

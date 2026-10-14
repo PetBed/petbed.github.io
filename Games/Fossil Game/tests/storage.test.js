@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createInitialState } from '../src/game-core.js';
+import { foundSite } from '../src/sites.js';
 
 const DATABASE_NAME = 'fossil-factory';
 const STORE_NAME = 'saves';
@@ -99,6 +100,22 @@ test('returnsNullWhenNoSaveExists', async () => {
   await clearDatabase();
 
   assert.equal(await loadGame(), null);
+});
+
+test('roundTripsMultipleSitesAndOfflineTimestamp', async () => {
+  const { loadGame, saveGame } = await loadStorage();
+  await clearDatabase();
+  const state = createInitialState();
+  assert.equal(foundSite(state, 'granite-reach').ok, true);
+  state.sites[1].resources.copper = 7;
+
+  await saveGame(state);
+  const loaded = await loadGame();
+
+  assert.deepEqual(loaded, state);
+  assert.equal(loaded.sites[1].resources.copper, 7);
+  assert.ok(Number.isSafeInteger(loaded.lastSavedAt));
+  assert.equal(Object.prototype.propertyIsEnumerable.call(loaded, 'lastSavedAt'), false);
 });
 
 test('rejectsMalformedSaveWithoutOverwrite', async () => {

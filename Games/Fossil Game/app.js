@@ -10,6 +10,7 @@ import {
 import { panCamera, screenToWorld, zoomCamera } from './src/camera.js';
 import { drawMinimap, drawWorld } from './src/world-renderer.js';
 import { loadGame, saveGame } from './src/storage.js';
+import { catchUpSite, foundSite, SITE_DEFINITIONS, switchSite } from './src/sites.js';
 
 let state = createInitialState();
 const worldCanvas = document.getElementById('world-canvas');
@@ -27,6 +28,7 @@ const TILE_SIZE = 32;
 const RESOURCE_LABELS = {
   coal: 'Coal',
   iron: 'Iron',
+  copper: 'Copper',
   stone: 'Stone',
   sediment: 'Sediment',
   steel: 'Steel',
@@ -35,6 +37,7 @@ const RESOURCE_LABELS = {
 const RESOURCE_MARKS = {
   coal: 'C',
   iron: 'Fe',
+  copper: 'Cu',
   stone: 'S',
   sediment: 'D',
   steel: 'St',
@@ -67,6 +70,7 @@ let gameReady = false;
 let savingEnabled = true;
 let saveInProgress = false;
 let lastSaveError = '';
+let renderedSiteNavigation = '';
 
 function activeSite() {
   return state.sites.find(site => site.id === state.activeSiteId);
@@ -235,8 +239,52 @@ function renderBuildSelection() {
 }
 
 function updateHud() {
+  renderSiteNavigation();
   renderResources();
   renderFossilInventory();
+}
+
+function renderSiteNavigation() {
+  const navigationState = JSON.stringify({
+    activeSiteId: state.activeSiteId,
+    sites: state.sites.map(site => [site.id, site.name]),
+  });
+  if (navigationState === renderedSiteNavigation) {
+    return;
+  }
+  renderedSiteNavigation = navigationState;
+
+  const navigation = document.getElementById('site-navigation');
+  navigation.replaceChildren();
+  state.sites.forEach((site, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `site-tab${site.id === state.activeSiteId ? ' selected' : ''}`;
+    button.dataset.siteId = site.id;
+    button.dataset.siteNumber = String(index + 1);
+    button.setAttribute('aria-label', `Switch to ${site.name}`);
+    button.setAttribute('aria-pressed', String(site.id === state.activeSiteId));
+    button.title = site.name;
+    button.textContent = String(index + 1);
+    navigation.append(button);
+  });
+
+  const available = SITE_DEFINITIONS.find(definition =>
+    !state.sites.some(site => site.id === definition.id)
+  );
+  if (available) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.id = 'found-site';
+    button.className = 'found-site';
+    button.textContent = '+';
+    button.setAttribute(
+      'aria-label',
+      `Found ${available.name} for ${available.foundingCost.iron} iron and ${available.foundingCost.stone} stone`
+    );
+    button.title = `Found ${available.name} · ${available.foundingCost.iron} iron / ${available.foundingCost.stone} stone`;
+    navigation.append(button);
+  }
 }
 
 function resizeAndDraw() {
@@ -362,7 +410,9 @@ function recenterFromMinimap(event) {
 function gameFrame(now) {
   const deltaSeconds = Math.min(1, Math.max(0, (now - lastFrameTime) / 1000));
   lastFrameTime = now;
-  const events = tickSite(activeSite(), deltaSeconds);
+  const site = activeSite();
+  const events = tickSite(site, deltaSeconds);
+  site.lastSimulatedAt = Date.now();
   for (const item of events.produced) {
     if (item.type !== 'power') {
       pushLog(`Produced ${formatItem(item)}.`);
@@ -386,6 +436,55 @@ document.querySelector('.build-tools').addEventListener('click', event => {
 document.getElementById('cancel-build').addEventListener('click', () => {
   selectedBuild = null;
   renderBuildSelection();
+});
+
+document.getElementById('site-navigation').addEventListener('click', event => {
+  const siteButton = event.target.closest('[data-site-id]');
+  if (siteButton) {
+    const site = state.sites.find(candidate => candidate.id === siteButton.dataset.siteId);
+    const catchup = site ? catchUpSite(site, Date.now()) : null;
+    const result = switchSite(state, siteButton.dataset.siteId);
+    if (!result.ok) {
+      showToast(result.reason);
+      return;
+    }
+    if (catchup?.elapsedSeconds >= 60) {
+      pushLog(`${result.site.name} caught up by ${Math.floor(catchup.elapsedSeconds / 60)} minutes.`);
+    }
+    lastFrameTime = performance.now();
+    selectedMuseumSlot = 0;
+    document.getElementById('site-name').textContent = result.site.name;
+    inspectTitle.textContent = result.site.name;
+    inspectCopy.textContent =
+      'Place belts from machine ports. Items enter inventory only when a belt reaches the warehouse.';
+    inspectDetails.textContent = '';
+    camera.x = worldCanvas.clientWidth / 2 - TILE_SIZE / 2;
+    camera.y = worldCanvas.clientHeight / 2 - TILE_SIZE / 2;
+    pushLog(`Now viewing ${result.site.name}.`);
+    updateHud();
+    void persistState();
+    return;
+  }
+
+  if (event.target.closest('#found-site')) {
+    const definition = SITE_DEFINITIONS.find(candidate =>
+      !state.sites.some(site => site.id === candidate.id)
+    );
+    if (!definition) {
+      showToast('All dig sites have been founded');
+      return;
+    }
+    const result = foundSite(state, definition.id);
+    if (!result.ok) {
+      showToast(result.reason);
+      return;
+    }
+    result.site.lastSimulatedAt = Date.now();
+    pushLog(`${result.site.name} founded with its own factory and materials.`);
+    showToast(`${result.site.name} founded · switch with the numbered site tabs`);
+    updateHud();
+    void persistState();
+  }
 });
 
 document.getElementById('expand-museum').addEventListener('click', () => {
@@ -521,7 +620,16 @@ async function startGame() {
     const savedState = await loadGame();
     if (savedState) {
       state = savedState;
+      const now = Date.now();
+      let elapsedSeconds = 0;
+      for (const site of state.sites) {
+        const catchup = catchUpSite(site, now, savedState.lastSavedAt);
+        elapsedSeconds = Math.max(elapsedSeconds, catchup.elapsedSeconds);
+      }
       pushLog('Factory restored from local save.');
+      if (elapsedSeconds >= 1) {
+        pushLog(`Sites caught up by ${Math.floor(Math.min(elapsedSeconds, 21600) / 60)} offline minutes.`);
+      }
     } else {
       pushLog('New Basalt Basin factory ready.');
     }
@@ -540,6 +648,7 @@ async function startGame() {
   renderBuildSelection();
   updateHud();
   gameReady = true;
+  void persistState();
   window.setInterval(() => { void persistState(); }, 5000);
   window.addEventListener('pagehide', () => { void persistState(); });
   document.addEventListener('visibilitychange', () => {

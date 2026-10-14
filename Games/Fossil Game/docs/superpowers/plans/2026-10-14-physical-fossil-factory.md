@@ -4,7 +4,7 @@
 
 **Goal:** Replace the abstract prototype with a playable, browser-based top-down factory where the player places machines and routes physical items from excavation through fossil processing and manual discovery.
 
-**Architecture:** Keep simulation state independent of rendering in plain JavaScript ES modules. Use a sparse integer tile grid for world placement and a Canvas 2D renderer for the pixel-art map, with compact in-game overlays for controls and inventory. Persist versioned saves in IndexedDB; the active site ticks physically, while inactive sites use bounded rate-based catch-up.
+**Architecture:** Keep simulation state independent of rendering in plain JavaScript ES modules. Use a sparse integer tile grid for world placement and a Canvas 2D renderer for the pixel-art map, with compact in-game overlays for controls and inventory. Persist versioned saves in IndexedDB; the active site ticks physically, while inactive sites reuse bounded physical ticks that preserve machine slots and connected routes.
 
 **Tech Stack:** Vanilla JavaScript ES modules, HTML, CSS, Canvas 2D, IndexedDB, Node.js built-in `node:test`, and `fake-indexeddb` as a development-only test dependency.
 
@@ -187,12 +187,13 @@ factory loop.
 **Interfaces:**
 - `foundSite(state, siteDefinitionId) -> { ok, reason? }` deducts the founding cost from the active site's materials and creates a new local factory without moving materials between sites.
 - `switchSite(state, siteId) -> { ok, reason? }` changes the active site while preserving every site's placed layout and item routes.
-- `simulateInactiveSite(site, elapsedSeconds) -> SiteEvents` applies bounded rate-based catch-up derived from the site's actual placed machines and connected routes; it must not advance disconnected or blocked production lines or rewrite the site's layout.
+- `simulateInactiveSite(site, elapsedSeconds) -> SiteEvents` applies bounded physical catch-up through the site's actual machines and connected routes, in 300-second chunks and capped at six hours per call; it must not advance disconnected or blocked production lines or rewrite the site's layout.
+- `catchUpSite(site, currentTime, fallbackLastSimulatedAt)` calculates elapsed time from the site's last physical tick (or the save timestamp for older saves), runs bounded catch-up, and advances the site's timestamp so returning to a site catches up only that site's idle period.
 - Fossil ownership is global; museum display and its bonuses remain site-local.
 
-- [ ] **Step 1: Write failing tests** named `foundingCostsActiveSiteMaterials`, `switchesWithoutLosingLayouts`, `sitesKeepMaterialsSeparate`, `fossilsTransferBetweenMuseums`, `museumBonusesStayLocal`, and `inactiveCatchupRespectsConnectedRoutes`; assert exact costs, preserved state, transfer ownership, local effects, and no production through blocked routes.
-- [ ] **Step 2: Run `npm test`** and verify the site tests fail.
-- [ ] **Step 3: Implement site definitions, founding, switching, and bounded inactive-site simulation** in `src/sites.js` and `src/game-core.js`.
-- [ ] **Step 4: Run `npm test`** and verify site isolation and catch-up tests pass.
-- [ ] **Step 5: Add compact site navigation and founding controls** without obscuring the active world; verify site switching and expansion in the browser.
-- [ ] **Step 6: Commit** as `feat: add material-funded site expansion`.
+- [x] **Step 1: Write failing tests** named `foundingCostsActiveSiteMaterials`, `switchesWithoutLosingLayouts`, `sitesKeepMaterialsSeparate`, `fossilsTransferBetweenMuseums`, `museumBonusesStayLocal`, `inactiveCatchupRespectsConnectedRoutes`, and `catchesUpSiteFromItsLastSimulatedTime`; assert exact costs, preserved state, transfer ownership, local effects, and no production through blocked routes.
+- [x] **Step 2: Run `npm test`** and verify the site tests fail.
+- [x] **Step 3: Implement site definitions, founding, switching, and bounded inactive-site simulation** in `src/sites.js` and `src/game-core.js`.
+- [x] **Step 4: Run `npm test`** and verify site isolation and catch-up tests pass.
+- [x] **Step 5: Add compact site navigation and founding controls** without obscuring the active world; verify site switching and expansion in the browser.
+- [x] **Step 6: Commit** as `feat: add material-funded site expansion`.

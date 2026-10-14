@@ -229,5 +229,10 @@ and exact individual-fossil bonus values are implementation-plan decisions.
 
 - The implementation plan selects Canvas 2D, IndexedDB, a guaranteed-resource
   start with procedural expansion, and route-aware bounded catch-up for
-  inactive-site simulation. These are implementation calls, not additional
-  player-selected requirements.
+  inactive-site simulation. In practice, Granite Reach costs 10 iron and 10
+  stone, has its own local starting stock, and adds a copper deposit and a
+  distinct fossil pool. Inactive sites reuse the physical site tick in
+  300-second chunks, capped at six hours per catch-up. Per-site simulation
+  timestamps let a factory catch up both after reload and when revisited during
+  a play session. These are implementation calls, not additional player-selected
+  requirements.

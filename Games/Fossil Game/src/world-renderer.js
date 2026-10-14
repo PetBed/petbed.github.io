@@ -11,6 +11,7 @@ const DIRECTIONS = {
 const RESOURCE_COLOURS = {
   coal: '#24282a',
   iron: '#bd7654',
+  copper: '#c88954',
   stone: '#a39b82',
   sediment: '#ba9a56',
   fragment: '#70a48e',
@@ -27,6 +28,7 @@ const BUILDING_COLOURS = {
 const ITEM_COLOURS = {
   coal: '#171c1e',
   iron: '#c77b58',
+  copper: '#d5955c',
   stone: '#b5ac93',
   sediment: '#d0ad5d',
   steel: '#c4c8bd',

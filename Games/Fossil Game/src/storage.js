@@ -46,7 +46,11 @@ function validateState(state) {
       !site.museum ||
       !Number.isSafeInteger(site.museum.slots) ||
       site.museum.slots < 1 ||
-      !Array.isArray(site.museum.displayed)
+      !Array.isArray(site.museum.displayed) ||
+      (
+        site.lastSimulatedAt !== undefined &&
+        (!Number.isSafeInteger(site.lastSimulatedAt) || site.lastSimulatedAt < 0)
+      )
     ) {
       failInvalidSave(`site ${site.id || '(unknown)'} is incomplete`);
     }
@@ -93,6 +97,14 @@ function normalizeState(state) {
     site.id,
     site.museum.displayed,
   ]));
+  return state;
+}
+
+function withSaveTimestamp(state, savedAt) {
+  Object.defineProperty(state, 'lastSavedAt', {
+    value: Number.isSafeInteger(savedAt) && savedAt >= 0 ? savedAt : Date.now(),
+    enumerable: false,
+  });
   return state;
 }
 
@@ -234,12 +246,15 @@ export async function loadGame() {
   if (record.saveVersion === 1) {
     const migrated = migrateVersionOneState(record.state);
     validateState(migrated);
-    return migrated;
+    return withSaveTimestamp(migrated, record.savedAt);
   }
   if (record.saveVersion !== SAVE_VERSION) {
     failInvalidSave(`save version ${record.saveVersion} is not supported`);
   }
 
   validateState(record.state);
-  return normalizeState(record.state);
+  if (!Number.isSafeInteger(record.savedAt) || record.savedAt < 0) {
+    failInvalidSave('save timestamp is invalid');
+  }
+  return withSaveTimestamp(normalizeState(record.state), record.savedAt);
 }

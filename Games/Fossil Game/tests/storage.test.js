@@ -133,6 +133,74 @@ test('rejectsMalformedSaveWithoutOverwrite', async () => {
   assert.deepEqual(await readRecord(), malformed);
 });
 
+test('rejectsIncompleteSiteInventoryWithoutOverwrite', async () => {
+  const { loadGame, saveGame } = await loadStorage();
+  await clearDatabase();
+  await saveGame(createInitialState());
+  const validRecord = await readRecord();
+
+  for (const removeField of [
+    state => delete state.sites[0].resources.iron,
+    state => delete state.sites[0].fragments.fern,
+  ]) {
+    const malformed = structuredClone(validRecord);
+    removeField(malformed.state);
+    await writeRecord(malformed);
+
+    await assert.rejects(loadGame(), /invalid save data/i);
+    assert.deepEqual(await readRecord(), malformed);
+  }
+});
+
+test('rejectsSaveMissingExplorationHistoryWithoutOverwrite', async () => {
+  const { loadGame, saveGame } = await loadStorage();
+  await clearDatabase();
+  await saveGame(createInitialState());
+  const malformed = await readRecord();
+  delete malformed.state.sites[0].exploredChunks;
+  await writeRecord(malformed);
+
+  await assert.rejects(loadGame(), /invalid save data/i);
+  assert.deepEqual(await readRecord(), malformed);
+});
+
+test('rejectsVersionTwoSaveWithoutItsOfflineTimestamp', async () => {
+  const { loadGame, saveGame } = await loadStorage();
+  await clearDatabase();
+  await saveGame(createInitialState());
+  const malformed = await readRecord();
+  malformed.saveVersion = 2;
+  delete malformed.savedAt;
+  await writeRecord(malformed);
+
+  await assert.rejects(loadGame(), /invalid save data/i);
+  assert.deepEqual(await readRecord(), malformed);
+});
+
+test('migratesVersionTwoSiteResourcesForTheCurrentWorld', async () => {
+  const { loadGame, saveGame } = await loadStorage();
+  await clearDatabase();
+  const priorState = createInitialState();
+  await saveGame(priorState);
+  delete priorState.site.resources.copper;
+  delete priorState.site.exploredChunks;
+  delete priorState.site.buildings[0].requiresPower;
+  delete priorState.site.buildings[0].powerReserved;
+  await writeRecord({
+    id: SAVE_ID,
+    saveVersion: 2,
+    savedAt: 1000,
+    state: priorState,
+  });
+
+  const migrated = await loadGame();
+
+  assert.equal(migrated.site.resources.copper, 0);
+  assert.deepEqual(migrated.site.exploredChunks, {});
+  assert.equal(migrated.site.buildings[0].requiresPower, false);
+  assert.equal(migrated.site.buildings[0].powerReserved, false);
+});
+
 test('migratesSupportedVersion', async () => {
   const { loadGame, saveGame } = await loadStorage();
   await clearDatabase();

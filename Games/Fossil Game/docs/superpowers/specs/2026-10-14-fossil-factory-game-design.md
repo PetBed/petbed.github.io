@@ -95,6 +95,10 @@ Building machines and expanding museum capacity costs materials, not coins.
 New sites add new raw materials alongside core materials so familiar production
 can branch into new or more effective routes.
 
+Each site's initial excavator is an intentional bootstrap exception and runs
+without power. Additional excavators consume one power unit per extraction
+cycle, so expanding excavation requires a local power supply.
+
 ## Fossil Lifecycle and Collection
 
 The intended sequence is:
@@ -134,7 +138,10 @@ building and exploring.
 Map generation must not strand a player without required core resources. The
 implementation will guarantee core resource nodes in the starting area and
 generate additional resource and fossil nodes as the player explores. This is
-an implementation choice, not a player-selected requirement.
+an implementation choice, not a player-selected requirement. Each first-visited
+24-by-24 world chunk deterministically adds one mineral deposit and one fossil
+deposit. Fossil deposits use that site's fossil pool, and explored chunks persist
+with the factory.
 
 ## Visual and Interaction Direction
 
@@ -163,6 +170,9 @@ an implementation choice, not a player-selected requirement.
   actual placed layout and item routes. Any performance optimization must not
   turn the factory into an abstract production network from the player's
   perspective.
+- When a browser tab resumes, the active site catches up from its last
+  physically simulated time using the bounded tick simulation; delayed frames
+  must not be silently discarded.
 - Storage technology, simulation scheduling, offline catch-up, and rendering
   approach are implementation decisions to settle in the build plan.
 

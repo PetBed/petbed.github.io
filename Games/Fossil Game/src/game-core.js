@@ -1,4 +1,4 @@
-import { RECIPES, EXCAVATOR_CYCLE_SECONDS } from './recipes.js';
+import { RECIPES, EXCAVATOR_CYCLE_SECONDS, EXCAVATOR_POWER } from './recipes.js';
 import { tickLogistics } from './logistics.js';
 import { FOSSIL_FAMILIES, createUnidentifiedFossilItem } from './fossils.js';
 
@@ -17,6 +17,7 @@ const MACHINE_COSTS = {
 const INITIAL_RESOURCES = {
   coal: 12,
   iron: 16,
+  copper: 0,
   stone: 20,
   sediment: 16,
   steel: 0,
@@ -43,6 +44,13 @@ export function createSite({
   const unidentifiedFossils = [];
   const isStartingSite = id === 'site-1';
   const buildingId = suffix => isStartingSite ? `building-${suffix}` : `${id}-building-${suffix}`;
+  const siteResourceNodes = resourceNodes || [
+    { id: 'node-coal', resource: 'coal', x: -8, y: 4, remaining: 100 },
+    { id: 'node-iron', resource: 'iron', x: 8, y: 4, remaining: 100 },
+    { id: 'node-stone', resource: 'stone', x: 4, y: -8, remaining: 100 },
+    { id: 'node-sediment', resource: 'sediment', x: -4, y: -8, remaining: 100 },
+    { id: 'node-fossils', resource: 'fragment', x: 0, y: 8, families: FOSSIL_FAMILIES, remaining: 100 },
+  ];
 
   return {
     id,
@@ -63,6 +71,8 @@ export function createSite({
         outputSlots: [],
         progress: 0,
         outputCapacity: 4,
+        requiresPower: false,
+        powerReserved: false,
       },
       {
         id: buildingId(2),
@@ -76,13 +86,8 @@ export function createSite({
       },
     ],
     belts: [],
-    resourceNodes: resourceNodes || [
-      { id: 'node-coal', resource: 'coal', x: -8, y: 4, remaining: 100 },
-      { id: 'node-iron', resource: 'iron', x: 8, y: 4, remaining: 100 },
-      { id: 'node-stone', resource: 'stone', x: 4, y: -8, remaining: 100 },
-      { id: 'node-sediment', resource: 'sediment', x: -4, y: -8, remaining: 100 },
-      { id: 'node-fossils', resource: 'fragment', x: 0, y: 8, families: FOSSIL_FAMILIES, remaining: 100 },
-    ],
+    resourceNodes: siteResourceNodes,
+    exploredChunks: {},
     unidentifiedFossils,
     museum: {
       slots: 1,
@@ -281,12 +286,22 @@ function advanceExcavator(site, building, events, rng) {
     return;
   }
 
+  if (building.requiresPower !== false && !building.powerReserved) {
+    if (site.resources.power < EXCAVATOR_POWER) {
+      addBlockedEvent(events, building.id, 'insufficient power');
+      return;
+    }
+    site.resources.power -= EXCAVATOR_POWER;
+    building.powerReserved = true;
+  }
+
   building.progress += 1 + (site.museum?.bonuses?.digSpeed || 0);
   if (building.progress < EXCAVATOR_CYCLE_SECONDS) {
     return;
   }
 
   building.progress -= EXCAVATOR_CYCLE_SECONDS;
+  building.powerReserved = false;
   node.remaining -= 1;
   const item = node.resource === 'fragment'
     ? { type: 'fragment', family: randomFamily(node.families, rng), amount: 1 }
@@ -335,6 +350,26 @@ export function tickSite(site, deltaSeconds, rng = Math.random) {
     steps -= 1;
   }
 
+  return events;
+}
+
+export function advanceSiteFrame(site, frameTime, previousFrameTime, wallClockTime = Date.now()) {
+  if (
+    !site ||
+    !Number.isFinite(frameTime) ||
+    !Number.isFinite(previousFrameTime) ||
+    !Number.isSafeInteger(wallClockTime) ||
+    wallClockTime < 0
+  ) {
+    throw new RangeError('site and valid frame timestamps are required');
+  }
+
+  const deltaSeconds = Math.max(0, (frameTime - previousFrameTime) / 1000);
+  const events = tickSite(site, deltaSeconds);
+  site.lastSimulatedAt = Math.max(
+    0,
+    Math.floor(wallClockTime - (site.simulationAccumulator || 0) * 1000)
+  );
   return events;
 }
 

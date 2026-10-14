@@ -1,6 +1,7 @@
 import { BUILDING_DEFINITIONS } from './buildings.js';
 
 export const EXCAVATOR_CYCLE_SECONDS = 2;
+export const EXCAVATOR_POWER = 1;
 
 export const RECIPES = {
   generator: {

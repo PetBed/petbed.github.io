@@ -139,3 +139,23 @@ test('catchesUpSiteFromItsLastSimulatedTime', async () => {
   assert.equal(site.resources.coal, 12);
   assert.equal(site.buildings[0].outputSlots.length, 2);
 });
+
+test('catchesUpOnlyTheActiveSiteWhenResuming', async () => {
+  const { catchUpActiveSite, foundSite } = await loadSites();
+  const state = createInitialState();
+  foundSite(state, 'granite-reach');
+  state.activeSiteId = 'granite-reach';
+  const inactiveSite = state.sites[0];
+  const activeSite = state.sites[1];
+  inactiveSite.lastSimulatedAt = 1000;
+  activeSite.lastSimulatedAt = 1000;
+  activeSite.resourceNodes[0].remaining = 2;
+
+  const result = catchUpActiveSite(state, 11000);
+
+  assert.equal(result.elapsedSeconds, 10);
+  assert.equal(activeSite.lastSimulatedAt, 11000);
+  assert.equal(activeSite.buildings[0].outputSlots.length, 2);
+  assert.equal(inactiveSite.lastSimulatedAt, 1000);
+  assert.equal(inactiveSite.buildings[0].outputSlots.length, 0);
+});

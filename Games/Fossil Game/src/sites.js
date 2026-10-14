@@ -140,3 +140,11 @@ export function catchUpSite(site, currentTime = Date.now(), fallbackLastSimulate
   site.lastSimulatedAt = currentTime;
   return { elapsedSeconds, events };
 }
+
+export function catchUpActiveSite(state, currentTime = Date.now()) {
+  const site = currentSite(state);
+  if (!site) {
+    throw new RangeError('state must have an active site to resume');
+  }
+  return catchUpSite(site, currentTime);
+}

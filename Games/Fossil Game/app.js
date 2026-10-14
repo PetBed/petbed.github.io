@@ -1,5 +1,5 @@
-import { tickSite, createInitialState } from './src/game-core.js';
-import { placeBelt, placeBuilding } from './src/world-grid.js';
+import { advanceSiteFrame, createInitialState } from './src/game-core.js';
+import { exploreSite, placeBelt, placeBuilding } from './src/world-grid.js';
 import { BUILDING_DEFINITIONS } from './src/buildings.js';
 import {
   expandMuseum,
@@ -10,7 +10,13 @@ import {
 import { panCamera, screenToWorld, zoomCamera } from './src/camera.js';
 import { drawMinimap, drawWorld } from './src/world-renderer.js';
 import { loadGame, saveGame } from './src/storage.js';
-import { catchUpSite, foundSite, SITE_DEFINITIONS, switchSite } from './src/sites.js';
+import {
+  catchUpActiveSite,
+  catchUpSite,
+  foundSite,
+  SITE_DEFINITIONS,
+  switchSite,
+} from './src/sites.js';
 
 let state = createInitialState();
 const worldCanvas = document.getElementById('world-canvas');
@@ -290,6 +296,14 @@ function renderSiteNavigation() {
 function resizeAndDraw() {
   const width = worldCanvas.clientWidth;
   const height = worldCanvas.clientHeight;
+  const topLeft = screenToWorld({ x: 0, y: 0 }, camera);
+  const bottomRight = screenToWorld({ x: width, y: height }, camera);
+  exploreSite(state, {
+    left: topLeft.x - 2,
+    top: topLeft.y - 2,
+    right: bottomRight.x + 2,
+    bottom: bottomRight.y + 2,
+  });
   worldContext.setTransform(canvasScale, 0, 0, canvasScale, 0, 0);
   drawWorld(worldContext, state, camera, { width, height });
 
@@ -408,11 +422,9 @@ function recenterFromMinimap(event) {
 }
 
 function gameFrame(now) {
-  const deltaSeconds = Math.min(1, Math.max(0, (now - lastFrameTime) / 1000));
-  lastFrameTime = now;
   const site = activeSite();
-  const events = tickSite(site, deltaSeconds);
-  site.lastSimulatedAt = Date.now();
+  const events = advanceSiteFrame(site, now, lastFrameTime, Date.now());
+  lastFrameTime = now;
   for (const item of events.produced) {
     if (item.type !== 'power') {
       pushLog(`Produced ${formatItem(item)}.`);
@@ -653,6 +665,15 @@ async function startGame() {
   window.addEventListener('pagehide', () => { void persistState(); });
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
+      void persistState();
+    } else {
+      const catchup = catchUpActiveSite(state, Date.now());
+      lastFrameTime = performance.now();
+      if (catchup.elapsedSeconds >= 1) {
+        pushLog(`Factory caught up by ${Math.floor(Math.min(catchup.elapsedSeconds, 21600) / 60)} offline minutes.`);
+      }
+      updateHud();
+      resizeAndDraw();
       void persistState();
     }
   });

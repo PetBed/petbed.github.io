@@ -7,6 +7,7 @@ import {
   processFragments,
   buyMachine,
 } from '../src/game-core.js';
+import { placeBuilding } from '../src/world-grid.js';
 import * as gameCore from '../src/game-core.js';
 import * as recipes from '../src/recipes.js';
 
@@ -75,6 +76,7 @@ test('excavatorEmitsResourcesAndFragments', () => {
     x: fragmentNode.x,
     y: fragmentNode.y,
     resourceNodeId: fragmentNode.id,
+    requiresPower: false,
   });
   const coalExcavator = site.buildings.find(building => building.type === 'excavator');
 
@@ -87,6 +89,52 @@ test('excavatorEmitsResourcesAndFragments', () => {
     item.type === 'fragment' && item.family === 'trilobite'
   ));
   assert.equal(site.resources.coal, 12);
+});
+
+test('placedExcavatorsWaitForPowerAndConsumeItOncePerCycle', () => {
+  const state = createInitialState();
+  const site = state.sites[0];
+  const node = {
+    id: 'node-powered-iron',
+    resource: 'iron',
+    x: 20,
+    y: 20,
+    remaining: 2,
+  };
+  site.resourceNodes.push(node);
+  site.resources.iron = 20;
+  site.resources.stone = 20;
+
+  assert.deepEqual(placeBuilding(state, 'excavator', 20, 20), { ok: true });
+  const excavator = site.buildings.at(-1);
+  excavator.resourceNodeId = node.id;
+
+  const unpoweredEvents = gameCore.tickSite(site, 2, () => 0);
+
+  assert.equal(excavator.outputSlots.length, 0);
+  assert.equal(excavator.progress, 0);
+  assert.ok(unpoweredEvents.blocked.some(event =>
+    event.machineId === excavator.id && event.reason === 'insufficient power'
+  ));
+
+  site.resources.power = 1;
+  gameCore.tickSite(site, 2, () => 0);
+
+  assert.equal(site.resources.power, 0);
+  assert.ok(excavator.outputSlots.some(item =>
+    item.type === 'resource' && item.resource === 'iron'
+  ));
+});
+
+test('activeFrameSimulatesTheFullElapsedFrameInterval', () => {
+  const site = createInitialState().site;
+  site.lastSimulatedAt = 1000;
+
+  gameCore.advanceSiteFrame(site, 5000, 0, 6000);
+
+  assert.equal(site.buildings[0].outputSlots.length, 2);
+  assert.equal(site.resourceNodes[0].remaining, 98);
+  assert.equal(site.lastSimulatedAt, 6000);
 });
 
 test('productionWaitsForPower', () => {

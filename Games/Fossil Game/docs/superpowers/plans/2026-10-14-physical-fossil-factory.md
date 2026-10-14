@@ -53,7 +53,7 @@
 - `placeBelt(state, x, y, direction) -> { ok, reason? }` places one belt tile using the same occupancy and payment rules.
 - `src/buildings.js` exports the footprint, rotation, port, and construction-cost definitions used by placement and rendering.
 - World coordinates are integer tile coordinates; machine rotations are `0`, `90`, `180`, or `270`; missing sparse-grid cells are traversable ground.
-- Map-generation call: guarantee the starting site's core resource nodes, then generate additional resource/fossil nodes as the player explores.
+- Map-generation call: guarantee the starting site's core resource nodes, then deterministically add one mineral and one site-pool fossil node when a 24-by-24 world chunk is first explored; persist explored chunks to prevent duplicates.
 
 - [ ] **Step 1: Write failing tests** named `createsGuaranteedStartingSite`, `placesBuildingAndDeductsCost`, and `rejectsInvalidOrOccupiedPlacement`; assert the starter resources and excavator exist, successful placement deducts the definition's exact cost, and each rejected placement leaves the full state unchanged.
 - [ ] **Step 2: Run `npm test`** and verify the new assertions fail for missing world/placement behavior.
@@ -98,6 +98,7 @@
 - A warehouse accepts resource, fragment, and unidentified-fossil items only through connected belt ports; its delivery updates that site's inventory.
 - Excavators and processors emit items to physical output slots; disconnected outputs do not update inventory.
 - Inputs are consumed atomically only when all recipe inputs and required power are available.
+- Each site's starter excavator is free-powered for bootstrap; additional excavators consume one power unit per extraction cycle.
 - Excavators output raw resources and typed fossil fragments into physical machine output slots; no fossil rarity/type RNG occurs here.
 
 - [ ] **Step 1: Write failing tests** named `excavatorEmitsResourcesAndFragments`, `productionWaitsForPower`, `missingInputsRemainUnchanged`, `generatorCoalIsNotAlsoRecipeInput`, and `extractedItemsReachWarehouseOnlyThroughBelts`; assert item counts and machine progress before/after deterministic ticks and confirm disconnected output never enters inventory.

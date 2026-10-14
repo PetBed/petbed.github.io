@@ -1,8 +1,8 @@
 import { RECIPES, EXCAVATOR_CYCLE_SECONDS } from './recipes.js';
 import { tickLogistics } from './logistics.js';
+import { FOSSIL_FAMILIES, createUnidentifiedFossilItem } from './fossils.js';
 
-export const FOSSIL_FAMILIES = ['trilobite', 'pterosaur', 'fish', 'fern'];
-export const RARITY_ORDER = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
+export { FOSSIL_FAMILIES } from './fossils.js';
 
 const MAX_SIMULATION_STEPS_PER_CALL = 300;
 const DEFAULT_OUTPUT_CAPACITY = 4;
@@ -31,7 +31,7 @@ export function createInitialState() {
     fern: 0,
   };
   const collection = [];
-  const museumDisplay = [];
+  const museumDisplay = [null];
   const unidentifiedFossils = [];
   const site = {
     id: 'site-1',
@@ -76,7 +76,9 @@ export function createInitialState() {
     museum: {
       slots: 1,
       displayed: museumDisplay,
+      bonuses: { digSpeed: 0, output: 0 },
     },
+    nextFossilId: 1,
   };
 
   return {
@@ -166,6 +168,15 @@ function hasOutputCapacity(building, recipe) {
 }
 
 function completeRecipe(site, building, recipe, events) {
+  if (building.type === 'fossil-finisher') {
+    const fossil = createUnidentifiedFossilItem(site);
+    building.outputSlots.push(fossil);
+    events.produced.push(fossil);
+    building.progress = 0;
+    building.pendingOutputs = null;
+    return;
+  }
+
   for (const output of recipe.outputs) {
     if (output.type === 'power') {
       site.resources.power += output.amount;
@@ -249,7 +260,7 @@ function advanceExcavator(site, building, events, rng) {
     return;
   }
 
-  building.progress += 1;
+  building.progress += 1 + (site.museum?.bonuses?.digSpeed || 0);
   if (building.progress < EXCAVATOR_CYCLE_SECONDS) {
     return;
   }
@@ -357,93 +368,10 @@ export function buyMachine(state, machineId, rng = Math.random) {
   return { ...state, purchased: true };
 }
 
-function weightedChoice(entries, rng) {
-  const total = entries.reduce((sum, [, count]) => sum + Math.max(0, count), 0);
-  if (total <= 0) {
-    return null;
-  }
-
-  const threshold = rng() * total;
-  let running = 0;
-
-  for (const [key, count] of entries) {
-    running += Math.max(0, count);
-    if (running >= threshold) {
-      return key;
-    }
-  }
-
-  return entries[entries.length - 1][0];
-}
-
-function determineRarity(rng = Math.random) {
-  const roll = rng();
-  if (roll < 0.52) return 'common';
-  if (roll < 0.78) return 'uncommon';
-  if (roll < 0.92) return 'rare';
-  if (roll < 0.98) return 'epic';
-  return 'legendary';
-}
-
-export function processFragments(state, rng = Math.random) {
-  const available = Object.entries(state.fragments).filter(([, count]) => count > 0);
-  if (available.length === 0) {
-    return { completed: [], processed: 0 };
-  }
-
-  const chosenFamily = weightedChoice(available, rng);
-  if (!chosenFamily) {
-    return { completed: [], processed: 0 };
-  }
-
-  let remaining = 4;
-  const consumed = {};
-
-  for (const [family, count] of available) {
-    if (remaining <= 0) break;
-    const take = Math.min(count, remaining);
-    if (take > 0) {
-      consumed[family] = take;
-      remaining -= take;
-    }
-  }
-
-  if (remaining > 0) {
-    return { completed: [], processed: 0 };
-  }
-
-  for (const [family, count] of Object.entries(consumed)) {
-    state.fragments[family] = Math.max(0, state.fragments[family] - count);
-  }
-
-  const rarity = determineRarity(rng);
-  const fossil = {
-    id: `fossil-${state.nextId++}`,
-    family: chosenFamily,
-    rarity,
-    name: `${capitalize(chosenFamily)} ${capitalize(rarity)}`,
-    bonus: getBonusForRarity(rarity),
-    createdAt: Date.now(),
+export function processFragments() {
+  return {
+    completed: [],
+    processed: 0,
+    reason: 'use a physical fossil finisher and open its unidentified output',
   };
-
-  state.fossils.push(fossil);
-  state.museum['site-1'].push(fossil.id);
-
-  return { completed: [fossil], processed: 1 };
-}
-
-function getBonusForRarity(rarity) {
-  const bonusMap = {
-    common: { digSpeed: 0.02, output: 0.03 },
-    uncommon: { digSpeed: 0.05, output: 0.06 },
-    rare: { digSpeed: 0.08, output: 0.1 },
-    epic: { digSpeed: 0.12, output: 0.12 },
-    legendary: { digSpeed: 0.16, output: 0.18 },
-  };
-
-  return bonusMap[rarity] || bonusMap.common;
-}
-
-function capitalize(value) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
 }

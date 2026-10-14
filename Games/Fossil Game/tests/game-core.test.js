@@ -35,16 +35,21 @@ test('dig produces resources and fragment batches', () => {
   assert.ok(Object.values(result.fragments).some(value => value > 0));
 });
 
-test('processFragments converts fragment batches into a finished fossil outcome', () => {
+test('processFragments does not reveal fossils before the player opens them', () => {
   const state = createInitialState();
   state.fragments = { trilobite: 6, pterosaur: 4, fish: 2, fern: 2 };
+  let rngCalls = 0;
 
-  const result = processFragments(state, () => 0.08);
+  const result = processFragments(state, () => {
+    rngCalls += 1;
+    return 0.08;
+  });
 
-  assert.equal(result.completed.length, 1);
-  assert.match(result.completed[0].family, /trilobite|pterosaur|fish|fern/);
-  assert.ok(['common', 'uncommon', 'rare', 'epic', 'legendary'].includes(result.completed[0].rarity));
-  assert.ok(state.fossils.some(f => f.id === result.completed[0].id));
+  assert.equal(rngCalls, 0);
+  assert.equal(result.completed.length, 0);
+  assert.equal(result.processed, 0);
+  assert.equal(state.fossils.length, 0);
+  assert.deepEqual(state.fragments, { trilobite: 6, pterosaur: 4, fish: 2, fern: 2 });
 });
 
 test('buyMachine consumes materials and updates the machine count', () => {

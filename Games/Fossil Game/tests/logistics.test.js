@@ -88,6 +88,24 @@ test('transfersItemToMachinePort', () => {
   assert.deepEqual(smelter.inputSlots, [item]);
 });
 
+test('deliversResourceToWarehouseThroughBelt', () => {
+  assert.equal(typeof logistics.tickLogistics, 'function');
+
+  const site = createSite();
+  const warehouse = site.buildings.find(building => building.type === 'warehouse');
+  assert.ok(warehouse);
+  warehouse.x = 3;
+  warehouse.y = 20;
+  const item = { type: 'resource', resource: 'iron', amount: 1 };
+  const belt = addBelt(site, 'belt-warehouse-input', 2, 20, 'east', item);
+
+  logistics.tickLogistics(site, 1);
+
+  assert.equal(belt.item, null);
+  assert.equal(site.resources.iron, 17);
+  assert.deepEqual(warehouse.inputSlots, []);
+});
+
 test('retainsBlockedItemWithoutDuplication', () => {
   assert.equal(typeof logistics.tickLogistics, 'function');
 

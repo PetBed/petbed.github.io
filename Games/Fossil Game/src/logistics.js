@@ -88,6 +88,34 @@ function getSplitterInput(site, belt) {
   return null;
 }
 
+function deliverToWarehouse(site, item) {
+  const amount = item.amount === undefined ? 1 : item.amount;
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return false;
+  }
+
+  if (
+    item.type === 'resource' &&
+    Object.hasOwn(site.resources, item.resource)
+  ) {
+    site.resources[item.resource] += amount;
+    return true;
+  }
+  if (
+    item.type === 'fragment' &&
+    Object.hasOwn(site.fragments, item.family)
+  ) {
+    site.fragments[item.family] += amount;
+    return true;
+  }
+  if (item.type === 'unidentified-fossil' && Array.isArray(site.unidentifiedFossils)) {
+    site.unidentifiedFossils.push(item);
+    return true;
+  }
+
+  return false;
+}
+
 function nextPosition(belt) {
   const offset = DIRECTION_OFFSETS[belt.direction];
   return { x: belt.x + offset.x, y: belt.y + offset.y };
@@ -184,6 +212,14 @@ function advanceOneSecond(site) {
 
     const inputPort = getInputPort(site, belt);
     if (inputPort) {
+      if (inputPort.building.type === 'warehouse') {
+        if (deliverToWarehouse(site, belt.item)) {
+          belt.item = null;
+          belt.progress = 0;
+        }
+        continue;
+      }
+
       const reservedCount = reservedInputs.get(inputPort.building.id) || 0;
       if (inputPort.building.inputSlots.length + reservedCount < MAX_MACHINE_INPUT_ITEMS) {
         inputPort.building.inputSlots.push(belt.item);

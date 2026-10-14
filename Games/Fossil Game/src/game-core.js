@@ -1,5 +1,11 @@
+import { RECIPES, EXCAVATOR_CYCLE_SECONDS } from './recipes.js';
+import { tickLogistics } from './logistics.js';
+
 export const FOSSIL_FAMILIES = ['trilobite', 'pterosaur', 'fish', 'fern'];
 export const RARITY_ORDER = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
+
+const MAX_SIMULATION_STEPS_PER_CALL = 300;
+const DEFAULT_OUTPUT_CAPACITY = 4;
 
 const MACHINE_COSTS = {
   digger: { steel: 35, concrete: 20 },
@@ -26,6 +32,7 @@ export function createInitialState() {
   };
   const collection = [];
   const museumDisplay = [];
+  const unidentifiedFossils = [];
   const site = {
     id: 'site-1',
     name: 'Basalt Basin',
@@ -37,6 +44,18 @@ export function createInitialState() {
       {
         id: 'building-1',
         type: 'excavator',
+        x: -8,
+        y: 4,
+        rotation: 0,
+        resourceNodeId: 'node-coal',
+        inputSlots: [],
+        outputSlots: [],
+        progress: 0,
+        outputCapacity: 4,
+      },
+      {
+        id: 'building-2',
+        type: 'warehouse',
         x: 0,
         y: 0,
         rotation: 0,
@@ -51,7 +70,9 @@ export function createInitialState() {
       { id: 'node-iron', resource: 'iron', x: 8, y: 4, remaining: 100 },
       { id: 'node-stone', resource: 'stone', x: 4, y: -8, remaining: 100 },
       { id: 'node-sediment', resource: 'sediment', x: -4, y: -8, remaining: 100 },
+      { id: 'node-fossils', resource: 'fragment', x: 0, y: 8, families: FOSSIL_FAMILIES, remaining: 100 },
     ],
+    unidentifiedFossils,
     museum: {
       slots: 1,
       displayed: museumDisplay,
@@ -66,7 +87,7 @@ export function createInitialState() {
     fragments,
     fossils: collection,
     collection,
-    unidentifiedFossils: [],
+    unidentifiedFossils,
     machines: {
       digger: 1,
       smelter: 0,
@@ -77,9 +98,212 @@ export function createInitialState() {
       [site.id]: museumDisplay,
     },
     site,
-    nextEntityId: 2,
+    nextEntityId: 3,
     nextId: 1,
   };
+}
+
+function isInputMatch(item, requirement) {
+  return item.type === requirement.type &&
+    (requirement.resource === undefined || item.resource === requirement.resource) &&
+    (requirement.family === undefined || requirement.family === '*' || item.family === requirement.family);
+}
+
+function itemAmount(item) {
+  return item.amount === undefined ? 1 : item.amount;
+}
+
+function hasInputs(inputSlots, requirements) {
+  return requirements.every(requirement => {
+    const available = inputSlots
+      .filter(item => isInputMatch(item, requirement))
+      .reduce((sum, item) => sum + itemAmount(item), 0);
+    return available >= requirement.amount;
+  });
+}
+
+function consumeInputs(inputSlots, requirements) {
+  const consumed = [];
+
+  for (const requirement of requirements) {
+    let remaining = requirement.amount;
+    for (let index = 0; index < inputSlots.length && remaining > 0;) {
+      const item = inputSlots[index];
+      if (!isInputMatch(item, requirement)) {
+        index += 1;
+        continue;
+      }
+
+      const available = itemAmount(item);
+      const amount = Math.min(available, remaining);
+      consumed.push({ ...item, amount });
+      remaining -= amount;
+
+      if (amount === available) {
+        inputSlots.splice(index, 1);
+      } else {
+        item.amount = available - amount;
+        index += 1;
+      }
+    }
+  }
+
+  return consumed;
+}
+
+function addBlockedEvent(events, machineId, reason) {
+  if (!events.blocked.some(event =>
+    event.machineId === machineId && event.reason === reason
+  )) {
+    events.blocked.push({ machineId, reason });
+  }
+}
+
+function hasOutputCapacity(building, recipe) {
+  const itemOutputs = recipe.outputs.filter(output => output.type !== 'power').length;
+  const capacity = building.outputCapacity || DEFAULT_OUTPUT_CAPACITY;
+  return building.outputSlots.length + itemOutputs <= capacity;
+}
+
+function completeRecipe(site, building, recipe, events) {
+  for (const output of recipe.outputs) {
+    if (output.type === 'power') {
+      site.resources.power += output.amount;
+      events.produced.push({ type: 'power', amount: output.amount });
+      continue;
+    }
+
+    const item = { ...output };
+    building.outputSlots.push(item);
+    events.produced.push(item);
+  }
+
+  building.progress = 0;
+  building.pendingOutputs = null;
+}
+
+function advanceRecipeMachine(site, building, events) {
+  const recipe = RECIPES[building.type];
+  if (!recipe) {
+    return;
+  }
+
+  if (building.progress === 0 && !building.pendingOutputs) {
+    if (!hasInputs(building.inputSlots, recipe.inputs)) {
+      addBlockedEvent(events, building.id, 'missing inputs');
+      return;
+    }
+    if (site.resources.power < recipe.power) {
+      addBlockedEvent(events, building.id, 'insufficient power');
+      return;
+    }
+    if (!hasOutputCapacity(building, recipe)) {
+      addBlockedEvent(events, building.id, 'output full');
+      return;
+    }
+
+    events.consumed.push(...consumeInputs(building.inputSlots, recipe.inputs));
+    site.resources.power -= recipe.power;
+    building.pendingOutputs = recipe.outputs.map(output => ({ ...output }));
+  }
+
+  building.progress += 1;
+  if (building.progress >= recipe.duration) {
+    completeRecipe(site, building, recipe, events);
+  }
+}
+
+function findResourceNode(site, building) {
+  if (building.resourceNodeId) {
+    return site.resourceNodes.find(node => node.id === building.resourceNodeId);
+  }
+  const node = site.resourceNodes.find(candidate =>
+    candidate.x === building.x && candidate.y === building.y
+  );
+  if (node) {
+    building.resourceNodeId = node.id;
+  }
+  return node;
+}
+
+function randomFamily(families, rng) {
+  const roll = rng();
+  if (!Number.isFinite(roll) || roll < 0 || roll >= 1) {
+    throw new RangeError('rng must return a number between 0 and 1');
+  }
+  return families[Math.floor(roll * families.length)];
+}
+
+function advanceExcavator(site, building, events, rng) {
+  const node = findResourceNode(site, building);
+  if (!node) {
+    addBlockedEvent(events, building.id, 'no resource node');
+    return;
+  }
+  if (node.remaining <= 0) {
+    addBlockedEvent(events, building.id, 'resource depleted');
+    return;
+  }
+  if (building.outputSlots.length >= (building.outputCapacity || DEFAULT_OUTPUT_CAPACITY)) {
+    addBlockedEvent(events, building.id, 'output full');
+    return;
+  }
+
+  building.progress += 1;
+  if (building.progress < EXCAVATOR_CYCLE_SECONDS) {
+    return;
+  }
+
+  building.progress -= EXCAVATOR_CYCLE_SECONDS;
+  node.remaining -= 1;
+  const item = node.resource === 'fragment'
+    ? { type: 'fragment', family: randomFamily(node.families, rng), amount: 1 }
+    : { type: 'resource', resource: node.resource, amount: 1 };
+  building.outputSlots.push(item);
+  events.produced.push(item);
+}
+
+function advanceSiteOneSecond(site, rng, events) {
+  for (const building of site.buildings) {
+    if (building.type === 'excavator') {
+      advanceExcavator(site, building, events, rng);
+    }
+  }
+
+  for (const building of site.buildings) {
+    if (building.type === 'generator') {
+      advanceRecipeMachine(site, building, events);
+    }
+  }
+
+  for (const building of site.buildings) {
+    if (building.type !== 'generator' && building.type !== 'excavator') {
+      advanceRecipeMachine(site, building, events);
+    }
+  }
+
+  tickLogistics(site, 1);
+}
+
+export function tickSite(site, deltaSeconds, rng = Math.random) {
+  if (!site || !Number.isFinite(deltaSeconds) || deltaSeconds < 0) {
+    throw new RangeError('site and a finite non-negative deltaSeconds are required');
+  }
+
+  const events = { produced: [], consumed: [], blocked: [] };
+  const accumulated = (site.simulationAccumulator || 0) + deltaSeconds;
+  let steps = Math.min(
+    MAX_SIMULATION_STEPS_PER_CALL,
+    Math.floor(accumulated + 1e-9)
+  );
+  site.simulationAccumulator = Math.max(0, accumulated - steps);
+
+  while (steps > 0) {
+    advanceSiteOneSecond(site, rng, events);
+    steps -= 1;
+  }
+
+  return events;
 }
 
 export function dig(state, rng = Math.random) {

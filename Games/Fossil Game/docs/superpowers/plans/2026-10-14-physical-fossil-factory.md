@@ -48,7 +48,7 @@
 - Create: `tests/world-grid.test.js`
 
 **Interfaces:**
-- `createInitialState() -> GameState` creates a version-1 save with active `site-1`, a guaranteed-resource starting area, a sparse tile grid, one functioning starter excavator, 12 coal, 16 iron, 20 stone, 16 sediment, no starting steel/concrete, empty fossil inventories, and a `nextEntityId`.
+- `createInitialState() -> GameState` creates a version-1 save with active `site-1`, a guaranteed-resource starting area, a sparse tile grid, a functioning starter excavator and warehouse, 12 coal, 16 iron, 20 stone, 16 sediment, no starting steel/concrete, empty fossil inventories, and a `nextEntityId`.
 - `placeBuilding(state, buildingId, x, y, rotation) -> { ok, reason? }` places an excavator, generator, smelter, crusher, fossil finisher, or splitter only on valid unoccupied tiles and deducts its material cost on success.
 - `placeBelt(state, x, y, direction) -> { ok, reason? }` places one belt tile using the same occupancy and payment rules.
 - `src/buildings.js` exports the footprint, rotation, port, and construction-cost definitions used by placement and rendering.
@@ -84,18 +84,23 @@
 
 **Files:**
 - Modify: `src/game-core.js`
+- Modify: `src/buildings.js`
+- Modify: `src/logistics.js`
 - Create: `src/recipes.js`
-- Test: `tests/game-core.test.js`
+- Modify: `tests/game-core.test.js`
+- Modify: `tests/logistics.test.js`
 
 **Interfaces:**
 - `tickSite(site, deltaSeconds, rng = Math.random) -> SiteEvents` advances resource extraction, machine recipes, and power; it calls `tickLogistics` for item movement.
 - `SiteEvents` is `{ produced: Item[], consumed: Item[], blocked: { machineId, reason }[] }` and is used for in-world event feedback.
 - `recipes.js` exports machine input/output, duration, power, and construction-cost definitions.
-- Initial production buildings are an excavator, generator, smelter, crusher, and fossil finisher; building footprints and ports are defined in `src/buildings.js`.
+- Initial production buildings are a warehouse, excavator, generator, smelter, crusher, and fossil finisher; building footprints and ports are defined in `src/buildings.js`.
+- A warehouse accepts resource, fragment, and unidentified-fossil items only through connected belt ports; its delivery updates that site's inventory.
+- Excavators and processors emit items to physical output slots; disconnected outputs do not update inventory.
 - Inputs are consumed atomically only when all recipe inputs and required power are available.
 - Excavators output raw resources and typed fossil fragments into physical machine output slots; no fossil rarity/type RNG occurs here.
 
-- [ ] **Step 1: Write failing tests** named `excavatorEmitsResourcesAndFragments`, `productionWaitsForPower`, `missingInputsRemainUnchanged`, and `generatorCoalIsNotAlsoRecipeInput`; assert item counts and machine progress before/after a deterministic tick.
+- [ ] **Step 1: Write failing tests** named `excavatorEmitsResourcesAndFragments`, `productionWaitsForPower`, `missingInputsRemainUnchanged`, `generatorCoalIsNotAlsoRecipeInput`, and `extractedItemsReachWarehouseOnlyThroughBelts`; assert item counts and machine progress before/after deterministic ticks and confirm disconnected output never enters inventory.
 - [ ] **Step 2: Run `npm test`** and verify the new simulation assertions fail.
 - [ ] **Step 3: Implement recipe data and `tickSite`** with deterministic elapsed-time accumulators and atomic input consumption.
 - [ ] **Step 4: Run `npm test`** and verify production, shared coal use, and existing world/logistics tests pass.
@@ -109,13 +114,13 @@
 - Test: `tests/fossils.test.js`
 
 **Interfaces:**
-- `finishFossil(state, siteId) -> { ok, fossilId?, reason? }` consumes the required processed fragment inputs and places a complete unidentified fossil item in the shared fossil inventory.
-- `openFossil(state, fossilId, rng = Math.random) -> { ok, fossil?, reason? }` rolls family and rarity only when a valid unidentified fossil is opened; a fossil ID can be opened once.
+- `finishFossil(site, finisher) -> { ok, item?, reason? }` consumes processed fragment inputs and emits a complete unidentified fossil item from the finisher's output slot; the item enters that site's inventory only after reaching its warehouse by belt.
+- `openFossil(state, siteId, fossilId, rng = Math.random) -> { ok, fossil?, reason? }` removes a valid unidentified fossil from that site's inventory and rolls family and rarity only when opened; a fossil ID can be opened once.
 - `setMuseumDisplay(state, siteId, fossilId, slotIndex) -> { ok, reason? }` equips an owned identified fossil at that site's museum; site bonuses apply only to that site's machines.
 - `expandMuseum(state, siteId) -> { ok, reason? }` spends materials to add one museum slot.
 - The first playable has individual fossil bonuses only, with no partial- or complete-set bonus logic.
 
-- [ ] **Step 1: Write failing tests** named `finishesUnidentifiedFossilWithoutRng`, `openFossilRollsOnlyWhenRequested`, `rejectsSecondOpen`, `museumBonusIsSiteLocal`, and `expandingMuseumDeductsMaterials`; assert inventory identity, deterministic family/rarity, one-time reveal, local-only activation, and exact slot/cost changes.
+- [ ] **Step 1: Write failing tests** named `finishesUnidentifiedFossilWithoutRng`, `warehouseStoresOnlyBeltDeliveredFossils`, `openFossilRollsOnlyWhenRequested`, `rejectsSecondOpen`, `museumBonusIsSiteLocal`, and `expandingMuseumDeductsMaterials`; assert physical output, inventory identity, deterministic family/rarity, one-time reveal, local-only activation, and exact slot/cost changes.
 - [ ] **Step 2: Run `npm test`** and verify the fossil tests fail against the current auto-roll behavior.
 - [ ] **Step 3: Implement `finishFossil`, `openFossil`, `setMuseumDisplay`, and `expandMuseum`** in `src/fossils.js` and connect their state transitions to `src/game-core.js`.
 - [ ] **Step 4: Run `npm test`** and verify manual reveal, inventory, and museum assertions pass.

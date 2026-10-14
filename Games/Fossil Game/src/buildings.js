@@ -1,8 +1,20 @@
 export const BUILDING_DEFINITIONS = {
+  warehouse: {
+    width: 2,
+    height: 2,
+    cost: { iron: 8, stone: 4 },
+    inputs: [
+      { x: -1, y: 0, direction: 'west' },
+      { x: 2, y: 0, direction: 'east' },
+      { x: 0, y: -1, direction: 'north' },
+      { x: 0, y: 2, direction: 'south' },
+    ],
+    outputs: [],
+  },
   excavator: {
     width: 2,
     height: 2,
-    cost: {},
+    cost: { iron: 4, stone: 4 },
     inputs: [],
     outputs: [{ x: 2, y: 0, direction: 'east' }],
   },

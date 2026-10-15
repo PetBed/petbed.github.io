@@ -75,6 +75,39 @@ function activeSite(state) {
   return state.sites.find(site => site.id === state.activeSiteId) || state.site;
 }
 
+export function getBeltItemPosition(site, belt) {
+  const direction = DIRECTIONS[belt?.direction];
+  if (!belt?.item || !direction) {
+    return null;
+  }
+
+  const next = { x: belt.x + direction.x, y: belt.y + direction.y };
+  const targetLanes = site.belts.filter(candidate =>
+    candidate.x === next.x && candidate.y === next.y
+  );
+  const target = targetLanes.find(candidate => candidate.direction === belt.direction) || targetLanes[0];
+  const hasInputPort = site.buildings.some(building =>
+    getBuildingPorts(building).some(port =>
+      port.type === 'input' &&
+      port.x === belt.x &&
+      port.y === belt.y &&
+      OPPOSITE_DIRECTIONS[port.direction] === belt.direction
+    )
+  );
+
+  if ((target && target.item !== null) || (!target && !hasInputPort)) {
+    return { x: belt.x + 0.5, y: belt.y + 0.5 };
+  }
+
+  const progress = Number.isFinite(belt.progress) ? belt.progress : 0;
+  const accumulator = Number.isFinite(site.logisticsAccumulator) ? site.logisticsAccumulator : 0;
+  const fraction = Math.min(1, Math.max(0, progress + accumulator));
+  return {
+    x: belt.x + 0.5 + direction.x * fraction,
+    y: belt.y + 0.5 + direction.y * fraction,
+  };
+}
+
 export function getMachineInventoryMarkers(building) {
   const footprint = getBuildingFootprint(building);
   const slots = [
@@ -156,22 +189,52 @@ function drawItem(context, item, x, y, size = 0.32) {
   context.fillRect(x - size / 2, y - size / 2, size * 0.36, size * 0.24);
 }
 
-function drawBelt(context, belt) {
+function drawBelt(context, belts, site) {
+  const first = belts[0];
   context.fillStyle = '#1f2925';
-  context.fillRect(belt.x + 0.05, belt.y + 0.05, 0.9, 0.9);
-  context.fillStyle = '#5a6359';
-  context.fillRect(belt.x + 0.12, belt.y + 0.12, 0.76, 0.76);
-  context.fillStyle = '#74766a';
-  context.fillRect(belt.x + 0.16, belt.y + 0.17, 0.68, 0.66);
-  context.save();
-  context.translate(belt.x, belt.y);
-  drawDirection(context, belt.direction, '#d6c879');
-  context.restore();
+  context.fillRect(first.x + 0.05, first.y + 0.05, 0.9, 0.9);
 
-  if (belt.item) {
-    const offset = DIRECTIONS[belt.direction] || DIRECTIONS.east;
-    const progress = Math.min(0.7, Math.max(0, belt.progress || 0) * 0.7);
-    drawItem(context, belt.item, belt.x + 0.5 + offset.x * progress, belt.y + 0.5 + offset.y * progress);
+  if (belts.length === 1) {
+    const belt = first;
+    context.fillStyle = '#5a6359';
+    context.fillRect(belt.x + 0.12, belt.y + 0.12, 0.76, 0.76);
+    context.fillStyle = '#74766a';
+    context.fillRect(belt.x + 0.16, belt.y + 0.17, 0.68, 0.66);
+    context.save();
+    context.translate(belt.x, belt.y);
+    drawDirection(context, belt.direction, '#d6c879');
+    context.restore();
+  } else {
+    for (const belt of belts) {
+      const horizontal = belt.direction === 'east' || belt.direction === 'west';
+      context.fillStyle = '#5a6359';
+      context.fillRect(
+        belt.x + (horizontal ? 0.08 : 0.34),
+        belt.y + (horizontal ? 0.34 : 0.08),
+        horizontal ? 0.84 : 0.32,
+        horizontal ? 0.32 : 0.84
+      );
+      context.fillStyle = '#74766a';
+      context.fillRect(
+        belt.x + (horizontal ? 0.12 : 0.4),
+        belt.y + (horizontal ? 0.4 : 0.12),
+        horizontal ? 0.76 : 0.2,
+        horizontal ? 0.2 : 0.76
+      );
+      context.save();
+      context.translate(belt.x, belt.y);
+      drawDirection(context, belt.direction, '#d6c879');
+      context.restore();
+    }
+  }
+
+  for (const belt of belts) {
+    if (belt.item) {
+      const position = getBeltItemPosition(site, belt);
+      if (position) {
+        drawItem(context, belt.item, position.x, position.y);
+      }
+    }
   }
 }
 
@@ -336,8 +399,15 @@ export function drawWorld(context, state, camera, viewport, preview = null) {
       drawResourceNode(context, node);
     }
   }
+  const beltGroups = new Map();
   for (const belt of site.belts) {
-    drawBelt(context, belt);
+    const key = `${belt.x},${belt.y}`;
+    const group = beltGroups.get(key) || [];
+    group.push(belt);
+    beltGroups.set(key, group);
+  }
+  for (const belts of beltGroups.values()) {
+    drawBelt(context, belts, site);
   }
   for (const building of site.buildings) {
     drawBuilding(context, building);

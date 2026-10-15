@@ -199,3 +199,127 @@ test('drawsInvalidBeltRouteEndpoints', () => {
     ));
   }
 });
+
+test('interpolatesUnblockedItemBetweenBeltCenters', () => {
+  const site = createInitialState().sites[0];
+  const belt = {
+    id: 'belt-moving',
+    type: 'belt',
+    x: 10,
+    y: 10,
+    direction: 'east',
+    item: { type: 'resource', resource: 'iron' },
+    progress: 0,
+  };
+  site.logisticsAccumulator = 0.5;
+  site.belts.push(
+    belt,
+    {
+      id: 'belt-destination',
+      type: 'belt',
+      x: 11,
+      y: 10,
+      direction: 'east',
+      item: null,
+      progress: 0,
+    }
+  );
+
+  assert.deepEqual(renderer.getBeltItemPosition(site, belt), { x: 11, y: 10.5 });
+});
+
+test('holdsBlockedItemAtItsCurrentCenter', () => {
+  const site = createInitialState().sites[0];
+  const belt = {
+    id: 'belt-blocked',
+    type: 'belt',
+    x: 10,
+    y: 10,
+    direction: 'east',
+    item: { type: 'resource', resource: 'iron' },
+    progress: 0,
+  };
+  site.logisticsAccumulator = 0.5;
+  site.belts.push(
+    belt,
+    {
+      id: 'belt-occupied-destination',
+      type: 'belt',
+      x: 11,
+      y: 10,
+      direction: 'east',
+      item: { type: 'resource', resource: 'coal' },
+      progress: 0,
+    }
+  );
+
+  assert.deepEqual(renderer.getBeltItemPosition(site, belt), { x: 10.5, y: 10.5 });
+});
+
+test('drawsDistinctTracksForCrossingLanes', () => {
+  const context = recordingContext();
+  const state = createInitialState();
+  state.sites[0].belts.push(
+    {
+      id: 'belt-horizontal',
+      type: 'belt',
+      x: 10,
+      y: 10,
+      direction: 'east',
+      item: null,
+      progress: 0,
+    },
+    {
+      id: 'belt-vertical',
+      type: 'belt',
+      x: 10,
+      y: 10,
+      direction: 'north',
+      item: null,
+      progress: 0,
+    }
+  );
+
+  renderer.drawWorld(
+    context,
+    state,
+    { x: 0, y: 0, zoom: 1, tileSize: 32 },
+    { width: 640, height: 640 }
+  );
+
+  assert.ok(context.calls.some(call =>
+    call.method === 'fillRect' &&
+    call.args.join(',') === '10.08,10.34,0.84,0.32'
+  ));
+  assert.ok(context.calls.some(call =>
+    call.method === 'fillRect' &&
+    call.args.join(',') === '10.34,10.08,0.32,0.84'
+  ));
+});
+
+test('drawWorldDoesNotMutateItemOrSimulationState', () => {
+  const context = recordingContext();
+  const state = createInitialState();
+  const site = state.sites[0];
+  site.logisticsAccumulator = 0.5;
+  site.simulationAccumulator = 0.25;
+  site.belts.push({
+    id: 'belt-render-purity',
+    type: 'belt',
+    x: 10,
+    y: 10,
+    direction: 'east',
+    item: { type: 'resource', resource: 'iron' },
+    progress: 0.25,
+  });
+  const before = structuredClone(site);
+
+  renderer.drawWorld(
+    context,
+    state,
+    { x: 0, y: 0, zoom: 1, tileSize: 32 },
+    { width: 640, height: 640 }
+  );
+
+  assert.deepEqual(site, before);
+});

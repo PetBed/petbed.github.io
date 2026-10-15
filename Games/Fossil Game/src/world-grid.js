@@ -666,27 +666,6 @@ export function removeBeltsAtTiles(state, tiles) {
   return { ok: true, removed, refunded, returnedItems };
 }
 
-export function getBeltItemPosition(site, belt) {
-  if (!belt || !belt.item || !belt.direction) {
-    return null;
-  }
-  const next = {
-    x: belt.x + { north: 0, east: 1, south: 0, west: -1 }[belt.direction],
-    y: belt.y + { north: -1, east: 0, south: 1, west: 0 }[belt.direction],
-  };
-  const targetBlocked = tileHasBuilding(site, next.x, next.y) || site.belts.some(candidate => candidate !== belt && candidate.x === next.x && candidate.y === next.y);
-  if (targetBlocked) {
-    return { x: belt.x + 0.5, y: belt.y + 0.5 };
-  }
-  const offset = { north: { x: 0, y: -1 }, east: { x: 1, y: 0 }, south: { x: 0, y: 1 }, west: { x: -1, y: 0 } }[belt.direction];
-  const progress = Number.isFinite(belt.progress) ? belt.progress : 0;
-  const accumulator = Number.isFinite(site.logisticsAccumulator) ? site.logisticsAccumulator : 0;
-  return {
-    x: belt.x + 0.5 + offset.x * Math.min(1, progress + accumulator),
-    y: belt.y + 0.5 + offset.y * Math.min(1, progress + accumulator),
-  };
-}
-
 export function getBeltDirectionsAtTile(site, x, y) {
   return site.belts.filter(belt => belt.x === x && belt.y === y).map(belt => belt.direction);
 }

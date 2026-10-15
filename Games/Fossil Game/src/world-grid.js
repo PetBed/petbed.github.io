@@ -51,15 +51,18 @@ function toTile(point, fallback = { x: 0, y: 0 }) {
   return { x: Number(point.x), y: Number(point.y) };
 }
 
-function normalizeCost(cost) {
+function normalizeCost(cost, resources) {
   if (!cost || typeof cost !== 'object' || Array.isArray(cost)) {
-    return {};
+    return null;
   }
-  return Object.fromEntries(
-    Object.entries(cost)
-      .filter(([resource, amount]) => typeof resource === 'string' && Number.isFinite(amount) && amount >= 0)
-      .map(([resource, amount]) => [resource, Number(amount)])
-  );
+  const normalized = {};
+  for (const [resource, amount] of Object.entries(cost)) {
+    if (!Object.hasOwn(resources, resource) || !Number.isFinite(amount) || amount < 0) {
+      return null;
+    }
+    normalized[resource] = amount;
+  }
+  return normalized;
 }
 
 function laneKey(x, y, direction) {
@@ -200,16 +203,17 @@ function nextId(state, prefix) {
 }
 
 function calcRemovalRefund(entity, fallbackCost) {
-  const paidCost = Object.hasOwn(entity, 'paidCost') && entity.paidCost ? normalizeCost(entity.paidCost) : fallbackCost;
-  return paidCost && typeof paidCost === 'object' ? paidCost : {};
+  return Object.hasOwn(entity, 'paidCost') ? entity.paidCost : fallbackCost;
 }
 
 function findStarterBuilding(site, building) {
   const candidateIds = [
     'building-1',
     'building-2',
+    'building-3',
     `${site.id}-building-1`,
     `${site.id}-building-2`,
+    `${site.id}-building-3`,
   ];
   return candidateIds.includes(building.id);
 }
@@ -296,6 +300,7 @@ export function placeBelt(state, x, y, direction) {
     direction,
     item: null,
     progress: 0,
+    paidCost: { ...cost },
   });
 
   return { ok: true };
@@ -516,21 +521,169 @@ export function placeBeltRoute(state, start, end) {
 }
 
 export function getGridLineTiles(start, end) {
-  const startTile = toTile(start);
-  const endTile = toTile(end);
-  const dx = endTile.x - startTile.x;
-  const dy = endTile.y - startTile.y;
-  const steps = Math.max(Math.abs(dx), Math.abs(dy));
-  const tiles = [];
+  if (
+    !start || !end ||
+    !Number.isSafeInteger(start.x) || !Number.isSafeInteger(start.y) ||
+    !Number.isSafeInteger(end.x) || !Number.isSafeInteger(end.y)
+  ) {
+    throw new RangeError('grid line endpoints must be integer world coordinates');
+  }
 
-  for (let step = 0; step <= steps; step += 1) {
-    const progress = steps === 0 ? 0 : step / steps;
-    const x = Math.round(startTile.x + dx * progress);
-    const y = Math.round(startTile.y + dy * progress);
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const nx = Math.abs(dx);
+  const ny = Math.abs(dy);
+  const stepX = Math.sign(dx);
+  const stepY = Math.sign(dy);
+  let x = start.x;
+  let y = start.y;
+  let ix = 0;
+  let iy = 0;
+  const tiles = [{ x, y }];
+
+  while (ix < nx || iy < ny) {
+    const decision = (1 + 2 * ix) * ny - (1 + 2 * iy) * nx;
+    if (decision === 0) {
+      tiles.push({ x: x + stepX, y });
+      tiles.push({ x, y: y + stepY });
+      x += stepX;
+      y += stepY;
+      ix += 1;
+      iy += 1;
+    } else if (decision < 0) {
+      x += stepX;
+      ix += 1;
+    } else {
+      y += stepY;
+      iy += 1;
+    }
     tiles.push({ x, y });
   }
 
   return tiles;
+}
+
+function prepareItemReturns(site, items) {
+  const resourceReturns = {};
+  const fragmentReturns = {};
+  const fossils = [];
+  let returnedItems = 0;
+
+  for (const item of items) {
+    if (item === null) {
+      continue;
+    }
+    if (!item || typeof item !== 'object' || Array.isArray(item)) {
+      return { ok: false, reason: 'unsupported held item' };
+    }
+
+    const amount = item.amount === undefined ? 1 : item.amount;
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return { ok: false, reason: 'invalid held item amount' };
+    }
+    if (item.type === 'resource' && Object.hasOwn(site.resources, item.resource)) {
+      resourceReturns[item.resource] = (resourceReturns[item.resource] || 0) + amount;
+      returnedItems += amount;
+    } else if (item.type === 'fragment' && Object.hasOwn(site.fragments, item.family)) {
+      fragmentReturns[item.family] = (fragmentReturns[item.family] || 0) + amount;
+      returnedItems += amount;
+    } else if (item.type === 'unidentified-fossil' && Array.isArray(site.unidentifiedFossils)) {
+      fossils.push(item);
+      returnedItems += 1;
+    } else {
+      return { ok: false, reason: 'unsupported held item' };
+    }
+  }
+
+  return {
+    ok: true,
+    resourceReturns,
+    fragmentReturns,
+    fossils,
+    returnedItems,
+  };
+}
+
+function prepareRemovalPlan(site, entity, fallbackCost, refundFree = false, items = []) {
+  const rawRefund = refundFree ? {} : calcRemovalRefund(entity, fallbackCost);
+  const refund = normalizeCost(rawRefund, site.resources);
+  if (!refund) {
+    return { ok: false, reason: 'invalid paid cost' };
+  }
+
+  const itemReturns = prepareItemReturns(site, items);
+  if (!itemReturns.ok) {
+    return itemReturns;
+  }
+
+  const resourceReturns = { ...refund };
+  for (const [resource, amount] of Object.entries(itemReturns.resourceReturns)) {
+    resourceReturns[resource] = (resourceReturns[resource] || 0) + amount;
+  }
+  for (const [resource, amount] of Object.entries(resourceReturns)) {
+    if (!Number.isFinite(site.resources[resource] + amount)) {
+      return { ok: false, reason: 'inventory total is invalid' };
+    }
+  }
+  for (const [family, amount] of Object.entries(itemReturns.fragmentReturns)) {
+    if (!Number.isFinite(site.fragments[family] + amount)) {
+      return { ok: false, reason: 'inventory total is invalid' };
+    }
+  }
+
+  return {
+    ok: true,
+    refunded: refund,
+    resourceReturns,
+    fragmentReturns: itemReturns.fragmentReturns,
+    fossils: itemReturns.fossils,
+    returnedItems: itemReturns.returnedItems,
+  };
+}
+
+function combineRemovalPlans(site, plans) {
+  const combined = {
+    refunded: {},
+    resourceReturns: {},
+    fragmentReturns: {},
+    fossils: [],
+    returnedItems: 0,
+  };
+  for (const plan of plans) {
+    for (const [resource, amount] of Object.entries(plan.refunded)) {
+      combined.refunded[resource] = (combined.refunded[resource] || 0) + amount;
+    }
+    for (const [resource, amount] of Object.entries(plan.resourceReturns)) {
+      combined.resourceReturns[resource] = (combined.resourceReturns[resource] || 0) + amount;
+    }
+    for (const [family, amount] of Object.entries(plan.fragmentReturns)) {
+      combined.fragmentReturns[family] = (combined.fragmentReturns[family] || 0) + amount;
+    }
+    combined.fossils.push(...plan.fossils);
+    combined.returnedItems += plan.returnedItems;
+  }
+
+  for (const [resource, amount] of Object.entries(combined.resourceReturns)) {
+    if (!Number.isFinite(site.resources[resource] + amount)) {
+      return null;
+    }
+  }
+  for (const [family, amount] of Object.entries(combined.fragmentReturns)) {
+    if (!Number.isFinite(site.fragments[family] + amount)) {
+      return null;
+    }
+  }
+  return combined;
+}
+
+function applyRemovalPlan(site, plan) {
+  for (const [resource, amount] of Object.entries(plan.resourceReturns)) {
+    site.resources[resource] += amount;
+  }
+  for (const [family, amount] of Object.entries(plan.fragmentReturns)) {
+    site.fragments[family] += amount;
+  }
+  site.unidentifiedFossils.push(...plan.fossils);
 }
 
 export function removeBuilding(state, buildingId) {
@@ -545,57 +698,19 @@ export function removeBuilding(state, buildingId) {
   }
 
   const building = site.buildings[index];
-  const refund = findStarterBuilding(site, building) ? {} : calcRemovalRefund(building, BUILDING_DEFINITIONS[building.type]?.cost || {});
-  const before = structuredClone(site.resources);
-  const beforeFragments = structuredClone(site.fragments);
-  const beforeFossils = [...site.unidentifiedFossils];
-
-  const returnedItems = [...building.inputSlots, ...building.outputSlots].reduce((count, item) => {
-    if (!item || typeof item !== 'object') {
-      return count;
-    }
-    if (item.type === 'resource' && Object.hasOwn(site.resources, item.resource)) {
-      const amount = item.amount === undefined ? 1 : Number(item.amount) || 1;
-      site.resources[item.resource] += amount;
-      return count + amount;
-    }
-    if (item.type === 'fragment' && Object.hasOwn(site.fragments, item.family)) {
-      const amount = item.amount === undefined ? 1 : Number(item.amount) || 1;
-      site.fragments[item.family] += amount;
-      return count + amount;
-    }
-    if (item.type === 'unidentified-fossil') {
-      site.unidentifiedFossils.push(item);
-      return count + 1;
-    }
-    return count;
-  }, 0);
-
-  for (const [resource, amount] of Object.entries(refund)) {
-    if (Number.isFinite(site.resources[resource])) {
-      site.resources[resource] += Number(amount);
-    }
+  const plan = prepareRemovalPlan(
+    site,
+    building,
+    BUILDING_DEFINITIONS[building.type]?.cost || {},
+    findStarterBuilding(site, building),
+    [...building.inputSlots, ...building.outputSlots]
+  );
+  if (!plan.ok) {
+    return plan;
   }
-
+  applyRemovalPlan(site, plan);
   site.buildings.splice(index, 1);
-
-  const transformed = structuredClone(site.resources);
-  const finalFragments = structuredClone(site.fragments);
-  for (const resource of Object.keys(before)) {
-    if (!Number.isFinite(transformed[resource])) {
-      transformed[resource] = before[resource];
-    }
-  }
-  for (const family of Object.keys(beforeFragments)) {
-    if (!Number.isFinite(finalFragments[family])) {
-      finalFragments[family] = beforeFragments[family];
-    }
-  }
-  if (beforeFossils.length !== site.unidentifiedFossils.length && site.unidentifiedFossils.length < beforeFossils.length) {
-    site.unidentifiedFossils.splice(0, site.unidentifiedFossils.length, ...beforeFossils);
-  }
-
-  return { ok: true, refunded: refund, returnedItems };
+  return { ok: true, refunded: plan.refunded, returnedItems: plan.returnedItems };
 }
 
 export function removeBelt(state, beltId) {
@@ -610,28 +725,13 @@ export function removeBelt(state, beltId) {
   }
 
   const belt = site.belts[index];
-  const refund = normalizeCost(belt.paidCost) || { iron: 1 };
-  const returnedItems = belt.item ? 1 : 0;
-
-  if (belt.item) {
-    const item = belt.item;
-    if (item.type === 'resource' && Object.hasOwn(site.resources, item.resource)) {
-      site.resources[item.resource] += item.amount === undefined ? 1 : item.amount;
-    } else if (item.type === 'fragment' && Object.hasOwn(site.fragments, item.family)) {
-      site.fragments[item.family] += item.amount === undefined ? 1 : item.amount;
-    } else if (item.type === 'unidentified-fossil') {
-      site.unidentifiedFossils.push(item);
-    }
+  const plan = prepareRemovalPlan(site, belt, BELT_COST, false, [belt.item]);
+  if (!plan.ok) {
+    return plan;
   }
-
-  for (const [resource, amount] of Object.entries(refund)) {
-    if (Number.isFinite(site.resources[resource])) {
-      site.resources[resource] += Number(amount);
-    }
-  }
-
+  applyRemovalPlan(site, plan);
   site.belts.splice(index, 1);
-  return { ok: true, refunded: refund, returnedItems };
+  return { ok: true, refunded: plan.refunded, returnedItems: plan.returnedItems };
 }
 
 export function removeBeltsAtTiles(state, tiles) {
@@ -643,27 +743,34 @@ export function removeBeltsAtTiles(state, tiles) {
     return { ok: false, reason: 'tiles must be an array' };
   }
 
-  const targets = [...tiles].map(tile => ({ x: Number(tile.x), y: Number(tile.y) }));
-  const removed = [];
-  const refunded = {};
-  let returnedItems = 0;
-
-  for (const tile of targets) {
-    const matches = site.belts.filter(belt => belt.x === tile.x && belt.y === tile.y);
-    for (const belt of matches) {
-      const result = removeBelt(state, belt.id);
-      if (!result.ok) {
-        return { ok: false, reason: result.reason };
-      }
-      removed.push(belt.id);
-      for (const [resource, amount] of Object.entries(result.refunded || {})) {
-        refunded[resource] = (refunded[resource] || 0) + Number(amount);
-      }
-      returnedItems += result.returnedItems || 0;
+  const targetKeys = new Set();
+  for (const tile of tiles) {
+    if (!tile || !Number.isSafeInteger(tile.x) || !Number.isSafeInteger(tile.y)) {
+      return { ok: false, reason: 'tiles must contain integer coordinates' };
     }
+    targetKeys.add(`${tile.x},${tile.y}`);
   }
 
-  return { ok: true, removed, refunded, returnedItems };
+  const selected = site.belts.filter(belt => targetKeys.has(`${belt.x},${belt.y}`));
+  const plans = selected.map(belt => prepareRemovalPlan(site, belt, BELT_COST, false, [belt.item]));
+  const invalid = plans.find(plan => !plan.ok);
+  if (invalid) {
+    return invalid;
+  }
+  const combined = combineRemovalPlans(site, plans);
+  if (!combined) {
+    return { ok: false, reason: 'inventory total is invalid' };
+  }
+
+  applyRemovalPlan(site, combined);
+  const selectedIds = new Set(selected.map(belt => belt.id));
+  site.belts = site.belts.filter(belt => !selectedIds.has(belt.id));
+  return {
+    ok: true,
+    removed: selected.map(belt => belt.id),
+    refunded: combined.refunded,
+    returnedItems: combined.returnedItems,
+  };
 }
 
 export function getBeltDirectionsAtTile(site, x, y) {

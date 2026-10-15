@@ -67,6 +67,7 @@ test('placesBeltAndDeductsCost', () => {
     direction: 'east',
     item: null,
     progress: 0,
+    paidCost: { iron: 1 },
     }
   );
   assert.equal(site.resources.iron, 0);
@@ -323,13 +324,13 @@ test('revalidatesAndCommitsOnlyAffordablePrefix', () => {
 test('refundsRecordedConstructionCostExactlyOnce', () => {
   const state = createInitialState();
   const site = state.sites.find(({ id }) => id === state.activeSiteId);
-  const generator = site.buildings.find(building => building.type === 'generator');
+  const resourcesBeforeBuild = { ...site.resources };
 
-  if (!generator) {
-    throw new Error('expected starter generator to exist');
-  }
+  assert.deepEqual(worldGrid.placeBuilding(state, 'generator', 20, 20), { ok: true });
+  const generator = site.buildings.find(building => building.x === 20 && building.y === 20);
+  assert.deepEqual(generator.paidCost, BUILDING_DEFINITIONS.generator.cost);
 
-  const before = { ...site.resources };
+  const beforeRemoval = structuredClone(state);
   const result = worldGrid.removeBuilding(state, generator.id);
 
   assert.deepEqual(result, {
@@ -337,7 +338,204 @@ test('refundsRecordedConstructionCostExactlyOnce', () => {
     refunded: BUILDING_DEFINITIONS.generator.cost,
     returnedItems: 0,
   });
-  assert.equal(site.resources.iron, before.iron + BUILDING_DEFINITIONS.generator.cost.iron);
-  assert.equal(site.resources.stone, before.stone + BUILDING_DEFINITIONS.generator.cost.stone);
+  assert.deepEqual(site.resources, resourcesBeforeBuild);
   assert.equal(site.buildings.some(building => building.id === generator.id), false);
+  const afterFirstRemoval = structuredClone(state);
+  assert.deepEqual(worldGrid.removeBuilding(state, generator.id), { ok: false, reason: 'unknown building' });
+  assert.deepEqual(state, afterFirstRemoval);
+  assert.notDeepEqual(state, beforeRemoval);
+});
+
+test('doesNotRefundPreplacedStarterBuildings', () => {
+  const state = createInitialState();
+  const site = state.sites[0];
+  const starterGenerator = site.buildings.find(building => building.type === 'generator');
+  assert.ok(starterGenerator);
+  const resourcesBefore = structuredClone(site.resources);
+
+  assert.deepEqual(worldGrid.removeBuilding(state, starterGenerator.id), {
+    ok: true,
+    refunded: {},
+    returnedItems: 0,
+  });
+  assert.deepEqual(site.resources, resourcesBefore);
+});
+
+test('infersHistoricalConstructionCostForLegacyBuiltEntity', () => {
+  const state = createInitialState();
+  const site = state.sites[0];
+  const resourcesBeforeBuild = { ...site.resources };
+  assert.deepEqual(worldGrid.placeBuilding(state, 'generator', 20, 20), { ok: true });
+  const generator = site.buildings.find(building => building.x === 20 && building.y === 20);
+  delete generator.paidCost;
+
+  assert.deepEqual(worldGrid.removeBuilding(state, generator.id), {
+    ok: true,
+    refunded: BUILDING_DEFINITIONS.generator.cost,
+    returnedItems: 0,
+  });
+  assert.deepEqual(site.resources, resourcesBeforeBuild);
+});
+
+test('returnsMachineContentsToMatchingInventories', () => {
+  const state = createInitialState();
+  const site = state.sites[0];
+  assert.deepEqual(worldGrid.placeBuilding(state, 'smelter', 20, 20), { ok: true });
+  const smelter = site.buildings.find(building => building.x === 20 && building.y === 20);
+  const fossil = { type: 'unidentified-fossil', id: 'returned-fossil' };
+  smelter.inputSlots.push(
+    { type: 'resource', resource: 'iron', amount: 2 },
+    { type: 'fragment', family: 'fish', amount: 1 }
+  );
+  smelter.outputSlots.push(fossil);
+  const ironBefore = site.resources.iron;
+  const fragmentsBefore = site.fragments.fish;
+
+  const result = worldGrid.removeBuilding(state, smelter.id);
+
+  assert.deepEqual(result, {
+    ok: true,
+    refunded: BUILDING_DEFINITIONS.smelter.cost,
+    returnedItems: 4,
+  });
+  assert.equal(site.resources.iron, ironBefore + BUILDING_DEFINITIONS.smelter.cost.iron + 2);
+  assert.equal(site.fragments.fish, fragmentsBefore + 1);
+  assert.deepEqual(site.unidentifiedFossils, [fossil]);
+});
+
+test('removesOnlySelectedLaneAndReturnsItsItem', () => {
+  const state = createInitialState();
+  const site = state.sites[0];
+  const selected = {
+    id: 'selected-east-lane',
+    type: 'belt',
+    x: 20,
+    y: 20,
+    direction: 'east',
+    item: { type: 'resource', resource: 'coal', amount: 2 },
+    progress: 0.5,
+    paidCost: { iron: 1 },
+  };
+  const crossing = {
+    id: 'crossing-north-lane',
+    type: 'belt',
+    x: 20,
+    y: 20,
+    direction: 'north',
+    item: null,
+    progress: 0,
+    paidCost: {},
+  };
+  site.belts.push(selected, crossing);
+  const ironBefore = site.resources.iron;
+  const coalBefore = site.resources.coal;
+
+  assert.deepEqual(worldGrid.removeBelt(state, selected.id), {
+    ok: true,
+    refunded: { iron: 1 },
+    returnedItems: 2,
+  });
+  assert.deepEqual(site.belts, [crossing]);
+  assert.equal(site.resources.iron, ironBefore + 1);
+  assert.equal(site.resources.coal, coalBefore + 2);
+});
+
+test('removeBeltsAtTilesDeletesAllLanesButNoBuildings', () => {
+  const state = createInitialState();
+  const site = state.sites[0];
+  const warehouse = site.buildings.find(building => building.type === 'warehouse');
+  const east = {
+    id: 'swept-east',
+    type: 'belt',
+    x: 12,
+    y: 14,
+    direction: 'east',
+    item: null,
+    progress: 0,
+    paidCost: { iron: 1 },
+  };
+  const north = {
+    id: 'swept-north',
+    type: 'belt',
+    x: 12,
+    y: 14,
+    direction: 'north',
+    item: { type: 'fragment', family: 'fern', amount: 2 },
+    progress: 0,
+    paidCost: {},
+  };
+  const other = {
+    id: 'not-swept',
+    type: 'belt',
+    x: 13,
+    y: 14,
+    direction: 'east',
+    item: null,
+    progress: 0,
+    paidCost: { iron: 1 },
+  };
+  site.belts.push(east, north, other);
+  const ironBefore = site.resources.iron;
+  const fernBefore = site.fragments.fern;
+
+  const result = worldGrid.removeBeltsAtTiles(state, [{ x: 12, y: 14 }]);
+
+  assert.deepEqual(result, {
+    ok: true,
+    removed: [east.id, north.id],
+    refunded: { iron: 1 },
+    returnedItems: 2,
+  });
+  assert.deepEqual(site.belts, [other]);
+  assert.equal(site.resources.iron, ironBefore + 1);
+  assert.equal(site.fragments.fern, fernBefore + 2);
+  assert.ok(site.buildings.includes(warehouse));
+});
+
+test('gridSweepIncludesEveryTouchedTile', () => {
+  assert.deepEqual(
+    worldGrid.getGridLineTiles({ x: 0, y: 0 }, { x: 2, y: 2 }),
+    [
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+      { x: 0, y: 1 },
+      { x: 1, y: 1 },
+      { x: 2, y: 1 },
+      { x: 1, y: 2 },
+      { x: 2, y: 2 },
+    ]
+  );
+});
+
+test('rejectsInvalidRemovalWithoutPartialRefund', () => {
+  const state = createInitialState();
+  const site = state.sites[0];
+  const first = {
+    id: 'valid-before-invalid',
+    type: 'belt',
+    x: 20,
+    y: 20,
+    direction: 'east',
+    item: null,
+    progress: 0,
+    paidCost: { iron: 1 },
+  };
+  const invalid = {
+    id: 'invalid-held-item',
+    type: 'belt',
+    x: 20,
+    y: 20,
+    direction: 'north',
+    item: { type: 'unsupported-item' },
+    progress: 0,
+    paidCost: { iron: 1 },
+  };
+  site.belts.push(first, invalid);
+  const before = structuredClone(state);
+
+  assert.deepEqual(worldGrid.removeBeltsAtTiles(state, [{ x: 20, y: 20 }]), {
+    ok: false,
+    reason: 'unsupported held item',
+  });
+  assert.deepEqual(state, before);
 });

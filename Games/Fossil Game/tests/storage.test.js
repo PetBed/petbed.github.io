@@ -290,3 +290,15 @@ test('rejectsDuplicateSameDirectionLaneInSave', async () => {
   await assert.rejects(loadGame(), /invalid save data/i);
   assert.deepEqual(await readRecord(), malformed);
 });
+
+test('rejectsMalformedPaidCostInSave', async () => {
+  const { loadGame, saveGame } = await loadStorage();
+  await clearDatabase();
+  await saveGame(createInitialState());
+  const malformed = await readRecord();
+  malformed.state.sites[0].buildings[0].paidCost = { unknown: 1 };
+  await writeRecord(malformed);
+
+  await assert.rejects(loadGame(), /invalid save data/i);
+  assert.deepEqual(await readRecord(), malformed);
+});

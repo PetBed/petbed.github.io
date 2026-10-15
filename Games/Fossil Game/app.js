@@ -6,6 +6,10 @@ import {
   placeBeltRoute,
   placeBuilding,
   previewBeltRoute,
+  getGridLineTiles,
+  removeBelt,
+  removeBeltsAtTiles,
+  removeBuilding,
 } from './src/world-grid.js';
 import { BELT_COST, BUILDING_DEFINITIONS, getBuildingPorts } from './src/buildings.js';
 import {
@@ -45,7 +49,7 @@ const saveWarning = document.getElementById('save-warning');
 const TILE_SIZE = 32;
 const BELT_DIRECTIONS = ['east', 'south', 'west', 'north'];
 const BUILDINGS = ['excavator', 'generator', 'smelter', 'crusher', 'fossil-finisher', 'splitter'];
-const HOTKEY_BUILDS = ['belt', ...BUILDINGS];
+const HOTKEY_BUILDS = ['belt', ...BUILDINGS, 'remove'];
 const camera = {
   x: window.innerWidth / 2 - TILE_SIZE / 2,
   y: window.innerHeight / 2 - TILE_SIZE / 2,
@@ -72,6 +76,7 @@ let savingEnabled = true;
 let saveInProgress = false;
 let lastSaveError = '';
 let renderedSiteNavigation = '';
+let inspectedTile = null;
 
 function activeSite() {
   return state.sites.find(site => site.id === state.activeSiteId);
@@ -242,6 +247,11 @@ function renderFossilInventory() {
 function renderBuildSelection() {
   for (const button of document.querySelectorAll('[data-build]')) {
     const buildId = button.dataset.build;
+    if (buildId === 'remove') {
+      button.classList.toggle('selected', selectedBuild === 'remove');
+      button.title = 'Click a machine or belt tile to remove it; drag to sweep belts';
+      continue;
+    }
     const cost = buildId === 'belt' ? BELT_COST : BUILDING_DEFINITIONS[buildId].cost;
     const rows = getCostDisplayRows(cost);
     const affordable = canAffordCost(activeSite().resources, cost);
@@ -277,12 +287,17 @@ function renderBuildSelection() {
     hint.textContent = 'Click a tile to inspect · Esc clears build selection';
   } else if (selectedBuild === 'belt') {
     hint.textContent = `Drag between empty tiles to route · ${BELT_DIRECTIONS[beltDirectionIndex]} belt · R rotates`;
+  } else if (selectedBuild === 'remove') {
+    hint.textContent = 'Click to remove a machine or belt tile · Drag to sweep belts';
   } else {
     hint.textContent = 'Preview the footprint · R rotates';
   }
 }
 
 function selectBuild(buildId) {
+  if (dragState?.kind === 'remove') {
+    finishRemovalGesture(dragState);
+  }
   selectedBuild = buildId;
   dragState = null;
   beltRoutePreview = null;
@@ -352,7 +367,7 @@ function resizeAndDraw() {
   });
   worldContext.setTransform(canvasScale, 0, 0, canvasScale, 0, 0);
   let buildingPreview = null;
-  if (pointerPosition && selectedBuild && selectedBuild !== 'belt') {
+  if (pointerPosition && selectedBuild && selectedBuild !== 'belt' && selectedBuild !== 'remove') {
     const tile = screenToWorld(pointerPosition, camera);
     buildingPreview = {
       type: 'building',
@@ -384,14 +399,15 @@ function resizeAndDraw() {
     worldHeight: height,
   });
 
-  if (pointerPosition && selectedBuild === 'belt') {
+  if (pointerPosition && (selectedBuild === 'belt' || selectedBuild === 'remove')) {
     worldContext.save();
     worldContext.translate(camera.x, camera.y);
     worldContext.scale(camera.zoom * TILE_SIZE, camera.zoom * TILE_SIZE);
     const tile = screenToWorld(pointerPosition, camera);
-    worldContext.fillStyle = 'rgba(225, 207, 120, 0.18)';
+    const removeMode = selectedBuild === 'remove';
+    worldContext.fillStyle = removeMode ? 'rgba(210, 110, 87, 0.2)' : 'rgba(225, 207, 120, 0.18)';
     worldContext.fillRect(tile.x, tile.y, 1, 1);
-    worldContext.strokeStyle = '#f0d987';
+    worldContext.strokeStyle = removeMode ? '#ed9b80' : '#f0d987';
     worldContext.lineWidth = 0.045;
     worldContext.strokeRect(tile.x + 0.02, tile.y + 0.02, 0.96, 0.96);
     worldContext.restore();
@@ -409,7 +425,24 @@ function tileHasBuilding(site, tile) {
   });
 }
 
+function setInspectorDetails(text, actions = []) {
+  inspectDetails.replaceChildren(document.createTextNode(text));
+  for (const action of actions) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'inspector-remove';
+    if (action.buildingId !== undefined) {
+      button.dataset.removeBuilding = action.buildingId;
+    } else {
+      button.dataset.removeBelt = action.beltId;
+    }
+    button.textContent = action.label;
+    inspectDetails.append(button);
+  }
+}
+
 function inspectTile(tile) {
+  inspectedTile = { x: tile.x, y: tile.y };
   const site = activeSite();
   const building = tileHasBuilding(site, tile);
   if (building) {
@@ -418,21 +451,29 @@ function inspectTile(tile) {
     const outputDirections = ports.filter(port => port.type === 'output').map(port => port.direction);
     inspectTitle.textContent = building.type.replaceAll('-', ' ');
     inspectCopy.textContent = `${building.x}, ${building.y} · rotated ${building.rotation}°`;
-    inspectDetails.textContent = [
+    setInspectorDetails([
       `Input ports: ${inputDirections.join(', ') || 'none'}`,
       `Output ports: ${outputDirections.join(', ') || 'none'}`,
       `Input items: ${building.inputSlots.map(formatInventorySlot).join(', ') || 'none'}`,
       `Output items: ${building.outputSlots.map(formatInventorySlot).join(', ') || 'none'}`,
       `Progress: ${Math.floor(building.progress || 0)}`,
-    ].join('\n');
+    ].join('\n'), [{
+      buildingId: building.id,
+      label: 'Remove machine · refund',
+    }]);
     return;
   }
 
-  const belt = site.belts.find(item => item.x === tile.x && item.y === tile.y);
-  if (belt) {
-    inspectTitle.textContent = 'Transport belt';
-    inspectCopy.textContent = `${belt.direction} · tile ${tile.x}, ${tile.y}`;
-    inspectDetails.textContent = belt.item ? `Carrying ${formatItem(belt.item)}` : 'Waiting for an item';
+  const belts = site.belts.filter(item => item.x === tile.x && item.y === tile.y);
+  if (belts.length > 0) {
+    inspectTitle.textContent = belts.length === 1 ? 'Transport belt' : 'Crossing belts';
+    inspectCopy.textContent = `${belts.length} lane${belts.length === 1 ? '' : 's'} · tile ${tile.x}, ${tile.y}`;
+    setInspectorDetails(belts.map(belt =>
+      `${belt.direction} · ${belt.item ? `carrying ${formatItem(belt.item)}` : 'waiting for an item'}`
+    ).join('\n'), belts.map(belt => ({
+      beltId: belt.id,
+      label: `Remove ${belt.direction} lane · refund`,
+    })));
     return;
   }
 
@@ -440,13 +481,100 @@ function inspectTile(tile) {
   if (node) {
     inspectTitle.textContent = node.resource === 'fragment' ? 'Fossil bed' : `${node.resource} deposit`;
     inspectCopy.textContent = `${Math.max(0, node.remaining)} units remain at ${tile.x}, ${tile.y}.`;
-    inspectDetails.textContent = node.resource === 'fragment' ? 'Excavate fragments, then prepare them at a fossil finisher.' : 'Place an excavator on this deposit.';
+    setInspectorDetails(node.resource === 'fragment' ? 'Excavate fragments, then prepare them at a fossil finisher.' : 'Place an excavator on this deposit.');
     return;
   }
 
   inspectTitle.textContent = 'Factory';
   inspectCopy.textContent = `Ground tile ${tile.x}, ${tile.y}`;
-  inspectDetails.textContent = '';
+  setInspectorDetails('');
+}
+
+function removalMessage(description, result) {
+  const parts = [`Removed ${description}`];
+  const refunds = Object.entries(result.refunded || {})
+    .filter(([, amount]) => amount > 0)
+    .map(([resource, amount]) => `${amount} ${resource}`);
+  if (refunds.length > 0) {
+    parts.push(`refunded ${refunds.join(', ')}`);
+  }
+  if (result.returnedItems > 0) {
+    parts.push(`returned ${result.returnedItems} item${result.returnedItems === 1 ? '' : 's'}`);
+  }
+  return parts.join(' · ');
+}
+
+function reportSingleRemoval(tile, description, result) {
+  if (!result.ok) {
+    showToast(result.reason);
+    return;
+  }
+  const message = removalMessage(description, result);
+  pushLog(`${message}.`);
+  showToast(message);
+  updateHud();
+  inspectTile(tile);
+  void persistState();
+}
+
+function removeAtTile(tile) {
+  const site = activeSite();
+  const building = tileHasBuilding(site, tile);
+  if (building) {
+    reportSingleRemoval(tile, building.type.replaceAll('-', ' '), removeBuilding(state, building.id));
+    return;
+  }
+  const belts = site.belts.filter(belt => belt.x === tile.x && belt.y === tile.y);
+  if (belts.length > 0) {
+    const result = removeBeltsAtTiles(state, [tile]);
+    reportSingleRemoval(tile, `${result.ok ? result.removed.length : belts.length} belt lane${belts.length === 1 ? '' : 's'}`, result);
+    return;
+  }
+  showToast('Nothing to remove here');
+}
+
+function createRemovalSummary() {
+  return { removedBelts: 0, refunded: {}, returnedItems: 0 };
+}
+
+function addRemovalToSummary(summary, result) {
+  summary.removedBelts += result.removed.length;
+  summary.returnedItems += result.returnedItems;
+  for (const [resource, amount] of Object.entries(result.refunded)) {
+    summary.refunded[resource] = (summary.refunded[resource] || 0) + amount;
+  }
+}
+
+function sweepRemovalToTile(tile) {
+  if (!dragState || dragState.kind !== 'remove' ||
+      (tile.x === dragState.lastTile.x && tile.y === dragState.lastTile.y)) {
+    return;
+  }
+  dragState.moved ||= tile.x !== dragState.startTile.x || tile.y !== dragState.startTile.y;
+  const tiles = getGridLineTiles(dragState.lastTile, tile);
+  const result = removeBeltsAtTiles(state, tiles);
+  if (!result.ok) {
+    showToast(result.reason);
+  } else if (result.removed.length > 0) {
+    addRemovalToSummary(dragState.summary, result);
+    updateHud();
+    inspectTile(tile);
+    void persistState();
+  }
+  dragState.lastTile = tile;
+}
+
+function finishRemovalGesture(gesture) {
+  if (!gesture || gesture.summary.removedBelts === 0) {
+    return;
+  }
+  const summary = gesture.summary;
+  const description = `${summary.removedBelts} belt lane${summary.removedBelts === 1 ? '' : 's'}`;
+  const message = removalMessage(description, summary);
+  pushLog(`${message}.`);
+  showToast(message);
+  updateHud();
+  inspectTile(gesture.lastTile);
 }
 
 function placeSelected(tile) {
@@ -499,7 +627,9 @@ function handleWorldClick(event) {
   const rect = worldCanvas.getBoundingClientRect();
   const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
   const tile = screenToWorld(point, camera);
-  if (selectedBuild) {
+  if (selectedBuild === 'remove') {
+    removeAtTile(tile);
+  } else if (selectedBuild) {
     placeSelected(tile);
   } else {
     inspectTile(tile);
@@ -543,6 +673,23 @@ document.querySelector('.build-tools').addEventListener('click', event => {
   const button = event.target.closest('[data-build]');
   if (!button) return;
   selectBuild(button.dataset.build);
+});
+
+inspectDetails.addEventListener('click', event => {
+  const button = event.target.closest('[data-remove-building], [data-remove-belt]');
+  if (!button) return;
+  const tile = inspectedTile;
+  const buildingId = button.dataset.removeBuilding;
+  const beltId = button.dataset.removeBelt;
+  const result = buildingId !== undefined
+    ? removeBuilding(state, activeSite().buildings.find(item => String(item.id) === buildingId)?.id)
+    : removeBelt(state, activeSite().belts.find(item => String(item.id) === beltId)?.id);
+  const description = button.dataset.removeBuilding !== undefined
+    ? 'machine'
+    : 'belt lane';
+  if (tile) {
+    reportSingleRemoval(tile, description, result);
+  }
 });
 
 document.getElementById('cancel-build').addEventListener('click', () => {
@@ -679,6 +826,8 @@ worldCanvas.addEventListener('pointermove', event => {
       end: endTile,
       ...previewBeltRoute(state, dragState.startTile, endTile),
     };
+  } else if (dragState?.kind === 'remove') {
+    sweepRemovalToTile(screenToWorld(pointerPosition, camera));
   }
 });
 
@@ -702,10 +851,37 @@ worldCanvas.addEventListener('pointerdown', event => {
       moved: false,
     };
     worldCanvas.setPointerCapture(event.pointerId);
+  } else if (event.button === 0 && selectedBuild === 'remove') {
+    const rect = worldCanvas.getBoundingClientRect();
+    const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    const startTile = screenToWorld(point, camera);
+    dragState = {
+      kind: 'remove',
+      startTile,
+      lastTile: startTile,
+      moved: false,
+      summary: createRemovalSummary(),
+    };
+    worldCanvas.setPointerCapture(event.pointerId);
   }
 });
 
 worldCanvas.addEventListener('pointerup', event => {
+  if (dragState?.kind === 'remove') {
+    const rect = worldCanvas.getBoundingClientRect();
+    const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    const endTile = screenToWorld(point, camera);
+    const removalGesture = dragState;
+    sweepRemovalToTile(endTile);
+    dragState = null;
+    if (!removalGesture.moved) {
+      removeAtTile(removalGesture.startTile);
+    } else {
+      finishRemovalGesture(removalGesture);
+    }
+    return;
+  }
+
   if (dragState?.kind === 'belt-route') {
     const rect = worldCanvas.getBoundingClientRect();
     const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
@@ -744,6 +920,9 @@ worldCanvas.addEventListener('pointerup', event => {
 });
 
 worldCanvas.addEventListener('pointercancel', () => {
+  if (dragState?.kind === 'remove') {
+    finishRemovalGesture(dragState);
+  }
   dragState = null;
   beltRoutePreview = null;
 });
@@ -759,12 +938,12 @@ minimapCanvas.addEventListener('click', recenterFromMinimap);
 window.addEventListener('resize', resize);
 window.addEventListener('keydown', event => {
   if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
-  if (/^[1-7]$/.test(event.key)) {
+  if (/^[1-8]$/.test(event.key)) {
     selectBuild(HOTKEY_BUILDS[Number(event.key) - 1]);
   } else if (event.key.toLowerCase() === 'r') {
     if (selectedBuild === 'belt') {
       beltDirectionIndex = (beltDirectionIndex + 1) % BELT_DIRECTIONS.length;
-    } else {
+    } else if (selectedBuild && selectedBuild !== 'remove') {
       selectedRotation = (selectedRotation + 90) % 360;
     }
     renderBuildSelection();

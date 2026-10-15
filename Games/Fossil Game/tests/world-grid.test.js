@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import { createInitialState } from '../src/game-core.js';
 import * as worldGrid from '../src/world-grid.js';
-import { BELT_COST, BUILDING_DEFINITIONS } from '../src/buildings.js';
+import { BELT_COST, BUILDING_DEFINITIONS, getBuildingFootprint } from '../src/buildings.js';
 
 test('placesBuildingAndDeductsCost', () => {
   assert.equal(typeof worldGrid.placeBuilding, 'function');
@@ -100,6 +100,38 @@ test('reusesExistingLaneAndAddsFreeCrossingLane', () => {
     site.belts.filter(belt => belt.x === 10 && belt.y === 10).map(({ direction }) => direction),
     ['east', 'north']
   );
+});
+
+test('findsBuildingsAtTilesUsingTheSharedFootprint', () => {
+  const state = createInitialState();
+  const site = state.sites[0];
+
+  for (const rotation of [0, 90, 180, 270]) {
+    const building = {
+      id: `rotated-${rotation}`,
+      type: 'fossil-finisher',
+      x: 20,
+      y: 20,
+      rotation,
+      inputSlots: [],
+      outputSlots: [],
+      progress: 0,
+    };
+    site.buildings = [building];
+    const footprint = getBuildingFootprint(building);
+
+    for (let x = footprint.left - 1; x <= footprint.right + 1; x += 1) {
+      for (let y = footprint.top - 1; y <= footprint.bottom + 1; y += 1) {
+        const covered = x >= footprint.left && x <= footprint.right &&
+          y >= footprint.top && y <= footprint.bottom;
+        assert.equal(
+          worldGrid.findBuildingAtTile(site, x, y),
+          covered ? building : undefined,
+          `rotation ${rotation} tile ${x},${y}`
+        );
+      }
+    }
+  }
 });
 
 test('rejectsDuplicateSameDirectionLane', () => {

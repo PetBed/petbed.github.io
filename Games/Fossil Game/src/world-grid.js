@@ -37,11 +37,17 @@ function isOccupied(site, footprint) {
   );
 }
 
-function tileHasBuilding(site, x, y) {
-  return site.buildings.some(building => {
+// The single owner of "which building covers this tile": both the coverage test and the
+// inspector's lookup go through it, so a rotated footprint can never be computed two ways.
+export function findBuildingAtTile(site, x, y) {
+  return site.buildings.find(building => {
     const footprint = getBuildingFootprint(building);
     return x >= footprint.left && x <= footprint.right && y >= footprint.top && y <= footprint.bottom;
   });
+}
+
+function tileHasBuilding(site, x, y) {
+  return findBuildingAtTile(site, x, y) !== undefined;
 }
 
 function toTile(point, fallback = { x: 0, y: 0 }) {

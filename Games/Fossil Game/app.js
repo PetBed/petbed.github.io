@@ -1,6 +1,7 @@
 import { advanceSiteFrame, createInitialState } from './src/game-core.js';
 import {
   exploreSite,
+  findBuildingAtTile,
   isBuildingPlacementValid,
   placeBelt,
   placeBeltRoute,
@@ -414,17 +415,6 @@ function resizeAndDraw() {
   }
 }
 
-function tileHasBuilding(site, tile) {
-  return site.buildings.find(building => {
-    const definition = BUILDING_DEFINITIONS[building.type];
-    const rotated = building.rotation === 90 || building.rotation === 270;
-    const width = rotated ? definition.height : definition.width;
-    const height = rotated ? definition.width : definition.height;
-    return tile.x >= building.x && tile.x < building.x + width &&
-      tile.y >= building.y && tile.y < building.y + height;
-  });
-}
-
 function setInspectorDetails(text, actions = []) {
   inspectDetails.replaceChildren(document.createTextNode(text));
   for (const action of actions) {
@@ -444,7 +434,7 @@ function setInspectorDetails(text, actions = []) {
 function inspectTile(tile) {
   inspectedTile = { x: tile.x, y: tile.y };
   const site = activeSite();
-  const building = tileHasBuilding(site, tile);
+  const building = findBuildingAtTile(site, tile.x, tile.y);
   if (building) {
     const ports = getBuildingPorts(building);
     const inputDirections = ports.filter(port => port.type === 'input').map(port => port.direction);
@@ -519,7 +509,7 @@ function reportSingleRemoval(tile, description, result) {
 
 function removeAtTile(tile) {
   const site = activeSite();
-  const building = tileHasBuilding(site, tile);
+  const building = findBuildingAtTile(site, tile.x, tile.y);
   if (building) {
     reportSingleRemoval(tile, building.type.replaceAll('-', ' '), removeBuilding(state, building.id));
     return;

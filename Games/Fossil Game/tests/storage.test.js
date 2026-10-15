@@ -357,3 +357,69 @@ test('rejectsMalformedPaidCostInSave', async () => {
   await assert.rejects(loadGame(), /invalid save data/i);
   assert.deepEqual(await readRecord(), malformed);
 });
+
+// Pre-crossing saves were written before `paidCost` and before a coordinate could hold
+// more than one lane. They reach validateState through migrateVersionTwoState, so this
+// is the path that decides whether an existing factory survives the crossing-lane work.
+function legacyVersionTwoState() {
+  const state = createInitialState();
+  for (const site of state.sites) {
+    for (const building of site.buildings) {
+      delete building.paidCost;
+    }
+  }
+  return state;
+}
+
+test('loadsVersionTwoSaveWithoutPaidCostOrCrossingLanes', async () => {
+  const { loadGame, saveGame } = await loadStorage();
+  await clearDatabase();
+  const state = legacyVersionTwoState();
+  const belt = {
+    id: 'legacy-v2-belt',
+    type: 'belt',
+    x: 12,
+    y: 14,
+    direction: 'east',
+    item: { type: 'resource', resource: 'iron' },
+    progress: 0.25,
+  };
+  state.site.belts.push(belt);
+  await saveGame(state);
+  await writeRecord({ id: SAVE_ID, saveVersion: 2, savedAt: 1000, state });
+
+  const loaded = await loadGame();
+
+  assert.deepEqual(loaded.site.belts, [belt]);
+  assert.equal(Object.hasOwn(loaded.site.belts[0], 'paidCost'), false);
+});
+
+test('rejectsVersionTwoSaveCarryingDuplicateSameDirectionLanes', async () => {
+  const { loadGame, saveGame } = await loadStorage();
+  await clearDatabase();
+  const state = legacyVersionTwoState();
+  state.site.belts.push(
+    {
+      id: 'legacy-duplicate-a',
+      type: 'belt',
+      x: 12,
+      y: 14,
+      direction: 'east',
+      item: null,
+      progress: 0,
+    },
+    {
+      id: 'legacy-duplicate-b',
+      type: 'belt',
+      x: 12,
+      y: 14,
+      direction: 'east',
+      item: null,
+      progress: 0,
+    }
+  );
+  await saveGame(createInitialState());
+  await writeRecord({ id: SAVE_ID, saveVersion: 2, savedAt: 1000, state });
+
+  await assert.rejects(loadGame(), /duplicate belt lanes/i);
+});

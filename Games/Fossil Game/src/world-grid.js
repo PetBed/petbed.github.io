@@ -309,25 +309,56 @@ export function previewBeltRoute(state, start, end) {
 
   const startTile = toTile(start);
   const endTile = toTile(end);
-  if (!Number.isInteger(startTile.x) || !Number.isInteger(startTile.y) || !Number.isInteger(endTile.x) || !Number.isInteger(endTile.y)) {
+  if (
+    !Number.isSafeInteger(startTile.x) ||
+    !Number.isSafeInteger(startTile.y) ||
+    !Number.isSafeInteger(endTile.x) ||
+    !Number.isSafeInteger(endTile.y)
+  ) {
     return { ok: false, reason: 'route endpoints must be integer tiles' };
   }
   if (startTile.x === endTile.x && startTile.y === endTile.y) {
     return { ok: false, reason: 'route endpoints must differ' };
   }
+  if (
+    tileHasBuilding(site, startTile.x, startTile.y) ||
+    tileHasBuilding(site, endTile.x, endTile.y) ||
+    site.belts.some(belt =>
+      (belt.x === startTile.x && belt.y === startTile.y) ||
+      (belt.x === endTile.x && belt.y === endTile.y)
+    )
+  ) {
+    return { ok: false, reason: 'route endpoints must be empty' };
+  }
+
   const startKey = `${startTile.x},${startTile.y}`;
   const goalKey = `${endTile.x},${endTile.y}`;
-  const queue = [{ ...startTile }];
+  const heuristic = point => Math.abs(endTile.x - point.x) + Math.abs(endTile.y - point.y);
+  const open = [{
+    ...startTile,
+    key: startKey,
+    cost: 0,
+    estimate: heuristic(startTile),
+    order: 0,
+  }];
+  const bestCosts = new Map([[startKey, 0]]);
   const cameFrom = new Map();
-  const directionFrom = new Map();
-  const visited = new Set([startKey]);
+  const settled = new Set();
+  let nextOrder = 1;
 
-  while (queue.length > 0) {
-    const current = queue.shift();
-    const currentKey = `${current.x},${current.y}`;
+  while (open.length > 0) {
+    open.sort((first, second) =>
+      first.estimate - second.estimate || first.order - second.order
+    );
+    const current = open.shift();
+    if (settled.has(current.key)) {
+      continue;
+    }
+    const currentKey = current.key;
     if (currentKey === goalKey) {
       break;
     }
+    settled.add(currentKey);
 
     for (const direction of DIRECTION_ORDER) {
       const delta = {
@@ -338,22 +369,29 @@ export function previewBeltRoute(state, start, end) {
       }[direction];
       const next = { x: current.x + delta.x, y: current.y + delta.y };
       const nextKey = `${next.x},${next.y}`;
-      if (visited.has(nextKey)) {
+      if (settled.has(nextKey)) {
         continue;
       }
       if (tileHasBuilding(site, next.x, next.y)) {
         continue;
       }
-      if (next.x === startTile.x && next.y === startTile.y) {
+      if (!Number.isSafeInteger(next.x) || !Number.isSafeInteger(next.y)) {
         continue;
       }
-      if (!Number.isInteger(next.x) || !Number.isInteger(next.y)) {
+      const nextCost = current.cost + 1;
+      if (bestCosts.has(nextKey) && bestCosts.get(nextKey) <= nextCost) {
         continue;
       }
-      visited.add(nextKey);
+      bestCosts.set(nextKey, nextCost);
       cameFrom.set(nextKey, currentKey);
-      directionFrom.set(nextKey, direction);
-      queue.push(next);
+      open.push({
+        ...next,
+        key: nextKey,
+        cost: nextCost,
+        estimate: nextCost + heuristic(next),
+        order: nextOrder,
+      });
+      nextOrder += 1;
     }
   }
 
@@ -361,45 +399,57 @@ export function previewBeltRoute(state, start, end) {
     return { ok: false, reason: 'no valid route' };
   }
 
-  const route = [];
+  const path = [endTile];
   let cursor = goalKey;
   while (cursor !== startKey) {
-    const currentTile = { x: Number(cursor.split(',')[0]), y: Number(cursor.split(',')[1]) };
-    const direction = directionFrom.get(cursor);
     const previous = cameFrom.get(cursor);
-    if (!direction) {
+    if (!previous) {
       return { ok: false, reason: 'route reconstruction failed' };
     }
-    const existing = site.belts.find(belt => belt.x === currentTile.x && belt.y === currentTile.y && belt.direction === direction);
-    const crossing = site.belts.some(belt => belt.x === currentTile.x && belt.y === currentTile.y && belt.direction !== direction);
-    route.push({
-      x: currentTile.x,
-      y: currentTile.y,
+    cursor = previous;
+    path.push({
+      x: Number(cursor.split(',')[0]),
+      y: Number(cursor.split(',')[1]),
+    });
+  }
+  path.reverse();
+
+  const route = path.map((tile, index) => {
+    const from = index < path.length - 1 ? tile : path[index - 1];
+    const to = index < path.length - 1 ? path[index + 1] : tile;
+    const direction = to.x > from.x
+      ? 'east'
+      : to.x < from.x
+        ? 'west'
+        : to.y > from.y
+          ? 'south'
+          : 'north';
+    const existing = site.belts.find(belt =>
+      belt.x === tile.x && belt.y === tile.y && belt.direction === direction
+    );
+    const crossing = site.belts.some(belt =>
+      belt.x === tile.x && belt.y === tile.y && belt.direction !== direction
+    );
+    return {
+      ...tile,
       direction,
       kind: existing ? 'reuse' : crossing ? 'crossing' : 'new',
-    });
-    cursor = previous;
-  }
-  route.reverse();
-
-  if (route.length === 0) {
-    return { ok: false, reason: 'route is empty' };
-  }
-
-  const startDirection = route[0]?.direction || 'east';
-  const startTileHasExisting = site.belts.find(belt => belt.x === startTile.x && belt.y === startTile.y && belt.direction === startDirection);
-  const startTileCrossing = site.belts.some(belt => belt.x === startTile.x && belt.y === startTile.y && belt.direction !== startDirection);
-  route.unshift({
-    x: startTile.x,
-    y: startTile.y,
-    direction: startDirection,
-    kind: startTileHasExisting ? 'reuse' : startTileCrossing ? 'crossing' : 'new',
+    };
   });
 
   const cost = { iron: route.filter(step => step.kind === 'new').length };
-  const affordableSteps = route.filter(step => step.kind === 'new').length;
   const availableIron = Number.isFinite(site.resources.iron) ? site.resources.iron : 0;
-  const buildable = availableIron >= cost.iron ? route : route.slice(0, Math.max(0, route.length - Math.max(0, cost.iron - availableIron)));
+  let remainingIron = availableIron;
+  const buildable = [];
+  for (const step of route) {
+    if (step.kind === 'new') {
+      if (remainingIron < 1) {
+        break;
+      }
+      remainingIron -= 1;
+    }
+    buildable.push(step);
+  }
   const buildableCost = { iron: buildable.filter(step => step.kind === 'new').length };
 
   return {
@@ -644,4 +694,3 @@ export function getBeltDirectionsAtTile(site, x, y) {
 export function isBeltRouteBlocked(site, x, y) {
   return tileHasBuilding(site, x, y) || site.belts.some(belt => belt.x === x && belt.y === y && belt.item !== null);
 }
-

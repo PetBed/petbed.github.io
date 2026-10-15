@@ -188,6 +188,138 @@ test('findsShortestFourDirectionRoute', () => {
   assert.deepEqual(preview.cost, { iron: 4 });
 });
 
+test('usesStableTieBreakForEqualShortestPaths', () => {
+  const state = createInitialState();
+  const site = state.sites.find(({ id }) => id === state.activeSiteId);
+  site.buildings = [];
+  site.belts = [];
+  site.resources.iron = 10;
+
+  const first = worldGrid.previewBeltRoute(state, { x: 0, y: 0 }, { x: 1, y: 1 });
+  const second = worldGrid.previewBeltRoute(state, { x: 0, y: 0 }, { x: 1, y: 1 });
+
+  assert.deepEqual(
+    first.route.map(({ x, y, direction }) => ({ x, y, direction })),
+    [
+      { x: 0, y: 0, direction: 'south' },
+      { x: 0, y: 1, direction: 'east' },
+      { x: 1, y: 1, direction: 'east' },
+    ]
+  );
+  assert.deepEqual(second.route, first.route);
+});
+
+test('routesAroundBuildingButOverResourceNodes', () => {
+  const state = createInitialState();
+  const site = state.sites.find(({ id }) => id === state.activeSiteId);
+  site.buildings = [
+    { id: 'route-blocker', type: 'splitter', x: 2, y: 0, rotation: 0 },
+    { id: 'route-south-blocker', type: 'splitter', x: 0, y: 1, rotation: 0 },
+    { id: 'route-north-blocker', type: 'splitter', x: 0, y: -1, rotation: 0 },
+  ];
+  site.belts = [];
+  site.resources.iron = 10;
+  site.resourceNodes.push({
+    id: 'route-passable-node',
+    resource: 'iron',
+    x: 1,
+    y: 0,
+    remaining: 100,
+  });
+
+  const preview = worldGrid.previewBeltRoute(state, { x: 0, y: 0 }, { x: 4, y: 0 });
+
+  assert.equal(preview.ok, true);
+  assert.ok(preview.route.some(({ x, y }) => x === 1 && y === 0));
+  assert.ok(preview.route.every(({ x, y }) => !(x === 2 && y === 0)));
+});
+
+test('requiresEmptyEndpoints', () => {
+  const state = createInitialState();
+  const site = state.sites.find(({ id }) => id === state.activeSiteId);
+  site.buildings = [];
+  site.belts = [{
+    id: 'endpoint-belt',
+    type: 'belt',
+    x: 0,
+    y: 0,
+    direction: 'east',
+    item: null,
+    progress: 0,
+  }];
+  site.resources.iron = 10;
+  const before = structuredClone(state);
+
+  const preview = worldGrid.previewBeltRoute(state, { x: 0, y: 0 }, { x: 3, y: 0 });
+  const commit = worldGrid.placeBeltRoute(state, { x: 0, y: 0 }, { x: 3, y: 0 });
+
+  assert.deepEqual(preview, { ok: false, reason: 'route endpoints must be empty' });
+  assert.deepEqual(commit, { ok: false, reason: 'route endpoints must be empty' });
+  assert.deepEqual(state, before);
+
+  site.belts = [];
+  site.buildings = [{ id: 'occupied-endpoint', type: 'splitter', x: 3, y: 0, rotation: 0 }];
+  const beforeOccupiedEnd = structuredClone(state);
+  assert.deepEqual(
+    worldGrid.previewBeltRoute(state, { x: 0, y: 0 }, { x: 3, y: 0 }),
+    { ok: false, reason: 'route endpoints must be empty' }
+  );
+  assert.deepEqual(state, beforeOccupiedEnd);
+});
+
+test('capsPreviewAtLastAffordableTile', () => {
+  const state = createInitialState();
+  const site = state.sites.find(({ id }) => id === state.activeSiteId);
+  site.buildings = [];
+  site.belts = [];
+  site.resources.iron = 2;
+  const before = structuredClone(state);
+
+  const preview = worldGrid.previewBeltRoute(state, { x: 0, y: 0 }, { x: 3, y: 0 });
+
+  assert.equal(preview.ok, true);
+  assert.deepEqual(preview.route.map(({ x, y }) => ({ x, y })), [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 2, y: 0 },
+    { x: 3, y: 0 },
+  ]);
+  assert.deepEqual(preview.buildableRoute.map(({ x, y }) => ({ x, y })), [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+  ]);
+  assert.deepEqual(preview.cost, { iron: 4 });
+  assert.equal(preview.complete, false);
+  assert.equal(preview.remaining, 2);
+  assert.deepEqual(state, before);
+});
+
+test('revalidatesAndCommitsOnlyAffordablePrefix', () => {
+  const state = createInitialState();
+  const site = state.sites.find(({ id }) => id === state.activeSiteId);
+  site.buildings = [];
+  site.belts = [];
+  site.resources.iron = 4;
+
+  const preview = worldGrid.previewBeltRoute(state, { x: 0, y: 0 }, { x: 3, y: 0 });
+  site.resources.iron = 2;
+  const commit = worldGrid.placeBeltRoute(state, { x: 0, y: 0 }, { x: 3, y: 0 });
+
+  assert.equal(preview.complete, true);
+  assert.deepEqual(commit, {
+    ok: true,
+    placed: 2,
+    reused: 0,
+    cost: { iron: 2 },
+    remaining: 2,
+  });
+  assert.deepEqual(site.belts.map(({ x, y }) => ({ x, y })), [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+  ]);
+  assert.equal(site.resources.iron, 0);
+});
+
 test('refundsRecordedConstructionCostExactlyOnce', () => {
   const state = createInitialState();
   const site = state.sites.find(({ id }) => id === state.activeSiteId);

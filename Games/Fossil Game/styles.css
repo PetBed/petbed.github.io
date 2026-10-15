@@ -330,6 +330,8 @@ kbd {
 
 .build-hint {
   margin: 2px 0;
+  color: #c8cbbb;
+  font-size: 10px;
   line-height: 1.35;
 }
 
@@ -377,6 +379,9 @@ kbd {
   color: #e2d7ae;
   line-height: 1.5;
   overflow-wrap: anywhere;
+  white-space: pre-line;
+  max-height: min(32vh, 220px);
+  overflow-y: auto;
 }
 
 .inventory-panel {

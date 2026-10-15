@@ -1,6 +1,13 @@
 import { advanceSiteFrame, createInitialState } from './src/game-core.js';
-import { exploreSite, placeBelt, placeBuilding } from './src/world-grid.js';
-import { BELT_COST, BUILDING_DEFINITIONS } from './src/buildings.js';
+import {
+  exploreSite,
+  isBuildingPlacementValid,
+  placeBelt,
+  placeBeltRoute,
+  placeBuilding,
+  previewBeltRoute,
+} from './src/world-grid.js';
+import { BELT_COST, BUILDING_DEFINITIONS, getBuildingPorts } from './src/buildings.js';
 import {
   canAffordCost,
   getCostDisplayRows,
@@ -55,6 +62,7 @@ let lastHudUpdate = 0;
 let toastTimeout;
 let pointerPosition = null;
 let dragState = null;
+let beltRoutePreview = null;
 let canvasScale = 1;
 let minimapMap = null;
 let lastViewportWidth = window.innerWidth;
@@ -116,6 +124,13 @@ function formatItem(item) {
   if (item.type === 'fragment') return `${item.family} fragment`;
   if (item.type === 'unidentified-fossil') return 'unidentified fossil';
   return item.type;
+}
+
+function formatInventorySlot(item) {
+  const name = formatItem(item);
+  const label = name.charAt(0).toUpperCase() + name.slice(1);
+  const amount = item.amount || 1;
+  return amount > 1 ? `${label} ×${amount}` : label;
 }
 
 function resizeCanvas(canvas, context, width, height) {
@@ -261,10 +276,17 @@ function renderBuildSelection() {
   if (!selectedBuild) {
     hint.textContent = 'Click a tile to inspect · Esc clears build selection';
   } else if (selectedBuild === 'belt') {
-    hint.textContent = `${BELT_DIRECTIONS[beltDirectionIndex]} belt · R rotates`;
+    hint.textContent = `Drag between empty tiles to route · ${BELT_DIRECTIONS[beltDirectionIndex]} belt · R rotates`;
   } else {
     hint.textContent = 'Preview the footprint · R rotates';
   }
+}
+
+function selectBuild(buildId) {
+  selectedBuild = buildId;
+  dragState = null;
+  beltRoutePreview = null;
+  renderBuildSelection();
 }
 
 function updateHud() {
@@ -329,7 +351,26 @@ function resizeAndDraw() {
     bottom: bottomRight.y + 2,
   });
   worldContext.setTransform(canvasScale, 0, 0, canvasScale, 0, 0);
-  drawWorld(worldContext, state, camera, { width, height });
+  let buildingPreview = null;
+  if (pointerPosition && selectedBuild && selectedBuild !== 'belt') {
+    const tile = screenToWorld(pointerPosition, camera);
+    buildingPreview = {
+      type: 'building',
+      buildingType: selectedBuild,
+      x: tile.x,
+      y: tile.y,
+      rotation: selectedRotation,
+      valid: isBuildingPlacementValid(state, selectedBuild, tile.x, tile.y, selectedRotation),
+      affordable: canAffordCost(activeSite().resources, BUILDING_DEFINITIONS[selectedBuild].cost),
+    };
+  }
+  drawWorld(
+    worldContext,
+    state,
+    camera,
+    { width, height },
+    beltRoutePreview || buildingPreview
+  );
 
   const site = activeSite();
   const mapWidth = minimapCanvas.clientWidth;
@@ -343,7 +384,7 @@ function resizeAndDraw() {
     worldHeight: height,
   });
 
-  if (pointerPosition && selectedBuild) {
+  if (pointerPosition && selectedBuild === 'belt') {
     worldContext.save();
     worldContext.translate(camera.x, camera.y);
     worldContext.scale(camera.zoom * TILE_SIZE, camera.zoom * TILE_SIZE);
@@ -372,9 +413,18 @@ function inspectTile(tile) {
   const site = activeSite();
   const building = tileHasBuilding(site, tile);
   if (building) {
+    const ports = getBuildingPorts(building);
+    const inputDirections = ports.filter(port => port.type === 'input').map(port => port.direction);
+    const outputDirections = ports.filter(port => port.type === 'output').map(port => port.direction);
     inspectTitle.textContent = building.type.replaceAll('-', ' ');
-    inspectCopy.textContent = `${building.x}, ${building.y} · facing ${building.rotation}°`;
-    inspectDetails.textContent = `Input ${building.inputSlots.length} · Output ${building.outputSlots.length} · Progress ${Math.floor(building.progress || 0)}`;
+    inspectCopy.textContent = `${building.x}, ${building.y} · rotated ${building.rotation}°`;
+    inspectDetails.textContent = [
+      `Input ports: ${inputDirections.join(', ') || 'none'}`,
+      `Output ports: ${outputDirections.join(', ') || 'none'}`,
+      `Input items: ${building.inputSlots.map(formatInventorySlot).join(', ') || 'none'}`,
+      `Output items: ${building.outputSlots.map(formatInventorySlot).join(', ') || 'none'}`,
+      `Progress: ${Math.floor(building.progress || 0)}`,
+    ].join('\n');
     return;
   }
 
@@ -412,6 +462,33 @@ function placeSelected(tile) {
   showToast('Construction placed');
   updateHud();
   inspectTile(tile);
+  void persistState();
+}
+
+function commitBeltRoute(start, end) {
+  const result = placeBeltRoute(state, start, end);
+  if (!result.ok) {
+    pushLog(`Belt route not placed: ${result.reason}.`);
+    showToast(result.reason);
+    return;
+  }
+  if (result.placed === 0) {
+    const message = `Need ${result.remaining} iron to start this route`;
+    pushLog(`${message}.`);
+    showToast(message);
+    return;
+  }
+
+  updateHud();
+  inspectTile(end);
+  if (result.remaining > 0) {
+    const message = `Route partial · ${result.remaining} more iron needed`;
+    pushLog(`Placed ${result.placed} belt tiles; ${result.remaining} iron is still needed for the full route.`);
+    showToast(message);
+  } else {
+    pushLog(`Belt route placed · ${result.cost.iron} iron.`);
+    showToast(`Belt route placed · ${result.cost.iron} iron`);
+  }
   void persistState();
 }
 
@@ -465,13 +542,11 @@ function gameFrame(now) {
 document.querySelector('.build-tools').addEventListener('click', event => {
   const button = event.target.closest('[data-build]');
   if (!button) return;
-  selectedBuild = button.dataset.build;
-  renderBuildSelection();
+  selectBuild(button.dataset.build);
 });
 
 document.getElementById('cancel-build').addEventListener('click', () => {
-  selectedBuild = null;
-  renderBuildSelection();
+  selectBuild(null);
 });
 
 document.getElementById('site-navigation').addEventListener('click', event => {
@@ -484,6 +559,8 @@ document.getElementById('site-navigation').addEventListener('click', event => {
       showToast(result.reason);
       return;
     }
+    dragState = null;
+    beltRoutePreview = null;
     if (catchup?.elapsedSeconds >= 60) {
       pushLog(`${result.site.name} caught up by ${Math.floor(catchup.elapsedSeconds / 60)} minutes.`);
     }
@@ -581,7 +658,7 @@ document.querySelector('.inventory-panel').addEventListener('click', event => {
 worldCanvas.addEventListener('pointermove', event => {
   const rect = worldCanvas.getBoundingClientRect();
   pointerPosition = { x: event.clientX - rect.left, y: event.clientY - rect.top };
-  if (dragState) {
+  if (dragState?.kind === 'pan') {
     const dx = event.clientX - dragState.x;
     const dy = event.clientY - dragState.y;
     if (Math.abs(dx) + Math.abs(dy) > 3) {
@@ -590,23 +667,77 @@ worldCanvas.addEventListener('pointermove', event => {
     }
     dragState.x = event.clientX;
     dragState.y = event.clientY;
+  } else if (dragState?.kind === 'belt-route') {
+    const endTile = screenToWorld(pointerPosition, camera);
+    dragState.endTile = endTile;
+    dragState.moved = dragState.moved ||
+      endTile.x !== dragState.startTile.x ||
+      endTile.y !== dragState.startTile.y;
+    beltRoutePreview = {
+      type: 'belt-route',
+      start: dragState.startTile,
+      end: endTile,
+      ...previewBeltRoute(state, dragState.startTile, endTile),
+    };
   }
 });
 
 worldCanvas.addEventListener('pointerdown', event => {
-  const isPanGesture = event.button === 2 || event.button === 1 || event.shiftKey || event.pointerType === 'touch';
+  const isPanGesture =
+    event.button === 2 ||
+    event.button === 1 ||
+    event.shiftKey ||
+    (event.pointerType === 'touch' && !selectedBuild);
   if (isPanGesture) {
-    dragState = { x: event.clientX, y: event.clientY, moved: false, isPanGesture };
+    dragState = { kind: 'pan', x: event.clientX, y: event.clientY, moved: false };
+    worldCanvas.setPointerCapture(event.pointerId);
+  } else if (event.button === 0 && selectedBuild === 'belt') {
+    const rect = worldCanvas.getBoundingClientRect();
+    const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    const startTile = screenToWorld(point, camera);
+    dragState = {
+      kind: 'belt-route',
+      startTile,
+      endTile: startTile,
+      moved: false,
+    };
     worldCanvas.setPointerCapture(event.pointerId);
   }
 });
 
 worldCanvas.addEventListener('pointerup', event => {
-  if (dragState?.moved) {
+  if (dragState?.kind === 'belt-route') {
+    const rect = worldCanvas.getBoundingClientRect();
+    const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    pointerPosition = point;
+    const endTile = screenToWorld(point, camera);
+    const routeGesture = dragState;
+    const moved = routeGesture.moved ||
+      endTile.x !== routeGesture.startTile.x ||
+      endTile.y !== routeGesture.startTile.y;
     dragState = null;
+    beltRoutePreview = null;
+    if (moved) {
+      commitBeltRoute(routeGesture.startTile, endTile);
+    } else if (event.button === 0) {
+      handleWorldClick(event);
+    }
     return;
   }
-  if (event.button === 0 && (!dragState?.isPanGesture || event.pointerType === 'touch')) {
+
+  if (dragState?.kind === 'pan') {
+    const panGesture = dragState;
+    dragState = null;
+    if (panGesture.moved) {
+      return;
+    }
+    if (event.button === 0 && event.pointerType === 'touch') {
+      handleWorldClick(event);
+    }
+    return;
+  }
+
+  if (event.button === 0) {
     handleWorldClick(event);
   }
   dragState = null;
@@ -614,6 +745,7 @@ worldCanvas.addEventListener('pointerup', event => {
 
 worldCanvas.addEventListener('pointercancel', () => {
   dragState = null;
+  beltRoutePreview = null;
 });
 
 worldCanvas.addEventListener('contextmenu', event => event.preventDefault());
@@ -628,8 +760,7 @@ window.addEventListener('resize', resize);
 window.addEventListener('keydown', event => {
   if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
   if (/^[1-7]$/.test(event.key)) {
-    selectedBuild = HOTKEY_BUILDS[Number(event.key) - 1];
-    renderBuildSelection();
+    selectBuild(HOTKEY_BUILDS[Number(event.key) - 1]);
   } else if (event.key.toLowerCase() === 'r') {
     if (selectedBuild === 'belt') {
       beltDirectionIndex = (beltDirectionIndex + 1) % BELT_DIRECTIONS.length;
@@ -638,8 +769,7 @@ window.addEventListener('keydown', event => {
     }
     renderBuildSelection();
   } else if (event.key === 'Escape') {
-    selectedBuild = null;
-    renderBuildSelection();
+    selectBuild(null);
   } else if (['ArrowLeft', 'a', 'A'].includes(event.key)) {
     panCamera(camera, 48, 0);
   } else if (['ArrowRight', 'd', 'D'].includes(event.key)) {

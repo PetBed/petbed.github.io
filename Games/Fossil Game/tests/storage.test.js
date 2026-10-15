@@ -2,6 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createInitialState } from '../src/game-core.js';
 import { foundSite } from '../src/sites.js';
+import {
+  placeBelt,
+  placeBuilding,
+  removeBelt,
+  removeBuilding,
+} from '../src/world-grid.js';
 
 const DATABASE_NAME = 'fossil-factory';
 const STORE_NAME = 'saves';
@@ -93,6 +99,55 @@ test('roundTripsPhysicalState', async () => {
   const loaded = await loadGame();
 
   assert.deepEqual(loaded, state);
+});
+
+test('persistsRemovalRefundsAndReturnedItems', async () => {
+  const { loadGame, saveGame } = await loadStorage();
+  await clearDatabase();
+  const state = createInitialState();
+  const site = state.site;
+  const originalBuildings = structuredClone(site.buildings);
+  const initialResources = { ...site.resources };
+  const initialFragments = { ...site.fragments };
+
+  assert.deepEqual(placeBuilding(state, 'smelter', 20, 20), { ok: true });
+  const smelter = site.buildings.find(building => building.x === 20 && building.y === 20);
+  smelter.inputSlots.push({ type: 'resource', resource: 'iron', amount: 2 });
+  assert.deepEqual(placeBelt(state, 24, 20, 'east'), { ok: true });
+  const belt = site.belts.find(item => item.x === 24 && item.y === 20);
+  belt.item = { type: 'fragment', family: 'fish', amount: 3 };
+
+  assert.deepEqual(removeBuilding(state, smelter.id), {
+    ok: true,
+    refunded: { iron: 8, stone: 4 },
+    returnedItems: 2,
+  });
+  assert.deepEqual(removeBelt(state, belt.id), {
+    ok: true,
+    refunded: { iron: 1 },
+    returnedItems: 3,
+  });
+
+  assert.deepEqual(site.resources, {
+    ...initialResources,
+    iron: initialResources.iron + 2,
+  });
+  assert.deepEqual(site.fragments, {
+    ...initialFragments,
+    fish: initialFragments.fish + 3,
+  });
+  assert.deepEqual(site.buildings, originalBuildings);
+  assert.deepEqual(site.belts, []);
+
+  await saveGame(state);
+  assert.equal((await readRecord()).saveVersion, 3);
+  const loaded = await loadGame();
+
+  assert.deepEqual(loaded, state);
+  assert.deepEqual(loaded.site.resources, site.resources);
+  assert.deepEqual(loaded.site.fragments, site.fragments);
+  assert.deepEqual(loaded.site.buildings, originalBuildings);
+  assert.deepEqual(loaded.site.belts, []);
 });
 
 test('returnsNullWhenNoSaveExists', async () => {

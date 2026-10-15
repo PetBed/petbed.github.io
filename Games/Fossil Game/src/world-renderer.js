@@ -100,7 +100,11 @@ export function getBeltItemPosition(site, belt) {
   }
 
   const progress = Number.isFinite(belt.progress) ? belt.progress : 0;
-  const accumulator = Number.isFinite(site.logisticsAccumulator) ? site.logisticsAccumulator : 0;
+  // Interpolate with the simulation clock, not `logisticsAccumulator`: logistics
+  // advances in whole-second steps, so its accumulator is always 0 between frames,
+  // while `simulationAccumulator` holds the fraction of a second since the last
+  // deterministic step. Reading the wrong one freezes items and hops them a tile.
+  const accumulator = Number.isFinite(site.simulationAccumulator) ? site.simulationAccumulator : 0;
   const fraction = Math.min(1, Math.max(0, progress + accumulator));
   return {
     x: belt.x + 0.5 + direction.x * fraction,

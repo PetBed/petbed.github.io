@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { createInitialState } from '../src/game-core.js';
+import { createInitialState, tickSite } from '../src/game-core.js';
 import * as renderer from '../src/world-renderer.js';
 import * as worldGrid from '../src/world-grid.js';
 
@@ -211,7 +211,7 @@ test('interpolatesUnblockedItemBetweenBeltCenters', () => {
     item: { type: 'resource', resource: 'iron' },
     progress: 0,
   };
-  site.logisticsAccumulator = 0.5;
+  site.simulationAccumulator = 0.5;
   site.belts.push(
     belt,
     {
@@ -239,7 +239,7 @@ test('holdsBlockedItemAtItsCurrentCenter', () => {
     item: { type: 'resource', resource: 'iron' },
     progress: 0,
   };
-  site.logisticsAccumulator = 0.5;
+  site.simulationAccumulator = 0.5;
   site.belts.push(
     belt,
     {
@@ -297,11 +297,46 @@ test('drawsDistinctTracksForCrossingLanes', () => {
   ));
 });
 
+test('glidesItemsForwardWithTheSimulationClock', () => {
+  const state = createInitialState();
+  const site = state.sites[0];
+  site.buildings = [];
+  site.belts = [];
+  for (let x = 10; x <= 13; x += 1) {
+    site.belts.push({
+      id: `belt-glide-${x}`,
+      type: 'belt',
+      x,
+      y: 10,
+      direction: 'east',
+      item: null,
+      progress: 0,
+    });
+  }
+  site.belts[0].item = { type: 'resource', resource: 'iron' };
+
+  // Seven 0.16s frames span 1.12s, so the last frame crosses exactly one
+  // deterministic simulation step and the item changes lane.
+  const drawn = [];
+  for (let frame = 0; frame < 7; frame += 1) {
+    tickSite(site, 0.16);
+    const carrier = site.belts.find(belt => belt.item !== null);
+    drawn.push(renderer.getBeltItemPosition(site, carrier).x);
+  }
+
+  for (let index = 1; index < drawn.length; index += 1) {
+    const step = drawn[index] - drawn[index - 1];
+    assert.ok(step > 0, `frame ${index} must advance the item, drew ${drawn.join(', ')}`);
+    assert.ok(step < 0.5, `frame ${index} must not hop a whole tile, drew ${drawn.join(', ')}`);
+  }
+  assert.ok(Math.abs(drawn[0] - (10.5 + 0.16)) < 1e-9, `first frame drew ${drawn[0]}`);
+  assert.ok(Math.abs(drawn[6] - (11.5 + 0.12)) < 1e-9, `seventh frame drew ${drawn[6]}`);
+});
+
 test('drawWorldDoesNotMutateItemOrSimulationState', () => {
   const context = recordingContext();
   const state = createInitialState();
   const site = state.sites[0];
-  site.logisticsAccumulator = 0.5;
   site.simulationAccumulator = 0.25;
   site.belts.push({
     id: 'belt-render-purity',

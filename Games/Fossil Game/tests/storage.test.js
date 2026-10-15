@@ -216,3 +216,77 @@ test('migratesSupportedVersion', async () => {
   assert.equal(migrated.site.nextFossilId, 1);
   assert.equal(migrated.site.museum.displayed.length, migrated.site.museum.slots);
 });
+
+test('loadsLegacySingleLaneSave', async () => {
+  const { loadGame, saveGame } = await loadStorage();
+  await clearDatabase();
+  const state = createInitialState();
+  const belt = {
+    id: 'legacy-single-belt',
+    type: 'belt',
+    x: 12,
+    y: 14,
+    direction: 'east',
+    item: { type: 'resource', resource: 'iron' },
+    progress: 0.25,
+  };
+  state.site.belts.push(belt);
+  await saveGame(state);
+
+  const loaded = await loadGame();
+
+  assert.deepEqual(loaded.site.belts, [belt]);
+});
+
+test('loadsDistinctCrossingLanesAtOneCoordinate', async () => {
+  const { loadGame, saveGame } = await loadStorage();
+  await clearDatabase();
+  const state = createInitialState();
+  const lanes = [
+    {
+      id: 'crossing-east',
+      type: 'belt',
+      x: 12,
+      y: 14,
+      direction: 'east',
+      item: null,
+      progress: 0,
+    },
+    {
+      id: 'crossing-north',
+      type: 'belt',
+      x: 12,
+      y: 14,
+      direction: 'north',
+      item: null,
+      progress: 0,
+    },
+  ];
+  state.site.belts.push(...lanes);
+  await saveGame(state);
+
+  const loaded = await loadGame();
+
+  assert.deepEqual(loaded.site.belts, lanes);
+});
+
+test('rejectsDuplicateSameDirectionLaneInSave', async () => {
+  const { loadGame, saveGame } = await loadStorage();
+  await clearDatabase();
+  await saveGame(createInitialState());
+  const malformed = await readRecord();
+  const lane = {
+    id: 'duplicate-east-a',
+    type: 'belt',
+    x: 12,
+    y: 14,
+    direction: 'east',
+    item: null,
+    progress: 0,
+  };
+  malformed.state.sites[0].belts = [lane, { ...lane, id: 'duplicate-east-b' }];
+  await writeRecord(malformed);
+
+  await assert.rejects(loadGame(), /invalid save data/i);
+  assert.deepEqual(await readRecord(), malformed);
+});

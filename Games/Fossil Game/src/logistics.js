@@ -19,10 +19,6 @@ function opposite(direction) {
   return rotateDirection(direction, 180);
 }
 
-function positionKey(x, y) {
-  return `${x},${y}`;
-}
-
 function getInputPort(site, belt) {
   for (const building of site.buildings) {
     if (!BUILDING_DEFINITIONS[building.type] || building.type === 'splitter') {
@@ -116,12 +112,14 @@ function chooseSplitterOutput(site, splitter, reservedBelts, initiallyOccupied) 
     const offset = DIRECTION_OFFSETS[direction];
     const x = splitter.x + offset.x;
     const y = splitter.y + offset.y;
-    const belt = site.belts.find(item => item.x === x && item.y === y);
+    const belt = site.belts.find(item =>
+      item.x === x && item.y === y && item.direction === direction
+    );
 
     if (
       belt &&
       belt.item === null &&
-      !initiallyOccupied.has(positionKey(x, y)) &&
+      !initiallyOccupied.has(belt.id) &&
       !reservedBelts.has(belt.id)
     ) {
       return { belt, nextIndex: (index + 1) % directions.length };
@@ -143,12 +141,15 @@ function releaseMachineOutputs(site, reservedBelts, initiallyOccupied) {
         continue;
       }
 
-      const belt = site.belts.find(item => item.x === position.x && item.y === position.y);
+      const belt = site.belts.find(item =>
+        item.x === position.x &&
+        item.y === position.y &&
+        item.direction === position.direction
+      );
       if (
         !belt ||
-        belt.direction !== position.direction ||
         belt.item !== null ||
-        initiallyOccupied.has(positionKey(belt.x, belt.y)) ||
+        initiallyOccupied.has(belt.id) ||
         reservedBelts.has(belt.id)
       ) {
         continue;
@@ -167,7 +168,7 @@ function advanceOneSecond(site) {
   const initiallyOccupied = new Set(
     site.belts
       .filter(belt => belt.item !== null)
-      .map(belt => positionKey(belt.x, belt.y))
+      .map(belt => belt.id)
   );
   const reservedBelts = new Set();
   const reservedInputs = new Map();
@@ -219,11 +220,12 @@ function advanceOneSecond(site) {
     }
 
     const next = nextPosition(belt);
-    const target = site.belts.find(item => item.x === next.x && item.y === next.y);
+    const nextLanes = site.belts.filter(item => item.x === next.x && item.y === next.y);
+    const target = nextLanes.find(item => item.direction === belt.direction) || nextLanes[0];
     if (
       target &&
       target.item === null &&
-      !initiallyOccupied.has(positionKey(target.x, target.y)) &&
+      !initiallyOccupied.has(target.id) &&
       !reservedBelts.has(target.id)
     ) {
       target.item = belt.item;

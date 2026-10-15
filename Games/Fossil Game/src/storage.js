@@ -81,7 +81,20 @@ function validateState(state) {
         !Array.isArray(building.inputSlots) ||
         !Array.isArray(building.outputSlots) ||
         (building.requiresPower !== undefined && typeof building.requiresPower !== 'boolean') ||
-        (building.powerReserved !== undefined && typeof building.powerReserved !== 'boolean')
+        (building.powerReserved !== undefined && typeof building.powerReserved !== 'boolean') ||
+        (
+          Object.hasOwn(building, 'paidCost') &&
+          (
+            !building.paidCost ||
+            typeof building.paidCost !== 'object' ||
+            Array.isArray(building.paidCost) ||
+            Object.entries(building.paidCost).some(([resource, amount]) =>
+              !RESOURCE_KEYS.includes(resource) ||
+              !Number.isFinite(amount) ||
+              amount < 0
+            )
+          )
+        )
       ) {
         failInvalidSave(`site ${site.id} has an invalid building`);
       }
@@ -106,6 +119,7 @@ function validateState(state) {
         failInvalidSave(`site ${site.id} has an invalid resource node`);
       }
     }
+    const beltLaneKeys = new Set();
     for (const belt of site.belts) {
       if (
         typeof belt.id !== 'string' ||
@@ -113,10 +127,28 @@ function validateState(state) {
         !Number.isSafeInteger(belt.y) ||
         !['north', 'east', 'south', 'west'].includes(belt.direction) ||
         !Object.hasOwn(belt, 'item') ||
-        !Number.isFinite(belt.progress)
+        !Number.isFinite(belt.progress) ||
+        (
+          Object.hasOwn(belt, 'paidCost') &&
+          (
+            !belt.paidCost ||
+            typeof belt.paidCost !== 'object' ||
+            Array.isArray(belt.paidCost) ||
+            Object.entries(belt.paidCost).some(([resource, amount]) =>
+              !RESOURCE_KEYS.includes(resource) ||
+              !Number.isFinite(amount) ||
+              amount < 0
+            )
+          )
+        )
       ) {
         failInvalidSave(`site ${site.id} has an invalid belt`);
       }
+      const laneKey = `${belt.x},${belt.y}:${belt.direction}`;
+      if (beltLaneKeys.has(laneKey)) {
+        failInvalidSave(`site ${site.id} has duplicate belt lanes`);
+      }
+      beltLaneKeys.add(laneKey);
     }
     for (const fossil of site.unidentifiedFossils) {
       if (fossil.type !== 'unidentified-fossil' || typeof fossil.id !== 'string') {

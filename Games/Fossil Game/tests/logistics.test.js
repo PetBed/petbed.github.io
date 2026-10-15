@@ -151,3 +151,62 @@ test('alternatesSplitterOutputs', () => {
   assert.equal(input.item, null);
   assert.equal(southOutput.item, secondItem);
 });
+
+test('feedsIntoAdjacentPerpendicularBeltFlow', () => {
+  const site = createSite();
+  const item = { type: 'resource', resource: 'coal' };
+  const input = addBelt(site, 'belt-feed-east', 20, 20, 'east', item);
+  const receiving = addBelt(site, 'belt-receive-north', 21, 20, 'north');
+  const northbound = addBelt(site, 'belt-continue-north', 21, 19, 'north');
+
+  logistics.tickLogistics(site, 1);
+  assert.equal(input.item, null);
+  assert.equal(receiving.item, item);
+
+  logistics.tickLogistics(site, 1);
+  assert.equal(receiving.item, null);
+  assert.equal(northbound.item, item);
+});
+
+test('prefersSameDirectionLaneAtCrossing', () => {
+  const site = createSite();
+  const item = { type: 'resource', resource: 'iron' };
+  const input = addBelt(site, 'belt-cross-input', 30, 30, 'east', item);
+  const northLane = addBelt(site, 'belt-cross-north-first', 31, 30, 'north');
+  const eastLane = addBelt(site, 'belt-cross-east-second', 31, 30, 'east');
+  const eastOutput = addBelt(site, 'belt-cross-east-output', 32, 30, 'east');
+
+  logistics.tickLogistics(site, 1);
+
+  assert.equal(input.item, null);
+  assert.equal(eastLane.item, item);
+  assert.equal(northLane.item, null);
+
+  logistics.tickLogistics(site, 1);
+
+  assert.equal(eastLane.item, null);
+  assert.equal(eastOutput.item, item);
+});
+
+test('keepsCrossingItemsOnTheirOriginalLanes', () => {
+  const site = createSite();
+  const eastItem = { type: 'resource', resource: 'iron' };
+  const northItem = { type: 'resource', resource: 'coal' };
+  const eastCrossing = addBelt(site, 'belt-cross-east', 10, 10, 'east', eastItem);
+  const northCrossing = addBelt(site, 'belt-cross-north', 10, 10, 'north');
+  const northInput = addBelt(site, 'belt-cross-north-input', 10, 11, 'north', northItem);
+  const eastOutput = addBelt(site, 'belt-cross-east-output', 11, 10, 'east');
+  const northOutput = addBelt(site, 'belt-cross-north-output', 10, 9, 'north');
+
+  logistics.tickLogistics(site, 1);
+
+  assert.equal(eastCrossing.item, null);
+  assert.equal(eastOutput.item, eastItem);
+  assert.equal(northInput.item, null);
+  assert.equal(northCrossing.item, northItem);
+
+  logistics.tickLogistics(site, 1);
+
+  assert.equal(northCrossing.item, null);
+  assert.equal(northOutput.item, northItem);
+});

@@ -7,6 +7,7 @@ import { FOSSIL_FAMILIES } from './fossils.js';
 
 const VALID_ROTATIONS = new Set([0, 90, 180, 270]);
 const VALID_DIRECTIONS = new Set(['north', 'east', 'south', 'west']);
+const DIRECTION_ORDER = ['south', 'east', 'north', 'west'];
 const EXPLORATION_CHUNK_SIZE = 24;
 const MINERAL_RESOURCES = ['coal', 'iron', 'copper', 'stone', 'sediment'];
 
@@ -34,6 +35,56 @@ function isOccupied(site, footprint) {
   return site.buildings.some(building =>
     intersects(getBuildingFootprint(building), footprint)
   );
+}
+
+function tileHasBuilding(site, x, y) {
+  return site.buildings.some(building => {
+    const footprint = getBuildingFootprint(building);
+    return x >= footprint.left && x <= footprint.right && y >= footprint.top && y <= footprint.bottom;
+  });
+}
+
+function toTile(point, fallback = { x: 0, y: 0 }) {
+  if (!point || typeof point !== 'object') {
+    return fallback;
+  }
+  return { x: Number(point.x), y: Number(point.y) };
+}
+
+function normalizeCost(cost) {
+  if (!cost || typeof cost !== 'object' || Array.isArray(cost)) {
+    return {};
+  }
+  return Object.fromEntries(
+    Object.entries(cost)
+      .filter(([resource, amount]) => typeof resource === 'string' && Number.isFinite(amount) && amount >= 0)
+      .map(([resource, amount]) => [resource, Number(amount)])
+  );
+}
+
+function laneKey(x, y, direction) {
+  return `${x},${y}:${direction}`;
+}
+
+function getBeltPlacementInfo(site, x, y, direction) {
+  const sameDirection = site.belts.find(belt => belt.x === x && belt.y === y && belt.direction === direction);
+  const crossing = site.belts.filter(belt => belt.x === x && belt.y === y && belt.direction !== direction);
+  return { sameDirection, crossing, isCrossing: crossing.length > 0, isDuplicate: Boolean(sameDirection) };
+}
+
+export function isBuildingPlacementValid(state, buildingId, x, y, rotation = 0) {
+  const site = activeSite(state);
+  if (
+    !site ||
+    !BUILDING_DEFINITIONS[buildingId] ||
+    !Number.isSafeInteger(x) ||
+    !Number.isSafeInteger(y) ||
+    !VALID_ROTATIONS.has(rotation)
+  ) {
+    return false;
+  }
+
+  return !isOccupied(site, getBuildingFootprint({ type: buildingId, x, y, rotation }));
 }
 
 function chunkHash(siteId, chunkX, chunkY, salt = 0) {
@@ -148,6 +199,21 @@ function nextId(state, prefix) {
   return id;
 }
 
+function calcRemovalRefund(entity, fallbackCost) {
+  const paidCost = Object.hasOwn(entity, 'paidCost') && entity.paidCost ? normalizeCost(entity.paidCost) : fallbackCost;
+  return paidCost && typeof paidCost === 'object' ? paidCost : {};
+}
+
+function findStarterBuilding(site, building) {
+  const candidateIds = [
+    'building-1',
+    'building-2',
+    `${site.id}-building-1`,
+    `${site.id}-building-2`,
+  ];
+  return candidateIds.includes(building.id);
+}
+
 export function placeBuilding(state, buildingId, x, y, rotation = 0) {
   const definition = BUILDING_DEFINITIONS[buildingId];
   const site = activeSite(state);
@@ -165,8 +231,7 @@ export function placeBuilding(state, buildingId, x, y, rotation = 0) {
     return { ok: false, reason: 'invalid rotation' };
   }
 
-  const footprint = getBuildingFootprint({ type: buildingId, x, y, rotation });
-  if (isOccupied(site, footprint)) {
+  if (!isBuildingPlacementValid(state, buildingId, x, y, rotation)) {
     return { ok: false, reason: 'occupied tiles' };
   }
   if (!canPay(site.resources, definition.cost)) {
@@ -183,6 +248,7 @@ export function placeBuilding(state, buildingId, x, y, rotation = 0) {
     inputSlots: [],
     outputSlots: [],
     progress: 0,
+    paidCost: { ...definition.cost },
     ...(buildingId === 'excavator' ? { requiresPower: true, powerReserved: false } : {}),
     outputDirections: buildingId === 'splitter' ? ['east', 'south'] : undefined,
     lastOutputIndex: 0,
@@ -204,14 +270,24 @@ export function placeBelt(state, x, y, direction) {
   if (!VALID_DIRECTIONS.has(direction)) {
     return { ok: false, reason: 'invalid direction' };
   }
-  if (isOccupied(site, { left: x, right: x, top: y, bottom: y })) {
+
+  const placement = getBeltPlacementInfo(site, x, y, direction);
+  if (placement.isDuplicate) {
+    return { ok: false, reason: 'duplicate belt lane' };
+  }
+  if (tileHasBuilding(site, x, y)) {
     return { ok: false, reason: 'occupied tile' };
   }
-  if (!canPay(site.resources, BELT_COST)) {
+
+  const cost = placement.isCrossing ? {} : { ...BELT_COST };
+  if (Object.keys(cost).length && !canPay(site.resources, cost)) {
     return { ok: false, reason: 'insufficient resources' };
   }
 
-  pay(site.resources, BELT_COST);
+  if (Object.keys(cost).length) {
+    pay(site.resources, cost);
+  }
+
   site.belts.push({
     id: nextId(state, 'belt'),
     type: 'belt',
@@ -224,3 +300,348 @@ export function placeBelt(state, x, y, direction) {
 
   return { ok: true };
 }
+
+export function previewBeltRoute(state, start, end) {
+  const site = activeSite(state);
+  if (!site) {
+    return { ok: false, reason: 'no active site' };
+  }
+
+  const startTile = toTile(start);
+  const endTile = toTile(end);
+  if (!Number.isInteger(startTile.x) || !Number.isInteger(startTile.y) || !Number.isInteger(endTile.x) || !Number.isInteger(endTile.y)) {
+    return { ok: false, reason: 'route endpoints must be integer tiles' };
+  }
+  if (startTile.x === endTile.x && startTile.y === endTile.y) {
+    return { ok: false, reason: 'route endpoints must differ' };
+  }
+  const startKey = `${startTile.x},${startTile.y}`;
+  const goalKey = `${endTile.x},${endTile.y}`;
+  const queue = [{ ...startTile }];
+  const cameFrom = new Map();
+  const directionFrom = new Map();
+  const visited = new Set([startKey]);
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    const currentKey = `${current.x},${current.y}`;
+    if (currentKey === goalKey) {
+      break;
+    }
+
+    for (const direction of DIRECTION_ORDER) {
+      const delta = {
+        north: { x: 0, y: -1 },
+        east: { x: 1, y: 0 },
+        south: { x: 0, y: 1 },
+        west: { x: -1, y: 0 },
+      }[direction];
+      const next = { x: current.x + delta.x, y: current.y + delta.y };
+      const nextKey = `${next.x},${next.y}`;
+      if (visited.has(nextKey)) {
+        continue;
+      }
+      if (tileHasBuilding(site, next.x, next.y)) {
+        continue;
+      }
+      if (next.x === startTile.x && next.y === startTile.y) {
+        continue;
+      }
+      if (!Number.isInteger(next.x) || !Number.isInteger(next.y)) {
+        continue;
+      }
+      visited.add(nextKey);
+      cameFrom.set(nextKey, currentKey);
+      directionFrom.set(nextKey, direction);
+      queue.push(next);
+    }
+  }
+
+  if (!cameFrom.has(goalKey)) {
+    return { ok: false, reason: 'no valid route' };
+  }
+
+  const route = [];
+  let cursor = goalKey;
+  while (cursor !== startKey) {
+    const currentTile = { x: Number(cursor.split(',')[0]), y: Number(cursor.split(',')[1]) };
+    const direction = directionFrom.get(cursor);
+    const previous = cameFrom.get(cursor);
+    if (!direction) {
+      return { ok: false, reason: 'route reconstruction failed' };
+    }
+    const existing = site.belts.find(belt => belt.x === currentTile.x && belt.y === currentTile.y && belt.direction === direction);
+    const crossing = site.belts.some(belt => belt.x === currentTile.x && belt.y === currentTile.y && belt.direction !== direction);
+    route.push({
+      x: currentTile.x,
+      y: currentTile.y,
+      direction,
+      kind: existing ? 'reuse' : crossing ? 'crossing' : 'new',
+    });
+    cursor = previous;
+  }
+  route.reverse();
+
+  if (route.length === 0) {
+    return { ok: false, reason: 'route is empty' };
+  }
+
+  const startDirection = route[0]?.direction || 'east';
+  const startTileHasExisting = site.belts.find(belt => belt.x === startTile.x && belt.y === startTile.y && belt.direction === startDirection);
+  const startTileCrossing = site.belts.some(belt => belt.x === startTile.x && belt.y === startTile.y && belt.direction !== startDirection);
+  route.unshift({
+    x: startTile.x,
+    y: startTile.y,
+    direction: startDirection,
+    kind: startTileHasExisting ? 'reuse' : startTileCrossing ? 'crossing' : 'new',
+  });
+
+  const cost = { iron: route.filter(step => step.kind === 'new').length };
+  const affordableSteps = route.filter(step => step.kind === 'new').length;
+  const availableIron = Number.isFinite(site.resources.iron) ? site.resources.iron : 0;
+  const buildable = availableIron >= cost.iron ? route : route.slice(0, Math.max(0, route.length - Math.max(0, cost.iron - availableIron)));
+  const buildableCost = { iron: buildable.filter(step => step.kind === 'new').length };
+
+  return {
+    ok: true,
+    route,
+    buildableRoute: buildable,
+    cost,
+    complete: buildable.length === route.length,
+    affordable: availableIron >= cost.iron,
+    remaining: Math.max(0, cost.iron - buildableCost.iron),
+  };
+}
+
+export function placeBeltRoute(state, start, end) {
+  const site = activeSite(state);
+  if (!site) {
+    return { ok: false, reason: 'no active site' };
+  }
+
+  const preview = previewBeltRoute(state, start, end);
+  if (!preview.ok) {
+    return preview;
+  }
+
+  const buildableRoute = preview.buildableRoute || preview.route;
+  const paid = { iron: buildableRoute.filter(step => step.kind === 'new').length };
+
+  if (
+    !Object.entries(paid).every(([resource, amount]) =>
+      Number.isFinite(site.resources[resource]) && site.resources[resource] >= amount
+    )
+  ) {
+    return { ok: false, reason: 'insufficient resources' };
+  }
+
+  if (paid.iron > 0) {
+    pay(site.resources, paid);
+  }
+
+  for (const step of buildableRoute) {
+    const existing = site.belts.find(belt => belt.x === step.x && belt.y === step.y && belt.direction === step.direction);
+    if (existing) {
+      continue;
+    }
+    site.belts.push({
+      id: nextId(state, 'belt'),
+      type: 'belt',
+      x: step.x,
+      y: step.y,
+      direction: step.direction,
+      item: null,
+      progress: 0,
+      paidCost: step.kind === 'new' ? { iron: 1 } : {},
+    });
+  }
+
+  return {
+    ok: true,
+    placed: buildableRoute.length,
+    reused: buildableRoute.filter(step => step.kind === 'reuse').length,
+    cost: paid,
+    remaining: Math.max(0, preview.cost.iron - paid.iron),
+  };
+}
+
+export function getGridLineTiles(start, end) {
+  const startTile = toTile(start);
+  const endTile = toTile(end);
+  const dx = endTile.x - startTile.x;
+  const dy = endTile.y - startTile.y;
+  const steps = Math.max(Math.abs(dx), Math.abs(dy));
+  const tiles = [];
+
+  for (let step = 0; step <= steps; step += 1) {
+    const progress = steps === 0 ? 0 : step / steps;
+    const x = Math.round(startTile.x + dx * progress);
+    const y = Math.round(startTile.y + dy * progress);
+    tiles.push({ x, y });
+  }
+
+  return tiles;
+}
+
+export function removeBuilding(state, buildingId) {
+  const site = activeSite(state);
+  if (!site) {
+    return { ok: false, reason: 'no active site' };
+  }
+
+  const index = site.buildings.findIndex(building => building.id === buildingId);
+  if (index === -1) {
+    return { ok: false, reason: 'unknown building' };
+  }
+
+  const building = site.buildings[index];
+  const refund = findStarterBuilding(site, building) ? {} : calcRemovalRefund(building, BUILDING_DEFINITIONS[building.type]?.cost || {});
+  const before = structuredClone(site.resources);
+  const beforeFragments = structuredClone(site.fragments);
+  const beforeFossils = [...site.unidentifiedFossils];
+
+  const returnedItems = [...building.inputSlots, ...building.outputSlots].reduce((count, item) => {
+    if (!item || typeof item !== 'object') {
+      return count;
+    }
+    if (item.type === 'resource' && Object.hasOwn(site.resources, item.resource)) {
+      const amount = item.amount === undefined ? 1 : Number(item.amount) || 1;
+      site.resources[item.resource] += amount;
+      return count + amount;
+    }
+    if (item.type === 'fragment' && Object.hasOwn(site.fragments, item.family)) {
+      const amount = item.amount === undefined ? 1 : Number(item.amount) || 1;
+      site.fragments[item.family] += amount;
+      return count + amount;
+    }
+    if (item.type === 'unidentified-fossil') {
+      site.unidentifiedFossils.push(item);
+      return count + 1;
+    }
+    return count;
+  }, 0);
+
+  for (const [resource, amount] of Object.entries(refund)) {
+    if (Number.isFinite(site.resources[resource])) {
+      site.resources[resource] += Number(amount);
+    }
+  }
+
+  site.buildings.splice(index, 1);
+
+  const transformed = structuredClone(site.resources);
+  const finalFragments = structuredClone(site.fragments);
+  for (const resource of Object.keys(before)) {
+    if (!Number.isFinite(transformed[resource])) {
+      transformed[resource] = before[resource];
+    }
+  }
+  for (const family of Object.keys(beforeFragments)) {
+    if (!Number.isFinite(finalFragments[family])) {
+      finalFragments[family] = beforeFragments[family];
+    }
+  }
+  if (beforeFossils.length !== site.unidentifiedFossils.length && site.unidentifiedFossils.length < beforeFossils.length) {
+    site.unidentifiedFossils.splice(0, site.unidentifiedFossils.length, ...beforeFossils);
+  }
+
+  return { ok: true, refunded: refund, returnedItems };
+}
+
+export function removeBelt(state, beltId) {
+  const site = activeSite(state);
+  if (!site) {
+    return { ok: false, reason: 'no active site' };
+  }
+
+  const index = site.belts.findIndex(belt => belt.id === beltId);
+  if (index === -1) {
+    return { ok: false, reason: 'unknown belt' };
+  }
+
+  const belt = site.belts[index];
+  const refund = normalizeCost(belt.paidCost) || { iron: 1 };
+  const returnedItems = belt.item ? 1 : 0;
+
+  if (belt.item) {
+    const item = belt.item;
+    if (item.type === 'resource' && Object.hasOwn(site.resources, item.resource)) {
+      site.resources[item.resource] += item.amount === undefined ? 1 : item.amount;
+    } else if (item.type === 'fragment' && Object.hasOwn(site.fragments, item.family)) {
+      site.fragments[item.family] += item.amount === undefined ? 1 : item.amount;
+    } else if (item.type === 'unidentified-fossil') {
+      site.unidentifiedFossils.push(item);
+    }
+  }
+
+  for (const [resource, amount] of Object.entries(refund)) {
+    if (Number.isFinite(site.resources[resource])) {
+      site.resources[resource] += Number(amount);
+    }
+  }
+
+  site.belts.splice(index, 1);
+  return { ok: true, refunded: refund, returnedItems };
+}
+
+export function removeBeltsAtTiles(state, tiles) {
+  const site = activeSite(state);
+  if (!site) {
+    return { ok: false, reason: 'no active site' };
+  }
+  if (!Array.isArray(tiles)) {
+    return { ok: false, reason: 'tiles must be an array' };
+  }
+
+  const targets = [...tiles].map(tile => ({ x: Number(tile.x), y: Number(tile.y) }));
+  const removed = [];
+  const refunded = {};
+  let returnedItems = 0;
+
+  for (const tile of targets) {
+    const matches = site.belts.filter(belt => belt.x === tile.x && belt.y === tile.y);
+    for (const belt of matches) {
+      const result = removeBelt(state, belt.id);
+      if (!result.ok) {
+        return { ok: false, reason: result.reason };
+      }
+      removed.push(belt.id);
+      for (const [resource, amount] of Object.entries(result.refunded || {})) {
+        refunded[resource] = (refunded[resource] || 0) + Number(amount);
+      }
+      returnedItems += result.returnedItems || 0;
+    }
+  }
+
+  return { ok: true, removed, refunded, returnedItems };
+}
+
+export function getBeltItemPosition(site, belt) {
+  if (!belt || !belt.item || !belt.direction) {
+    return null;
+  }
+  const next = {
+    x: belt.x + { north: 0, east: 1, south: 0, west: -1 }[belt.direction],
+    y: belt.y + { north: -1, east: 0, south: 1, west: 0 }[belt.direction],
+  };
+  const targetBlocked = tileHasBuilding(site, next.x, next.y) || site.belts.some(candidate => candidate !== belt && candidate.x === next.x && candidate.y === next.y);
+  if (targetBlocked) {
+    return { x: belt.x + 0.5, y: belt.y + 0.5 };
+  }
+  const offset = { north: { x: 0, y: -1 }, east: { x: 1, y: 0 }, south: { x: 0, y: 1 }, west: { x: -1, y: 0 } }[belt.direction];
+  const progress = Number.isFinite(belt.progress) ? belt.progress : 0;
+  const accumulator = Number.isFinite(site.logisticsAccumulator) ? site.logisticsAccumulator : 0;
+  return {
+    x: belt.x + 0.5 + offset.x * Math.min(1, progress + accumulator),
+    y: belt.y + 0.5 + offset.y * Math.min(1, progress + accumulator),
+  };
+}
+
+export function getBeltDirectionsAtTile(site, x, y) {
+  return site.belts.filter(belt => belt.x === x && belt.y === y).map(belt => belt.direction);
+}
+
+export function isBeltRouteBlocked(site, x, y) {
+  return tileHasBuilding(site, x, y) || site.belts.some(belt => belt.x === x && belt.y === y && belt.item !== null);
+}
+

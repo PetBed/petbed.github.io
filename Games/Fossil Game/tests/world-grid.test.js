@@ -57,16 +57,61 @@ test('placesBeltAndDeductsCost', () => {
   const result = worldGrid.placeBelt(state, 20, 20, 'east');
 
   assert.deepEqual(result, { ok: true });
-  assert.deepEqual(site.belts[0], {
-    id: 'belt-2',
+  assert.match(site.belts[0].id, /^belt-\d+$/);
+  assert.deepEqual(
+    Object.fromEntries(Object.entries(site.belts[0]).filter(([key]) => key !== 'id')),
+    {
     type: 'belt',
     x: 20,
     y: 20,
     direction: 'east',
     item: null,
     progress: 0,
-  });
+    }
+  );
   assert.equal(site.resources.iron, 0);
+});
+
+test('reusesExistingLaneAndAddsFreeCrossingLane', () => {
+  const state = createInitialState();
+  const site = state.sites.find(({ id }) => id === state.activeSiteId);
+  site.buildings = [];
+  site.belts = [{
+    id: 'belt-existing-east',
+    type: 'belt',
+    x: 10,
+    y: 10,
+    direction: 'east',
+    item: null,
+    progress: 0,
+  }];
+  site.resources.iron = 3;
+
+  const route = worldGrid.placeBeltRoute(state, { x: 9, y: 10 }, { x: 11, y: 10 });
+  const ironAfterRoute = site.resources.iron;
+  const crossing = worldGrid.placeBelt(state, 10, 10, 'north');
+
+  assert.equal(route.ok, true);
+  assert.equal(route.reused, 1);
+  assert.equal(crossing.ok, true);
+  assert.equal(site.resources.iron, ironAfterRoute);
+  assert.deepEqual(
+    site.belts.filter(belt => belt.x === 10 && belt.y === 10).map(({ direction }) => direction),
+    ['east', 'north']
+  );
+});
+
+test('rejectsDuplicateSameDirectionLane', () => {
+  const state = createInitialState();
+  const site = state.sites.find(({ id }) => id === state.activeSiteId);
+  site.resources.iron = 3;
+
+  assert.equal(worldGrid.placeBelt(state, 10, 10, 'east').ok, true);
+  const beforeDuplicate = structuredClone(state);
+  const duplicate = worldGrid.placeBelt(state, 10, 10, 'east');
+
+  assert.deepEqual(duplicate, { ok: false, reason: 'duplicate belt lane' });
+  assert.deepEqual(state, beforeDuplicate);
 });
 
 test('createsGuaranteedStartingSite', () => {
@@ -119,4 +164,48 @@ test('keepsExcavatorPlacementOnResourceNode', () => {
   assert.ok(site.buildings.some(building =>
     building.type === 'excavator' && building.x === node.x && building.y === node.y
   ));
+});
+
+test('findsShortestFourDirectionRoute', () => {
+  const state = createInitialState();
+  const site = state.sites.find(({ id }) => id === state.activeSiteId);
+  site.buildings = [];
+  site.belts = [];
+  site.resources.iron = 99;
+
+  const preview = worldGrid.previewBeltRoute(state, { x: 0, y: 0 }, { x: 3, y: 0 });
+
+  assert.deepEqual(preview.ok, true);
+  assert.deepEqual(
+    preview.route.map(step => ({ x: step.x, y: step.y, direction: step.direction })),
+    [
+      { x: 0, y: 0, direction: 'east' },
+      { x: 1, y: 0, direction: 'east' },
+      { x: 2, y: 0, direction: 'east' },
+      { x: 3, y: 0, direction: 'east' },
+    ]
+  );
+  assert.deepEqual(preview.cost, { iron: 4 });
+});
+
+test('refundsRecordedConstructionCostExactlyOnce', () => {
+  const state = createInitialState();
+  const site = state.sites.find(({ id }) => id === state.activeSiteId);
+  const generator = site.buildings.find(building => building.type === 'generator');
+
+  if (!generator) {
+    throw new Error('expected starter generator to exist');
+  }
+
+  const before = { ...site.resources };
+  const result = worldGrid.removeBuilding(state, generator.id);
+
+  assert.deepEqual(result, {
+    ok: true,
+    refunded: BUILDING_DEFINITIONS.generator.cost,
+    returnedItems: 0,
+  });
+  assert.equal(site.resources.iron, before.iron + BUILDING_DEFINITIONS.generator.cost.iron);
+  assert.equal(site.resources.stone, before.stone + BUILDING_DEFINITIONS.generator.cost.stone);
+  assert.equal(site.buildings.some(building => building.id === generator.id), false);
 });

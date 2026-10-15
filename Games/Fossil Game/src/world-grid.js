@@ -206,16 +206,21 @@ function calcRemovalRefund(entity, fallbackCost) {
   return Object.hasOwn(entity, 'paidCost') ? entity.paidCost : fallbackCost;
 }
 
+// Seeded starters are the buildings createSite places before the player acts. They cost
+// no materials, so removing one refunds nothing. Keep this list aligned with the seeded
+// buildings: an id that no seeded building owns must not appear here, or the first
+// player-placed building to take it would refund nothing.
+const STARTER_BUILDING_SUFFIXES = [1, 2];
+
 function findStarterBuilding(site, building) {
-  const candidateIds = [
-    'building-1',
-    'building-2',
-    'building-3',
-    `${site.id}-building-1`,
-    `${site.id}-building-2`,
-    `${site.id}-building-3`,
-  ];
-  return candidateIds.includes(building.id);
+  // A recorded payment always wins: an entity the player bought was not a starter, even
+  // when it holds an id the starter set once reserved.
+  if (Object.hasOwn(building, 'paidCost')) {
+    return false;
+  }
+  return STARTER_BUILDING_SUFFIXES.some(suffix =>
+    building.id === `building-${suffix}` || building.id === `${site.id}-building-${suffix}`
+  );
 }
 
 export function placeBuilding(state, buildingId, x, y, rotation = 0) {

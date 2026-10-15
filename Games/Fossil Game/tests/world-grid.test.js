@@ -349,13 +349,32 @@ test('refundsRecordedConstructionCostExactlyOnce', () => {
 test('doesNotRefundPreplacedStarterBuildings', () => {
   const state = createInitialState();
   const site = state.sites[0];
-  const starterGenerator = site.buildings.find(building => building.type === 'generator');
-  assert.ok(starterGenerator);
+  const starters = [...site.buildings];
+  assert.ok(starters.length > 0, 'the starting site seeds at least one building');
   const resourcesBefore = structuredClone(site.resources);
 
-  assert.deepEqual(worldGrid.removeBuilding(state, starterGenerator.id), {
+  for (const starter of starters) {
+    assert.deepEqual(worldGrid.removeBuilding(state, starter.id), {
+      ok: true,
+      refunded: {},
+      returnedItems: 0,
+    });
+  }
+  assert.deepEqual(site.resources, resourcesBefore);
+});
+
+test('refundsFirstPaidBuildingThatReusesAStarterId', () => {
+  const state = createInitialState();
+  const site = state.sites[0];
+  const resourcesBefore = { ...site.resources };
+
+  assert.deepEqual(worldGrid.placeBuilding(state, 'generator', 20, 20), { ok: true });
+  const generator = site.buildings.find(building => building.x === 20 && building.y === 20);
+  assert.equal(generator.id, 'building-3');
+
+  assert.deepEqual(worldGrid.removeBuilding(state, generator.id), {
     ok: true,
-    refunded: {},
+    refunded: BUILDING_DEFINITIONS.generator.cost,
     returnedItems: 0,
   });
   assert.deepEqual(site.resources, resourcesBefore);
